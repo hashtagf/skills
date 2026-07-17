@@ -1,0 +1,19 @@
+{
+  "name": "hashtagf",
+  "owner": {
+    "name": "hashtagf",
+    "email": "flame@hpktechnology.com"
+  },
+  "metadata": {
+    "description": "hashtagf's skill warehouse — agent skills for Claude Code",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "hashtagf-skills",
+      "source": "./",
+      "description": "All hashtagf skills bundled as one plugin (design-system-builder and more)",
+      "category": "productivity"
+    }
+  ]
+}

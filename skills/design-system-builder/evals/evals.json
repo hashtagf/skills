@@ -1,0 +1,54 @@
+{
+  "skill_name": "design-system-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm building a SaaS dashboard for a Thai logistics company (Thai + English UI). Brand color is emerald green (#059669-ish), stack is React + Tailwind v4. Create a design system for it — I won't be around to answer questions, use sensible defaults and just build the MVP set.",
+      "expected_output": "Full CREATE-mode output: 3-tier tokens as CSS variables + Tailwind @theme, all 13 foundation categories, ~20 MVP components each with full state matrix, Thai typography rules applied (line-height >= 1.6), DECISIONS.md recording assumptions, docs.",
+      "files": [],
+      "assertions": [
+        "Three-tier token architecture: primitive and semantic CSS variable layers exist, and component styles reference semantic tokens (var(--...)) rather than raw hex values",
+        "Thai typography handled: body/base line-height >= 1.6 stated in tokens/docs",
+        "MVP coverage: at least 15 of the ~20 MVP components are present as specs or implementations",
+        "Button state matrix complete: hover, focus-visible, active, and disabled styles all present",
+        "Assumptions recorded: a DECISIONS.md (or equivalent) lists the defaults chosen since no interview was possible",
+        "Single system-wide focus ring: one shared focus spec, not per-component ad-hoc outlines",
+        "Brand color is emerald green family as requested"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our web app's CSS has grown messy over 2 years — colors and spacing are hardcoded everywhere and we have at least two different button implementations. Audit the codebase at ./sample-app and extract what we have so we can turn it into a proper design system. Don't build anything yet, just give us the plan.",
+      "expected_output": "EXTRACT-mode AUDIT.md: inventory of found colors/spacing/fonts/radii with occurrence counts, consolidation proposal (old value -> new token mapping table with no silent drops), component inventory with duplicates and state-coverage gaps, prioritized build plan. No components built.",
+      "files": [
+        "sample-app fixture: small React app with hardcoded hex colors, ad-hoc spacing values, two Button variants"
+      ],
+      "assertions": [
+        "Audit/plan document produced in outputs",
+        "Found values reported with occurrence counts (frequency data), not just a list",
+        "Old-to-new mapping table covers the off-scale spacing values (7, 9, 13, 15, 17, 18px) with no silent drops",
+        "Near-duplicate brand colors #2563eb vs #2564ec are flagged for merging",
+        "Duplicate button implementations (Button.jsx + PrimaryButton.jsx) identified for consolidation",
+        "No implementation built: outputs contain plan/audit docs only, no component/token code files intended as deliverable implementation",
+        "Build plan is prioritized (ordered by usage/impact)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We already have a design system in ./sample-ds but it's half broken: components reference raw hex colors directly, buttons have no focus or disabled styles, and every component has its own focus outline. Fix it so it actually works without breaking existing pages.",
+      "expected_output": "REDESIGN-mode output: gap-analysis findings table, repaired 3-tier token architecture with old token names kept as deprecated aliases, state gaps filled (focus-visible, disabled with :not(:disabled) guards), single system-wide focus ring, MIGRATION.md.",
+      "files": [
+        "sample-ds fixture: small component lib with hardcoded colors and missing states"
+      ],
+      "assertions": [
+        "Component CSS now references var(--...) tokens instead of raw hex for colors",
+        "Buttons gained :focus-visible styles",
+        "Buttons gained :disabled styles",
+        "Inconsistent focus outlines (dashed orange on Input, dotted black on Card) replaced by one shared focus spec",
+        "Backward compatible: original class names (.ds-btn, .ds-input, .ds-card, .ds-badge) unchanged and original token names still resolve (kept as aliases)",
+        "Migration/findings document saved to outputs",
+        "Disabled wins over hover (:not(:disabled) guard or equivalent ordering)"
+      ]
+    }
+  ]
+}
