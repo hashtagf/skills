@@ -35,6 +35,13 @@ lightness steps (OKLCH is the reliable way).
 | Border | `border-default`, `border-strong`, `border-subtle`, `border-focus`, `border-error` |
 | Status | `{success,warning,error,info}` each with `-bg`, `-text`, `-border` (subtle + solid variants) |
 | Alpha | `overlay-scrim` (e.g. black 50%), `state-layer` opacities |
+| Chart | `chart-1`…`chart-8` categorical + a sequential ramp; see below |
+
+**Chart/data-viz palette** (define when the product has charts): 6–8 categorical colors
+distinguishable by lightness as well as hue (colorblind-safe; start series 1 from brand),
+a sequential ramp (neutral → brand) for magnitude, and a diverging pair for +/−. Do not
+reuse status colors as categorical series — a red series reads as "error". Re-validate the
+whole set on dark backgrounds when a dark theme exists.
 
 ## 2. Typography
 
@@ -78,7 +85,7 @@ Consistency here is what makes a UI look "designed".
 
 ## 7. Shadow / Elevation
 
-Levels 0–5 mapped to component classes: 0 flat, 1 card, 2 dropdown/popover, 3 modal,
+Levels 0–4 mapped to component classes: 0 flat, 1 card, 2 dropdown/popover, 3 modal,
 4 toast. Include a **focus ring** spec here (it is system-wide, not per component):
 color (`border-focus`), width 2px, offset 2px, contrast ≥ 3:1 against adjacent colors.
 

@@ -1,0 +1,25 @@
+/* Badge — variants: info (default), success. Status must be carried by the
+   LABEL text, not color alone (WCAG 1.4.1) — the color only reinforces it. */
+
+.ds-badge {
+  /* component tokens */
+  --badge-bg:      var(--color-info-bg);
+  --badge-text:    var(--color-info-text);
+  --badge-pad-y:   var(--space-2);
+  --badge-pad-x:   var(--space-8);     /* was 10 (off-scale) -> 8 */
+  --badge-radius:  var(--radius-full);
+
+  display: inline-block;
+  padding: var(--badge-pad-y) var(--badge-pad-x);
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  border-radius: var(--badge-radius);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.ds-badge--success {
+  --badge-bg:   var(--color-success-bg);
+  --badge-text: var(--color-success-text);
+}

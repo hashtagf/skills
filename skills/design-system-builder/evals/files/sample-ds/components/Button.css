@@ -1,0 +1,5 @@
+.ds-btn { background: #2563eb; color: #ffffff; padding: 10px 16px; border-radius: 6px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; }
+.ds-btn:hover { background: #1d4ed8; }
+.ds-btn--danger { background: #dc2626; }
+.ds-btn--danger:hover { background: #b91c1c; }
+/* no focus style, no disabled style */

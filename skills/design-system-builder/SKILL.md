@@ -1,16 +1,14 @@
 ---
 name: design-system-builder
 description: >-
-  Build, extract, or repair a complete design system (tokens + components + states + docs)
-  for one theme. Three modes: (1) CREATE — interview the user, then build a full system from
-  scratch; (2) EXTRACT — audit an existing codebase, inventory its de-facto design decisions,
-  and produce a token/component plan; (3) REDESIGN — fix an existing design system so it
-  actually works (broken token architecture, missing states, inconsistent components).
-  Use this skill whenever the user mentions design systems, design tokens, theming, component
-  libraries, style guides, "สร้าง design system", "ถอด design system จาก codebase",
-  "ทำ theme", "design tokens", "ปรับ design system", standardizing UI styles, or wants
-  consistent colors/spacing/typography across an app — even if they only ask for "a button
-  component" but clearly need systematic foundations behind it.
+  Build, extract, repair, or extend a complete design system — design tokens, a component
+  library with full interaction states, and docs — delivered as CSS/Tailwind or as an
+  installable package for React, Next.js, or Vue (auto-detected from the repo). Use this
+  skill whenever the user mentions design systems, design tokens, theming, dark mode,
+  component libraries, style guides, "สร้าง design system", "ถอด design system จาก
+  codebase", "ทำ theme", or wants consistent colors/spacing/typography across an app —
+  even if they only ask for a single component but clearly need systematic foundations
+  behind it.
 ---
 
 # Design System Builder
@@ -28,10 +26,16 @@ Decide from the user's request; confirm only if genuinely ambiguous:
 | **CREATE** | No existing system; "start from scratch", new product | Interview → full system (tokens + components + docs) |
 | **EXTRACT** | Existing codebase, no formal system; "audit", "ถอดออกมา" | Audit report → consolidated tokens → component build plan |
 | **REDESIGN** | A design system exists but is broken/inconsistent | Gap analysis → repaired architecture → migration notes |
+| **EXTEND** | A healthy system exists; "add a Date Picker", "add dark mode", "add compact density" | New parts that conform to existing conventions |
 
-All three modes converge on the same deliverable format (see "Deliverables" below); they
-differ in where the design decisions come from: the interview, the codebase, or the broken
-system plus its real-world usage.
+All four modes converge on the same deliverable format (see "Deliverables" below); they
+differ in where the design decisions come from: the interview (CREATE), the codebase
+(EXTRACT), the broken system plus its real-world usage (REDESIGN), or the existing
+system's own conventions (EXTEND).
+
+Scope: web design systems (CSS/Tailwind; React, Next.js, Vue). Native mobile
+(React Native/Flutter/SwiftUI) is out of scope — for those, deliver only the
+token JSON/CSS as a shared source and say so.
 
 ## Non-negotiable principles (all modes)
 
@@ -56,12 +60,22 @@ system plus its real-world usage.
 
 - `references/foundations.md` — the 13 foundation token categories with recommended scales
   and values, plus token architecture and naming. Read when defining or restructuring tokens.
-- `references/components.md` — full inventory (~140 components in 10 categories), ship tiers,
+- `references/components.md` — full inventory (~140 items: 9 component categories + composed patterns), ship tiers,
   and the per-component spec template. Read when planning scope or writing component specs.
 - `references/states.md` — complete state taxonomy (interactive, selection, validation,
   loading, structural), how major systems implement them, CSS/data-attribute patterns.
   Read when writing any component spec or reviewing state coverage.
 - `references/interview.md` — CREATE-mode interview script. Read at the start of CREATE mode.
+- `references/packaging.md` — framework detection (React / Next.js / Vue), package shapes
+  (workspace vs published npm), and per-framework authoring rules. Read before implementing
+  components in any framework or when the deliverable is a reusable package.
+- `references/theming.md` — second-theme (dark mode) playbook and density variants.
+  Read in EXTEND mode for theme work, or when the user wants dark mode / compact.
+- `references/guardrails.md` — Stylelint/ESLint/CI rules that stop token drift. Read when
+  the project has CI, and always at the end of EXTRACT and REDESIGN.
+- `references/operations.md` — package versioning & deprecation, testing strategy,
+  Storybook/Histoire setup with story-authoring rules (matrix/playground/interaction
+  stories), Figma sync. Read when shipping a package or setting up infrastructure.
 
 ## Mode 1: CREATE
 
@@ -76,9 +90,14 @@ system plus its real-world usage.
    z-index scale — the cross-cutting decisions components will inherit.
 5. **Components, Tier 1 first.** For each: anatomy (internal padding, gap, sizes) →
    variants → full state matrix, using the spec template in `references/components.md`.
-   Implement in the user's stack (default: CSS custom properties + Tailwind v4 `@theme`
-   if no stack is specified).
-6. **Docs.** Token reference + per-component usage (do/don't) + the DECISIONS.md.
+   Detect the project's framework and package shape per `references/packaging.md`
+   (React / Next.js / Vue from package.json — never ask what the repo can answer;
+   default: CSS custom properties + Tailwind v4 `@theme` when no stack exists).
+6. **Verify.** Build a preview/demo page per component exercising every state (both themes
+   if two exist), render it (browser/screenshot where available), and check it against the
+   quality gate. A design system that has never been rendered is a hypothesis, not a system.
+7. **Docs.** Token reference + per-component usage (do/don't) + the DECISIONS.md. Add CI
+   guardrails per `references/guardrails.md` when the project has CI.
 
 ## Mode 2: EXTRACT
 
@@ -93,8 +112,9 @@ system plus its real-world usage.
    9-step scale; 23 spacing values → the base-4 scale, with a mapping table old → new).
    Every collapsed value must appear in the mapping table — silent drops break UIs.
 4. **Report.** Produce `AUDIT.md`: found values with counts, proposed token set, component
-   inventory with state-coverage gaps, and a prioritized build plan (which components to
-   build/merge first, based on usage frequency).
+   inventory with state-coverage gaps, a prioritized build plan (which components to
+   build/merge first, based on usage frequency), and a drift-prevention section from
+   `references/guardrails.md` — without enforcement the codebase regrows the mess.
 5. Stop after the report unless the user asked to also build — EXTRACT's deliverable is
    the plan, and the user decides what gets built.
 
@@ -112,12 +132,32 @@ system plus its real-world usage.
    system that works, not a big-bang rename that breaks every screen.
 5. **Verify**: render/screenshot key components in every state where the project has a
    runnable app; otherwise diff computed CSS before/after for a sample of components.
+6. **Guard**: add CI guardrails per `references/guardrails.md` (ratchet mode on legacy
+   code) so the repaired system stays repaired.
+
+## Mode 4: EXTEND
+
+For adding to a system that already works. The prime directive: **conform, don't invent**.
+
+1. **Read the existing system first** — tokens, an existing sibling component's spec/code,
+   naming conventions, focus-ring spec, story format. The new part must look like it was
+   always there.
+2. **New component**: pick the closest existing component as the template; reuse semantic
+   tokens (a new primitive/semantic token requires a documented gap, not convenience);
+   full state matrix per `references/states.md`; stories for every state; changelog entry
+   (minor). Follow the spec template in `references/components.md`.
+3. **New theme / density**: follow `references/theming.md`.
+4. **Verify like CREATE step 6** — render the new part next to existing components; visual
+   inconsistency with siblings is a failure even when the component is fine in isolation.
 
 ## Deliverables (all modes end here)
 
 - **Tokens as code**: CSS custom properties (and Tailwind `@theme` / config when the
   project uses Tailwind), organized primitive → semantic → component.
-- **Component specs/implementations** per the template, each with its full state matrix.
+- **Component specs/implementations** per the template, each with its full state matrix,
+  authored for the detected framework (React / Next.js / Vue) and shaped as a consumable
+  package (`@org/ui` workspace or published — see `references/packaging.md`) whenever the
+  system will be consumed by more than one place in the repo.
 - **Docs**: `README.md` (structure + how to consume), token reference table,
   `DECISIONS.md` (CREATE) / `AUDIT.md` (EXTRACT) / `MIGRATION.md` (REDESIGN).
 

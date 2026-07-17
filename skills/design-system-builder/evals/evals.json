@@ -18,10 +18,10 @@
     },
     {
       "id": 2,
-      "prompt": "Our web app's CSS has grown messy over 2 years — colors and spacing are hardcoded everywhere and we have at least two different button implementations. Audit the codebase at ./sample-app and extract what we have so we can turn it into a proper design system. Don't build anything yet, just give us the plan.",
+      "prompt": "Our web app's CSS has grown messy over 2 years — colors and spacing are hardcoded everywhere and we have at least two different button implementations. Audit the codebase at the sample-app directory (copy of evals/files/sample-app) and extract what we have so we can turn it into a proper design system. Don't build anything yet, just give us the plan.",
       "expected_output": "EXTRACT-mode AUDIT.md: inventory of found colors/spacing/fonts/radii with occurrence counts, consolidation proposal (old value -> new token mapping table with no silent drops), component inventory with duplicates and state-coverage gaps, prioritized build plan. No components built.",
       "files": [
-        "sample-app fixture: small React app with hardcoded hex colors, ad-hoc spacing values, two Button variants"
+        "evals/files/sample-app"
       ],
       "assertions": [
         "Audit/plan document produced in outputs",
@@ -35,10 +35,10 @@
     },
     {
       "id": 3,
-      "prompt": "We already have a design system in ./sample-ds but it's half broken: components reference raw hex colors directly, buttons have no focus or disabled styles, and every component has its own focus outline. Fix it so it actually works without breaking existing pages.",
+      "prompt": "We already have a design system in the sample-ds directory (copy of evals/files/sample-ds) but it's half broken: components reference raw hex colors directly, buttons have no focus or disabled styles, and every component has its own focus outline. Fix it so it actually works without breaking existing pages.",
       "expected_output": "REDESIGN-mode output: gap-analysis findings table, repaired 3-tier token architecture with old token names kept as deprecated aliases, state gaps filled (focus-visible, disabled with :not(:disabled) guards), single system-wide focus ring, MIGRATION.md.",
       "files": [
-        "sample-ds fixture: small component lib with hardcoded colors and missing states"
+        "evals/files/sample-ds"
       ],
       "assertions": [
         "Component CSS now references var(--...) tokens instead of raw hex for colors",
@@ -47,7 +47,44 @@
         "Inconsistent focus outlines (dashed orange on Input, dotted black on Card) replaced by one shared focus spec",
         "Backward compatible: original class names (.ds-btn, .ds-input, .ds-card, .ds-badge) unchanged and original token names still resolve (kept as aliases)",
         "Migration/findings document saved to outputs",
-        "Disabled wins over hover (:not(:disabled) guard or equivalent ordering)"
+        "Disabled wins over hover (:not(:disabled) guard or equivalent ordering)",
+        "Depth beyond the 3 named problems: repaired tokens include at least motion, z-index, and opacity categories (not only colors)",
+        "Verification artifact exists: a preview/demo page or screenshots exercising the fixed states",
+        "Drift prevention included: lint/CI guardrail configuration or a guardrails section in the migration doc"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "This is our pnpm monorepo (see the sample-mono directory (copy of evals/files/sample-mono)) — a Next.js app in apps/web plus a Vue 3 admin in apps/admin. Build us a shared design-system package the two apps can both consume: shared tokens, and Button + Input + Card implemented for each framework. Detect what you need from the repo, don't ask.",
+      "expected_output": "PACKAGING output: workspace package(s) under packages/ with an exports map exposing tokens.css separately; shared token CSS consumed by both frameworks; React components server-safe by default ('use client' only where state/events require it); Vue components as <script setup> SFCs with v-model on Input; frameworks in peerDependencies; full state matrix on all six components.",
+      "files": [
+        "evals/files/sample-mono"
+      ],
+      "assertions": [
+        "Framework targets detected from the repo (Next.js + Vue), not asked or assumed wrongly",
+        "Workspace package structure created under packages/ with a package.json exports map that exposes tokens.css independently of components",
+        "Tokens are plain CSS custom properties shared by both framework targets (single source, no duplicated values)",
+        "React/Next components are server-safe by default: 'use client' appears only in components using state/effects/events",
+        "Vue components use <script setup> and Input supports v-model (modelValue + update:modelValue)",
+        "Frameworks are peerDependencies of the package, not dependencies",
+        "All six components (Button/Input/Card x2 frameworks) have full state coverage: hover, focus-visible, disabled"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Our design system (see the sample-healthy-ds directory, copy of evals/files/sample-healthy-ds) is in good shape. Two asks: (1) add a Select component that matches our existing conventions, and (2) add dark mode. Don't break anything that exists.",
+      "expected_output": "EXTEND-mode output: Select conforms to existing conventions (ds- class prefix, component tokens referencing the existing semantic layer, shared focus ring, full state matrix); dark mode implemented by re-pointing the semantic layer only ([data-theme] + prefers-color-scheme + color-scheme), with dark-adjusted elevation/status values; existing components untouched in light theme.",
+      "files": [
+        "evals/files/sample-healthy-ds"
+      ],
+      "assertions": [
+        "Select follows existing conventions: ds- prefixed classes, tokens reference the EXISTING semantic layer, no new primitive introduced without a documented gap",
+        "Select uses the existing shared focus-ring spec, not its own outline",
+        "Select has full state coverage: default, hover, focus-visible, disabled, error, open/closed",
+        "Dark mode re-points semantic tokens only — no component CSS file needed dark-specific rules",
+        "Dark mode switching: explicit [data-theme] wins over prefers-color-scheme, and color-scheme is set",
+        "Existing components' light-theme resolved values unchanged (no visual regression in light mode)",
+        "Dark status/elevation values are re-tuned, not copied (raised surfaces lighter, status colors re-checked for contrast)"
       ]
     }
   ]

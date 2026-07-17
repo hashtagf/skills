@@ -1,0 +1,17 @@
+/* Card — a container (single default state). Links inside it get the ONE
+   system focus ring (system.css); the old dotted-black per-card outline is gone. */
+
+.ds-card {
+  /* component tokens */
+  --card-bg:      var(--color-bg-surface);
+  --card-border:  var(--color-border-subtle);
+  --card-radius:  var(--radius-lg);    /* 10 — matches old value */
+  --card-padding: var(--space-20);     /* 20 — already on-scale */
+
+  background: var(--card-bg);
+  border: var(--border-width-default) solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+/* No .ds-card a:focus rule — links use the system focus ring. */

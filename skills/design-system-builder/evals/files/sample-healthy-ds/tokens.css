@@ -1,0 +1,203 @@
+/* =============================================================================
+   Design tokens — 3-tier architecture: primitive -> semantic -> (component).
+   Components consume the SEMANTIC layer only. Adding a dark theme later means
+   re-pointing the semantic block; primitives and components stay untouched.
+
+   Every primitive value below reproduces a hex that already shipped in the
+   old components, so existing pages render identically.
+   ============================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------------
+     TIER 1 — PRIMITIVES (raw values, no meaning). Tailwind default palette.
+     --------------------------------------------------------------------------- */
+
+  --white: #ffffff;
+  --black: #000000;
+
+  /* Neutral / gray */
+  --gray-50:  #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;   /* was: card border */
+  --gray-300: #d1d5db;   /* was: input border */
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;   /* was: --color-gray-700 */
+  --gray-800: #1f2937;
+  --gray-900: #111827;   /* was: input text */
+  --gray-950: #030712;
+
+  /* Blue — brand + info */
+  --blue-50:  #eff6ff;
+  --blue-100: #dbeafe;   /* was: badge bg */
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;   /* was: --color-primary / button bg */
+  --blue-700: #1d4ed8;   /* was: button hover */
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;   /* was: badge text */
+  --blue-950: #172554;
+
+  /* Red — danger / error */
+  --red-50:  #fef2f2;
+  --red-100: #fee2e2;
+  --red-500: #ef4444;
+  --red-600: #dc2626;    /* was: danger button bg */
+  --red-700: #b91c1c;    /* was: danger button hover */
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+
+  /* Emerald — success (matches the shipped badge success hexes) */
+  --emerald-50:  #ecfdf5;
+  --emerald-100: #d1fae5; /* was: badge success bg */
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46; /* was: badge success text */
+
+  /* Amber — warning (added for status completeness; not yet in any component) */
+  --amber-50:  #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+
+  /* Spacing — one base-4 scale (px value == token number). Off-scale = bug. */
+  --space-0:  0;
+  --space-2:  2px;
+  --space-4:  4px;
+  --space-8:  8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-80: 80px;
+  --space-96: 96px;
+
+  /* Radius — scale reconciled from existing intent (control 6, container 10). */
+  --radius-xs:   4px;
+  --radius-sm:   6px;    /* control radius — from the old --radius */
+  --radius-md:   8px;
+  --radius-lg:   10px;   /* container radius — from the old card */
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-size-xs:  12px;   /* badge */
+  --font-size-sm:  14px;   /* button, input */
+  --font-size-md:  16px;
+  --font-size-lg:  18px;
+  --font-size-xl:  20px;
+  --font-size-2xl: 24px;
+
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --line-height-tight:   1.25;
+  --line-height-normal:  1.5;
+  --line-height-relaxed: 1.625;
+
+  /* Sizing — interactive control heights (all rows align to these) */
+  --control-height-sm: 32px;
+  --control-height-md: 40px;
+  --control-height-lg: 48px;
+
+  /* Icon sizes */
+  --icon-size-sm: 16px;
+  --icon-size-md: 20px;
+  --icon-size-lg: 24px;
+
+  /* Border widths */
+  --border-width-default: 1px;
+  --border-width-strong:  2px;
+
+  /* Elevation / shadow */
+  --shadow-none: none;
+  --shadow-sm:   0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  /* Opacity */
+  --opacity-disabled: 0.5;
+
+  /* Motion */
+  --duration-fast: 100ms;   /* color/opacity on state change */
+  --duration-base: 200ms;   /* layout/transform */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Z-index ladder (components never invent values) */
+  --z-dropdown: 1000;
+  --z-sticky:   1100;
+  --z-modal:    1400;
+  --z-toast:    1600;
+  --z-tooltip:  1700;
+
+  /* ---------------------------------------------------------------------------
+     TIER 2 — SEMANTIC (meaning). This is the theme-swap layer components read.
+     --------------------------------------------------------------------------- */
+
+  /* Backgrounds */
+  --color-bg-page:          var(--white);
+  --color-bg-surface:       var(--white);
+  --color-bg-surface-raised: var(--white);
+  --color-bg-brand:         var(--blue-600);
+  --color-bg-brand-hover:   var(--blue-700);
+  --color-bg-brand-active:  var(--blue-800);
+  --color-bg-danger:        var(--red-600);
+  --color-bg-danger-hover:  var(--red-700);
+  --color-bg-danger-active: var(--red-800);
+  --color-bg-disabled:      var(--gray-100);
+
+  /* Text */
+  --color-text-primary:   var(--gray-900);
+  --color-text-secondary: var(--gray-700);
+  --color-text-tertiary:  var(--gray-500);
+  --color-text-disabled:  var(--gray-400);
+  --color-text-inverse:   var(--white);
+  --color-text-on-brand:  var(--white);
+  --color-text-brand:     var(--blue-700);
+  --color-text-danger:    var(--red-700);
+
+  /* Borders */
+  --color-border-subtle:  var(--gray-200);
+  --color-border-default: var(--gray-300);
+  --color-border-strong:  var(--gray-400);
+  --color-border-focus:   var(--blue-600);   /* 4.5:1 on white — >= 3:1 (WCAG 2.4.11) */
+  --color-border-error:   var(--red-600);
+
+  /* Status (subtle bg + text + border) */
+  --color-info-bg:      var(--blue-100);
+  --color-info-text:    var(--blue-900);
+  --color-info-border:  var(--blue-200);
+  --color-success-bg:     var(--emerald-100);
+  --color-success-text:   var(--emerald-800);
+  --color-success-border: var(--emerald-600);
+  --color-warning-bg:     var(--amber-100);
+  --color-warning-text:   var(--amber-800);
+  --color-warning-border: var(--amber-600);
+  --color-error-bg:     var(--red-100);
+  --color-error-text:   var(--red-800);
+  --color-error-border: var(--red-600);
+
+  /* Focus ring — ONE spec for the whole system (see system.css) */
+  --focus-ring-color:  var(--color-border-focus);
+  --focus-ring-width:  var(--border-width-strong);  /* 2px */
+  --focus-ring-offset: 2px;
+
+  /* ---------------------------------------------------------------------------
+     DEPRECATED ALIASES — kept so pages using the old names don't break.
+     Each resolves to the identical value it had before. Prefer the tokens above.
+     --------------------------------------------------------------------------- */
+  --color-primary:  var(--color-bg-brand);   /* was #2563eb */
+  --color-gray-700: var(--gray-700);         /* was #374151 */
+  --spacing-sm:     var(--space-8);          /* was 8px */
+  --spacing-md:     var(--space-16);         /* was 16px */
+  --radius:         var(--radius-sm);        /* was 6px */
+}

@@ -74,3 +74,22 @@ Pick ONE interaction-color strategy for the whole system:
 4. Focus indicator contrast ≥ 3:1 (WCAG 2.4.11); one spec system-wide.
 5. Test states under `forced-colors: active` (Windows High Contrast) — state layers and
    subtle backgrounds disappear there; borders and outlines survive.
+
+## Keyboard interaction contracts (per component family)
+
+States and keyboard behavior ship together — a focus style without the keys that reach it
+is decoration. These follow the ARIA Authoring Practices; put them in each component's
+spec and test them in interaction tests.
+
+| Family | Keys |
+|---|---|
+| Dialog / Drawer | Tab trapped inside; `Esc` closes; focus returns to the trigger on close |
+| Menu / Dropdown / Context menu | `Enter`/`Space`/`ArrowDown` opens; arrows navigate; `Esc` closes; type-ahead jumps |
+| Tabs | Arrows switch tabs (roving tabindex); `Home`/`End` first/last; `Tab` exits into the panel |
+| Select / Listbox / Combobox | Arrows navigate options; `Enter` selects; `Esc` closes; type-ahead; combobox keeps focus in the input |
+| Checkbox / Switch | `Space` toggles |
+| Radio group | Arrows move AND select (one tab stop for the group) |
+| Slider | Arrows step; `PageUp`/`PageDown` big step; `Home`/`End` min/max |
+| Accordion | `Enter`/`Space` toggles the focused header |
+| Data grid (`role=grid`) | Arrows move cell focus; `Home`/`End` row edges; `PageUp`/`PageDown` scroll |
+| Toast / status region | Never steals focus; announced via `aria-live`; a hotkey or F6 reaches the region |

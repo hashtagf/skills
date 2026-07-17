@@ -1,0 +1,52 @@
+/* Input — states: default, hover, focus-visible, disabled, error, read-only.
+   Focus ring is system-wide (system.css); the error state is signalled by
+   border color + aria-invalid (never color alone — pair with a message). */
+
+.ds-input {
+  /* component tokens */
+  --input-bg:           var(--color-bg-surface);
+  --input-text:         var(--color-text-primary);
+  --input-border:       var(--color-border-default);
+  --input-border-hover: var(--color-border-strong);
+  --input-height:       var(--control-height-md);   /* 40 */
+  --input-padding-x:    var(--space-12);
+  --input-radius:       var(--radius-sm);            /* 6 — was 4, unified w/ button */
+
+  box-sizing: border-box;
+  height: var(--input-height);
+  padding: 0 var(--input-padding-x);
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: var(--border-width-default) solid var(--input-border);
+  border-radius: var(--input-radius);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.ds-input::placeholder { color: var(--color-text-tertiary); }
+
+.ds-input:not(:disabled):hover { border-color: var(--input-border-hover); }
+
+/* Error — wire [aria-invalid="true"] as the styling hook (a11y for free). */
+.ds-input[aria-invalid="true"] {
+  --input-border: var(--color-border-error);
+  border-width: var(--border-width-strong);
+}
+
+/* Read-only — legible but visibly inert. */
+.ds-input:read-only {
+  background: var(--color-bg-disabled);
+  border-color: var(--color-border-subtle);
+}
+
+/* Disabled — wins over hover. */
+.ds-input:disabled {
+  background: var(--color-bg-disabled);
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-subtle);
+  cursor: not-allowed;
+}
+
+/* Focus: system ring + focus border. No dashed-orange one-off. */
+.ds-input:focus-visible { border-color: var(--color-border-focus); }

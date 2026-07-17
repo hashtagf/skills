@@ -10,7 +10,7 @@ and proceed.
 
 ## Batch 1 — Product & brand (shapes everything)
 
-1. **What is the product?** (SaaS dashboard / e-commerce / marketing site / mobile app / internal tool)
+1. **What is the product?** (SaaS dashboard / e-commerce / marketing site / mobile-web app / internal tool — native mobile is out of scope)
    → drives density, component priorities, tier scoping
 2. **Brand color(s)?** Existing hex values, or a direction ("trustworthy blue", "energetic orange")?
    Any logo/brand assets to match?
@@ -20,7 +20,7 @@ and proceed.
 
 ## Batch 2 — Technical (shapes deliverable format)
 
-5. **Stack**: React/Vue/Svelte/plain HTML? Tailwind (v3/v4)/CSS modules/vanilla CSS/styled-components?
+5. **Stack**: React/Next.js/Vue/plain HTML? Tailwind (v3/v4)/CSS modules/vanilla CSS/styled-components?
    Component lib in play (shadcn/Radix/none)?
    → default when unanswered: CSS custom properties + Tailwind v4 `@theme`
 6. **Where does this live**: one app, or a shared package consumed by several apps?
