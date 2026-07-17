@@ -110,6 +110,22 @@ dropdown 1000 / sticky 1100 / fixed 1200 / modal-backdrop 1300 / modal 1400 / po
 - Rule: color/opacity transitions on state change use `fast`; layout/transform use `base`.
 - Always pair with `prefers-reduced-motion: reduce` → transitions ~0ms, no auto-motion.
 
+**Keyframe animations** (named, reused system-wide — components never write ad-hoc `@keyframes`):
+
+| Token | Use | Spec |
+|---|---|---|
+| `spin` | Spinner, loading icons | 360° rotate, linear, ~800ms loop |
+| `shimmer` / `pulse` | Skeleton | pick ONE for the whole system; ~1.5–2s loop, subtle (opacity 0.5–1 or gradient sweep) |
+| `enter` / `exit` | Modal, popover, toast | fade + small translate/scale (4–8px, 0.96–1); `enter` uses enter easing at `base`, `exit` accelerates at `fast` — exits are always faster than entrances |
+| `slide-in-{side}` | Toast, drawer, bottom sheet | translate from the edge it belongs to |
+
+- Toast queue choreography: new toasts push existing ones (animate the stack offset, `base`);
+  removal collapses the gap — never let siblings jump.
+- Stagger (list/menu items entering): 20–30ms per item, cap total ≤ 300ms; skip stagger
+  entirely under reduced motion.
+- Loop animations (`spin`, `shimmer`) keep running under reduced motion only if they convey
+  ongoing status; decorative loops stop.
+
 ## 11. Layout
 
 - Breakpoints: `sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536` (or the project's existing ones — don't introduce a second set).
