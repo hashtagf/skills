@@ -140,6 +140,11 @@ Mixing sets reads as broken faster than any color mistake.
 
 Logo variants (full/mark, on-light/on-dark), illustration style notes, image radius/aspect defaults.
 
+**Image rules**: every image slot reserves its box (`aspect-ratio` or explicit dimensions)
+so loading never shifts layout; lazy-load below the fold (`loading="lazy"`); define the
+fallback (skeleton → placeholder icon on error) and require meaningful `alt` (empty `alt`
+only for decorative images).
+
 ## Output format
 
 Emit tokens as CSS custom properties grouped by tier, with the semantic layer in a

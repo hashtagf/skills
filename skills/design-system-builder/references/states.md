@@ -41,6 +41,13 @@ hover/active with `:not(:disabled)` so specificity accidents can't resurrect hov
 - `:required`, `:read-only`, `:placeholder-shown`, `:out-of-range`
 - Semantic layer on top: **error / warning / success / info** with message + icon + border
   color. Wire `[aria-invalid="true"]` and use it as the styling hook — accessibility for free.
+- **Placeholder rules**: a placeholder is never the label and never carries required
+  information — it vanishes on typing. Always pair with a persistent label (or helper
+  text for format hints). Style it clearly lighter than value text but still ≥ 4.5:1.
+- **Validation timing**: validate on blur or on submit — never per-keystroke before the
+  first submit (red-while-typing punishes users mid-word). On failed submit, focus the
+  first invalid field; long forms add an error summary linking to each field. Error
+  messages sit at the field and say how to fix it, not just "invalid".
 
 ## 4. Loading / content states
 
