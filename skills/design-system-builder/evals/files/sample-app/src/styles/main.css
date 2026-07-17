@@ -1,8 +1,0 @@
-body { font-family: Arial, sans-serif; font-size: 15px; color: #333; background: #fafafa; }
-h1 { font-size: 27px; color: #222; margin-bottom: 13px; }
-h2 { font-size: 21px; color: #444; margin-bottom: 9px; }
-.container { max-width: 1180px; margin: 0 auto; padding: 18px; }
-.sidebar { width: 235px; background: #f4f4f4; padding: 15px; border-right: 1px solid #ddd; }
-.text-muted { color: #999; font-size: 13px; }
-.link { color: #2563eb; }
-.link:hover { color: #1e40af; }

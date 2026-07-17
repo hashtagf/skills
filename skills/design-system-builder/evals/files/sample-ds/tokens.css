@@ -1,8 +1,0 @@
-/* Design tokens — defined long ago, mostly ignored by components */
-:root {
-  --color-primary: #2563eb;
-  --color-gray-700: #374151;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --radius: 6px;
-}
