@@ -16,6 +16,7 @@ Subagents bundled with the plugin (auto-discovered from `agents/`). Invoke via t
 | Agent | Description |
 |---|---|
 | [kimi-k3](agents/kimi-k3.md) | Thin Haiku-powered orchestrator that delegates a whole subtask to Kimi K3 (via the `kimi-k3` skill's runner) in an isolated context and relays the answer. Use to hand off a prompt / second opinion / vision question to Kimi K3 without cluttering the main thread. Needs `MOONSHOT_API_KEY`. |
+| [kimi-k3-implement](agents/kimi-k3-implement.md) | Delegates a scoped coding task to **Kimi K3 as an autonomous agent** (its own read/edit/run loop via Kimi Code CLI @ `kimi-k3`), then verifies the result (git diff + tests) and reports. For "let k3 build this" — K3 implements, the agent supervises. Requires Kimi Code CLI configured for k3 ([setup](skills/kimi-k3/references/kimi-cli-setup.md)). |
 
 ## Install
 
