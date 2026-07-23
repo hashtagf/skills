@@ -7,6 +7,15 @@ Skill warehouse for hashtagf — a collection of reusable [Claude Code agent ski
 | Skill | Description |
 |---|---|
 | [design-system-builder](skills/design-system-builder/SKILL.md) | Build, extract, or repair a complete design system (tokens + components + states + docs). Three modes: CREATE, EXTRACT, REDESIGN. |
+| [kimi-k3](skills/kimi-k3/SKILL.md) | Send a prompt to Moonshot's Kimi K3 model (1M context, vision, thinking mode) via a bundled runner script and relay its answer. For second opinions, cross-model checks, long-context reads. Needs `MOONSHOT_API_KEY`. |
+
+## Agents
+
+Subagents bundled with the plugin (auto-discovered from `agents/`). Invoke via the Agent tool (`subagent_type`) or by name.
+
+| Agent | Description |
+|---|---|
+| [kimi-k3](agents/kimi-k3.md) | Thin Haiku-powered orchestrator that delegates a whole subtask to Kimi K3 (via the `kimi-k3` skill's runner) in an isolated context and relays the answer. Use to hand off a prompt / second opinion / vision question to Kimi K3 without cluttering the main thread. Needs `MOONSHOT_API_KEY`. |
 
 ## Install
 
@@ -51,9 +60,13 @@ skills/
     ├── SKILL.md      # Skill definition and instructions
     ├── references/   # Supporting reference docs loaded on demand
     └── evals/        # Eval cases for testing the skill
+agents/
+└── <agent-name>.md  # Bundled subagent (YAML frontmatter + system prompt)
 ```
 
 Skills under `skills/` are auto-discovered by both the plugin system and the skills CLI.
+Subagents under `agents/` are auto-discovered by the plugin system (lowest precedence — a
+project `.claude/agents/<name>.md` with the same name overrides them).
 
 ## Adding a new skill
 

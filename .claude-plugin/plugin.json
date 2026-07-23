@@ -1,7 +1,7 @@
 {
   "name": "hashtagf-skills",
   "description": "hashtagf's skill warehouse — reusable agent skills for Claude Code (design-system-builder and more)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "hashtagf",
     "email": "flame@hpktechnology.com"
