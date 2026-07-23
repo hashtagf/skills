@@ -34,8 +34,13 @@ export MOONSHOT_API_KEY=sk-...
 echo 'export MOONSHOT_API_KEY=sk-...' >> ~/.zshenv
 ```
 
-Get a key at https://platform.moonshot.ai (min $1 top-up unlocks the model). Never
-hardcode or invent a key.
+Or point them to the bundled one-time helper (**user-run**): `scripts/setup.sh sk-...`
+persists the key to `~/.zshenv`; add `--with-cli` to also configure the Kimi CLI for the
+`kimi-k3-implement` agent. Don't run it yourself, and never pass it a key you found on the
+system — handing over a key is the user's call.
+
+Get a key at https://platform.moonshot.ai (min $1 top-up unlocks the model). Never hardcode
+or invent a key.
 
 ## How to run
 

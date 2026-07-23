@@ -39,7 +39,13 @@ model = "kimi-k3"
 max_context_size = 1048576
 ```
 
+**Fast path:** the skill bundles a helper that writes this file for you —
+`skills/kimi-k3/scripts/setup.sh --with-cli sk-your-key` (merges into any existing
+`~/.kimi/config.toml`, sets `default_model = "kimi-k3"`, chmod 600). It's user-run; an agent
+should never run it with a scavenged key.
+
 **Credentials — pick one, don't commit the key:**
+- run `scripts/setup.sh --with-cli sk-...` (above), **or**
 - put your key directly in `api_key` above (this file is local to your machine — never commit it), **or**
 - run `kimi` once interactively and use `/login` to store credentials in `~/.kimi/`.
 
