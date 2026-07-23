@@ -23,30 +23,50 @@ replacement for your own direct help.
 
 ## Prerequisite: API key
 
-The runner reads `MOONSHOT_API_KEY` from the environment. If it's missing, the script says
-so and exits. Don't hardcode keys or invent one — tell the user to set it:
+The runner reads `MOONSHOT_API_KEY` from the environment. If it's set, you're ready.
+
+If it's **not** set, do not go rummaging through the user's shell dotfiles (`~/.zshrc`,
+`~/.zprofile`, …) to find it — auto-hunting for a credential across profile files is fragile
+and trips security tooling. Instead, ask the user to make the key available, and point out
+the durable fix:
 
 ```bash
-export MOONSHOT_API_KEY=sk-...   # from https://platform.moonshot.ai (min $1 top-up unlocks the model)
+# just this session:
+export MOONSHOT_API_KEY=sk-...
+
+# persist for ALL shells, including the non-interactive ones that tools/scripts run in
+# (note: ~/.zshrc is NOT loaded by non-interactive shells, which is why a key set only there
+#  won't reach the runner — ~/.zshenv is):
+echo 'export MOONSHOT_API_KEY=sk-...' >> ~/.zshenv
 ```
+
+Get a key at https://platform.moonshot.ai (a min $1 top-up unlocks the model). Never hardcode
+or invent a key.
 
 ## How to run it
 
-Call the bundled script — it's pure Python stdlib (no `pip install`, no `jq`, no `curl`
-escaping). Use `python3 <skill-dir>/scripts/kimi_k3.py`.
+The runner lives at `scripts/kimi_k3.py` next to this file. Call it by its **absolute path** —
+the working directory usually isn't the skill directory, so a relative path won't resolve.
+Set it once to the `scripts/kimi_k3.py` beside this SKILL.md:
+
+```bash
+KIMI="/absolute/path/to/kimi-k3/scripts/kimi_k3.py"   # e.g. .../.claude/skills/kimi-k3/scripts/kimi_k3.py
+```
+
+It's pure Python stdlib — no `pip install`, no `jq`, no `curl` escaping.
 
 ```bash
 # simplest — prompt as an argument
-python3 scripts/kimi_k3.py "Explain lock-free queues in 3 bullets"
+python3 "$KIMI" "Explain lock-free queues in 3 bullets"
 
 # long or multi-line prompts: pipe via stdin so quoting never bites you
-cat report.md | python3 scripts/kimi_k3.py "Summarize the risks in this doc"
+cat report.md | python3 "$KIMI" "Summarize the risks in this doc"
 
 # steer it
-python3 scripts/kimi_k3.py --system "You are a terse Rust reviewer" --effort high "review: <code>"
+python3 "$KIMI" --system "You are a terse Rust reviewer" --effort high "review: <code>"
 
 # ask about an image (local path is base64-inlined; a URL is passed through)
-python3 scripts/kimi_k3.py --image ./architecture.png "What does this design do?"
+python3 "$KIMI" --image ./architecture.png "What does this design do?"
 ```
 
 Prefer **stdin** for anything long or containing quotes/backticks/newlines — it sidesteps
@@ -76,7 +96,7 @@ user asked for a comparison or second opinion, you can add your own brief take a
 ## When it fails
 
 The script exits non-zero with a one-line reason on stderr:
-- **`MOONSHOT_API_KEY is not set`** → ask the user to export it (see above).
+- **`MOONSHOT_API_KEY is not set`** → ask the user to export it (see Prerequisite); suggest adding it to `~/.zshenv` so non-interactive shells pick it up. Don't hunt for it in their dotfiles.
 - **`API error 401`** → key is wrong/expired.
 - **`API error 429` / insufficient balance** → the account needs a top-up (min $1 unlocks access).
 - **`network error`** → connectivity/endpoint issue; retry or check `--base-url`.

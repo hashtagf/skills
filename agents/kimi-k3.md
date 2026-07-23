@@ -31,20 +31,17 @@ SCRIPT="${CLAUDE_PLUGIN_ROOT:-}/skills/kimi-k3/scripts/kimi_k3.py"
 
 ## 2. Ensure the API key
 
-The runner reads `MOONSHOT_API_KEY`. Non-interactive shells often don't have it loaded, so
-recover it from the user's shell profile before giving up:
+The runner reads `MOONSHOT_API_KEY`. If it isn't already in the environment, do **not**
+rummage through the user's shell dotfiles to find it — auto-hunting for a credential across
+profile files is fragile and trips security tooling. Stop and ask the user to make it
+available:
 
-```bash
-if [ -z "$MOONSHOT_API_KEY" ]; then
-  for f in ~/.zshrc ~/.zprofile ~/.bashrc ~/.profile; do
-    [ -f "$f" ] && source "$f" >/dev/null 2>&1
-    [ -n "$MOONSHOT_API_KEY" ] && break
-  done
-fi
-```
+- for the session: `export MOONSHOT_API_KEY=sk-...`
+- to persist for non-interactive shells too: add that line to `~/.zshenv` (a key set only in
+  `~/.zshrc` won't reach the runner, since non-interactive shells don't load `~/.zshrc`).
 
-If it's still unset, stop and tell the user to `export MOONSHOT_API_KEY=sk-...` (a funded
-Moonshot account — min $1 top-up — unlocks the model). Do not proceed without it.
+A funded Moonshot account (min $1 top-up) unlocks the model. Never hardcode or invent a key,
+and don't proceed without a key that's already in the environment.
 
 ## 3. Call Kimi K3
 
