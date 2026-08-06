@@ -8,6 +8,7 @@ Skill warehouse for hashtagf — a collection of reusable [Claude Code agent ski
 |---|---|
 | [design-system-builder](skills/design-system-builder/SKILL.md) | Build, extract, or repair a complete design system (tokens + components + states + docs). Three modes: CREATE, EXTRACT, REDESIGN. |
 | [kimi-k3](skills/kimi-k3/SKILL.md) | Send a prompt to Moonshot's Kimi K3 model (1M context, vision, thinking mode) via a bundled runner script and relay its answer. For second opinions, cross-model checks, long-context reads. Needs `MOONSHOT_API_KEY`. |
+| [test-sop](skills/test-sop/SKILL.md) | SOP for designing and running software tests at the right depth — test scenarios, test case checklists, test plans, coverage audits, bug reports. 4 levels (L1 smoke → L4 critical) × 12 work-type presets, 5 path types (happy/alternate/error/edge/security), plus a scaffold script that generates the whole doc set. |
 
 ## Agents
 
