@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-06
+
+### Added
+- **`gitops-nova`** — SOP for designing, bootstrapping, extending, and auditing an Argo CD
+  GitOps repository. Distilled from a production app-of-apps repo (9 services, one shared
+  chart, LGTM stack, Gateway API edge), so the rules carry the reason and the measurement
+  rather than the convention.
+
+  Four modes — BOOTSTRAP / ONBOARD / REVIEW / PROMOTE — organised around one question: what
+  can a single bad merge destroy? Ten reference files cover layout and ApplicationSet
+  generators, the two-step Argo CD bootstrap, the shared service chart and its Helm traps,
+  the three-tier sync ladder, secrets by reference, digest promotion, exposure and edge auth,
+  observability, the review checklist, and the values-file-as-decision-log convention.
+
+  Two scripts, both verified against a real repo:
+  - `scripts/audit.py` — static audit. Credentials committed as values, unpinned charts and
+    images, `prune` on cluster-scoped paths, catchall public routes, JWT-exempt paths that
+    bypass their own allowlist (with Gateway API *segment* prefix semantics, not string
+    prefix), probes on portless components, generator entries whose values file is missing,
+    wildcard project sources, apps sourcing repos their project forbids, duplicate hostnames,
+    and east-west calls routed through the repo's own public hostnames. `--fail-on` makes it
+    a merge gate; it reads commented-out generator entries so a parked environment is not
+    reported as a broken one.
+  - `scripts/scaffold.py` — repo skeleton with the traps pre-handled: the `kindIs "bool"`
+    guard (Helm's `default` swallows `false`), per-component resource fallback, port-driven
+    Service/probes/scrape, and templates that `fail` rather than render an unauthenticated
+    path. `helm lint` and `helm template` clean.
+
 ## [0.4.0] - 2026-08-06
 
 ### Changed
@@ -92,7 +120,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/hashtagf/skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/hashtagf/skills/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hashtagf/skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/hashtagf/skills/compare/v0.1.0...v0.2.0
