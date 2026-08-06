@@ -17,6 +17,22 @@ normal and reads fastest for them).
 
 ---
 
+## 0. Where these fit
+
+Four tiers in the tracker. Produce the Module task even for a single module — it is the only
+place the overview, shared rules, and scenario table live, and without it the scenarios have no
+parent to hang from.
+
+```
+[Module] <module name>                 ← §1 below
+└─ SC-<CODE>-NN · <scenario name>      ← §2
+   └─ Test Scenario : <scenario name>  ← §3 (what QA ticks)
+└─ Issue [SC-<CODE>-NN] : <symptom>    ← §4, filed under the Module
+```
+
+Field conventions and push order are in `clickup.md`; you only need that file when you are
+actually creating the tasks.
+
 ## 1. Module task
 
 ```markdown
