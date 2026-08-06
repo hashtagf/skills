@@ -89,11 +89,11 @@ An absent key and a forgotten key look identical. This is the only way to tell t
 ### 4 — The dependency that is not visible from here
 
 ```yaml
-# MUST be the same DB the deposit service reads: bank writes bank_statement and deposit's
-# consumer looks it up by the StatementID in the command — a miss is treated as a broken
-# contract and dead-letters. deposit @ dev uses ledger_dev with no prefix, so bank
-# must too.
-MONGO_DB: ledger_dev
+# MUST be the same DB the billing service reads: ingest writes `events` and billing's
+# consumer looks each one up by the EventID in the command — a miss is treated as a
+# broken contract and dead-letters. billing @ dev uses billing_dev with no collection
+# prefix, so ingest must too.
+MONGO_DB: billing_dev
 ```
 
 This value looks wrong (a service pointing at another service's database) and is right. Without

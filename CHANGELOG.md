@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-08-06
+
+### Changed
+- `gitops-nova`: the example services now use a domain-neutral cast — `api`, `worker`, `auth`,
+  `orders`, `billing`, `catalog`, `ingest`, `storefront`, `admin-api`, `analytics`. They
+  previously carried the business vocabulary of the platform the skill was distilled from
+  (`agent`, `member`, `office`, `bank`, `deposit`, `payin`), which quietly narrowed who the
+  examples read as being for and made them awkward to lift into a project of a different shape.
+  `agent` was doubly bad: in a skill read by an LLM it collides with the other meaning of the
+  word. The skill name is unchanged.
+
 ## [0.5.2] - 2026-08-06
 
 ### Changed
@@ -147,7 +158,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/hashtagf/skills/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/hashtagf/skills/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/hashtagf/skills/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/hashtagf/skills/compare/v0.4.0...v0.5.0

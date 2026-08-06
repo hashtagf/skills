@@ -64,7 +64,7 @@ application change — the pod keeps serving them in-cluster. Then flip
 `INTERNAL_API_ENABLED` off once the invite flow lands.
 
 **F2. The operator back-office trusts identity headers it does not verify.**
-`envs/dev/services/office/values.yaml:50`
+`envs/dev/services/admin-api/values.yaml:50`
 
 This service uses the mesh-verifies model: its gate checks only that
 `X-User-Id` / `X-Tenant-Id` / `X-Realm` are present and well-formed, by design,
@@ -78,26 +78,26 @@ handler. That was full admin impersonation of any tenant with three curl
 headers.
 
 *Generalise it:* every other service using this model needs the same check.
-`member` is one (`MODE: development` wires a dev auth shim that injects the
+`storefront` is one (`MODE: development` wires a dev auth shim that injects the
 headers itself) and it is public with no policy — see F3.
 
-**F3. The player-facing service runs a development auth shim on a public host.**
-`envs/dev/services/member/values.yaml:22`
+**F3. The customer-facing service runs a development auth shim on a public host.**
+`envs/dev/services/storefront/values.yaml:22`
 
 `MODE: development` wires an auth shim that injects `X-Username` / `X-Tenant-Id`
 itself. With no edge policy, any caller can supply those headers and act as that
-player. Dev data only, and the file says so — but the same values file is the
+customer. Dev data only, and the file says so — but the same values file is the
 template someone will copy for uat.
 
 *Closes it:* the edge policy, or the mode flip. Until then, add `route.paths` so
 at least the ops plane is not published alongside it.
 
 **F4. A test harness with write access to a shared broker is public and
-unauthenticated.** `envs/dev/services/bank/values.yaml:166`
+unauthenticated.** `envs/dev/services/ingest/values.yaml:166`
 
-`POST /admin/rows` injects records into the ledger, `/admin/hash/fail` drives
+`POST /admin/rows` injects records into the shared store, `/admin/fail` drives
 the fail-closed branch, and `/admin/flood` generates ≥100 msg/s onto the
-RabbitMQ broker **shared with payment and deposit**.
+message broker **shared with orders and billing**.
 
 This one is a deliberate, dated decision recorded in the file, and the comment
 names the pattern that would close it. Listing it because "deliberate" and
@@ -105,7 +105,7 @@ names the pattern that would close it. Listing it because "deliberate" and
 services' queues, which is beyond what a dev harness decision normally covers.
 
 *Closes it:* the edge basic-auth policy already used by the analytics chart in
-this repo — `charts/clickhouse/templates/edge-auth.yaml` is a working example.
+this repo — `charts/analytics/templates/edge-auth.yaml` is a working example.
 
 ### Tier 2 — unbounded
 
@@ -146,19 +146,19 @@ one endpoint of the twelve it publishes has a real external caller. Expect
 similar ratios elsewhere.
 
 **F8. Three services reach each other through their own public hostnames.**
-`envs/dev/services/{deposit,payment}/values.yaml`
+`envs/dev/services/{billing,orders}/values.yaml`
 
-`AGENT_BASE_URL: https://agent.acme.example.com` from inside the cluster
+`CATALOG_BASE_URL: https://catalog.acme.example.com` from inside the cluster
 hairpins pod → NAT → CDN → edge → back in. It works today and will start
 returning 401 the day that host gets an edge policy — which F2's generalisation
 makes likely soon.
 
-One of the three is worse than it looks: `payment`'s agent-push was removed in a
-refactor, so that variable is **dead config**. It reads as a live integration in
+One of the three is worse than it looks: `orders`' call to catalog was removed in
+a refactor, so that variable is **dead config**. It reads as a live integration in
 a grep and is not one.
 
-*Closes it:* `http://agent/api/agent` for the two live callers; delete the key
-from `payment`.
+*Closes it:* `http://catalog/api/v1` for the two live callers; delete the key
+from `orders`.
 
 ### Tier 4 — will bite later
 

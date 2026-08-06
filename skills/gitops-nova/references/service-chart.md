@@ -247,7 +247,7 @@ A component may run a different image than the service:
 ```yaml
 components:
   mock:
-    image: {repository: ghcr.io/acme/wallet-mock, tag: sandbox}
+    image: {repository: ghcr.io/acme/provider-mock, tag: sandbox}
 ```
 
 Each field falls back to the top-level image when omitted. Reach for it only when the
@@ -259,7 +259,7 @@ Two things follow, and both belong in a comment where the key is used:
 
 - CI bumps only the **top-level** `image.tag`. A component image is pinned by hand, so it will
   quietly go stale unless someone owns it.
-- A binary that fabricates data (a mock wallet, a seeded balance provider) must live in its own
+- A binary that fabricates data (a stand-in for a paid upstream, a seeded fixture server) must live in its own
   image, never bundled into the service image. Bundled, it is one `command:` override away from
   running in production.
 

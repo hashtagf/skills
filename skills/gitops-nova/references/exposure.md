@@ -25,7 +25,7 @@ route:
   enabled: true
   hostnames: [payment.example.com]
   paths:
-    - /api/v2/payin
+    - /api/v2/orders
     - /healthz
 ```
 
@@ -138,8 +138,8 @@ Filtering a bad entry silently is worse than failing: an auth-exempt webhook wou
 
 ```yaml
 env:
-  AGENT_URL: http://agent/api/agent        # right — ClusterIP
-  # AGENT_URL: https://agent.example.com   # wrong — hairpins out and back
+  CATALOG_URL: http://catalog/api/v1        # right — ClusterIP
+  # CATALOG_URL: https://catalog.example.com  # wrong — hairpins out and back
 ```
 
 The public hostname sends a pod-to-pod call out through NAT, to the CDN, to the accelerator, to
@@ -149,7 +149,7 @@ for a call that never needed to leave the cluster.
 
 Two details that cause bugs:
 
-- **Put the version/group prefix in the base URL** (`http://agent/api/agent`), because clients
+- **Put the version/group prefix in the base URL** (`http://catalog/api/v1`), because clients
   typically append bare paths. Getting this wrong yields `/api/api/v1/...` and a 404 that looks
   like a routing problem.
 - **Trailing slashes and duplicated segments** are the second most common cause of the same
@@ -183,7 +183,7 @@ Write it where the route is declared, and include all four:
 ```yaml
 # ⚠️ PUBLIC, UNAUTHENTICATED — decided deliberately 2026-08-04.
 # WHAT is reachable: /admin/rows (inject records), /admin/flood (≥100 msg/s onto the
-#   broker SHARED with payment and deposit).
+#   broker SHARED with orders and billing).
 # WHY it is acceptable: dev-only harness, dev data, no production dependency.
 # WHAT CHANGES IT: if that stops being acceptable, copy the pattern in
 #   charts/<x>/templates/edge-auth.yaml — basic-auth SecurityPolicy bound to the route.
