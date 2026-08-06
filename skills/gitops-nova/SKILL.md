@@ -148,7 +148,7 @@ objects read `OutOfSync` forever are in `references/sync-policy.md`.
 Reasons in parentheses — the reason tells you when a rule may flex.
 
 1. **Secrets are references, never values.** A values file may carry a *path*
-   (`nova/dev/payment`) and *key names*; the operator syncs the values in-cluster. (Git is
+   (`acme/dev/payment`) and *key names*; the operator syncs the values in-cluster. (Git is
    replicated to every laptop and every CI runner forever, and `git rm` does not unpublish.
    A path is useless without the IAM role that can read it.)
 

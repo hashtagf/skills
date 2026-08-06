@@ -247,7 +247,7 @@ A component may run a different image than the service:
 ```yaml
 components:
   mock:
-    image: {repository: ghcr.io/acme/nova-mock, tag: sandbox}
+    image: {repository: ghcr.io/acme/wallet-mock, tag: sandbox}
 ```
 
 Each field falls back to the top-level image when omitted. Reach for it only when the

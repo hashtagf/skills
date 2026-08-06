@@ -1007,7 +1007,7 @@ def main() -> int:
     ap.add_argument("--services", default="api")
     ap.add_argument("--minimal", action="store_true",
                     help="dev only, one service -- the smallest thing that can go green")
-    ap.add_argument("--gateway", default="nova", help="Gateway resource name")
+    ap.add_argument("--gateway", default="edge", help="Gateway resource name")
     ap.add_argument("--gateway-ns", default="envoy-gateway-system")
     ap.add_argument("--secret-store", default=None,
                     help="ClusterSecretStore name (default: <project>-secret-store)")

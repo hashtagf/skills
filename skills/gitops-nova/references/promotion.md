@@ -57,7 +57,7 @@ envs/<env>/services/<svc>/values.yaml   →   image.tag
 ```
 
 Nothing else. The discipline pays off in one specific way: `git log` on the gitops repo stays
-readable, because `ci(payment): dev -> dev-f1c6f60` is visibly a robot and everything else is
+readable, because `ci(payment): dev -> dev-a1b2c3d` is visibly a robot and everything else is
 visibly a decision. The moment CI edits env vars or replicas, you can no longer tell what a
 human chose, and the repo stops being a record of intent.
 

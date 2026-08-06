@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-08-06
+
+### Changed
+- `gitops-nova`: replaced seven identifiers carried over from the private repo the skill was
+  distilled from with generic equivalents — a secret-manager path, a database name (x2), three
+  internal ADR/debt id formats, a real CI commit sha, a provider-specific env var name, a mock
+  image name, a chart name in a docstring, and `scaffold.py`'s `--gateway` default (now `edge`,
+  which is also a better name than a platform codename). No credentials, hostnames, account ids,
+  ARNs, or endpoints were ever present — these were identifiers, not secrets — but this
+  repository is public and none of them earned their place in a reusable skill.
+
 ## [0.5.1] - 2026-08-06
 
 ### Added
@@ -136,7 +147,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/hashtagf/skills/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/hashtagf/skills/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/hashtagf/skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/hashtagf/skills/compare/v0.3.0...v0.4.0

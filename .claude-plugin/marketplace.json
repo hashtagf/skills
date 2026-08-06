@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "hashtagf's skill warehouse — agent skills for Claude Code",
-    "version": "0.5.1"
+    "version": "0.5.2"
   },
   "plugins": [
     {

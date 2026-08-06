@@ -546,7 +546,7 @@ def values_to_chart(repo: Repo) -> dict[str, str]:
 
     Built from the Applications and ApplicationSets themselves rather than
     guessed from the path, because the whole point of the shared-chart layout is
-    that `envs/dev/services/payment/values.yaml` feeds `charts/nova-service`, not
+    that `envs/dev/services/payment/values.yaml` feeds `charts/platform-service`, not
     a chart named `payment`.
     """
     mapping: dict[str, str] = {}

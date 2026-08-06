@@ -27,7 +27,7 @@ Writing the reason costs thirty seconds at the moment you already have all the c
 is no cheaper moment, and it will never be this cheap again.
 
 This also changes what an LLM agent can do with the repo later. An agent reading
-`ROCKETWIN_URL: https://api.example.net` can only pattern-match. An agent reading that line
+`PROVIDER_URL: https://api.example.net` can only pattern-match. An agent reading that line
 with a comment saying it is a production endpoint, that dev shares production's egress IPs, and
 that the API key lives per-tenant in a database rather than here, can reason about a change
 instead of guessing at one.
@@ -91,9 +91,9 @@ An absent key and a forgotten key look identical. This is the only way to tell t
 ```yaml
 # MUST be the same DB the deposit service reads: bank writes bank_statement and deposit's
 # consumer looks it up by the StatementID in the command — a miss is treated as a broken
-# contract and dead-letters. deposit @ dev uses nova_deposit_dev with no prefix, so bank
+# contract and dead-letters. deposit @ dev uses ledger_dev with no prefix, so bank
 # must too.
-MONGO_DB: nova_deposit_dev
+MONGO_DB: ledger_dev
 ```
 
 This value looks wrong (a service pointing at another service's database) and is right. Without
@@ -109,8 +109,8 @@ A small, consistent vocabulary makes the repo greppable:
 | `⚠️` | changing or copying this has consequences beyond this file | a dev-only auth bypass |
 | `TODO(<scope>):` | known work, with the scope that owns it | `TODO(east-west): move to ClusterIP` |
 | `ponytail:` (or your own word) | delete this when its condition is met | `ponytail: remove when the real adapter lands` |
-| `<ADR-ID>` | the decision record this implements | `PLAT-0005`, `ADR-0013` |
-| `<DEBT-ID>` | known debt this is an instance of | `TDR-011` |
+| `<ADR-ID>` | the decision record this implements | `ARCH-0014`, `ADR-0007` |
+| `<DEBT-ID>` | known debt this is an instance of | `DEBT-0003` |
 
 The exact words do not matter; using them consistently does. Pick them, write them in the repo
 README, and then `grep -rn 'ponytail:'` answers "what cleanup is outstanding" in one command —
