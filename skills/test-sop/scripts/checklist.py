@@ -27,6 +27,25 @@ CHECK_BLOCK = re.compile(
 )
 
 
+FENCE = re.compile(r"^\s*`{3,}", re.M)
+
+
+def outer_marks(text):
+    """Scenario headings that are NOT inside a fenced block.
+
+    Module files carry the heading twice — once as the document section and once inside the
+    ````markdown spec block meant for pasting into a task. Only the outer one is a real
+    section boundary; treating both as boundaries duplicates every checklist.
+    """
+    fences = [f.start() for f in FENCE.finditer(text)]
+    marks = []
+    for m in SPEC_ID.finditer(text):
+        depth = sum(1 for f in fences if f < m.start())
+        if depth % 2 == 0:
+            marks.append(m)
+    return marks
+
+
 def parse_scenarios(text):
     """Return [(id, name, [criteria]), ...] taken from the spec blocks."""
     out = []
@@ -40,8 +59,9 @@ def parse_scenarios(text):
                 rest = body[sec.end():]
                 nxt = re.search(r"^##\s+", rest, re.M)
                 chunk = rest[: nxt.start()] if nxt else rest
+                # accept *, -, + bullets — hand-written specs use whichever the author prefers
                 crit = [re.sub(r"\s+", " ", c).strip()
-                        for c in re.findall(r"^\*\s+(.+?)\s*$", chunk, re.M)]
+                        for c in re.findall(r"^[*\-+]\s+(?!\[[ xX]\])(.+?)\s*$", chunk, re.M)]
                 break
         if crit:
             # the same scenario appears twice (section heading + inside the fenced spec);
@@ -57,6 +77,28 @@ def render(sid, name, crit, note):
     items = "\n".join(f"- [ ] {c}" for c in crit)
     return (f"### Test Scenario : {name}\n\n> {note} · {sid}\n\n"
             f"````markdown\n{items}\n````\n")
+
+
+def insert_blocks(text, scen, note):
+    """วางแต่ละ checklist ใต้ scenario ของตัวเอง แทนการต่อท้ายไฟล์ —
+    รักษาลำดับ spec+checklist สลับกันตาม template และไม่ย้ายเนื้อหาของผู้ใช้"""
+    by_id = {sid: (name, crit) for sid, name, crit in scen}
+    marks = outer_marks(text) or list(SPEC_ID.finditer(text))
+    if not marks:
+        return text
+    out = [text[: marks[0].start()]]
+    for i, m in enumerate(marks):
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
+        chunk = text[m.start(): end]
+        sid = m.group(1)
+        if sid in by_id:
+            # ตัด block เดิมของ scenario นี้ทิ้งก่อนวางใหม่ (idempotent เมื่อรันซ้ำ)
+            chunk = re.sub(r"\n*^### Test Scenario\s*:.*?(?=^## |\Z)", "\n", chunk,
+                           flags=re.M | re.S)
+            name, crit = by_id[sid]
+            chunk = chunk.rstrip() + "\n\n" + render(sid, name, crit, note)
+        out.append(chunk)
+    return "".join(out)
 
 
 def existing_blocks(text):
@@ -123,9 +165,7 @@ def main():
 
         blocks = [render(sid, name, crit, args.note) for sid, name, crit in scen]
         if args.write:
-            new = CHECK_BLOCK.sub("", text).rstrip() + "\n"
-            new += "\n---\n\n" + "\n---\n\n".join(blocks)
-            path.write_text(new, encoding="utf-8")
+            path.write_text(insert_blocks(text, scen, args.note), encoding="utf-8")
             print(f"{path.name}: wrote {len(blocks)} checklist block(s) "
                   f"({sum(len(c) for _, _, c in scen)} items)")
         else:
