@@ -213,15 +213,15 @@ L1 has no scenario specs — one task named `Test : <work item>`.
 ## 7. Banned words in acceptance criteria
 
 If a criterion contains one of these, rewrite it — they make the result depend on who ran the
-test rather than on the system. Thai equivalents are listed because these are the phrases that
-actually appear in Thai-language test docs.
+test rather than on the system. When writing in another language, translate the left column and
+keep the test: could two testers disagree about whether this passed?
 
 | Don't write | Write instead |
 | ---| --- |
-| the system is fast / ระบบทำงานเร็ว | redirects within 1 second |
-| easy to use / ใช้งานง่าย | the primary action is visible without scrolling |
-| data is secure / ข้อมูลปลอดภัย | calling the API with a `user` role token returns 403 |
-| displays correctly / แสดงผลถูกต้อง | the table total equals the sum of the visible rows |
-| works normally / ทำงานได้ปกติ | (name the observable behaviour — if you can't, you don't yet know what to test) |
-| handles large data / รองรับข้อมูลจำนวนมาก | 10,000 rows load within 3 seconds with no frozen frame |
-| no errors / ไม่มี error | no console errors and no 5xx responses across the whole flow |
+| the system is fast | redirects within 1 second |
+| easy to use | the primary action is visible without scrolling |
+| data is secure | calling the API with a `user` role token returns 403 |
+| displays correctly | the table total equals the sum of the visible rows |
+| works normally | (name the observable behaviour — if you can't, you don't yet know what to test) |
+| handles large data | 10,000 rows load within 3 seconds with no frozen frame |
+| no errors | no console errors and no 5xx responses across the whole flow |

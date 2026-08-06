@@ -80,8 +80,8 @@ def render(sid, name, crit, note):
 
 
 def insert_blocks(text, scen, note):
-    """วางแต่ละ checklist ใต้ scenario ของตัวเอง แทนการต่อท้ายไฟล์ —
-    รักษาลำดับ spec+checklist สลับกันตาม template และไม่ย้ายเนื้อหาของผู้ใช้"""
+    """Place each checklist under its own scenario rather than appending at the end of the file,
+    so the template's spec/checklist interleaving survives and nothing the author wrote moves."""
     by_id = {sid: (name, crit) for sid, name, crit in scen}
     marks = outer_marks(text) or list(SPEC_ID.finditer(text))
     if not marks:

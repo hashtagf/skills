@@ -5,8 +5,8 @@ grew into a full set of 12 modules / 64 scenarios / 18 files.
 Use it as a reference for what L4 output looks like — not as something to copy wholesale, since
 the business rules (TTLs, attempt counts, policies) differ in every project.
 
-The deliverables were written in Thai because that is the team's working language; the structure
-is what transfers.
+The original deliverables were written in the team's own language; the scenarios below are
+translated, and the structure is what transfers.
 
 ---
 
@@ -41,40 +41,38 @@ where they don't belong.
 
 ## One full scenario (Happy Path)
 
-The deliverable is in Thai; the shape is the point.
-
 ````markdown
-## SC-LOGIN-01 · Login ด้วย Email และ Password
+## SC-LOGIN-01 · Log in with email and password
 
 **Type:** Happy Path
-**Persona:** Registered User — มีบัญชีในระบบแล้ว
-**Pre-condition:** มีบัญชีในระบบ, email verified แล้ว, account ไม่ถูก lock
+**Persona:** Registered User — already has an account
+**Pre-condition:** account exists, email already verified, account not locked
 
 ## Scenario Steps
-1. User เข้าหน้า Login เห็น form Email และ Password
-2. กรอก Email และ Password ที่ถูกต้อง
-3. กด "เข้าสู่ระบบ"
-4. ระบบ verify credentials — ถูกต้อง
-5. ออก JWT access\_token และ refresh\_token
-6. Redirect ไปยังหน้า Loading แล้ว Redirect ไปยังหน้า Space โดยอัตโนมัติ
+1. User opens the Login page and sees the Email and Password fields
+2. Enters a correct email and password
+3. Presses "Sign in"
+4. The system verifies the credentials — correct
+5. Issues a JWT access\_token and refresh\_token
+6. Redirects to the Loading page, then automatically on to the Space page
 
 ## Acceptance Criteria
-*   Form มี Email field และ Password field พร้อม icon แสดง/ซ่อน
-*   ปุ่ม "Sign in" disable จนกว่าจะกรอกครบทั้ง 2 field
-*   มี loading state บนปุ่ม ขณะรอ API response
-*   Login สำเร็จ redirect ภายใน 1 วินาที
-*   มี link "ลืมรหัสผ่าน?" ใต้ password field
-*   มีตัวเลือก "จำฉันไว้" สำหรับขยาย token expiry
-*   ถ้า account เปิด 2FA ไว้ ระบบไปหน้ากรอกรหัส 2FA แทนการเข้าหน้า Space ทันที
-*   Session ใหม่ปรากฏในรายการอุปกรณ์พร้อม device / IP / เวลาที่ถูกต้อง
+*   The form has an Email field and a Password field with a show/hide icon
+*   "Sign in" stays disabled until both fields are filled
+*   The button shows a loading state while the API call is in flight
+*   On success the redirect completes within 1 second
+*   A "Forgot password?" link sits under the password field
+*   A "Remember me" option is present and extends token expiry
+*   If the account has 2FA enabled, the user goes to the 2FA code step instead of straight to Space
+*   The new session appears in the device list with the correct device, IP, and timestamp
 
 ## Business Logic / Rules
-*   Access token อายุ 15 นาที, Refresh token อายุ 7 วัน (30 วันถ้า Remember me)
-*   เก็บ refresh\_token ใน httpOnly cookie เท่านั้น ห้าม localStorage
-*   Access token เก็บ in-memory เท่านั้น
-*   Validate redirect\_url ให้เป็น domain เดียวกัน (prevent open redirect)
-*   บันทึก last\_login\_at และ last\_login\_ip ทุกครั้ง
-*   Reset failed\_login\_count = 0 เมื่อ login สำเร็จ
+*   Access token lives 15 minutes, refresh token 7 days (30 days with Remember me)
+*   Store refresh\_token in an httpOnly cookie only — never localStorage
+*   Keep the access token in memory only
+*   Validate redirect\_url to the same origin (prevent open redirect)
+*   Record last\_login\_at and last\_login\_ip on every login
+*   Reset failed\_login\_count to 0 on success
 
 ## UX/UI
 https://www.figma.com/design/xxx?node-id=163-41619
@@ -87,35 +85,30 @@ what makes the QA checklist tickable without opening the code.
 ## One Security Path scenario
 
 ````markdown
-## SC-MFA-06 · พยายามข้ามขั้น 2FA (bypass)
+## SC-MFA-06 · Attempt to skip the 2FA step (bypass)
 
 **Type:** Security Path
-**Persona:** Attacker ที่รู้ password แล้ว — พยายามข้ามขั้น 2FA
-**Pre-condition:** รู้ email + password ของ account ที่เปิด 2FA และอยู่ที่ขั้นกรอกรหัส 2FA
+**Persona:** Attacker who already knows the password — trying to get past the 2FA step
+**Pre-condition:** knows the email + password of an account with 2FA enabled, and is sitting on the 2FA code screen
 
 ## Scenario Steps
-1. กรอก password ถูกต้อง มาถึงขั้นกรอกรหัส 2FA
-2. พิมพ์ URL ของหน้าที่ต้อง login ตรง ๆ โดยไม่กรอกรหัส
-3. เรียก API ที่ต้อง auth ด้วย pre-auth token ที่ได้จากขั้นแรก
-4. ปิด tab แล้วเปิดใหม่
+1. Enter the correct password and reach the 2FA code step
+2. Type the URL of a page that requires login directly, without entering a code
+3. Call an authenticated API using the pre-auth token issued at step 1
+4. Close the tab and reopen it
 
 ## Acceptance Criteria
-*   พิมพ์ URL หน้าใน ๆ ตรง ๆ ระหว่างค้างขั้น 2FA ถูก redirect กลับมาขั้น 2FA เสมอ
-*   เรียก API ด้วย pre-auth token ได้ 401 ทุก endpoint
-*   ไม่มี refresh\_token cookie ถูก set ก่อนผ่าน 2FA
-*   ปิด tab แล้วเปิดใหม่ ต้องเริ่มจากกรอก email + password ใหม่
-*   กด back แล้ว forward ไม่สามารถข้ามไปหน้า Space ได้
-*   ทุกความพยายามข้ามขั้นถูกบันทึกลง audit log
-
-## Business Logic / Rules
-*   Server ต้องบังคับ 2FA ที่ชั้น API ทุก endpoint ไม่ใช่แค่ redirect ฝั่ง client
-*   pre-auth token มี scope `mfa_pending` เท่านั้น อายุ 5 นาที ใช้ครั้งเดียว
-*   ห้ามเก็บสถานะ "ผ่าน 2FA แล้ว" ไว้ฝั่ง client เพียงลำพัง
+*   Typing an internal URL while stuck at the 2FA step always redirects back to the 2FA step
+*   Calling any endpoint with the pre-auth token returns 401
+*   No refresh\_token cookie is set before 2FA passes
+*   Closing and reopening the tab forces the flow to restart from email + password
+*   Back then forward does not slip through to the Space page
+*   Every bypass attempt is written to the audit log
 ````
 
-Note the Persona is an Attacker *with something already in hand* ("knows the password"), which
-tells whoever runs it what state to set up. And the criteria assert that **the system refuses**,
-rather than that it works.
+Note the Persona is an Attacker *with something already in hand* ("already knows the password"),
+which tells whoever runs it what state to set up. And the criteria assert that **the system
+refuses**, rather than that it works.
 
 ---
 

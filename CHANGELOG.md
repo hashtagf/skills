@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-06
+
 ### Added
 - **test-sop** skill — SOP for designing and running software tests at the right depth,
   reusable across projects.
@@ -29,16 +31,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Worked L4 example: 12-module / 64-scenario authentication set.
   - Skill instructions are in English; the description carries both English and Thai trigger
     phrases, and deliverables are written in the team's own language.
-  - Benchmarked against a no-skill baseline on 4 realistic tasks (30 assertions, Sonnet
-    subagents): 100% vs 51% pass rate. Split by assertion kind: quality criteria (edge/security
-    coverage, measurable acceptance criteria, out-of-scope discipline) 96% vs 65%; SOP-format
-    criteria 100% vs 0%. The clearest effect is depth calibration — the same skill produced
-    2 files / 417 words for a bugfix and 14 files / 207 KB for a payment system, where the
-    baseline wrote at roughly one length regardless of risk.
+  - `scripts/checklist.py` generates the per-scenario checklists from the acceptance criteria
+    and verifies they stay 1:1 (`--check`, non-zero exit on drift).
+  - Benchmarked against a no-skill baseline on 4 realistic tasks (33 mechanical assertions,
+    single run each, Sonnet subagents): **97% with the skill vs 48% without**. An earlier
+    iteration of the skill scored 91% on the same ruler. The clearest effect is depth
+    calibration — the same skill produced 2 files / 438 words for a bugfix and 10 files /
+    10k words for a payment system, where the baseline wrote at roughly one length regardless
+    of risk. Numbers are one run per task on one model; treat them as directional.
   - Eval findings folded back into the skill: no-placeholder rule promoted to a top-level rule
-    with a `grep -rn TODO` check, risk-ordered wave delivery required above ~20 scenarios, and
-    coverage audits must name the NFR section an item moves into.
+    (`grep -rn TODO`, and any placeholder that must stay has to be disclosed in the reply),
+    risk-ordered wave delivery required above ~20 scenarios, coverage audits must name the NFR
+    section an item moves into, and checklists are generated rather than hand-copied — hand
+    copying drifted from the criteria in 64–100% of scenarios, losing conditions in both
+    directions, which the generated + verified flow eliminated entirely.
+  - Trigger measurement: 20-query eval (3 runs each, 3 optimizer iterations) found perfect
+    precision but 8–17% recall on deliberately advisory phrasings, and two machine-written
+    descriptions scored worse than the original, so the description is unchanged. Advisory
+    questions get answered directly instead of dispatched to a skill, so **invoke it explicitly
+    (`/test-sop`)** rather than relying on auto-trigger.
+
+### Changed
 - `.codex/` config with local Anthropic base URL.
+
+## [0.2.0] - 2026-07-28
+
+### Added
+- **kimi-k3** skill and the `kimi-k3` / `kimi-k3-implement` agents — delegate a prompt or a
+  scoped coding task to Moonshot's Kimi K3 and relay the result. Needs `MOONSHOT_API_KEY`.
 
 ## [0.1.0] - 2026-07-17
 
@@ -60,5 +80,7 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/hashtagf/skills/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/hashtagf/skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/hashtagf/skills/releases/tag/v0.1.0
