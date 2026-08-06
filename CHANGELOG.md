@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-06
+
+### Changed
+- **Renamed `test-sop` → `test-design`** (breaking for anyone who installed 0.3.0 — invoke
+  `/test-design`). "SOP" said nothing about what the skill decides, and nobody types it when
+  asking for help; "test design" is the standard term for choosing what to verify (ISTQB /
+  ISO 29119 use it for exactly this activity).
+- Its description now states explicitly that the skill covers deciding and documenting *what*
+  to verify, not writing or debugging automated test code (jest / vitest / playwright specs,
+  mocks, flaky CI). The new name invites that misreading, so the boundary is spelled out.
+  This wording is unmeasured — the trigger eval was run against the old name.
+
 ## [0.3.0] - 2026-08-06
 
 ### Added
@@ -80,7 +92,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/hashtagf/skills/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hashtagf/skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/hashtagf/skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/hashtagf/skills/releases/tag/v0.1.0

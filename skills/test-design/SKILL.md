@@ -1,5 +1,5 @@
 ---
-name: test-sop
+name: test-design
 description: >-
   SOP for designing and running software tests at the right depth — test scenarios, test
   case checklists, test plans, coverage audits, and bug reports — via a 4-level system
@@ -13,10 +13,12 @@ description: >-
   right level and the right path types (happy / alternate / error / edge / security) is
   exactly what separates a checklist that catches bugs from one that only proves the happy
   path works. Also use it when reviewing existing test docs for gaps, when writing bug
-  reports, and when pushing scenarios into ClickUp / Jira as a task tree.
+  reports, and when pushing scenarios into ClickUp / Jira as a task tree. This is about
+  deciding and documenting *what* to verify — not about writing or debugging automated test
+  code (jest / vitest / playwright specs, mocks, flaky CI), which is a different job.
 ---
 
-# Test SOP
+# Test Design
 
 Design test documentation at the right depth — not 60 scenarios for a single button, and
 not 5 lines for an authentication system.
