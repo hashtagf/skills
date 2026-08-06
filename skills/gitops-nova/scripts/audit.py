@@ -535,6 +535,70 @@ def _covers(prefix: str, path: str) -> str | None:
     return None
 
 
+AUTH_POLICY_KIND = re.compile(
+    r"^\s*kind:\s*(SecurityPolicy|AuthorizationPolicy|RequestAuthentication|AuthPolicy)\s*$",
+    re.MULTILINE,
+)
+
+
+def values_to_chart(repo: Repo) -> dict[str, str]:
+    """Map each values file to the chart directory that consumes it.
+
+    Built from the Applications and ApplicationSets themselves rather than
+    guessed from the path, because the whole point of the shared-chart layout is
+    that `envs/dev/services/payment/values.yaml` feeds `charts/nova-service`, not
+    a chart named `payment`.
+    """
+    mapping: dict[str, str] = {}
+    for rel, doc, spec in app_specs(repo):
+        srcs = sources_of(spec)
+        chart_paths = [
+            str(s.get("path", "")).strip("/")
+            for s in srcs
+            if s.get("path") and not GO_TEMPLATE.search(str(s.get("path")))
+        ]
+        if not chart_paths:
+            continue
+        chart = chart_paths[0]
+        contexts = (
+            _generator_contexts(doc.get("spec") or {})
+            if doc.get("kind") == "ApplicationSet"
+            else [{}]
+        )
+        for src in srcs:
+            for vf in (get(src, "helm", "valueFiles") or []):
+                if not isinstance(vf, str):
+                    continue
+                for ctx in contexts or [{}]:
+                    rendered = TEMPLATE_TOKEN.sub(
+                        lambda m: str(ctx.get(m.group(1).lstrip("."), m.group(0))), vf
+                    )
+                    if GO_TEMPLATE.search(rendered):
+                        continue
+                    mapping[_values_ref(rendered)] = chart
+    return mapping
+
+
+def charts_with_auth_template(repo: Repo) -> set[str]:
+    """Chart directories shipping their own auth-policy template.
+
+    A chart can bind an edge policy to its route without the release-level
+    `route.jwt` block knowing anything about it -- an analytics chart with its
+    own basic-auth policy is the common case. Without this, every such route
+    reads as unauthenticated, which is the kind of false positive that teaches
+    people to stop reading the output.
+    """
+    charts: set[str] = set()
+    for template_rel, text in repo.text.items():
+        parts = Path(template_rel).parts
+        if "templates" not in parts or not AUTH_POLICY_KIND.search(text):
+            continue
+        idx = parts.index("templates")
+        if idx:
+            charts.add("/".join(parts[:idx]))
+    return charts
+
+
 def _is_chart_default(rel: str) -> bool:
     """`charts/<x>/values.yaml` states defaults that per-env values override, so its
     route is not by itself a deployed route. Any other values file is real."""
@@ -544,6 +608,12 @@ def _is_chart_default(rel: str) -> bool:
 
 def check_routes(repo: Repo, out: list[Finding]) -> None:
     hostnames: dict[str, list[str]] = {}
+    chart_of = values_to_chart(repo)
+    auth_charts = charts_with_auth_template(repo)
+
+    def _chart_has_auth(values_rel: str) -> bool:
+        chart = chart_of.get(values_rel.replace("\\", "/"))
+        return bool(chart and chart in auth_charts)
 
     for rel, vals in repo.values.items():
         text = repo.text.get(rel, "")
@@ -596,7 +666,16 @@ def check_routes(repo: Repo, out: list[Finding]) -> None:
                     f"`{where}` forwards EVERY path on {', '.join(map(str, hosts)) or 'its host'} "
                     "-- including /metrics, any pprof handler, and any ops or admin plane the "
                     "process serves on the same listener."
-                    + ("" if jwt_on else " There is also no edge authentication on it."),
+                    # Only ASSERT "unauthenticated" when nothing could be authenticating it.
+                    # A chart shipping its own policy template is invisible in these values, so
+                    # asserting it there is the kind of wrong that discredits the whole report --
+                    # but dropping the point entirely loses the signal, so hedge instead.
+                    + ("" if jwt_on else
+                       (f" No `route.jwt` is set either; chart `{chart_of.get(rel)}` does ship an "
+                        "auth-policy template, so check whether it binds to this route before "
+                        "treating the surface as protected."
+                        if _chart_has_auth(rel) else
+                        " There is also no edge authentication declared on it.")),
                     "Set `paths:` to the real public surface. Everything unlisted then 404s at "
                     "the gateway and the pod never sees it (references/exposure.md).",
                 ))
@@ -604,14 +683,42 @@ def check_routes(repo: Repo, out: list[Finding]) -> None:
             # Only when RT002 did not already fire: a catchall route with no auth is
             # one problem to fix, not two rows describing the same file.
             elif not jwt_on and hosts and not chart_default:
+                chart = chart_of.get(rel.replace("\\", "/"))
+                if _chart_has_auth(rel):
+                    out.append(Finding(
+                        "RT003", "low", "Route has no `route.jwt`, but its chart ships an auth policy",
+                        rel, approx_line(text, "jwt", "hostnames"),
+                        f"`{where}` publishes {', '.join(map(str, hosts))} with no `route.jwt` "
+                        f"block, but chart `{chart}` carries its own auth-policy template. "
+                        "Whether this route is protected depends on that template's render "
+                        "condition, which cannot be read from values.",
+                        "Read the chart's policy template and confirm it binds to this route. If "
+                        "it does, this is fine -- say so in a comment here so the next reader "
+                        "does not have to repeat the trace.",
+                    ))
+                else:
+                    out.append(Finding(
+                        "RT003", "low", "Route is allowlisted but has no edge authentication",
+                        rel, approx_line(text, "jwt", "hostnames"),
+                        f"`{where}` publishes {', '.join(map(str, hosts))} with no edge policy. "
+                        "That is fine if the service authenticates itself -- and full "
+                        "impersonation if it only checks that identity headers are present.",
+                        "Confirm which model this service uses. If it trusts injected headers, an "
+                        "edge policy is required before the route is public.",
+                    ))
+
+            # Exempt paths only mean anything when a policy exists to be exempt FROM.
+            if exempt and not jwt_on and not chart_default:
                 out.append(Finding(
-                    "RT003", "low", "Route is allowlisted but has no edge authentication",
-                    rel, approx_line(text, "jwt", "hostnames"),
-                    f"`{where}` publishes {', '.join(map(str, hosts))} with no edge policy. "
-                    "That is fine if the service authenticates itself -- and full impersonation "
-                    "if it only checks that identity headers are present.",
-                    "Confirm which model this service uses. If it trusts injected headers, an "
-                    "edge policy is required before the route is public.",
+                    "RT007", "medium", "Exempt paths declared but edge auth is off",
+                    rel, approx_line(text, "jwtExemptPaths"),
+                    f"`{where}` lists jwtExemptPaths {list(exempt)} while route.jwt.enabled is "
+                    "not set. The list is inert -- nothing is being exempted, because nothing is "
+                    "enforced. Worse, the values now READ as though the route is protected with "
+                    "a carve-out, which is how a reviewer concludes auth is handled.",
+                    "Either set route.jwt.enabled: true (after confirming the identity service is "
+                    "live and serving JWKS), or drop the exempt list and state plainly that this "
+                    "route is unauthenticated.",
                 ))
 
             if jwt_on and paths and exempt:

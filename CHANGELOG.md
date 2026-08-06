@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `gitops-nova` `audit.py`: **RT007** — `jwtExemptPaths` declared while `route.jwt.enabled` is
+  unset. The list is inert (nothing is exempted because nothing is enforced) and, worse, the
+  values then *read* as a protected route with a carve-out, which is how a reviewer concludes
+  auth is handled. Found by running the skill against a real repo: one service carried this in
+  all four environments.
+
+### Fixed
+- `gitops-nova` `audit.py`: RT002/RT003 no longer assert "no edge authentication" when the
+  consuming chart ships its own auth-policy template — a chart-level `SecurityPolicy` is
+  invisible in the release's values. The finding now names the chart and asks for the binding to
+  be checked. Values files are mapped to their chart from the Applications and ApplicationSets
+  themselves, not guessed from the path, so the shared-chart layout resolves correctly.
+
 ## [0.5.0] - 2026-08-06
 
 ### Added
