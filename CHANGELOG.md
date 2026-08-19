@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-19
+
+### Added
+- **`figma-cli`** — a project-neutral workflow for compiling figma-ds-cli JSX into live,
+  editable Figma Desktop nodes. Covers project discovery, safe and patched bridge modes,
+  the seven core DSL node types, source-file rendering, token collection binding, visual
+  verification, non-destructive canvas arrangement, token import, and HTML conversion when
+  requested. The guidance is aligned with the installed CLI's source documentation and calls
+  out silent failure modes such as clipped text, incorrect CSS-style props, numeric `var:`
+  bindings, wrapper auto-splitting, and ambiguous variable collections.
+
 ## [0.5.3] - 2026-08-06
 
 ### Changed
@@ -158,7 +169,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/hashtagf/skills/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/hashtagf/skills/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/hashtagf/skills/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/hashtagf/skills/compare/v0.5.0...v0.5.1
