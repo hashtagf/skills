@@ -5,8 +5,9 @@ description: >-
   library with full interaction states, and docs — delivered as CSS/Tailwind or as an
   installable package for React, Next.js, or Vue (auto-detected from the repo) — including
   publishing and sharing it as an npm package other repos can `npm i` (npm/GitHub
-  Packages/private registry). Use this skill whenever the user mentions design systems,
-  design tokens, theming, dark mode, component libraries, style guides, "สร้าง design
+  Packages/private registry), plus an optional Storybook/Histoire docs site. Use this
+  skill whenever the user mentions design systems, design tokens, theming, dark mode,
+  component libraries, style guides, a Storybook for their components, "สร้าง design
   system", "ถอด design system จาก codebase", "ทำ theme", "ทำเป็น npm package", "publish
   ขึ้น npm", or wants consistent colors/spacing/typography across an app —
   even if they only ask for a single component but clearly need systematic foundations
@@ -80,8 +81,11 @@ token JSON/CSS as a shared source and say so.
 - `references/guardrails.md` — Stylelint/ESLint/CI rules that stop token drift. Read when
   the project has CI, and always at the end of EXTRACT and REDESIGN.
 - `references/operations.md` — package versioning & deprecation, testing strategy,
-  Storybook/Histoire setup with story-authoring rules (matrix/playground/interaction
-  stories), Figma sync. Read when shipping a package or setting up infrastructure.
+  Figma sync. Read when shipping a package or setting up infrastructure.
+- `references/storybook.md` — optional Storybook/Histoire docs site: tool choice, scaffold,
+  theme-toolbar preview config, story authoring rules (matrix/playground/interaction),
+  CI test-runner, publishing the static site. Read when the user opts into a Storybook
+  or when shipping a published package (offer it then).
 
 ## Mode 1: CREATE
 
@@ -167,6 +171,9 @@ For adding to a system that already works. The prime directive: **conform, don't
   the repo, publish it per `references/publishing.md` so they can `npm i` it.
 - **Docs**: `README.md` (structure + how to consume), token reference table,
   `DECISIONS.md` (CREATE) / `AUDIT.md` (EXTRACT) / `MIGRATION.md` (REDESIGN).
+- **Optional — Storybook/Histoire docs site** per `references/storybook.md`: build when
+  the user opts in; offer it when shipping a published package. Never block the core
+  deliverable on it.
 
 ## Quality gate before declaring done
 

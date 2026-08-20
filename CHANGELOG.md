@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-20
+
+### Added
+- `design-system-builder`: **`references/storybook.md`** — optional Storybook/Histoire
+  docs-site deliverable: tool choice per stack, scaffold + addons, the `preview.ts`
+  theme/density toolbar wired to the `data-theme` contract, story authoring rules
+  (matrix / playground / interaction stories, generated token reference page), CI
+  test-runner + visual regression, and publishing the static site alongside the npm
+  package. Explicitly optional: offered when shipping a published package, never a
+  blocker for the core deliverable, and never a substitute for the render-verify step.
+
+### Changed
+- `design-system-builder`: Storybook content moved out of `operations.md` (now a pointer);
+  SKILL.md lists the docs site as an optional deliverable and triggers on Storybook asks.
+
 ## [0.7.0] - 2026-08-20
 
 ### Added
@@ -189,7 +204,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/hashtagf/skills/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/hashtagf/skills/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/hashtagf/skills/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/hashtagf/skills/compare/v0.5.2...v0.5.3

@@ -23,7 +23,7 @@ Changelog: keep-a-changelog format; CI requires an entry on any PR that touches 
 
 Stories are the backbone: **one story per component per state per theme** (the same
 preview pages the verify step renders). They serve as demo, docs, and test corpus at once —
-see the Storybook/Histoire section below for how to author them.
+see `storybook.md` for how to set up and author them.
 
 1. **Accessibility (automated)**: axe (`vitest-axe` / `@axe-core/playwright`) against every story.
 2. **Interaction**: Testing Library tests for the keyboard contracts in `states.md`
@@ -35,33 +35,10 @@ see the Storybook/Histoire section below for how to author them.
 
 ## Storybook / Histoire (docs site + test corpus in one)
 
-React/Next → Storybook (framework preset matching the bundler); Vue → Histoire (or
-Storybook with the Vue renderer). Set this up as part of the package deliverable — it is
-the demo, the docs, and the test corpus simultaneously, which is why it pays for itself.
-
-**Story authoring rules** (CSF3, colocated `Button.stories.tsx` next to the component):
-
-- **Matrix story first**: one story per component rendering the full variant × state grid
-  (default/hover/focus-visible/disabled/loading…, hover/focus forced via
-  `storybook-addon-pseudo-states`). This is the visual-regression target — one screenshot
-  catches every cell.
-- **Playground story**: one interactive story with controls (args) for every public prop.
-- **Interaction stories**: `play` functions implementing the keyboard contracts from
-  `states.md` (dialog trap + Esc, menu arrows…) — the Storybook test-runner executes them
-  in CI, so keyboard behavior is tested where it's documented.
-
-**Setup essentials:**
-
-- Global decorator imports `tokens.css` and adds a toolbar switch that stamps
-  `data-theme` / `data-density` on the preview root — every story instantly viewable in
-  every theme without story changes.
-- Addons: `a11y` (axe on every story), `interactions`, `pseudo-states`.
-- Token reference page: an MDX/autodocs page generated from `tokens.css` by a small
-  parser script — hand-maintained token tables go stale in a week.
-- Each component's docs page: examples per state, props table, and the do/don't from its
-  spec — the spec is the source, the story imports it, no duplication.
-
-Visual regression (Playwright or Chromatic) runs against the matrix stories in both themes.
+Optional deliverable — full SOP moved to `storybook.md` (tool choice, scaffold, preview
+config with the theme toolbar, story authoring rules, CI test-runner, publishing the
+static site). Offer it whenever the system ships as a package; the story rules there feed
+the testing strategy above.
 
 ## Figma
 
