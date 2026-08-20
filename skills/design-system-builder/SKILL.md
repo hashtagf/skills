@@ -3,10 +3,12 @@ name: design-system-builder
 description: >-
   Build, extract, repair, or extend a complete design system — design tokens, a component
   library with full interaction states, and docs — delivered as CSS/Tailwind or as an
-  installable package for React, Next.js, or Vue (auto-detected from the repo). Use this
-  skill whenever the user mentions design systems, design tokens, theming, dark mode,
-  component libraries, style guides, "สร้าง design system", "ถอด design system จาก
-  codebase", "ทำ theme", or wants consistent colors/spacing/typography across an app —
+  installable package for React, Next.js, or Vue (auto-detected from the repo) — including
+  publishing and sharing it as an npm package other repos can `npm i` (npm/GitHub
+  Packages/private registry). Use this skill whenever the user mentions design systems,
+  design tokens, theming, dark mode, component libraries, style guides, "สร้าง design
+  system", "ถอด design system จาก codebase", "ทำ theme", "ทำเป็น npm package", "publish
+  ขึ้น npm", or wants consistent colors/spacing/typography across an app —
   even if they only ask for a single component but clearly need systematic foundations
   behind it.
 ---
@@ -69,6 +71,10 @@ token JSON/CSS as a shared source and say so.
 - `references/packaging.md` — framework detection (React / Next.js / Vue), package shapes
   (workspace vs published npm), and per-framework authoring rules. Read before implementing
   components in any framework or when the deliverable is a reusable package.
+- `references/publishing.md` — making the package `npm i`-able outside its repo: registry
+  choice (npm public/private, GitHub Packages, self-hosted, git/tarball), build pipeline,
+  published package.json, pre-publish verification, Changesets release automation, consumer
+  install docs. Read when the user wants to publish or share the system as an npm package.
 - `references/theming.md` — second-theme (dark mode) playbook and density variants.
   Read in EXTEND mode for theme work, or when the user wants dark mode / compact.
 - `references/guardrails.md` — Stylelint/ESLint/CI rules that stop token drift. Read when
@@ -157,7 +163,8 @@ For adding to a system that already works. The prime directive: **conform, don't
 - **Component specs/implementations** per the template, each with its full state matrix,
   authored for the detected framework (React / Next.js / Vue) and shaped as a consumable
   package (`@org/ui` workspace or published — see `references/packaging.md`) whenever the
-  system will be consumed by more than one place in the repo.
+  system will be consumed by more than one place in the repo. If consumers live outside
+  the repo, publish it per `references/publishing.md` so they can `npm i` it.
 - **Docs**: `README.md` (structure + how to consume), token reference table,
   `DECISIONS.md` (CREATE) / `AUDIT.md` (EXTRACT) / `MIGRATION.md` (REDESIGN).
 

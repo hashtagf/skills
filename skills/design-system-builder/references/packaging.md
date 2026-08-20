@@ -26,7 +26,7 @@ dep → tokens via `@theme` for v4, `tailwind.config` for v3), monorepo (`worksp
 |---|---|
 | Monorepo (workspaces detected) | Internal workspace package `packages/ui`, consumed as `@{org}/ui` via `workspace:*`. Ship **source directly** (no build step) — the consuming app's bundler compiles it; simplest to maintain |
 | Single app, wants reuse later | Same structure under `src/ui/` or `packages/ui`, importable by path alias — promote to published package later without restructuring |
-| Published npm package requested | Build with `tsup` or Vite library mode: ESM + `.d.ts`, `sideEffects: ["*.css"]`, framework in `peerDependencies` (never `dependencies`) |
+| Published npm package requested (consumers outside this repo, "share ให้ `npm i` ได้") | Build with `tsup` or Vite library mode: ESM + `.d.ts`, `sideEffects: ["*.css"]`, framework in `peerDependencies` (never `dependencies`). **Read `publishing.md`** for the full pipeline: registry choice, published package.json, pre-publish verification, release automation |
 
 Structure (framework-agnostic core, framework-specific components):
 

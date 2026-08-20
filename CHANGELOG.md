@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-20
+
+### Added
+- `design-system-builder`: **`references/publishing.md`** — full workflow for making the
+  design system an `npm i`-able package consumed outside its own repo: sharing-channel
+  decision table (npm public/private, GitHub Packages, self-hosted registry, git/tarball
+  stopgap), dist build pipeline per framework (tsup / Vite lib mode, `'use client'`
+  preservation check), the complete published package.json (files/exports/types-first/
+  sideEffects/peerDependencies/prepublishOnly), the four mandatory pre-publish checks
+  (`npm pack --dry-run`, publint, arethetypeswrong, tarball smoke-install), publish
+  mechanics (provenance, dist-tags, deprecate-never-unpublish), Changesets release
+  automation, registry-specific consumer `.npmrc` setup, and the consumer README contract.
+- `design-system-builder`: eval #6 covering the workspace-package → published-package
+  upgrade path (evals are dev-only, not distributed).
+
+### Changed
+- `design-system-builder`: SKILL.md description and reference list now cover publishing/
+  sharing as an npm package (triggers like "ทำเป็น npm package", "publish ขึ้น npm");
+  `packaging.md`'s published-shape row points at `publishing.md`.
+
 ## [0.6.0] - 2026-08-19
 
 ### Added
@@ -169,7 +189,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/hashtagf/skills/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/hashtagf/skills/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/hashtagf/skills/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/hashtagf/skills/compare/v0.5.1...v0.5.2
