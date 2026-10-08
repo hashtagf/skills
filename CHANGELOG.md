@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-10-09
+
+### Added
+- `ux-ui-principles`: dated OpenDesign reference research with 16 site candidates
+  and 8 template references mapped to the original layout IDs; machine-readable
+  selection metadata, attribution, evidence depth and adaptation checks.
+  Identifies error/verification captures and overlay-only evidence; no external
+  implementations, fonts, images or complete specifications are bundled.
+
+### Changed
+- Layout workflow can consult external references with explicit source/surface
+  scope and distinguishes catalog-only candidates from reviewed detail text.
+
+## [0.9.1] - 2026-10-08
+
+### Added
+- `ux-ui-principles`: 40 original layout blueprints in eight task categories,
+  a selection index, shared responsive/state/accessibility specification, and
+  three Thai worked examples (checkout, record management, booking). Examples
+  are adaptable proposals with tradeoffs and acceptance checks, not validated UIs.
+
+### Changed
+- Skill workflow selects layout IDs and loads only relevant category references.
+
+## [0.9.0] - 2026-10-08
+
+### Added
+- `ux-ui-principles`: evidence-based UX/UI research, design, audit and improvement
+  workflow with six reference guides, output templates and three evaluation cases.
+  Research register contains 36 authoritative sources verified online on 2026-10-08.
+  Covers interaction heuristics, cognitive-model limitations, visual hierarchy,
+  forms/recovery, dashboards, Thai text, WCAG 2.2 levels/exceptions, and validation.
+  Separates observed evidence, standard requirements and project recommendations;
+  does not infer runtime accessibility or conversion impact from screenshots.
+
 ## [0.8.0] - 2026-08-20
 
 ### Added
@@ -204,7 +239,10 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/hashtagf/skills/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/hashtagf/skills/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/hashtagf/skills/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/hashtagf/skills/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/hashtagf/skills/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/hashtagf/skills/compare/v0.5.3...v0.6.0

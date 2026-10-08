@@ -6,6 +6,7 @@ Skill warehouse for hashtagf — a collection of reusable [Claude Code agent ski
 
 | Skill | Description |
 |---|---|
+| [ux-ui-principles](skills/ux-ui-principles/SKILL.md) | Research-backed UX/UI reasoning for flows, visual hierarchy, forms, navigation, accessibility and validation. RESEARCH, DESIGN, AUDIT and IMPROVE modes; 36 source references, 40 layout blueprints, Thai worked examples, and evidence-bounded acceptance checks. |
 | [design-system-builder](skills/design-system-builder/SKILL.md) | Build, extract, or repair a complete design system (tokens + components + states + docs). Three modes: CREATE, EXTRACT, REDESIGN. |
 | [figma-cli](skills/figma-cli/SKILL.md) | Build, edit, render, and visually verify Figma designs through figma-ds-cli's JSX DSL and local Figma Desktop bridge. Covers project discovery, tokens, safe rendering, canvas arrangement, and silent DSL failure traps. |
 | [gitops-nova](skills/gitops-nova/SKILL.md) | SOP for designing, bootstrapping, extending, and auditing an Argo CD GitOps repo — app-of-apps layout, AppProjects as blast-radius boundaries, ONE shared service chart driven by per-(service, env) values, the three-tier sync ladder (auto / manual / observe-only), secrets by reference, digest promotion, and default-deny routes. Four modes: BOOTSTRAP, ONBOARD, REVIEW, PROMOTE. Ships `audit.py` (static audit of an existing repo — credentials in git, catchall routes, exempt-path bypasses, prune on cluster-scoped objects) and `scaffold.py` (repo skeleton whose Helm traps are already handled). |

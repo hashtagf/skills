@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "hashtagf's skill warehouse — agent skills for Claude Code",
-    "version": "0.8.0"
+    "version": "0.9.2"
   },
   "plugins": [
     {
       "name": "hashtagf-skills",
       "source": "./",
-      "description": "All hashtagf skills bundled as one plugin (design-system-builder, figma-cli, gitops-nova, test-design, kimi-k3)",
+      "description": "All hashtagf skills bundled as one plugin (ux-ui-principles, design-system-builder, figma-cli, gitops-nova, test-design, kimi-k3)",
       "category": "productivity"
     }
   ]
