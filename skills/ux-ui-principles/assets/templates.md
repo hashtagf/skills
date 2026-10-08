@@ -10,6 +10,8 @@ useful information, not a requirement to produce long documents for small tasks.
 **Decision:** Concrete label, control, sequence, layout or behavior.
 **Rationale:** Principle + source ID/link and why it applies here.
 **Tradeoff:** What becomes harder or less efficient; mitigation.
+**Do / Don't (when relevant):** Paired intended usage and likely misuse, consequence,
+context/exception and observable check; see `references/do-and-dont.md` from the skill root.
 **States:** Applicable state matrix including failure and recovery.
 **Acceptance:** Observable condition and test procedure.
 **Validation status:** Tested result or proposed research, clearly separated.

@@ -1,7 +1,6 @@
 # Component Inventory & Spec Template
 
-Full inventory ≈ 140 items. Real systems ship in tiers (Mantine ~100, Ant ~70, MUI ~60,
-Carbon ~50 — none shipped everything at v1). Scope by tier, drive Tier 3 by product demand.
+This inventory is a planning menu, not a required component count. Choose from observed product demand.
 
 ## Ship tiers
 
@@ -11,8 +10,7 @@ Carbon ~50 — none shipped everything at v1). Scope by tier, drive Tier 3 by pr
 | **2 — Growth** | ~50 | + Combobox, Date Picker, Drawer, Accordion, Stepper, Slider, File Upload, Empty State, Popover, Tag/Chip, Progress, Segmented Control, Number Input, Search Input, App Shell, Page Header, Filter Bar, Filter Dropdown… |
 | **3 — Full** | 100+ | The rest of this file, pulled in when a product needs it |
 
-**Hard ones**: Data Grid, Date/Range Picker, Combobox, Rich Text Editor cost more than the
-rest combined. Default recommendation: headless libraries (TanStack Table, Radix/Ark,
+**Hard ones**: Data Grid, Date/Range Picker, Combobox, Rich Text Editor require substantial domain and accessibility work. Default recommendation: headless libraries (TanStack Table, Radix/Ark,
 Lexical) skinned with the system's tokens — build from scratch only on explicit request.
 
 ## Full inventory
@@ -63,15 +61,23 @@ Every shipped component gets this spec. "Complete" means every cell filled or ma
 **Element/ARIA**: what it renders as (`<button>`, `role=...`), required ARIA wiring
 **Sizes**: sm / md / lg → height, padding-x, type style, icon size
 **Variants**: e.g. primary / secondary / tertiary / ghost / danger
-**Tokens**: component tokens it defines, each referencing semantic tokens
+**Tokens**: consumed semantic roles and optional component tokens; documented invariants
 **States** (per variant): default, hover, focus-visible, active, disabled,
   loading, error (where applicable) — bg / text / border / shadow per state
+**Keyboard/focus**: activation, navigation, focus entry/return, modal/non-modal contract
+**Validation**: message associations and timing where applicable
+**Evidence**: rendered examples and passed/failed/untested behavior checks
 **Motion**: which properties transition, duration+easing tokens
 **Content rules**: label casing, truncation, min/max lengths
-**Do / Don't**: 2–4 usage rules
+**Do / Don't**: relevant paired usage examples, each with a reason and observable check;
+  distinguish requirements from recommendations and state valid exceptions
 ```
 
 Example (abbreviated) — Button/primary/md:
 height 40, padding-x 16, gap 8, radius md, type `label-md`;
 default `button-primary-bg` / hover `-hover-bg` / focus-visible ring spec / active `-active-bg`
-/ disabled opacity token + `:not(:disabled)` guards / loading: spinner 16, label kept for width stability.
+/ disabled opacity token + native/aria-disabled guards plus activation prevention / loading: spinner 16, label kept for width stability.
+
+For worked usage pairs, read `do-and-dont-examples.md`. Select examples relevant to
+this component; do not fill the spec with generic prohibitions or require unrelated
+states just to reach a fixed rule count.

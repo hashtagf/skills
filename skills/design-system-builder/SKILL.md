@@ -27,12 +27,11 @@ Decide from the user's request; confirm only if genuinely ambiguous:
 | Mode | Signal | Output |
 |---|---|---|
 | **CREATE** | No existing system; "start from scratch", new product | Interview → full system (tokens + components + docs) |
-| **EXTRACT** | Existing codebase, no formal system; "audit", "ถอดออกมา" | Audit report → consolidated tokens → component build plan |
+| **EXTRACT** | Existing codebase, no formal system; "audit", "ถอดออกมา" | Audit report → proposed consolidated tokens → component build plan |
 | **REDESIGN** | A design system exists but is broken/inconsistent | Gap analysis → repaired architecture → migration notes |
 | **EXTEND** | A healthy system exists; "add a Date Picker", "add dark mode", "add compact density" | New parts that conform to existing conventions |
 
-All four modes converge on the same deliverable format (see "Deliverables" below); they
-differ in where the design decisions come from: the interview (CREATE), the codebase
+Deliver only what the selected mode and user scope require. Decisions come from: the interview (CREATE), the codebase
 (EXTRACT), the broken system plus its real-world usage (REDESIGN), or the existing
 system's own conventions (EXTEND).
 
@@ -40,24 +39,44 @@ Scope: web design systems (CSS/Tailwind; React, Next.js, Vue). Native mobile
 (React Native/Flutter/SwiftUI) is out of scope — for those, deliver only the
 token JSON/CSS as a shared source and say so.
 
-## Non-negotiable principles (all modes)
+## Principles (all modes)
 
-1. **Three-tier tokens.** `primitive → semantic → component`. Components never reference
-   primitives directly — the semantic layer is what makes a second theme a one-layer swap
-   instead of a rewrite. Naming: `{component}-{variant}-{state}-{property}`.
-2. **One spacing scale.** Base-4 scale used for padding, margin, and gap alike. Any value
-   outside the scale is a bug, not a design decision.
-3. **Every component ships with its full state matrix.** A button without hover, focus-visible,
-   disabled, and loading specs is not done. Read `references/states.md` for the checklist —
-   it is the most commonly skipped part and the reason most design systems fail review.
-4. **One focus-ring spec for the whole system** (color, width, offset; contrast ≥ 3:1 per
-   WCAG 2.4.11). Never per-component focus styles.
-5. **Ship in tiers.** MVP (~20 components) → Growth (~50) → Full (100+). Never attempt the
-   full inventory in one pass; deliver Tier 1 working end-to-end first, because a complete
-   Button proves the token architecture in a way that 50 half-specified components cannot.
-6. **Thai-language support when relevant** (Thai user text, Thai fonts in the codebase):
-   body line-height ≥ 1.6 to clear stacked vowels/tone marks, Thai+Latin font pairing,
-   no letter-spacing on Thai text.
+1. **Tokens follow roles.** Use primitive → semantic aliases; add component tokens when
+   component-specific control is useful. Document deliberate invariant values. Validate
+   aliases and themes; a three-tier diagram alone does not prove theme correctness.
+2. **Respect existing scales.** Base-4 is a possible default, not an accessibility rule.
+   Preserve deliberate spacing values; document exceptions rather than calling them bugs.
+3. **Cover applicable states and behavior.** Use `references/states.md`; mark N/A states.
+   Include keyboard, focus, accessible names and error associations, not only CSS.
+4. **Accessible focus.** A shared focus contract may adapt to surrounding surfaces.
+   WCAG 2.4.7 requires visible focus; 2.4.11 AA concerns focus not being entirely obscured;
+   1.4.11 covers applicable non-text contrast. 2.4.13 focus appearance is AAA.
+5. **Scope to demand.** Agree a useful component slice; even two complete components can
+   be a valid MVP. Inventory tiers are planning examples, not minimum delivery counts.
+6. **Validate languages.** For Thai, test actual fonts, stacked marks, wrapping, mixed
+   scripts and zoom. Start with generous line-height (e.g. 1.6); adjust using rendered
+   evidence. Avoid adding tracking by default, without treating it as a universal ban.
+
+## Do / Don't — decisions during every mode
+
+Use these pairs at the relevant decision point. Follow the user's scope and the
+existing system; recommendations may have documented exceptions. Accessibility
+requirements and claims about executed checks need evidence.
+
+| Do | Don't |
+|---|---|
+| Read existing tokens, sibling components and consumer constraints before changing the system. | Introduce a competing scale, naming scheme or framework solely because an example uses it. |
+| Deliver the requested component slice; in report-only EXTRACT, propose changes in the audit. | Expand a two-component request into the full inventory or modify audited code without implementation scope. |
+| Use semantic roles and document deliberate invariant values and scale exceptions. | Hardcode theme-dependent values or silently remap intentional values such as 6px spacing. |
+| Specify applicable states, keyboard behavior, focus and error associations; mark N/A explicitly. | Treat a default-state screenshot, an ARIA attribute or disabled-looking CSS as proof of usable behavior. |
+| Render Thai content with actual fonts, stacked marks, mixed scripts, wrapping and zoom. | Present a fixed line-height or tracking value as a guarantee that Thai text renders correctly. |
+| Preserve supported consumer APIs with aliases and migration notes when changing them. | Remove public tokens or props without assessing compatibility and explaining migration. |
+| Build and inspect the packed artifact, then test it in a fresh supported consumer when packaging is requested. | Infer package correctness from workspace imports, or publish when only preparation/sharing was requested. |
+| Report passed, failed and untested checks; prove a CI gate detects a known violation when configuring it. | Claim production readiness or WCAG conformance from unexecuted checks or automated accessibility results alone. |
+
+For component usage docs, read `references/do-and-dont-examples.md` when authoring or
+reviewing examples. Use relevant pairs with the reason and an observable check; adapt
+the examples to the real component API rather than copying an invented API.
 
 ## Reference files — read before the relevant phase
 
@@ -65,6 +84,8 @@ token JSON/CSS as a shared source and say so.
   and values, plus token architecture and naming. Read when defining or restructuring tokens.
 - `references/components.md` — full inventory (~140 items: 9 component categories + composed patterns), ship tiers,
   and the per-component spec template. Read when planning scope or writing component specs.
+- `references/do-and-dont-examples.md` — component usage examples, failure reasons and
+  verification checks. Read when writing usage guidance or reviewing misuse.
 - `references/states.md` — complete state taxonomy (interactive, selection, validation,
   loading, structural), how major systems implement them, CSS/data-attribute patterns.
   Read when writing any component spec or reviewing state coverage.
@@ -93,20 +114,20 @@ token JSON/CSS as a shared source and say so.
    available to answer (background run), make explicit, conventional assumptions, record
    them in a `DECISIONS.md`, and proceed — a system built on stated assumptions is
    correctable; a stalled one is worthless.
-2. **Token architecture.** Define the three tiers and naming convention before any values.
-3. **Foundations.** Define all 13 categories from `references/foundations.md` for the one
-   theme. Populate primitives, then semantic aliases.
+2. **Token architecture.** Define role aliases, optional component tokens and naming conventions. Read `references/token-interoperability.md` for portable token exchange.
+3. **Foundations.** Assess the 13 categories in `references/foundations.md`; implement relevant categories and mark others deferred or N/A. Populate primitives, then semantic aliases.
 4. **System-wide specs.** Focus ring, state layer/interaction color strategy, motion rules,
    z-index scale — the cross-cutting decisions components will inherit.
 5. **Components, Tier 1 first.** For each: anatomy (internal padding, gap, sizes) →
    variants → full state matrix, using the spec template in `references/components.md`.
    Detect the project's framework and package shape per `references/packaging.md`
    (React / Next.js / Vue from package.json — never ask what the repo can answer;
-   default: CSS custom properties + Tailwind v4 `@theme` when no stack exists).
+   default: plain CSS custom properties when no stack exists; add Tailwind only when requested or already used).
 6. **Verify.** Build a preview/demo page per component exercising every state (both themes
    if two exist), render it (browser/screenshot where available), and check it against the
    quality gate. A design system that has never been rendered is a hypothesis, not a system.
-7. **Docs.** Token reference + per-component usage (do/don't) + the DECISIONS.md. Add CI
+7. **Docs.** Token reference + per-component usage (paired do/don't examples, reasons
+   and checks per `references/do-and-dont-examples.md`) + the DECISIONS.md. Add CI
    guardrails per `references/guardrails.md` when the project has CI.
 
 ## Mode 2: EXTRACT
@@ -160,15 +181,19 @@ For adding to a system that already works. The prime directive: **conform, don't
 4. **Verify like CREATE step 6** — render the new part next to existing components; visual
    inconsistency with siblings is a failure even when the component is fine in isolation.
 
-## Deliverables (all modes end here)
+## Deliverables (adapt to mode and requested scope)
+
+EXTRACT without implementation ends at `AUDIT.md`; the following code/package items
+apply only when implementation is requested. External publication requires a user
+request to publish; preparing a tarball and consumer instructions does not require a release.
 
 - **Tokens as code**: CSS custom properties (and Tailwind `@theme` / config when the
-  project uses Tailwind), organized primitive → semantic → component.
+  project uses Tailwind), organized by primitives, semantic roles and optional component tokens.
 - **Component specs/implementations** per the template, each with its full state matrix,
   authored for the detected framework (React / Next.js / Vue) and shaped as a consumable
   package (`@org/ui` workspace or published — see `references/packaging.md`) whenever the
   system will be consumed by more than one place in the repo. If consumers live outside
-  the repo, publish it per `references/publishing.md` so they can `npm i` it.
+  the repo, prepare a distributable per `references/publishing.md`; publish when requested.
 - **Docs**: `README.md` (structure + how to consume), token reference table,
   `DECISIONS.md` (CREATE) / `AUDIT.md` (EXTRACT) / `MIGRATION.md` (REDESIGN).
 - **Optional — Storybook/Histoire docs site** per `references/storybook.md`: build when
@@ -179,11 +204,20 @@ For adding to a system that already works. The prime directive: **conform, don't
 
 Run through this list and state the result honestly:
 
-- [ ] No component token references a primitive directly
+- [ ] Token aliases resolve without cycles; role mappings and documented invariants work in each supported theme
 - [ ] Every shipped component covers its applicable states (checklist in `references/states.md`)
-- [ ] Focus ring identical everywhere, ≥ 3:1 contrast
+- [ ] Component usage guidance includes relevant Do / Don't pairs with a reason and an observable check
+- [ ] Focus is visible, not entirely obscured, and meets applicable non-text contrast; AAA focus appearance checked only if targeted
 - [ ] Text contrast ≥ 4.5:1 (normal) / 3:1 (large); state not conveyed by color alone
-- [ ] All spacing values on-scale
-- [ ] Disabled styles win over hover/active (`:not(:disabled)` guards or ordering)
+- [ ] Spacing follows the agreed scale or documented exceptions
+- [ ] Disabled styles win over hover/active (native and aria-disabled guards plus activation prevention)
 - [ ] `prefers-reduced-motion` respected wherever motion tokens are used
-- [ ] Thai text rules applied if the product has Thai content
+- [ ] Thai glyphs, wrapping and zoom rendered and checked if relevant
+- [ ] Packed package passes a fresh consumer build if packaging is in scope
+- [ ] Record passed, failed and untested checks; automated accessibility checks alone are not conformance
+
+## Research and operation references
+
+- `references/token-interoperability.md` — DTCG exchange and alias validation.
+- `references/research-audit-2026-10-09.md` — official-source findings and remaining evidence limits.
+- `references/operations.md` — ownership, contribution review, adoption and testing evidence.

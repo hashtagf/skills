@@ -23,6 +23,7 @@ Skill สำหรับใช้หลัก UX/UI เปลี่ยนโจ�
 | Hierarchy, typography, grouping, responsive และข้อความไทย | [Visual](references/visual.md) |
 | WCAG 2.2 ระดับ A/AA/AAA, ข้อยกเว้น, keyboard และ modal | [Accessibility](references/accessibility.md) |
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
+| Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |
 | วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
 | รายการแหล่งอ้างอิง 36 แหล่งและสถานะหลักฐาน | [Sources](references/sources.md) |
 | รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |

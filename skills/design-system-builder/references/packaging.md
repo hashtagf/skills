@@ -14,7 +14,7 @@ Inspect `package.json` (root + workspaces) and config files, in this priority:
 | `nuxt` in deps / `nuxt.config.*` | **Vue** (author Nuxt-compatible: no app-level plugins required) |
 | `vue` in deps / `*.vue` files / `vite` with `@vitejs/plugin-vue` | **Vue 3** |
 | `react` / `react-dom` | **React** |
-| none of the above | Ask the user; if unavailable, default React + note in DECISIONS.md |
+| none of the above | Use plain CSS tokens unless framework components are requested; record assumptions |
 
 Also detect: TypeScript (`tsconfig.json` → author in TS), Tailwind version (`tailwindcss`
 dep → tokens via `@theme` for v4, `tailwind.config` for v3), monorepo (`workspaces` field,
@@ -24,7 +24,7 @@ dep → tokens via `@theme` for v4, `tailwind.config` for v3), monorepo (`worksp
 
 | Situation | Shape |
 |---|---|
-| Monorepo (workspaces detected) | Internal workspace package `packages/ui`, consumed as `@{org}/ui` via `workspace:*`. Ship **source directly** (no build step) — the consuming app's bundler compiles it; simplest to maintain |
+| Monorepo (workspaces detected) | Internal workspace package `packages/ui`, consumed as `@{org}/ui` using the detected package manager's supported workspace syntax. Ship source only if all consumer bundlers transpile it; otherwise build. For Next, inspect `transpilePackages` and verify a production build |
 | Single app, wants reuse later | Same structure under `src/ui/` or `packages/ui`, importable by path alias — promote to published package later without restructuring |
 | Published npm package requested (consumers outside this repo, "share ให้ `npm i` ได้") | Build with `tsup` or Vite library mode: ESM + `.d.ts`, `sideEffects: ["*.css"]`, framework in `peerDependencies` (never `dependencies`). **Read `publishing.md`** for the full pipeline: registry choice, published package.json, pre-publish verification, release automation |
 
@@ -63,7 +63,7 @@ framework-independent layer; only component code differs per framework.
 - `forwardRef` on every leaf interactive component (or plain `ref` prop on React 19) —
   consumers WILL need refs for focus management and form libs.
 - Variants via `cva` (class-variance-authority) or a typed variant map; props:
-  `variant`, `size`, `disabled`, `loading` + native props spread last.
+  `variant`, `size`, `disabled`, `loading` + native props. Compose event handlers and protect disabled/loading invariants; arbitrary spreading must not override them.
 - Controlled + uncontrolled where the native element has state (Input, Checkbox):
   support `value`/`defaultValue`.
 - Compound components as namespace or dot-notation (`Tabs`, `Tabs.List`, `Tabs.Panel`).
@@ -73,7 +73,7 @@ framework-independent layer; only component code differs per framework.
   `'use client'` to components that use state/effects/event handlers (Modal, Tabs,
   Dropdown…). A design system that marks everything client poisons the consumer's tree.
 - Split entries if needed: purely-presentational (Badge, Card, Divider) must stay
-  server-safe. Never import a client component from a server-safe one.
+  server-safe. Server Components may import and render marked Client Components. Keep server-only dependencies out of the client module graph; boundary props must be serializable. Verify the packed library in an App Router consumer.
 - Fonts via `next/font` in docs/examples, not hardcoded `@font-face`.
 
 ### Vue 3

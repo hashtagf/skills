@@ -9,8 +9,8 @@ or when the user asks how to run the system over time.
 |---|---|
 | Visual-identical fixes, doc changes | patch |
 | New component, new token, new additive state/variant/prop | minor |
-| Intentional value change on an existing semantic/component token (brand tweak) | minor, but flag prominently in changelog — screens will visibly change |
-| Rename/remove a token, class, prop, or component; change component DOM structure | **major** |
+| Intentional value change on an existing semantic/component token (brand tweak) | classify by the documented visual compatibility contract; flag changes and provide consumer diffs |
+| Rename/remove a token, class, prop, or component; break a supported DOM/selector contract | **major** |
 
 **Deprecation before removal, always:** keep the old name as an alias resolving to the new
 token (CSS) or a re-export with a console warning in dev (JS), note it in the changelog
@@ -21,11 +21,11 @@ Changelog: keep-a-changelog format; CI requires an entry on any PR that touches 
 
 ## Testing strategy
 
-Stories are the backbone: **one story per component per state per theme** (the same
+Use stories or equivalent demo fixtures for applicable states and supported themes (the same
 preview pages the verify step renders). They serve as demo, docs, and test corpus at once —
 see `storybook.md` for how to set up and author them.
 
-1. **Accessibility (automated)**: axe (`vitest-axe` / `@axe-core/playwright`) against every story.
+1. **Accessibility (automated)**: axe against relevant fixtures; automated checks do not establish WCAG conformance. Manually inspect keyboard, screen-reader behavior, zoom and forced colors.
 2. **Interaction**: Testing Library tests for the keyboard contracts in `states.md`
    (dialog trap+Esc, menu arrows, tabs roving tabindex…).
 3. **Visual regression**: Playwright screenshots of every story in both themes; diff on PR.
@@ -47,3 +47,12 @@ project), offer a code→Figma sync: generate the Figma library from the shipped
 component specs using that tool's own workflow/skill — do not duplicate its instructions
 here. Record the Figma file link in the README. If no Figma tooling is connected, note it
 as a follow-up instead of blocking.
+
+## Ownership and adoption
+
+Assign a maintainer and contribution review path. Record proposal → experimental →
+stable → deprecated status, acceptance criteria and migration guidance. Validate new
+patterns with actual product users, including people with disabilities when relevant.
+Track consuming apps, adoption of maintained components, duplicate implementations,
+reported defects and upgrade effort. These measures show usefulness; inventory size alone
+does not. See [GOV.UK contribution criteria](https://design-system.service.gov.uk/community/contribution-criteria/).

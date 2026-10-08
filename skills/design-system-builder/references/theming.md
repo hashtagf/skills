@@ -1,7 +1,7 @@
 # Theming & Density
 
 Read this when adding a second theme (dark mode) or density variants.
-Both work the same way: they re-point the **semantic** token layer only. If any
+Both primarily override semantic roles; document component or asset exceptions. If any
 component token references a primitive directly, fix that first — grep for it before
 starting, because one leaked primitive breaks every variant silently.
 
@@ -13,17 +13,17 @@ starting, because one leaked primitive breaks every variant silently.
    - `@media (prefers-color-scheme: dark)` as default
    - explicit `[data-theme="dark"]` / `[data-theme="light"]` on the root that WINS over
      the media query (user toggle beats OS)
-   - `color-scheme: dark` on root so native widgets (scrollbars, inputs) follow
-   - set the attribute in an inline `<head>` script to avoid a flash of wrong theme
+   - `color-scheme: light` / `dark` matching the active root theme so native widgets (scrollbars, inputs) follow
+   - initialize the attribute before paint where supported; respect CSP, SSR/hydration and stored user preference
 3. **Write the dark value set — dark is not inverted light:**
    - Elevation flips medium: shadows are weak in dark; raised surfaces get **lighter**
      (step up the neutral scale or overlay white at 4–12% per level)
    - Reduce saturation of large filled areas; brand fills often need a lighter, less
      saturated dark-mode variant to hold contrast
-   - Text: pure white on dark vibrates — use off-white (~90% luminance) for primary text
+   - Text: choose measured text/background contrast, including subdued and interactive states; off-white is an optional visual choice
    - Status colors need their own dark variants (the light ones usually fail contrast on dark bg)
    - Disabled/overlay opacities usually differ between themes — re-tune, don't copy
-4. **Images/illustrations**: provide dark variants or wrap in a dimming filter token.
+4. **Images/illustrations**: use dark variants when needed; avoid blanket image filters that change meaningful photos or chart colors.
 5. **Re-verify everything**: contrast check every semantic text/bg pair per state in the
    new theme, and re-render the component preview pages in both themes.
 
@@ -32,6 +32,5 @@ starting, because one leaked primitive breaks every variant silently.
 - Density tokens cover **size only**: control heights, paddings/gaps, type sizes — never colors.
 - Implement as `[data-density="compact"]` re-pointing semantic size tokens
   (e.g. `--control-height-md: 40px → 32px`, paddings one step down the spacing scale).
-- Precondition: components consume sizes via tokens, not literals. Do NOT model density
-  as per-component props — it becomes unmixable and drifts.
-- Touch targets still ≥ 44px on touch devices even in compact (extend hit area, not the visual).
+- Precondition: components consume sizes via tokens, not literals. Use a shared inherited density contract; explicit local overrides are valid when scoped and documented.
+- Keep targets usable in compact mode: AA 2.5.8 is 24 CSS px or defined exceptions; 44 CSS px is the enhanced touch target. Verify spacing and non-overlap.

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-09
+
+### Added
+- `ux-ui-principles`: paired workflow Do / Don’t and ten flow/screen examples
+  linked to layout IDs, plus a Thai worked pair with rationale and observable checks.
+- `design-system-builder`: component Do / Don’t examples, dated official-source
+  research audit, and token interoperability guidance.
+
+### Changed
+- `design-system-builder`: add paired workflow Do / Don't guidance and component
+  usage examples with failure reasons, context/exception notes and observable checks.
+- `design-system-builder`: correct WCAG focus/target guidance, ARIA state behavior,
+  Next server/client composition, npm packing lifecycle and manager-specific exports.
+  Scope components and typography defaults to product needs; document Storybook
+  accessibility CI setup, token interchange, governance and research evidence limits.
+
 ## [0.9.2] - 2026-10-09
 
 ### Added
@@ -239,7 +255,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/hashtagf/skills/compare/026626b...v0.10.0
 [0.9.2]: https://github.com/hashtagf/skills/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/hashtagf/skills/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/hashtagf/skills/compare/v0.8.0...v0.9.0

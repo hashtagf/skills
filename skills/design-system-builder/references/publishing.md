@@ -14,20 +14,19 @@ Ask which applies (or infer from the repo's remotes/org) before touching config:
 |---|---|---|
 | Open source / public | **npmjs.com public** | Scoped name `@org/ui`; first publish needs `--access public` |
 | Private, org already pays npm | **npmjs.com private** | Zero consumer friction beyond `npm login` |
-| Private, code lives on GitHub | **GitHub Packages** | Free with the repo; every consumer (and CI) needs a `read:packages` token + `.npmrc` — real friction, say so |
+| Private, code lives on GitHub | **GitHub Packages** | Private usage is subject to plan quotas; local access generally uses a read:packages PAT. Eligible Actions jobs can use GITHUB_TOKEN with granted package access |
 | Enterprise with Artifactory/Nexus/Verdaccio | **that registry** | Publish via `publishConfig.registry`; consumers usually already have `.npmrc` |
 | No registry, share now | **git URL or tarball** | `npm i git+ssh://git@github.com/org/ui.git#v1.2.0` or `npm pack` → share the `.tgz`. No semver ranges, no dist-tags; git installs run `prepare`, so the repo must build itself — treat as a stopgap, not the destination |
 
-A monorepo-internal `workspace:*` package (packaging.md shape 1) needs none of this — only
-publish when a consumer outside the workspace exists.
+A monorepo-internal `workspace:*` package (packaging.md shape 1) needs none of this — prepare distribution when needed; publish only when the user requests a release.
 
 ## 1. Build pipeline
 
-Published packages ship `dist/`, never raw `src/` (consumers' bundlers won't compile your TS/SFCs).
+Default to compiled dist for broad consumer compatibility. Source distribution requires an explicit tested consumer transpilation contract.
 
 - **React / Next.js**: `tsup` — `format: ['esm']`, `dts: true`, `sourcemap: true`,
   `external` everything in `peerDependencies`. Add CJS only if a known consumer needs it.
-- **Vue 3**: Vite library mode + `@vitejs/plugin-vue`, types via `vue-tsc --declaration`
+- **Vue 3**: Vite library mode + `@vitejs/plugin-vue`, types via `vue-tsc --declaration --emitDeclarationOnly` with a build tsconfig and output directory
   (tsup can't emit SFC types).
 - **CSS**: `tokens.css` / `theme.css` are copied verbatim into `dist/` (they are the
   framework-independent contract); component CSS imports stay in the JS and are declared via
@@ -61,7 +60,7 @@ Complete example — every field here earns its place:
   "repository": { "type": "git", "url": "git+https://github.com/org/ui.git" },
   "scripts": {
     "build": "tsup",
-    "prepublishOnly": "npm run build"
+    "prepack": "npm run build"
   }
 }
 ```
@@ -73,14 +72,12 @@ Rules encoded above, stated once:
 - `files: ["dist"]` allowlist beats `.npmignore` denylist — new junk stays out by default.
 - `types` condition **first** in each export entry; keep the `./tokens.css` export so apps
   can adopt tokens before components.
-- `prepublishOnly` makes a stale-dist publish impossible.
-- Same-repo promotion: keep the workspace `exports` pointing at `src/` for local dev via a
-  `development` condition or `publishConfig.exports` override pointing at `dist/`, so
-  workspace consumers keep HMR while the published artifact ships built output.
+- `prepack` builds for pack/publish unless lifecycle scripts are disabled; explicitly verify a clean build and copied CSS. `npm pack` does not run `prepublishOnly`.
+- For npm, actual published exports must point at dist (or generate a distribution manifest). `publishConfig.exports` rewriting is pnpm-specific and requires pnpm pack/publish. A development condition works only when consumer resolvers enable it. Inspect the packed manifest.
 
 ## 3. Verify before first publish — all four, in order
 
-1. `npm pack --dry-run` — the printed file list **is** the package. No `src/`, stories,
+1. From a clean checkout, install locked dependencies and run a build that emits JS, declarations and CSS; then `npm pack --dry-run` — the printed file list **is** the package. No `src/`, stories,
    tests, or `.env`; `dist/` and CSS present.
 2. `npx publint` and `npx @arethetypeswrong/cli --pack .` — catch exports-map and types
    resolution bugs that only appear in consumers.
@@ -88,7 +85,7 @@ Rules encoded above, stated once:
    `npm i ../org-ui-0.1.0.tgz`, import one component + `@org/ui/tokens.css`, run its build,
    render it. A package that has never been installed from its own tarball is a hypothesis,
    not a package — this is the packaging analogue of the skill's render-verify rule.
-4. Name check: `npm view @org/ui` → 404 means free. Scope must be an org/user you control.
+4. Name check: `npm view @org/ui` → 404 alone does not prove name availability or publishing authorization; check registry, scope ownership and access. Scope must be an org/user you control.
 
 ## 4. Publish mechanics
 
@@ -106,11 +103,10 @@ Rules encoded above, stated once:
 For any package with more than one contributor or consumer:
 
 - `npx changeset init`; every PR that changes the package adds a changeset (patch/minor/major
-  per the semver table in `operations.md` — token value changes are minor-but-flagged,
-  renames/removals major).
+  per the semver table in `operations.md` — classify token-value changes by the documented visual compatibility contract;
+  public renames/removals are breaking).
 - GitHub Actions: `changesets/action` opens a "Version Packages" PR (bumps + CHANGELOG);
-  merging it publishes. Publish job needs `NPM_TOKEN` secret and, for provenance,
-  `permissions: { id-token: write, contents: read }`.
+  merging it publishes only if the workflow has a configured publish command. Prefer npm trusted publishing/OIDC where the provider and runtime support it; use scoped token secrets as a fallback. Verify current requirements and provenance permissions in official npm docs.
 - Tag releases `v{version}`; the git tag is what makes `npm i git+…#v1.2.0` fallbacks and
   bisecting consumer regressions possible.
 
@@ -124,7 +120,7 @@ every consumer needs a `.npmrc`:
 //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
 ```
 
-with a PAT (`read:packages`) locally and a token secret in CI. Document this in the README —
+with a PAT (`read:packages`) locally, or eligible Actions GITHUB_TOKEN with granted package access in CI. Document this in the README —
 it is the #1 "works on my machine, fails in CI" cause for GitHub Packages.
 
 **Verdaccio (self-hosted, free)**: `docker run -p 4873:4873 verdaccio/verdaccio`, then
@@ -143,5 +139,4 @@ The published README must let a stranger go from zero to a rendered Button. Incl
 3. First component: a 5-line copy-paste example.
 4. Theming: how to set `data-theme` (from `theming.md`), and the rule that overrides happen
    at the semantic-token layer, not by overriding component CSS.
-5. Versioning policy: link the changelog; state that semantic token value changes land as
-   flagged minors (so visual diffs on upgrade are expected, not bugs).
+5. Versioning policy: link the changelog; document the visual compatibility policy, breaking-change classification and expected upgrade diffs.

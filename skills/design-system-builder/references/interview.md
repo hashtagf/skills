@@ -1,7 +1,7 @@
 # CREATE-mode Interview
 
 Goal: extract enough decisions to build the whole system without guessing on anything
-expensive to change later. Ask in batches (use AskUserQuestion when available), not one
+expensive to change later. Ask in batches (use the available user-input tool when useful), not one
 at a time. Skip questions already answered by the conversation or repo context.
 
 If the user is unavailable (background/autonomous run): choose the conventional default
@@ -16,19 +16,19 @@ and proceed.
    Any logo/brand assets to match?
 3. **Personality on two axes**: serious ↔ playful, minimal ↔ expressive
    → drives radius (sharp vs round), shadow depth, motion amount
-4. **Languages/scripts**: Thai? Thai+English? → typography rules (line-height ≥ 1.6, font pairing)
+4. **Languages/scripts**: Thai? Thai+English? → font/script rendering checks (start near line-height 1.6, verify actual marks and wrapping)
 
 ## Batch 2 — Technical (shapes deliverable format)
 
 5. **Stack**: React/Next.js/Vue/plain HTML? Tailwind (v3/v4)/CSS modules/vanilla CSS/styled-components?
    Component lib in play (shadcn/Radix/none)?
-   → default when unanswered: CSS custom properties + Tailwind v4 `@theme`
+   → default when unanswered: plain CSS custom properties; add Tailwind only if requested/already used
 6. **Where does this live**: one app, or a shared package consumed by several apps?
 7. **Figma needed too**, or code-only?
 
 ## Batch 3 — Scope & constraints
 
-8. **Tier 1 component list** — show the MVP ~20 from `components.md`, ask what to add/remove;
+8. **Initial component slice** — scope from the product journey; use `components.md` as a menu, not a minimum;
    ask which of the 4 hard components (Data Grid, Date Picker, Combobox, RTE) are needed now
 9. **Density**: comfortable / compact / both? (both = plan density tokens from day 1)
 10. **Dark mode**: now, later, never? (architecture supports it regardless; "now" doubles the semantic layer work)
@@ -42,8 +42,8 @@ and proceed.
 | Product type | SaaS web app |
 | Brand color | Blue-based, neutral gray with slight cool tint |
 | Personality | Middle: radius md, shadows subtle, motion minimal |
-| Stack | CSS custom properties + Tailwind v4 |
-| Tier | MVP ~20 components |
+| Stack | Plain CSS custom properties |
+| Tier | Smallest useful component slice, stated in DECISIONS.md |
 | Density | Comfortable only |
 | Dark mode | Architecture-ready, not built |
 | A11y | WCAG AA |

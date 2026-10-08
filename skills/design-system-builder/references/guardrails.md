@@ -24,26 +24,26 @@ Use `stylelint-declaration-strict-value` to require `var()` for every token-gove
 }
 ```
 
-Exempt only the token files themselves (`overrides` on `src/tokens/**`) — primitives are
+Exempt token files and reviewed invariant/dynamic exceptions (`overrides` on `src/tokens/**`) — primitives are
 the one place literals belong.
 
 ## ESLint (JS/JSX side)
 
-- Ban inline style colors/spacing: `react/forbid-dom-props` for `style`, or a project rule
+- Restrict hardcoded inline colors/spacing; allow justified dynamic positioning and token-backed values: `react/review-dom-props` for `style`, or a project rule
   allowing `style` only with token `var()` strings.
 - Tailwind projects: `eslint-plugin-tailwindcss` (or v4 equivalent) with
-  `no-arbitrary-value` — arbitrary values (`p-[13px]`, `text-[#333]`) are exactly the drift
-  the system exists to stop.
+  `no-arbitrary-value` — verify plugin compatibility with the installed Tailwind major; token-backed arbitrary values and dynamic calculations may be valid.
 - Restrict imports: primitives module importable only by the semantic layer
   (`no-restricted-imports` on `tokens/primitives`).
-- Next.js: forbid `'use client'` in the presentational component dirs (custom
-  `no-restricted-syntax` rule) so server-safety survives contributions.
+- Next.js: review `'use client'` in the presentational component dirs (custom
+  `no-restricted-syntax` rule) and verify the client/server module graph and consumer build rather than banning legitimate client boundaries.
 
 ## Token integrity script
 
 Add a small check script (runs in CI) that fails on:
 - any `var(--...)` reference with no definition (typo'd token)
-- any component token whose value is a literal instead of a semantic reference
+- cycles, invalid types and undocumented component literals; respect legitimate CSS fallbacks and scopes
+- generated output drifting from its declared source
 - deprecated aliases past their announced removal date
 
 ## CI wiring

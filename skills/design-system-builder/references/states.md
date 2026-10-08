@@ -21,15 +21,15 @@ say which states apply, so "missing" is distinguishable from "not applicable".
 | Hover | `:hover` | Guard with `@media (hover: hover)` — touch devices fire sticky hovers |
 | Focus | `:focus-visible` (keyboard), `:focus-within` (container) | Plain `:focus` only when pointer focus should also show |
 | Active / Pressed | `:active` | |
-| Disabled | `:disabled`, `[aria-disabled="true"]` | `aria-disabled` stays focusable — better for discoverability |
+| Disabled | `:disabled`, `[aria-disabled="true"]` | `aria-disabled` changes semantics only; focusability is a deliberate choice and JS must prevent activation |
 | Visited | `:visited` | links only; CSS restricts styleable properties |
 
 **Ordering rule**: base → hover → focus → active → disabled. Disabled must win — guard
-hover/active with `:not(:disabled)` so specificity accidents can't resurrect hover styles.
+hover/active with `:not(:disabled):not([aria-disabled="true"])` so specificity accidents can't resurrect hover styles.
 
 ## 2. Selection / value states
 
-- Checked/Selected: `:checked`, `[aria-selected]`, `[aria-pressed]` (toggle buttons), `[aria-current]` (current nav item)
+- Checked/Selected: `:checked`, `[aria-selected="true"]`, `[aria-pressed="true"]` (toggle buttons), `[aria-current="page"]` or another documented current value; presence selectors also match false
 - Indeterminate: `:indeterminate` (partial checkbox, unknown progress)
 - Activated (Material): persistent "you are here" state, distinct from transient selected
 - Dragged: elevated + state layer (Material treats it as a first-class state)
@@ -40,23 +40,21 @@ hover/active with `:not(:disabled)` so specificity accidents can't resurrect hov
   which marks required fields red on page load
 - `:required`, `:read-only`, `:placeholder-shown`, `:out-of-range`
 - Semantic layer on top: **error / warning / success / info** with message + icon + border
-  color. Wire `[aria-invalid="true"]` and use it as the styling hook — accessibility for free.
+  color. Wire `[aria-invalid="true"]` and use it as the styling hook — associate a persistent label and error text (e.g. aria-describedby); ARIA styling alone does not provide accessibility.
 - **Placeholder rules**: a placeholder is never the label and never carries required
   information — it vanishes on typing. Always pair with a persistent label (or helper
   text for format hints). Style it clearly lighter than value text but still ≥ 4.5:1.
-- **Validation timing**: validate on blur or on submit — never per-keystroke before the
-  first submit (red-while-typing punishes users mid-word). On failed submit, focus the
-  first invalid field; long forms add an error summary linking to each field. Error
+- **Validation timing**: choose timing by task; avoid premature errors while users compose input. After a failed submit, focus a linked error summary for long forms, or the first invalid field for short forms; document the chosen behavior. Error
   messages sit at the field and say how to fix it, not just "invalid".
 
 ## 4. Loading / content states
 
-- Loading/Busy (`[aria-busy]`), per-component Skeleton, Empty state, Error state — the
+- Loading/Busy (`[aria-busy="true"]`), per-component Skeleton, Empty state, Error state — the
   container-level states product screens actually spend time in.
 
 ## 5. Structural states (compound components)
 
-- Open/Closed, Expanded/Collapsed: `[aria-expanded]`, `[open]`, or `data-state="open|closed"`
+- Open/Closed, Expanded/Collapsed: `[aria-expanded="true"]`, `[open]`, or `data-state="open|closed"`
 - On/Off (switch), Highlighted (`data-highlighted`), Drop target (`data-drop-target`)
 
 ## How major systems model states (for calibration)
@@ -75,10 +73,10 @@ Pick ONE interaction-color strategy for the whole system:
 ## Implementation rules
 
 1. Native elements → CSS pseudo-classes; JS-driven state → `data-state` attributes.
-2. Style off ARIA attributes (`[aria-expanded="true"]`, `[aria-invalid]`) where possible —
-   it forces correct markup and keeps a11y in sync with visuals by construction.
-3. State must never be color-only (WCAG 1.4.1): pair color with icon, underline, weight, or border.
-4. Focus indicator contrast ≥ 3:1 (WCAG 2.4.11); one spec system-wide.
+2. Style off ARIA attributes (`[aria-expanded="true"]`, `[aria-invalid="true"]`) where possible —
+   keep semantics and visuals aligned, then separately test names, relationships and behavior.
+3. State must never be color-only (WCAG 1.4.1): supply a meaningful non-color cue, such as text or a recognizable icon; a border color change alone is insufficient.
+4. Visible focus: 2.4.7; non-obscuration: 2.4.11 AA; applicable non-text contrast: 1.4.11. Focus appearance 2.4.13 is AAA. Use a shared contract with surface adaptations.
 5. Test states under `forced-colors: active` (Windows High Contrast) — state layers and
    subtle backgrounds disappear there; borders and outlines survive.
 
@@ -90,13 +88,13 @@ spec and test them in interaction tests.
 
 | Family | Keys |
 |---|---|
-| Dialog / Drawer | Tab trapped inside; `Esc` closes; focus returns to the trigger on close |
+| Modal Dialog / modal Drawer | Background inert; Tab contained; `Esc` closes; focus returns to the trigger on close |
 | Menu / Dropdown / Context menu | `Enter`/`Space`/`ArrowDown` opens; arrows navigate; `Esc` closes; type-ahead jumps |
-| Tabs | Arrows switch tabs (roving tabindex); `Home`/`End` first/last; `Tab` exits into the panel |
-| Select / Listbox / Combobox | Arrows navigate options; `Enter` selects; `Esc` closes; type-ahead; combobox keeps focus in the input |
+| Tabs | Arrows move tab focus; auto-activate only with low latency, otherwise Enter/Space activates. Home/End optional. Tab proceeds into the active panel |
+| Custom Listbox / Combobox | Follow the specific APG popup pattern; editable listbox combobox typically retains DOM focus with aria-activedescendant. Preserve native select behavior |
 | Checkbox / Switch | `Space` toggles |
-| Radio group | Arrows move AND select (one tab stop for the group) |
+| Radio group | Arrows generally move and select; toolbar radio groups have different contracts |
 | Slider | Arrows step; `PageUp`/`PageDown` big step; `Home`/`End` min/max |
 | Accordion | `Enter`/`Space` toggles the focused header |
 | Data grid (`role=grid`) | Arrows move cell focus; `Home`/`End` row edges; `PageUp`/`PageDown` scroll |
-| Toast / status region | Never steals focus; announced via `aria-live`; a hotkey or F6 reaches the region |
+| Toast / status region | Never steals focus; announced via `aria-live`; interactive actions remain reachable; any optional hotkey is a product contract, not an APG requirement |

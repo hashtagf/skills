@@ -11,12 +11,12 @@ single-app CSS-only, just offer it as a follow-up line, don't build it.
 
 | Stack | Tool |
 |---|---|
-| React / Next.js | **Storybook** (`@storybook/nextjs` or `react-vite` preset — match the bundler) |
+| React / Next.js | **Storybook** (`@storybook/nextjs-vite` for compatible Next projects, or the existing supported framework — match installed versions) |
 | Vue 3 / Nuxt | **Histoire** (Vite-native, lighter) — or Storybook Vue3 renderer if the team already knows Storybook |
 
 ## 2. Scaffold
 
-- `npx storybook@latest init` from the package root — it detects the framework preset.
+- For new projects, verify supported versions before `npx storybook@latest init` from the package root; preserve existing major versions — it detects the framework preset.
   Pin whatever major it installs; don't hand-mix Storybook major versions across addons.
 - Addons: `@storybook/addon-a11y` (axe on every story), interactions (bundled in 8+),
   `storybook-addon-pseudo-states` (forces `:hover`/`:focus-visible` in matrix stories).
@@ -34,13 +34,19 @@ export const globalTypes = {
   density: { toolbar: { items: ['default', 'compact'] } },   // only if densities exist
 };
 
+export const initialGlobals = { theme: "light", density: "default" };
+export const parameters = { a11y: { test: "error" } }; // compatible current a11y integration
+
 export const decorators = [
   (Story, { globals }) => {
     document.documentElement.dataset.theme = globals.theme;
-    return Story();
+    document.documentElement.dataset.density = globals.density;
+    return Story(); // adapt decorator to the renderer, e.g. React JSX
   },
 ];
 ```
+
+Import the actual token CSS; Tailwind theme.css additionally requires the consumer's Tailwind pipeline. Set story globals explicitly for deterministic screenshots.
 
 Every story becomes viewable in every theme with zero per-story work — same
 `data-theme` contract as `theming.md`.
@@ -74,9 +80,15 @@ edits.
 }
 ```
 
-- CI runs `@storybook/test-runner` against a built Storybook: executes every `play`
-  function + axe via the a11y addon. This is the automated half of the testing strategy in
-  `operations.md`.
+- Prefer the Vitest addon for compatible Vite frameworks; check framework, Vitest and
+  Storybook compatibility before choosing it. Otherwise install the test-runner and its
+  browsers, build and serve Storybook, wait for readiness, run against its URL, then teardown.
+- Installing the a11y addon alone is not a failing CI gate. Current integration uses
+  `parameters.a11y.test: 'error'`; older runners require their documented axe hooks.
+  Prove the gate by temporarily introducing a known violation and observing nonzero exit.
+- Pseudo-focus screenshots do not verify keyboard focus. Use actual interaction tests.
+  Keep critical stories isolated with unique IDs; use representative matrices rather
+  than forcing every variant × state combination into one enormous story.
 - Visual regression (Playwright screenshots or Chromatic) targets the **matrix stories in
   both themes** — a changed semantic token shows up as a wall of diffs, which is correct
   behavior per the versioning rules.

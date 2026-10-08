@@ -21,6 +21,9 @@ not counted as additional original blueprints.
 5. Review against [the shared specification](specification.md), then verify the
    rendered task if implementation is requested. A blueprint is not a tested screen.
 
+For paired usage and misuse checks, read [Do / Don't examples](../../references/do-and-dont.md).
+Reuse relevant examples when adapting these layouts; their presence does not certify a screen.
+
 ## Browse by task
 
 | Category | Examples | Guide |

@@ -30,6 +30,25 @@ the current platform guidance before prescribing platform dimensions or behavior
 For a small question, answer directly with the relevant principle and example.
 Do not produce a full audit for a single label correction.
 
+## Do / Don't — UX decisions
+
+Apply the relevant pairs; do not turn recommendations into universal layout rules.
+
+| Do | Don't |
+|---|---|
+| Start with the user's task, context and consequence of failure. | Choose a layout solely for its appearance or invent research to justify it. |
+| Connect observed evidence to a concrete behavior and verification step. | List UX laws without showing how they apply to this screen. |
+| Specify relevant loading, empty, error, success and recovery behavior. | Deliver only the happy path or represent an unknown operation outcome as success. |
+| Preserve entered work where appropriate and explain how to recover. | Clear valid inputs on a recoverable error or invite duplicate submission while the outcome is unknown. |
+| Expose important costs, scope and consequences before the user commits. | Hide required fees, ambiguous bulk-action scope or cancellation behind misleading choices. |
+| Adapt templates to real content, permissions, devices and existing conventions. | Copy a public landing page as evidence of a private app's workflow or treat a blueprint as a validated screen. |
+| Verify the critical journey with appropriate keyboard, zoom and language checks. | Infer interactive usability or accessibility conformance from screenshots alone. |
+| Separate observed results, assumptions and proposed research. | Claim conversion lift or usability success without suitable measurements. |
+
+Read [Do / Don't examples](references/do-and-dont.md) when producing design guidance
+or reviewing misuse. Include relevant paired examples, their reason and an observable
+check; scale the detail to the request rather than attaching the whole list to every answer.
+
 ## Load only the relevant references
 
 - [Research and source register](references/sources.md): provenance, authority,
@@ -42,6 +61,9 @@ Do not produce a full audit for a single label correction.
   keyboard behavior, and limits of evidence. Read for any accessibility claim.
 - [Patterns](references/patterns.md): forms, states, dialogs, dashboards,
   performance and ethical decisions. Read for relevant interactions.
+- [Do / Don't examples](references/do-and-dont.md): paired flow/screen examples,
+  context, consequences and acceptance checks. Read when writing usage guidance
+  or explaining a proposed improvement.
 - [Validation](references/validation.md): research methods, issue severity,
   metrics and report structure. Read before evaluating or claiming success.
 - [Output templates](assets/templates.md): use the section appropriate to the task.
@@ -114,7 +136,8 @@ Do not produce a full audit for a single label correction.
 ## Completion criteria
 
 For the requested scope, deliver actionable decisions with rationale and a way
-to verify them. Cover relevant failure and recovery states. Disclose untested
+to verify them. Include relevant Do / Don't examples when explaining intended usage
+or likely misuse; state contextual exceptions. Cover relevant failure and recovery states. Disclose untested
 behavior and assumptions. Use the user's requested output location; otherwise
 answer in conversation rather than creating unsolicited project documents.
 Coordinate with `design-system-builder` for tokens/components and `figma-cli`
