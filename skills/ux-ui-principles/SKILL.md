@@ -77,6 +77,21 @@ check; scale the detail to the request rather than attaching the whole list to e
   for OpenDesign or real-world examples; distinguish reviewed page text from
   catalog-only candidates and verify selected pack contents before importing tokens.
 
+## Focused task guides
+
+For a compact task-specific review, select the relevant guide:
+
+- [Experience patterns](references/experience-patterns.md): navigation continuity,
+  form recovery, partial/unknown operation outcomes, and bulk-action scope.
+- [Visual composition](references/visual-composition.md): task-led hierarchy,
+  real content, Thai glyphs, responsive transformations, and data interpretation.
+- [Accessibility and verification](references/accessibility-verification.md):
+  focused web checks, criterion exceptions, and what each evidence surface proves.
+
+Use these for the active decision; the research register and topic references
+above remain the source for deeper research and the existing layout workflow.
+Do not preload both sets for an incidental UI change.
+
 ## Workflow
 
 1. **Establish the task.** Identify users, their objective, entry context,
@@ -143,3 +158,12 @@ answer in conversation rather than creating unsolicited project documents.
 Coordinate with `design-system-builder` for tokens/components and `figma-cli`
 for canvas work when requested; this skill supplies UX reasoning, not a new
 rendering tool or an automatic redesign of the whole product.
+
+## Host workflow and authority
+
+Follow the host's workspace, agreement, and approval rules. Within Change Loop,
+record consequential choices and scenarios in the compiled OpenSpec agreement;
+project providers and the harness own evidence execution and lifecycle state.
+Do not create a parallel implementation ledger or treat a UX checklist as proof.
+A design decision or successful preview grants no authority to publish, deploy,
+commit, push, or Land.

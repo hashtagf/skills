@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `ux-ui-principles`: compact task-focused reference guides for experience
+  patterns, visual composition, and accessibility verification. Preserve the
+  existing research and layout workflow; add explicit host/lifecycle authority
+  boundaries for portable use and Change Loop integration.
+
 ## [0.10.0] - 2026-10-09
 
 ### Added
