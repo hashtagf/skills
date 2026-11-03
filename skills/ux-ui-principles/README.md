@@ -3,12 +3,44 @@
 Skill สำหรับใช้หลัก UX/UI เปลี่ยนโจทย์ผลิตภัณฑ์เป็นการตัดสินใจที่อธิบายเหตุผล
 และตรวจสอบได้ วิจัยแหล่งต้นทางบนอินเทอร์เน็ตวันที่ 8 ตุลาคม 2026
 
+## Framework 6 ระดับ (ใหม่)
+
+สกิลครอบคลุมตั้งแต่ "ควรสร้างอะไร" จนถึง "วัดผลหลังใช้งานจริง" และแยก 6 ศาสตร์ออกจากกัน:
+Product · UX · UI · Interaction · Design Engineering · Validation
+
+| ระดับ | ครอบคลุม | เอกสาร |
+|---|---|---|
+| 1. Product Strategy & Research | ปัญหา หลักฐาน role ตัวชี้วัดความสำเร็จ ข้อจำกัด | [Product discovery](references/product-discovery.md) |
+| 2. Experience Architecture | Journey, flow, IA, navigation, URL, permission flow | [Experience architecture](references/experience-architecture.md) |
+| 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing | [Back office](references/back-office.md), [Content design](references/content-design.md), [Patterns](references/patterns.md) |
+| 4. Visual & Design System | focal point, color roles, density, tokens | [Visual craft](references/visual-craft.md) + `design-system-builder` |
+| 5. Quality & Engineering | Accessibility, i18n, performance, security/privacy UX | [Trust/Security/Privacy](references/trust-security-privacy.md), [i18n & performance](references/i18n-performance.md) |
+| 6. Validation & Improvement | metric, instrumentation, A/B, design QA, รอบปรับปรุง | [Measurement](references/measurement.md), [Validation](references/validation.md) |
+
+ภาพรวมและกระบวนการ Discover → Define → Structure → Design → Verify → Improve อยู่ใน
+[Framework](references/framework.md)
+
+**ระดับความเข้มงวด (Rigor tier):** เลือกจากผลเสียที่อาจเกิดเมื่อออกแบบผิด
+- **Light:** หน้าอ่านอย่างเดียวหรือความเสี่ยงต่ำ
+- **Standard:** flow หลักและหน้าฝั่งลูกค้า
+- **Critical:** เงิน การอนุมัติ สิทธิ์ และการลบถาวร
+
+tier เป็นตัวกำหนดว่าต้องตอบข้อไหนใน [Page spec 16 ข้อ](assets/page-spec.md)
+
+**Design context กลาง:** [template](assets/design-context.md) สำหรับไฟล์เดียวของโปรเจกต์
+ที่เก็บ role, คำศัพท์, ชื่อ status, tokens และ pattern ที่ตัดสินใจแล้ว
+ทั้งสกิลนี้และ `design-system-builder` อ่านไฟล์นี้ร่วมกัน
+
 ## เรียกใช้
 
 ```text
 /ux-ui-principles ตรวจ UX checkout นี้ จัดลำดับปัญหาและเสนอวิธีตรวจหลังแก้
 /ux-ui-principles ออกแบบ flow สมัครสมาชิก ระบุ loading/error/recovery และ keyboard behavior
 /ux-ui-principles research หลักการ navigation สำหรับ dashboard ที่ใช้ทุกวัน พร้อมข้อจำกัด
+/ux-ui-principles discover ฟีเจอร์คืนเงินอัตโนมัติ: ปัญหา หลักฐาน role และ metric
+/ux-ui-principles วาง IA และ permission flow ของระบบหลังบ้านชำระเงิน 3 role
+/ux-ui-principles เขียน page spec ระดับ Critical สำหรับหน้าอนุมัติถอนเงิน
+/ux-ui-principles design QA หน้านี้เทียบกับ spec และระบุสิ่งที่ยังไม่ได้ทดสอบ
 ```
 
 ตอบเป็นภาษาที่ผู้ใช้เลือก รองรับข้อความภาษาไทย และใช้ร่วมกับ

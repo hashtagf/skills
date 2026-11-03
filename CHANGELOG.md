@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `ux-ui-principles`: end-to-end product design framework — six disciplines,
+  six levels (strategy & research → experience architecture → page & interaction
+  → visual & design system → quality & engineering → validation & improvement),
+  an iterative Discover → Improve process and Light / Standard / Critical rigor
+  tiers. New DISCOVER and ARCHITECT modes.
+- `ux-ui-principles`: new references — product discovery, experience
+  architecture (IA, navigation, URLs, permission flows), back-office page
+  taxonomy and pattern fit, content design / UX writing, trust-security-privacy
+  UX, localization and performance, visual craft, and measurement / design QA.
+- `ux-ui-principles`: 16-row page design specification template scaled by tier,
+  with a worked Critical example, and a shared design-context template read by
+  both `ux-ui-principles` and `design-system-builder`.
+- `ux-ui-principles`: source register extended with verified standards and
+  design-system sources (ISO 9241-210, WCAG 2.2 timing/error-prevention/language,
+  OWASP cheat sheets, GOV.UK patterns, Ant Design, Carbon, Material 3, HEART).
 - `ux-ui-principles`: compact task-focused reference guides for experience
   patterns, visual composition, and accessibility verification. Preserve the
   existing research and layout workflow; add explicit host/lifecycle authority

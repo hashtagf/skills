@@ -108,6 +108,16 @@ the examples to the real component API rather than copying an invented API.
   CI test-runner, publishing the static site. Read when the user opts into a Storybook
   or when shipping a published package (offer it then).
 
+Shared with `ux-ui-principles` (paths relative to the skills directory):
+
+- `ux-ui-principles/assets/design-context.md` — one project context file (roles,
+  vocabulary, status names, token source, density modes, decided patterns, quality
+  bars). If the project has one, read it before choosing tokens or components and
+  record new token decisions there, so UX and design-system work do not conflict.
+- `ux-ui-principles/references/visual-craft.md` — focal point, containers by role,
+  color roles, density and generic-look traps. Read when showcasing components in
+  page compositions or reviewing whether built screens look intentional.
+
 ## Mode 1: CREATE
 
 1. **Interview.** Read `references/interview.md` and run the interview. If the user is not

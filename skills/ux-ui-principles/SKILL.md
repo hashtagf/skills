@@ -1,14 +1,18 @@
 ---
 name: ux-ui-principles
 description: >-
-  Apply evidence-based UX/UI principles to user flows, screens, forms, navigation,
-  dashboards, and interaction specifications. Use for detailed UX/UI research,
-  usability audits, design rationale, accessibility reviews, or turning a product
-  brief into testable interface decisions; includes Thai-language interfaces
-  and 40 adaptable layout examples plus curated OpenDesign references.
-  Triggers include "UX UI principles", "review usability", "audit UX",
-  "หลักการ UX/UI", "ตรวจ UX", and "ออกแบบ user flow". Use alongside a
-  design-system or implementation skill when those deliverables are requested.
+  End-to-end UX/UI framework for web and mobile products: product discovery,
+  experience architecture (journeys, IA, navigation, permissions), page and
+  interaction design, visual craft, quality (accessibility, localization,
+  performance, security/privacy UX) and validation/measurement. Use for UX/UI
+  research, page or flow design, admin/back-office and customer UI, page design
+  specs, usability audits, UX writing, design QA and success metrics; includes
+  Thai-language guidance, 40 layout blueprints, a 16-row page spec with rigor
+  tiers, and a shared design-context template. Triggers include "UX UI
+  principles", "review usability", "audit UX", "design spec", "back office",
+  "information architecture", "หลักการ UX/UI", "ตรวจ UX", "ออกแบบ user flow",
+  "ออกแบบหน้า admin". Use alongside design-system-builder or figma-cli when
+  tokens, components or canvas work are requested.
 ---
 
 # UX/UI Principles
@@ -18,13 +22,35 @@ language; use Thai for Thai requests while keeping technical identifiers intact.
 Default scope is web and mobile interaction design. For native products, consult
 the current platform guidance before prescribing platform dimensions or behavior.
 
+## Place the request first
+
+Read [the framework](references/framework.md) when the request is larger than a
+single screen decision. It separates six disciplines (product, UX, UI,
+interaction, design engineering, validation) and six levels (strategy &
+research → experience architecture → page & interaction → visual & design
+system → quality & engineering → validation & improvement). Identify the level
+the request belongs to, load only that level's references, and name missing
+upstream inputs as assumptions rather than inventing them.
+
+Set a **rigor tier** from the worst plausible consequence of a design error:
+**Light** (read-only, low risk), **Standard** (main flows, customer UI),
+**Critical** (money, approvals, permissions, irreversible or legal actions).
+The tier decides which rows of the [page spec](assets/page-spec.md) are
+required and how much verification is needed. State the tier in the answer.
+
+If the project has a shared [design context](assets/design-context.md) file,
+read it before deciding and reuse its roles, vocabulary, status names, tokens
+and chosen patterns.
+
 ## Choose the task
 
 | Mode | Input | Deliverable |
 |---|---|---|
 | RESEARCH | Topic or unfamiliar interaction | Source-backed synthesis, limitations, application rules |
-| DESIGN | Product brief or requested flow | Journey, screen priorities, behavior/state specification, validation plan |
-| AUDIT | URL, screenshots, prototype, code | Evidence-based findings, prioritized fixes, verification steps |
+| DISCOVER | Feature idea, vague brief, new product area | Problem statement with evidence labels, role profiles, success metric + guardrail, constraints, assumptions to test |
+| ARCHITECT | Multi-page feature, navigation or IA problem, multi-role system | Journey/flows, IA map, page inventory with page types, URL and permission model |
+| DESIGN | Product brief or requested flow | Journey, screen priorities, page spec at the chosen tier, behavior/state specification, validation plan |
+| AUDIT | URL, screenshots, prototype, code | Evidence-based findings, prioritized fixes, verification steps; design QA against a spec when one exists |
 | IMPROVE | Existing UI plus requested change | Scoped changes and verification, when implementation is authorized |
 
 For a small question, answer directly with the relevant principle and example.
@@ -44,12 +70,53 @@ Apply the relevant pairs; do not turn recommendations into universal layout rule
 | Adapt templates to real content, permissions, devices and existing conventions. | Copy a public landing page as evidence of a private app's workflow or treat a blueprint as a validated screen. |
 | Verify the critical journey with appropriate keyboard, zoom and language checks. | Infer interactive usability or accessibility conformance from screenshots alone. |
 | Separate observed results, assumptions and proposed research. | Claim conversion lift or usability success without suitable measurements. |
+| Order each page by the role's reason for arriving; one focal point per view. | Give operators, managers and auditors one identical layout, or give every element equal weight. |
+| Match friction to consequence: undo for small actions, check-and-confirm for money, permissions and deletion. | Confirm every click, or let an irreversible payout go through on one unlabeled "OK". |
+| Write real copy with one glossary of object and status names. | Ship lorem ipsum, "Submit" buttons or different names for the same status. |
+| Name a success metric and guardrail for Standard and Critical work. | Decide after launch which metric proves the design worked. |
 
 Read [Do / Don't examples](references/do-and-dont.md) when producing design guidance
 or reviewing misuse. Include relevant paired examples, their reason and an observable
 check; scale the detail to the request rather than attaching the whole list to every answer.
 
 ## Load only the relevant references
+
+By framework level (details in [framework.md](references/framework.md)):
+
+| Level | References |
+|---|---|
+| 1 Strategy & research | [product-discovery](references/product-discovery.md), [validation](references/validation.md) |
+| 2 Experience architecture | [experience-architecture](references/experience-architecture.md), [back-office](references/back-office.md) |
+| 3 Page & interaction | [back-office](references/back-office.md), [patterns](references/patterns.md), [experience-patterns](references/experience-patterns.md), [content-design](references/content-design.md), [layout library](assets/layouts/index.md) |
+| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md); design-system-builder for tokens/components |
+| 5 Quality & engineering | [accessibility](references/accessibility.md), [accessibility-verification](references/accessibility-verification.md), [i18n-performance](references/i18n-performance.md), [trust-security-privacy](references/trust-security-privacy.md) |
+| 6 Validation & improvement | [validation](references/validation.md), [measurement](references/measurement.md) |
+
+New in the end-to-end set:
+
+- [Framework](references/framework.md): disciplines, levels, iterative process,
+  rigor tiers, shared design context. Read for anything beyond one screen.
+- [Product discovery](references/product-discovery.md): problem framing, role
+  profiles, evidence labels, success metrics, constraints.
+- [Experience architecture](references/experience-architecture.md): journeys,
+  IA, navigation, breadcrumbs, URLs, cross-page flows, permission flows.
+- [Back office](references/back-office.md): eight page dimensions, 12-type page
+  taxonomy, pattern-fit table, role-based layout, 10-item page review.
+- [Content design](references/content-design.md): UX writing for buttons,
+  errors, empty states, confirmations, status vocabulary, Thai register.
+- [Trust, security and privacy](references/trust-security-privacy.md):
+  consequential actions, transaction confirmation, masking, sessions,
+  permissions, auditability, privacy by design.
+- [Localization and performance](references/i18n-performance.md): i18n rules,
+  Thai calendar/currency, text expansion, Core Web Vitals, perceived speed.
+- [Visual craft](references/visual-craft.md): focal point, containers by role,
+  color roles, density, avoiding a generic or wireframe-like result.
+- [Measurement](references/measurement.md): success metrics, instrumentation
+  spec, experiments, design QA, post-launch review.
+- [Page spec](assets/page-spec.md) and [design context](assets/design-context.md):
+  templates for a complete page specification and a shared project context.
+
+Existing topic references:
 
 - [Research and source register](references/sources.md): provenance, authority,
   verification dates, and source IDs. Read for RESEARCH or source-sensitive claims.
@@ -99,6 +166,8 @@ Do not preload both sets for an incidental UI change.
    of failure. Read supplied artifacts and repository conventions first.
    Ask only for missing information that changes the decision. Continue with
    explicit assumptions for reversible work; do not invent user research.
+   Place the work on the framework level, set the rigor tier, and read the
+   project's design context if one exists.
 2. **Inspect evidence.** Record the artifact, location, viewport, state, and
    observed behavior. A screenshot supports visual observations, not keyboard,
    screen-reader, server, or conversion claims. A prototype supports only the
@@ -106,6 +175,9 @@ Do not preload both sets for an incidental UI change.
 3. **Map the journey.** Trace entry → understand → act → feedback → recover →
    finish. Identify user decisions and required information at each step.
    Include at least one plausible failure/recovery path for the critical task.
+   For multi-page work, check entry points, handoffs between roles, return
+   paths, deep links and permissions across pages
+   ([experience architecture](references/experience-architecture.md)).
 4. **Apply principles selectively.** Choose the few that explain a concrete
    problem or decision. Connect evidence → affected task → principle → proposed
    behavior → verification. Avoid a list of laws disconnected from the UI.
@@ -119,14 +191,23 @@ Do not preload both sets for an incidental UI change.
    If using an external reference, name its source and inspected surface/state,
    retain attribution, and identify which aspects are adapted. Do not infer a
    private app layout from its public landing page or an error/verification capture.
+   For admin pages, classify the page type first ([back office](references/back-office.md)).
+   Answer the [page spec](assets/page-spec.md) rows required by the tier, including
+   copy ([content design](references/content-design.md)), security/privacy for
+   Critical work, and a visual pass for focal point, containers, density and
+   color roles ([visual craft](references/visual-craft.md)).
 6. **Verify at the available depth.** Inspect rendered states and execute the
    critical journey when tools permit. Check keyboard, zoom/reflow, contrast,
    and assistive technology as relevant. Record actual results separately
    from proposed tests. If implementation is requested, perform the scoped
    changes and existing appropriate checks before reporting completion.
+   For built UI, run the design QA list in [measurement](references/measurement.md):
+   content, layout, tokens, states, interaction, responsive, accessibility,
+   performance and analytics — each passed, failed or not tested.
 7. **Report decisions.** Lead with the user outcome. Rank findings by task
    impact and consequence; separate severity, confidence, frequency evidence,
    and implementation effort. State tradeoffs and unresolved evidence gaps.
+   Name the success metric, guardrail and when to review it after release.
 
 ## Evidence discipline
 
@@ -151,7 +232,8 @@ Do not preload both sets for an incidental UI change.
 ## Completion criteria
 
 For the requested scope, deliver actionable decisions with rationale and a way
-to verify them. Include relevant Do / Don't examples when explaining intended usage
+to verify them. Required page-spec rows for the stated tier are answered or
+marked N/A with a reason. Include relevant Do / Don't examples when explaining intended usage
 or likely misuse; state contextual exceptions. Cover relevant failure and recovery states. Disclose untested
 behavior and assumptions. Use the user's requested output location; otherwise
 answer in conversation rather than creating unsolicited project documents.
