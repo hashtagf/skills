@@ -42,9 +42,9 @@ failure and recovery path, not just success; keep personal data out
 
 ## Experiments
 
-A/B tests show *what* changed in behavior under the tested conditions, not *why*;
-they need enough traffic, a predefined primary metric and guardrails, and
-should be combined with qualitative research to explain results. [S56]
+A/B tests measure immediate behavior on the tested element, not *why* it
+happened, and should be paired with qualitative user research. [S56] The
+planning rules below are this skill's recommendations.
 
 - Write the hypothesis, primary metric, guardrails, minimum detectable effect
   and duration before starting.

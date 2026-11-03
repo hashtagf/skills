@@ -48,9 +48,11 @@ client logs. Minimize what each role sees to what its task needs.
 - **Errors:** use generic sign-in failure messages that do not reveal whether an
   account exists; treat registration and password reset similarly. [S52]
 - **Session timeouts:** security guidance sets idle and absolute timeouts based
-  on risk. [S51] Accessibility requires warning users before a time limit and
-  allowing extension (with exceptions such as real-time events or where the limit
-  is essential, or time limits over 20 hours). [S47] Design pattern:
+  on risk. [S51] WCAG 2.2.1 (Level A) requires a time limit to be turnable off,
+  adjustable, or extendable after a warning with at least 20 seconds to respond,
+  with exceptions for real-time events, essential limits and limits over 20
+  hours. [S47] OWASP gives typical idle timeouts of 2–5 minutes for high-value
+  apps and 15–30 minutes for low-risk ones. [S51] Design pattern:
   1. Warn before expiry with time remaining and a "stay signed in" action.
   2. On expiry, preserve unsaved work where policy permits (draft) and explain
      what happened after re-authentication.

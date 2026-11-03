@@ -55,9 +55,9 @@ Pick the primary type first. A page can mix patterns, but one task should lead.
 | Monitoring | Health status, severity, impact, duration, shortcut to investigate | Many charts while the real incident is not prominent |
 | Analytics | Time range, segment, comparison, trend, breakdown, drill-down | Attractive charts that do not answer the business question |
 
-Visualization pages should move from overview to filtering and detail, place
-key information prominently and pick chart types that match the data's
-meaning. [S41] Every KPI needs units, time window, freshness and a comparison;
+Project recommendation: move visualization pages from overview to filtering
+and detail, place key information prominently and pick chart types that match
+the data's meaning. Every KPI needs units, time window, freshness and a comparison;
 distinguish zero, missing and stale data (see [do-and-dont.md](do-and-dont.md)).
 
 Order by role. If people arrive to clear backlog, "requires attention" goes
@@ -73,7 +73,7 @@ first; if they arrive to analyze trends, charts lead.
 
 Data-table users typically find records, compare them, view or edit details,
 and take actions on rows. [S39] Separate table-level tools (search, filters,
-batch actions) from row-level actions, and offer density options for expert
+batch actions) from row-level actions, and offer row-size (density) options for expert
 use. [S40] Detail pages should show information directly where reasonable and
 group it by relationship; use tabs only when content is genuinely complex and
 separable. [S41]
@@ -117,8 +117,9 @@ dependencies. [S42]
 
 Settings must choose deliberately between **instant effect** (toggle applies
 immediately; show confirmation and undo where possible) and **submission
-effect** (changes apply on Save; show unsaved state and warn on leave),
-based on how values relate and their consequences. [S41] Never mix both
+effect** (changes apply on Save; show unsaved state and warn on leave). Ant
+Design's form-page settings template asks for one mode per page and submission
+effect when settings depend on each other. [S41] Never mix both
 behaviors in one group without visual distinction.
 
 Permission pages show **effective access** (what this person can do, from which

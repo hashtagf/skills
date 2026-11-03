@@ -34,7 +34,7 @@ the product is still hard to use if pages do not connect. Source IDs resolve in
 |---|---|---|
 | Global navigation | Top-level sections reflect major user goals; current section is indicated programmatically and visually | Each page highlights exactly one section; screen reader announces current page |
 | Local navigation | Sub-sections or tabs only when content is truly separate (see Tabs in [back-office.md](back-office.md)) | Users do not need to compare across tabs |
-| Breadcrumbs | Show location in hierarchy, not session history; supplement rather than replace primary navigation [S57] | Breadcrumb trail is identical no matter how the page was reached |
+| Breadcrumbs | Show location in hierarchy, not session history, and supplement primary navigation (project rule); see NN/g breadcrumb guidelines, including mobile tradeoffs [S57] | Breadcrumb trail is identical no matter how the page was reached |
 | Back behavior | Browser Back returns to the previous view with filters, search, selection and scroll preserved where practical | Filter a list, open a record, press Back; the filtered list reappears |
 | Deep links | Every object, filtered list and significant view has a shareable URL | Copy the URL into a new session; same view loads (subject to permission) |
 | Cross-links | Related objects link to each other in both directions | From a withdrawal reach the customer; from the customer reach their withdrawals |

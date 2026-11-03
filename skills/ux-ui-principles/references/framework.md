@@ -32,10 +32,12 @@ assumptions instead of silently inventing product strategy.
 
 ## Process — iterative, not linear
 
-Human-centred design standards describe understanding context of use, specifying
-requirements, producing solutions and evaluating them, repeated until the
-requirements are met. [S37] Use the six phases below as a working loop; return
-to an earlier phase when evidence contradicts an assumption.
+ISO 9241-210 sets requirements and recommendations for human-centred design
+principles and activities across the life cycle of interactive systems. [S37,
+public abstract only] Research guidance likewise treats assumptions as
+hypotheses and plans research iteratively. [S33, S34] The six phases below are
+this skill's operational loop; return to an earlier phase when evidence
+contradicts an assumption.
 
 | Phase | Activity | Output | Return when |
 |---|---|---|---|

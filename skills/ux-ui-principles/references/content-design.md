@@ -9,10 +9,10 @@ whether people understand what will happen. Source IDs resolve in
 | Principle | Apply | Example |
 |---|---|---|
 | Use the user's words | Name things as users recognize them, not as the system stores them [S01, S45] | "การแจ้งเตือน" not "webhook config"; "เลขที่คำสั่งซื้อ" not "order_ref" |
-| Front-load meaning | Put the important word first in headings, links and list items [S45] | "ยกเลิกการสมัครสมาชิก" not "หากคุณต้องการยกเลิก กดที่นี่" |
+| Front-load meaning | Put the important word first in headings, links and list items (project rule) | "ยกเลิกการสมัครสมาชิก" not "หากคุณต้องการยกเลิก กดที่นี่" |
 | Be specific | Say exactly what happens, to what, and how much | "โอน ฿125,000 ไปยัง กสิกรไทย ****4821" |
 | One term per concept | Keep a glossary; never alternate synonyms for the same object or status | Choose "ถอนเงิน" or "เบิกเงิน" and use it everywhere |
-| Plain, short sentences | Prefer common words; explain unavoidable jargon once | Domain terms stay when users use them (KYC, SLA) |
+| Plain, short sentences | Keep interface text clear and short [S45]; explain unavoidable jargon once | Domain terms stay when users use them (KYC, SLA) |
 | Active voice, user-centered | Who does what is clear | "ระบบส่ง SMS ยืนยันแล้ว" |
 
 ## Component-level rules

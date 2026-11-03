@@ -18,6 +18,10 @@ existing design system; within those, it is part of the job.
    roles + optional data face, spacing scale, radius, elevation) and build only
    from it. Record it in [design-context.md](../assets/design-context.md).
 3. A new aesthetic needs a reason tied to the product, brand or audience.
+4. When tokens move between tools, the Design Tokens Format Module 2025.10 is a
+   stable Community Group report (not a W3C Standard) [S58]; Figma variable
+   modes can hold theme, language or device values [S59]. Implementation detail
+   belongs to design-system-builder.
 
 ## One focal point per view
 

@@ -57,7 +57,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
 | Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |
 | วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
-| รายการแหล่งอ้างอิง 36 แหล่งและสถานะหลักฐาน | [Sources](references/sources.md) |
+| รายการแหล่งอ้างอิง 62 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย. 2569) | [Sources](references/sources.md) |
 | รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |
 | ตัวอย่าง layout 40 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
 | ตัวอย่างภาษาไทยแบบเต็ม: checkout, admin records, booking | [Worked examples](assets/layouts/worked-examples.md) |
