@@ -118,6 +118,32 @@ one stock font for everything, numbered markers on content that is not a
 sequence. Choose deliberately from the product's own world (its units,
 documents, vocabulary) and keep boldness in one place per screen.
 
+## Signal budget
+
+Every visual property you use (fill, text color, border, ring, icon, badge,
+opacity, dashed line, size, weight) is a signal. Small elements — cells, chips,
+list rows, table status columns — can carry **one value and at most one status**.
+When more information is needed, move it to the row/column header, a tooltip
+plus detail view, or a separate column. Prefer text ("−1", "เกินกำหนด") over
+abstract marks. Never use opacity as a state on informative content.
+
+## Diagnosing visual feedback
+
+When people say a screen is hard to read or "not beautiful", diagnose before
+repainting:
+
+| Feedback | Likely causes | First fixes |
+|---|---|---|
+| "ดูยาก / อ่านยาก" (hard to read) | Too many signals per element; text color changes with background; low contrast; faded states; small type | Apply the signal budget; one text color per ramp; check pairs with `scripts/contrast.py`; remove opacity states |
+| "สีดูยาก / สีแรง" (colors are hard) | Saturated or dark fills dominate; semantic colors used for decoration; ramp steps too similar or too extreme | Lighter ramp, darkest step reserved; semantic colors only for exceptions; test both themes |
+| "รก" (cluttered) | Every section boxed; repeated metadata; equal emphasis everywhere | Containers by role; move repeated facts to headers; choose one focal point |
+| "ไม่สวย / ดูเหมือน wireframe" (plain, unfinished) | No focal point; default fonts and greys; placeholder data; identical boxes | Focal point, deliberate neutrals and accent, real content, type scale contrast |
+| "หาไม่เจอ" (can't find it) | Weak hierarchy, action far from context, unlabeled icons | Move action next to its object, label icons, strengthen heading hierarchy |
+
+Change the cause, re-render, re-run contrast, and show before/after. When the
+right direction is unclear, offer 2–3 complete variants side by side
+([prototyping.md](prototyping.md)).
+
 ## Visual review checklist
 
 1. Is there one clear focal point, and is it the most important thing for the task?

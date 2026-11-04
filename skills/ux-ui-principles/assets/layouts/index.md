@@ -1,6 +1,6 @@
 # Layout example library
 
-42 original, task-based blueprints. These are this skill's project examples, not
+43 original, task-based blueprints. These are this skill's project examples, not
 research findings, finished visual designs, or evidence that a layout increases
 conversion. Choose by task and context; adapt to actual users, content and constraints.
 
@@ -30,7 +30,7 @@ Reuse relevant examples when adapting these layouts; their presence does not cer
 |---|---|---|
 | Marketing and public services | Product landing; Service overview; Pricing comparison; Campaign landing; Help or contact hub | [M01–M05](marketing.md) |
 | Commerce and transactions | Product listing; Product detail; Cart review; Checkout; Booking | [C01–C05](commerce.md) |
-| Dashboards and analysis | Operational overview; Analytical exploration; Finance reporting; Monitoring incidents; Comparison workspace | [D01–D05](dashboards.md) |
+| Dashboards and analysis | Operational overview; Analytical exploration; Finance reporting; Monitoring incidents; Comparison workspace; Matrix / heatmap | [D01–D06](dashboards.md) |
 | Administration and back office | Record management; Record detail; Approval workbench; Access management; Import wizard; Audit log; Settings with save behavior | [A01–A07](admin.md) |
 | Content, learning and discovery | Article or documentation; Knowledge base; Search results; Course learning; Community discussion | [E01–E05](content.md) |
 | Productivity and collaboration | Inbox master-detail; Kanban board; Calendar workspace; Document editor; Collaboration workspace | [P01–P05](productivity.md) |

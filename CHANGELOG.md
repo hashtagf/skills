@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ux-ui-principles`: sources S88–S93 (WCAG 1.4.13, 2.1.1, 2.4.3, 4.1.2, 2.2.2;
   ARIA APG patterns verified from w3c/aria-practices).
 
+- `ux-ui-principles`: heatmap/matrix rules (data visualization), signal budget
+  and a visual-feedback diagnosis table (visual craft), data-ramp guidance
+  (color palette), layout D06 Matrix / heatmap (43 blueprints) and the SkillMap
+  worked example.
+- `ux-ui-principles`: customer-facing UI reference (page taxonomy, onboarding,
+  trust, metrics) and UX for AI features (human control by consequence, output
+  states, feedback).
+- `ux-ui-principles`: `contrast.py --css` reads `:root` token blocks (light,
+  dark, palette variants) from a page and checks role and naming-pattern pairs.
+
 ### Changed
 - `ux-ui-principles`: no longer depends on `design-system-builder` or
   `figma-cli`; all routing points to the skill's own references.

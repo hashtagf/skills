@@ -39,14 +39,18 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | เลือก component ให้ถูกงาน (tooltip/popover/dialog, toast/banner, pagination/infinite scroll ฯลฯ) และกติกาการใช้ ~60 component | [Components usage](references/components-usage.md) |
 | State ครบทุกแบบ + keyboard contract ตาม ARIA APG + template spec ของ component | [Component states](references/component-states.md) |
 | วิธีส่งงานออกแบบ: text wireframe, HTML prototype พร้อม state และ variant, hand-off | [Prototyping](references/prototyping.md) |
+| หน้าฝั่งลูกค้า: ประเภทหน้า 13 แบบ, ต่างจากหลังบ้านอย่างไร, onboarding, ความน่าเชื่อถือ | [Customer UI](references/customer-ui.md) |
+| UX ของฟีเจอร์ AI: เหมาะเมื่อไร, ให้ผู้ใช้ควบคุมตามความเสี่ยง, state ของผลลัพธ์ AI | [AI features](references/ai-features.md) |
 | การออกแบบฟอร์ม: ถามอะไร, โครงสร้าง, label, เลือก control, ที่อยู่/เบอร์/บัตรประชาชนไทย, validation | [Forms](references/forms.md) |
 | การใช้ icon: เมื่อไรต้องมี label, ชุดเดียว ความหมายเดียว, ขนาด, พื้นที่กด, accessible name | [Iconography](references/iconography.md) |
 | Native mobile: iOS/Android, ขอสิทธิ์ในจังหวะที่ใช้, push, deep link, offline, gesture | [Mobile native](references/mobile-native.md) |
 | การสื่อสารข้ามช่องทาง: email/SMS/push/in-app | [Notifications](references/notifications.md) |
 | Data visualization: เลือกกราฟจากคำถาม, สีในกราฟ, state ของข้อมูล | [Data visualization](references/data-visualization.md) |
 | การสร้างและตรวจชุดสี: role ก่อนค่าสี, สีสถานะคงที่, contrast สองโหมด | [Color palette](references/color-palette.md) |
-| การตรวจหน้าที่ render จริง + script `render_check.js` และ `contrast.py` | [Render verification](references/render-verification.md) |
-| ตัวอย่างระบบหลังบ้าน PayOps 4 หน้า + layout ใหม่ A06 Audit log, A07 Settings | [Worked examples](assets/layouts/worked-examples-back-office.md) |
+| การตรวจหน้าที่ render จริง + script `render_check.js` และ `contrast.py` (`--css` ตรวจ token ทุกธีมจากไฟล์หน้าเว็บอัตโนมัติ) | [Render verification](references/render-verification.md) |
+| ตัวอย่างระบบหลังบ้าน PayOps 4 หน้า + SkillMap (skill matrix) + layout ใหม่ A06 Audit log, A07 Settings, D06 Matrix/heatmap | [Worked examples](assets/layouts/worked-examples-back-office.md) |
+| Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [Visual craft](references/visual-craft.md) |
+| กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ | [Data visualization](references/data-visualization.md) |
 | ชุดทดสอบการเรียกใช้สกิลและผลลัพธ์ | [Evals](evals/README.md) |
 
 **หมายเหตุการเรียกใช้:** ผลทดสอบพบว่าคำถามเชิงขอคำแนะนำมักถูกตอบตรง ๆ โดยไม่โหลดสกิล
@@ -83,7 +87,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
 | รายการแหล่งอ้างอิง 93 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S93 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
 | รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |
-| ตัวอย่าง layout 42 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
+| ตัวอย่าง layout 43 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
 | ตัวอย่างภาษาไทยแบบเต็ม: checkout, admin records, booking | [Worked examples](assets/layouts/worked-examples.md) |
 | ตัวอย่างจาก OpenDesign 16 เว็บไซต์ + 8 templates พร้อมระดับหลักฐาน | [OpenDesign references](assets/layouts/opendesign.md) |
 

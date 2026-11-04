@@ -50,6 +50,17 @@ Rules:
 
 Contrast alone doesn't guarantee meaning: never use color as the only cue. [S67]
 
+## Data ramps with text on top
+
+For heatmaps, level badges and status cells where numbers sit on the color:
+- Choose the text color first (one for the whole ramp), then build ramp steps
+  that each pass 4.5:1 against it.
+- Keep steps visibly different in lightness (e.g. 4–5 steps from very light to
+  medium), and keep the darkest step for the most important level only.
+- In dark themes, invert: dark ramp, one light text color, check every step.
+- Check every pair with `scripts/contrast.py --css <page>`; ramp tokens named
+  `--l1`/`--l1i` (fill/ink) or `--x`/`--on-x` are paired automatically.
+
 ## Dark theme
 
 - Define it as a second set of the same roles, not an inversion.
@@ -61,8 +72,9 @@ Contrast alone doesn't guarantee meaning: never use color as the only cue. [S67]
 ## Procedure
 
 1. List roles and write light values; write dark values for the same roles.
-2. Put the pairs to check in a JSON file and run
-   `python3 scripts/contrast.py pairs.json` (from the skill root); fix failures.
+2. Run `python3 scripts/contrast.py --css page.html` to check the role pairs
+   it finds in every theme block, or list custom pairs in a JSON file and run
+   `python3 scripts/contrast.py pairs.json`; fix failures.
 3. Render key screens in both themes (see [render-verification.md](render-verification.md))
    and look at: selection states, disabled, error fields, charts, focus rings.
 4. Simulate color vision deficiency (browser devtools) for status and chart colors.

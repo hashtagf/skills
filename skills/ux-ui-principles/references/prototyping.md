@@ -60,8 +60,8 @@ honest about what it demonstrates.
   be compared ([color-palette.md](color-palette.md)).
 
 **Verify before presenting**
-- Run `scripts/render_check.js` and inspect screenshots; run `scripts/contrast.py`
-  on token pairs; drive the critical journey and one failure path.
+- Run `scripts/render_check.js` and inspect screenshots; run `scripts/contrast.py --css <page>`
+  on the token blocks; drive the critical journey and one failure path.
 - State what the prototype does not prove (real data, API latency, screen
   readers, real users).
 

@@ -12,7 +12,7 @@ passed, failed or not tested.
 | Script | Checks | Run from the skill root |
 |---|---|---|
 | `scripts/render_check.js` | Renders at 1440/768/390 px (+320 px with `--zoom`) in light and dark; reports JS/console errors, failed requests, horizontal page overflow with the offending elements, images without alt, unnamed buttons/links, unlabeled fields; saves full-page screenshots | `node scripts/render_check.js <url-or-file> --out <dir> [--zoom]` |
-| `scripts/contrast.py` | WCAG contrast ratio for color pairs with per-pair minimums | `python3 scripts/contrast.py pairs.json` |
+| `scripts/contrast.py` | WCAG contrast ratio for color pairs with per-pair minimums; `--css` reads token blocks (light, dark, palettes) from a page and checks role pairs automatically | `python3 scripts/contrast.py --css page.html` or `python3 scripts/contrast.py pairs.json` |
 
 `render_check.js` needs Playwright. It is a smoke check: it does not prove
 keyboard operability, screen-reader behavior, task success or WCAG conformance.
@@ -41,8 +41,8 @@ keyboard operability, screen-reader behavior, task success or WCAG conformance.
    absence of errors.
 4. **Keyboard pass** on changed areas: Tab order follows reading order, focus is
    visible, dialogs trap and return focus, Escape closes overlays.
-5. **Contrast**: list text/background and component/background pairs from the
-   tokens for both themes and run `contrast.py`.
+5. **Contrast**: run `contrast.py --css <page>` to check role pairs in every
+   theme block; add a JSON pairs file for pairs the script can't infer.
 6. **Content stress**: longest real Thai and English values, empty values,
    large numbers, many rows.
 7. **Fix → re-run steps 1–2.** Limit to what changed; report what was not re-checked.
@@ -78,6 +78,9 @@ const { chromium } = require('playwright');
 | Thai text in monospace | Mono font applied to a container with mixed text | Apply mono only to IDs/numbers spans |
 | Dark mode text unreadable | Literal colors outside the token system | Use tokens only; check pairs in both themes |
 | Focus ring invisible on accent buttons | Focus color equals button color | Offset outline or a contrasting focus token |
+| White text on a light semantic color in dark mode | Badge text hard-coded to white while the dark theme lightens the badge | Give badges an `--on-<color>` token per theme |
+| Cells or rows faded to show state become unreadable | Opacity used as a state | Use a text badge or header label instead ([visual-craft.md](visual-craft.md)) |
+| Users say colors are hard to read | Too many encodings per element | Apply the signal budget; one text color per ramp |
 
 ## Reporting
 

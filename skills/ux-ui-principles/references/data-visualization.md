@@ -48,6 +48,29 @@ with target and trend, or exact values users must copy.
   adjacent colors (WCAG 1.4.11). [S04]
 - Check both light and dark themes.
 
+## Heatmaps and matrices (people × skills, risk grids, schedules)
+
+A matrix packs many values into small cells, so every extra signal costs
+legibility. These rules come from a skill-matrix prototype that users found
+"very hard to read" until the cell encoding was simplified.
+
+| Rule | Why | Check |
+|---|---|---|
+| **One text color across the whole ramp** (dark on a light ramp, light on a dark-theme ramp) | Flipping text between black and white by level makes the eye re-adjust every cell | Every ramp step passes 4.5:1 with that single text color (`scripts/contrast.py`) |
+| **Light, low-saturation ramp**; reserve the darkest step for the top level only | Dark, saturated cells dominate and hide the exceptions users came to find | The exception marker is the most prominent thing on screen |
+| **"None" is empty**, not a colored cell | Filled zeros add noise and make real values harder to spot | Scan a row: filled cells = has skill |
+| **At most two signals per cell**: the value plus one status (e.g. "−1 below target") | Rings, corner triangles, dots, dashed borders and fading together become unreadable | Count encodings per cell in the legend; more than two → move one elsewhere |
+| **Status as text inside the cell**, not an overlapping corner mark | Text ("−1") is readable and explicit; small corner glyphs collide with neighbors | Zoom to 200%: markers don't overlap adjacent cells |
+| **Row- or column-level facts go on the header**, not on every cell (stale data, role, risk) | Repeating a row property in each cell multiplies noise | Stale data shown once next to the person's name |
+| **Never use opacity to mean a state** | Faded cells fail contrast and look disabled | No `opacity` on informative cells; state uses text or a badge |
+| **Semantic colors only for exceptions** | Red/amber should mean "look here", not decorate categories | Remove all red: is anything important lost? Only the exceptions |
+| **Sticky row and column headers; table semantics; full accessible label per cell** | Users must know which person/skill a cell belongs to while scrolling; screen readers need the same | Scroll diagonally; tab to a cell and hear "name · skill: level, target, status" |
+| **Summary row/column for the decision** (e.g. people at level ≥3 per skill, gaps per person) | The matrix answers "where are we thin?"; totals make it explicit | Decision visible without reading every cell |
+| **Compact screens get a list view** (per person or per skill, exceptions first) | A 2-D grid is unusable at phone width | 390 px shows a list, not a tiny grid |
+
+Data tables and matrices may scroll in two dimensions under the WCAG reflow
+exception; keep that scroll inside the table region, not the page. [S05]
+
 ## Data states
 
 | State | Show |
