@@ -8,6 +8,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `ux-ui-principles`: self-contained design coverage — design foundations
+  (tokens, type, spacing, sizing, radius, elevation, motion, breakpoints,
+  density, focus, theming), component selection and usage for ~60 components,
+  component states with keyboard contracts, and prototyping deliverables.
+- `ux-ui-principles`: sources S88–S93 (WCAG 1.4.13, 2.1.1, 2.4.3, 4.1.2, 2.2.2;
+  ARIA APG patterns verified from w3c/aria-practices).
+
+- `ux-ui-principles`: heatmap/matrix rules (data visualization), signal budget
+  and a visual-feedback diagnosis table (visual craft), data-ramp guidance
+  (color palette), layout D06 Matrix / heatmap (43 blueprints) and the SkillMap
+  worked example.
+- `ux-ui-principles`: design-quality reference — plan-then-review with subject
+  inventory, idea sentence and competitor test, template devices to avoid,
+  substance over restraint, frame and rhythm, screenshot critique loop.
+- `ux-ui-principles`: customer-facing UI reference (page taxonomy, onboarding,
+  trust, metrics) and UX for AI features (human control by consequence, output
+  states, feedback).
+- `ux-ui-principles`: `contrast.py --css` reads `:root` token blocks (light,
+  dark, palette variants) from a page and checks role and naming-pattern pairs.
+
+### Changed
+- `ux-ui-principles`: no longer depends on `design-system-builder` or
+  `figma-cli`; all routing points to the skill's own references.
+
+## [0.11.0] - 2026-11-04
+
+### Added
+- `ux-ui-principles`: form design, iconography, native mobile (iOS/Android),
+  cross-channel notifications, data visualization and color-palette references.
+- `ux-ui-principles`: render verification procedure with `scripts/render_check.js`
+  (viewports, themes, overflow, unnamed controls, unlabeled fields, screenshots)
+  and `scripts/contrast.py` (WCAG contrast pairs).
+- `ux-ui-principles`: layouts A06 Audit log and A07 Settings with save behavior
+  (42 blueprints); back-office worked examples for a payments operations product.
+- `ux-ui-principles`: trigger eval set and recorded results (`evals/`).
+- `ux-ui-principles`: sources S63–S87 (WCAG form/icon/color criteria, GOV.UK form
+  components and patterns, Apple HIG, Android developer guidance, FT Visual
+  Vocabulary, W3C WAI complex images; NN/g, Baymard, Notify marked partial).
+- `ux-ui-principles`: end-to-end product design framework — six disciplines,
+  six levels (strategy & research → experience architecture → page & interaction
+  → visual & design system → quality & engineering → validation & improvement),
+  an iterative Discover → Improve process and Light / Standard / Critical rigor
+  tiers. New DISCOVER and ARCHITECT modes.
+- `ux-ui-principles`: new references — product discovery, experience
+  architecture (IA, navigation, URLs, permission flows), back-office page
+  taxonomy and pattern fit, content design / UX writing, trust-security-privacy
+  UX, localization and performance, visual craft, and measurement / design QA.
+- `ux-ui-principles`: 16-row page design specification template scaled by tier,
+  with a worked Critical example, and a shared design-context template read by
+  both `ux-ui-principles` and `design-system-builder`.
+- `ux-ui-principles`: source register extended with verified standards and
+  design-system sources (ISO 9241-210, WCAG 2.2 timing/error-prevention/language,
+  OWASP cheat sheets, GOV.UK patterns, Ant Design, Carbon, Material 3, HEART).
 - `ux-ui-principles`: compact task-focused reference guides for experience
   patterns, visual composition, and accessibility verification. Preserve the
   existing research and layout workflow; add explicit host/lifecycle authority

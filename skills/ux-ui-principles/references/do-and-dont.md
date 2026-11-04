@@ -3,8 +3,8 @@
 These are project recommendations synthesized from the existing interaction,
 patterns, visual, accessibility and validation references. They are examples,
 not user-study findings or tested layouts. Consult those references and the
-source register for standards and research claims. Component implementation
-contracts belong in design-system-builder when that work is requested.
+source register for standards and research claims. Component usage and state
+contracts are in components-usage.md and component-states.md.
 
 ## How to use a pair
 

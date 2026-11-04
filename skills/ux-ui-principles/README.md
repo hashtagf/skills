@@ -3,16 +3,77 @@
 Skill สำหรับใช้หลัก UX/UI เปลี่ยนโจทย์ผลิตภัณฑ์เป็นการตัดสินใจที่อธิบายเหตุผล
 และตรวจสอบได้ วิจัยแหล่งต้นทางบนอินเทอร์เน็ตวันที่ 8 ตุลาคม 2026
 
+## Framework 6 ระดับ (ใหม่)
+
+สกิลครอบคลุมตั้งแต่ "ควรสร้างอะไร" จนถึง "วัดผลหลังใช้งานจริง" และแยก 6 ศาสตร์ออกจากกัน:
+Product · UX · UI · Interaction · Design Engineering · Validation
+
+| ระดับ | ครอบคลุม | เอกสาร |
+|---|---|---|
+| 1. Product Strategy & Research | ปัญหา หลักฐาน role ตัวชี้วัดความสำเร็จ ข้อจำกัด | [Product discovery](references/product-discovery.md) |
+| 2. Experience Architecture | Journey, flow, IA, navigation, URL, permission flow | [Experience architecture](references/experience-architecture.md) |
+| 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing | [Back office](references/back-office.md), [Content design](references/content-design.md), [Patterns](references/patterns.md) |
+| 4. Visual & Design System | tokens, type, spacing, component, state, focal point, color, icon | [Design foundations](references/design-foundations.md), [Components usage](references/components-usage.md), [Component states](references/component-states.md), [Visual craft](references/visual-craft.md) |
+| 5. Quality & Engineering | Accessibility, i18n, performance, security/privacy UX | [Trust/Security/Privacy](references/trust-security-privacy.md), [i18n & performance](references/i18n-performance.md) |
+| 6. Validation & Improvement | metric, instrumentation, A/B, design QA, รอบปรับปรุง | [Measurement](references/measurement.md), [Validation](references/validation.md) |
+
+ภาพรวมและกระบวนการ Discover → Define → Structure → Design → Verify → Improve อยู่ใน
+[Framework](references/framework.md)
+
+**ระดับความเข้มงวด (Rigor tier):** เลือกจากผลเสียที่อาจเกิดเมื่อออกแบบผิด
+- **Light:** หน้าอ่านอย่างเดียวหรือความเสี่ยงต่ำ
+- **Standard:** flow หลักและหน้าฝั่งลูกค้า
+- **Critical:** เงิน การอนุมัติ สิทธิ์ และการลบถาวร
+
+tier เป็นตัวกำหนดว่าต้องตอบข้อไหนใน [Page spec 16 ข้อ](assets/page-spec.md)
+
+**Design context กลาง:** [template](assets/design-context.md) สำหรับไฟล์เดียวของโปรเจกต์
+ที่เก็บ role, คำศัพท์, ชื่อ status, tokens และ pattern ที่ตัดสินใจแล้ว
+ให้ทุกงานออกแบบ พัฒนา และรีวิว ใช้ข้อมูลชุดเดียวกัน
+
+## หัวข้อเพิ่มเติม (4 พ.ย. 2569)
+
+| เรื่อง | เอกสาร |
+|---|---|
+| Design foundations: token layers, type scale, spacing, radius, elevation, motion, breakpoint, density, focus, theme | [Design foundations](references/design-foundations.md) |
+| เลือก component ให้ถูกงาน (tooltip/popover/dialog, toast/banner, pagination/infinite scroll ฯลฯ) และกติกาการใช้ ~60 component | [Components usage](references/components-usage.md) |
+| State ครบทุกแบบ + keyboard contract ตาม ARIA APG + template spec ของ component | [Component states](references/component-states.md) |
+| วิธีส่งงานออกแบบ: text wireframe, HTML prototype พร้อม state และ variant, hand-off | [Prototyping](references/prototyping.md) |
+| คุณภาพงานออกแบบ: วางแผน → ตรวจแผนเทียบหน้าตาสำเร็จรูป, idea sentence + competitor test, รายการสิ่งที่ทำให้ดู "เป็น template", วิธี critique จากภาพหน้าจอ | [Design quality](references/design-quality.md) |
+| หน้าฝั่งลูกค้า: ประเภทหน้า 13 แบบ, ต่างจากหลังบ้านอย่างไร, onboarding, ความน่าเชื่อถือ | [Customer UI](references/customer-ui.md) |
+| UX ของฟีเจอร์ AI: เหมาะเมื่อไร, ให้ผู้ใช้ควบคุมตามความเสี่ยง, state ของผลลัพธ์ AI | [AI features](references/ai-features.md) |
+| การออกแบบฟอร์ม: ถามอะไร, โครงสร้าง, label, เลือก control, ที่อยู่/เบอร์/บัตรประชาชนไทย, validation | [Forms](references/forms.md) |
+| การใช้ icon: เมื่อไรต้องมี label, ชุดเดียว ความหมายเดียว, ขนาด, พื้นที่กด, accessible name | [Iconography](references/iconography.md) |
+| Native mobile: iOS/Android, ขอสิทธิ์ในจังหวะที่ใช้, push, deep link, offline, gesture | [Mobile native](references/mobile-native.md) |
+| การสื่อสารข้ามช่องทาง: email/SMS/push/in-app | [Notifications](references/notifications.md) |
+| Data visualization: เลือกกราฟจากคำถาม, สีในกราฟ, state ของข้อมูล | [Data visualization](references/data-visualization.md) |
+| การสร้างและตรวจชุดสี: role ก่อนค่าสี, สีสถานะคงที่, contrast สองโหมด | [Color palette](references/color-palette.md) |
+| การตรวจหน้าที่ render จริง + script `render_check.js` และ `contrast.py` (`--css` ตรวจ token ทุกธีมจากไฟล์หน้าเว็บอัตโนมัติ) | [Render verification](references/render-verification.md) |
+| ตัวอย่างระบบหลังบ้าน PayOps 4 หน้า + SkillMap (skill matrix) + layout ใหม่ A06 Audit log, A07 Settings, D06 Matrix/heatmap | [Worked examples](assets/layouts/worked-examples-back-office.md) |
+| Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [Visual craft](references/visual-craft.md) |
+| กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ | [Data visualization](references/data-visualization.md) |
+| ชุดทดสอบการเรียกใช้สกิลและผลลัพธ์ | [Evals](evals/README.md) |
+
+**หมายเหตุการเรียกใช้:** ผลทดสอบพบว่าคำถามเชิงขอคำแนะนำมักถูกตอบตรง ๆ โดยไม่โหลดสกิล
+ให้เรียก `/ux-ui-principles` โดยตรงเมื่อต้องการใช้กรอบนี้แน่นอน
+
 ## เรียกใช้
 
 ```text
 /ux-ui-principles ตรวจ UX checkout นี้ จัดลำดับปัญหาและเสนอวิธีตรวจหลังแก้
 /ux-ui-principles ออกแบบ flow สมัครสมาชิก ระบุ loading/error/recovery และ keyboard behavior
 /ux-ui-principles research หลักการ navigation สำหรับ dashboard ที่ใช้ทุกวัน พร้อมข้อจำกัด
+/ux-ui-principles discover ฟีเจอร์คืนเงินอัตโนมัติ: ปัญหา หลักฐาน role และ metric
+/ux-ui-principles วาง IA และ permission flow ของระบบหลังบ้านชำระเงิน 3 role
+/ux-ui-principles เขียน page spec ระดับ Critical สำหรับหน้าอนุมัติถอนเงิน
+/ux-ui-principles design QA หน้านี้เทียบกับ spec และระบุสิ่งที่ยังไม่ได้ทดสอบ
 ```
 
-ตอบเป็นภาษาที่ผู้ใช้เลือก รองรับข้อความภาษาไทย และใช้ร่วมกับ
-`design-system-builder` หรือ `figma-cli` เมื่อต้องสร้างชิ้นงานในขอบเขตนั้น
+ตอบเป็นภาษาที่ผู้ใช้เลือก รองรับข้อความภาษาไทย
+
+**ใช้ได้ครบในตัว ไม่ต้องพึ่งสกิลอื่น:** มีทั้งหลักการ, foundations (tokens/type/spacing),
+การเลือกและใช้ component พร้อม state และ keyboard, การทำ prototype HTML
+และ script ตรวจผล ถ้าโปรเจกต์มี design system อยู่แล้วให้ใช้ของโปรเจกต์ก่อน
 
 ## สิ่งที่รวบรวมไว้
 
@@ -25,9 +86,9 @@ Skill สำหรับใช้หลัก UX/UI เปลี่ยนโจ�
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
 | Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |
 | วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
-| รายการแหล่งอ้างอิง 36 แหล่งและสถานะหลักฐาน | [Sources](references/sources.md) |
+| รายการแหล่งอ้างอิง 93 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S93 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
 | รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |
-| ตัวอย่าง layout 40 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
+| ตัวอย่าง layout 43 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
 | ตัวอย่างภาษาไทยแบบเต็ม: checkout, admin records, booking | [Worked examples](assets/layouts/worked-examples.md) |
 | ตัวอย่างจาก OpenDesign 16 เว็บไซต์ + 8 templates พร้อมระดับหลักฐาน | [OpenDesign references](assets/layouts/opendesign.md) |
 
