@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-04
+
 ### Added
+- `ux-ui-principles`: form design, iconography, native mobile (iOS/Android),
+  cross-channel notifications, data visualization and color-palette references.
+- `ux-ui-principles`: render verification procedure with `scripts/render_check.js`
+  (viewports, themes, overflow, unnamed controls, unlabeled fields, screenshots)
+  and `scripts/contrast.py` (WCAG contrast pairs).
+- `ux-ui-principles`: layouts A06 Audit log and A07 Settings with save behavior
+  (42 blueprints); back-office worked examples for a payments operations product.
+- `ux-ui-principles`: trigger eval set and recorded results (`evals/`).
+- `ux-ui-principles`: sources S63–S87 (WCAG form/icon/color criteria, GOV.UK form
+  components and patterns, Apple HIG, Android developer guidance, FT Visual
+  Vocabulary, W3C WAI complex images; NN/g, Baymard, Notify marked partial).
 - `ux-ui-principles`: end-to-end product design framework — six disciplines,
   six levels (strategy & research → experience architecture → page & interaction
   → visual & design system → quality & engineering → validation & improvement),

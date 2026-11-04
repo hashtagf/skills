@@ -121,3 +121,48 @@ Preview changes | Import status + result
 tokens and the actual data model. Record why this structure serves the user task.
 
 
+
+## A06: Audit log
+
+**Task:** Find out who changed what, when and why, and trace a cause.
+
+**Wide layout:**
+
+```text
+Search (ID, actor, target) | Filters: action, actor, date range
+Day-grouped event timeline: time | actor + role | action · target
+Expanded event: before → after values | reason | source (UI/API/system)
+```
+
+**Compact behavior:** One event per row (time, actor, action); expand in place for before/after; filters in a sheet.
+
+**Applicable states:** No events; filtered empty; loading more; export in progress; permission-restricted fields redacted.
+
+**Avoid / adapt:** Avoid editable or deletable entries; corrections are new events. Avoid raw JSON diffs as the only view.
+
+**Acceptance example:** Starting from a record ID, an auditor finds the change that set a value and sees actor, time with time zone, reason and previous value.
+
+**Customize:** Map real event types and retention rules; decide which fields are redacted per role. See [back-office.md](../../references/back-office.md).
+
+## A07: Settings with save behavior
+
+**Task:** Change configuration safely, knowing when changes take effect.
+
+**Wide layout:**
+
+```text
+Category list | Section heading + description
+              | Setting rows: label, explanation, current value, control
+              | (submission groups) Unsaved banner → Save / Discard
+              | Last changed by · when
+```
+
+**Compact behavior:** Category list becomes a first screen; each category opens its own page with Back.
+
+**Applicable states:** Instant-effect saved/failed per row; submission group unsaved/saving/saved/failed; dependent setting disabled with reason; no permission (read-only with explanation).
+
+**Avoid / adapt:** Avoid mixing instant and submission effect in one group without distinction; avoid toggles inside forms that save later.
+
+**Acceptance example:** Change a limit, navigate away, and see an unsaved-changes warning; save, then find the change in the audit log.
+
+**Customize:** Decide instant vs submission per group from dependencies and consequence; record it in the design context.

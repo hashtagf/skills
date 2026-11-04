@@ -1,6 +1,6 @@
 # Layout example library
 
-40 original, task-based blueprints. These are this skill's project examples, not
+42 original, task-based blueprints. These are this skill's project examples, not
 research findings, finished visual designs, or evidence that a layout increases
 conversion. Choose by task and context; adapt to actual users, content and constraints.
 
@@ -31,7 +31,7 @@ Reuse relevant examples when adapting these layouts; their presence does not cer
 | Marketing and public services | Product landing; Service overview; Pricing comparison; Campaign landing; Help or contact hub | [M01–M05](marketing.md) |
 | Commerce and transactions | Product listing; Product detail; Cart review; Checkout; Booking | [C01–C05](commerce.md) |
 | Dashboards and analysis | Operational overview; Analytical exploration; Finance reporting; Monitoring incidents; Comparison workspace | [D01–D05](dashboards.md) |
-| Administration and back office | Record management; Record detail; Approval workbench; Access management; Import wizard | [A01–A05](admin.md) |
+| Administration and back office | Record management; Record detail; Approval workbench; Access management; Import wizard; Audit log; Settings with save behavior | [A01–A07](admin.md) |
 | Content, learning and discovery | Article or documentation; Knowledge base; Search results; Course learning; Community discussion | [E01–E05](content.md) |
 | Productivity and collaboration | Inbox master-detail; Kanban board; Calendar workspace; Document editor; Collaboration workspace | [P01–P05](productivity.md) |
 | Accounts, onboarding and settings | Sign-in and recovery; Setup onboarding; Profile settings; Security settings; Subscription management | [U01–U05](accounts.md) |
@@ -55,6 +55,8 @@ Reuse relevant examples when adapting these layouts; their presence does not cer
 
 [Three Thai worked specifications](worked-examples.md) show how to turn a template
 into an implementation-ready proposal: checkout, record management, and service booking.
+[Back-office worked examples](worked-examples-back-office.md) apply the page spec and
+rigor tiers to a payments back office: overview, approval queue, audit log and access.
 Read them for deliverable depth, not as mandatory domain assumptions.
 
 ## Add another example

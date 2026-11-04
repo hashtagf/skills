@@ -5,14 +5,17 @@ description: >-
   experience architecture (journeys, IA, navigation, permissions), page and
   interaction design, visual craft, quality (accessibility, localization,
   performance, security/privacy UX) and validation/measurement. Use for UX/UI
-  research, page or flow design, admin/back-office and customer UI, page design
-  specs, usability audits, UX writing, design QA and success metrics; includes
-  Thai-language guidance, 40 layout blueprints, a 16-row page spec with rigor
-  tiers, and a shared design-context template. Triggers include "UX UI
-  principles", "review usability", "audit UX", "design spec", "back office",
-  "information architecture", "หลักการ UX/UI", "ตรวจ UX", "ออกแบบ user flow",
-  "ออกแบบหน้า admin". Use alongside design-system-builder or figma-cli when
-  tokens, components or canvas work are requested.
+  research, page or flow design, admin/back-office and customer UI, forms,
+  icon usage, native mobile (permissions, notifications, offline), charts and
+  dashboards, color palettes and contrast, UX writing, page design specs,
+  usability audits, rendered-UI verification, design QA and success metrics;
+  includes Thai-language guidance, 42 layout blueprints, a 16-row page spec with
+  rigor tiers, render/contrast check scripts and a shared design-context
+  template. Triggers include "UX UI principles", "review usability", "audit
+  UX", "design spec", "back office", "form design", "information architecture",
+  "หลักการ UX/UI", "ตรวจ UX", "ออกแบบ user flow", "ออกแบบหน้า admin",
+  "ออกแบบฟอร์ม". Use alongside design-system-builder or figma-cli when tokens,
+  components or canvas work are requested.
 ---
 
 # UX/UI Principles
@@ -87,9 +90,10 @@ By framework level (details in [framework.md](references/framework.md)):
 |---|---|
 | 1 Strategy & research | [product-discovery](references/product-discovery.md), [validation](references/validation.md) |
 | 2 Experience architecture | [experience-architecture](references/experience-architecture.md), [back-office](references/back-office.md) |
-| 3 Page & interaction | [back-office](references/back-office.md), [patterns](references/patterns.md), [experience-patterns](references/experience-patterns.md), [content-design](references/content-design.md), [layout library](assets/layouts/index.md) |
-| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md); design-system-builder for tokens/components |
-| 5 Quality & engineering | [accessibility](references/accessibility.md), [accessibility-verification](references/accessibility-verification.md), [i18n-performance](references/i18n-performance.md), [trust-security-privacy](references/trust-security-privacy.md) |
+| 2 (channels) | [notifications](references/notifications.md), [mobile-native](references/mobile-native.md) |
+| 3 Page & interaction | [back-office](references/back-office.md), [forms](references/forms.md), [patterns](references/patterns.md), [experience-patterns](references/experience-patterns.md), [content-design](references/content-design.md), [data-visualization](references/data-visualization.md), [layout library](assets/layouts/index.md) |
+| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md), [iconography](references/iconography.md), [color-palette](references/color-palette.md); design-system-builder for tokens/components |
+| 5 Quality & engineering | [accessibility](references/accessibility.md), [accessibility-verification](references/accessibility-verification.md), [i18n-performance](references/i18n-performance.md), [trust-security-privacy](references/trust-security-privacy.md), [mobile-native](references/mobile-native.md), [render-verification](references/render-verification.md) |
 | 6 Validation & improvement | [validation](references/validation.md), [measurement](references/measurement.md) |
 
 New in the end-to-end set:
@@ -113,8 +117,24 @@ New in the end-to-end set:
   color roles, density, avoiding a generic or wireframe-like result.
 - [Measurement](references/measurement.md): success metrics, instrumentation
   spec, experiments, design QA, post-launch review.
+- [Forms](references/forms.md): what to ask, structure, labels, control choice,
+  Thai address/phone/ID fields, validation timing, mobile and back-office forms.
+- [Iconography](references/iconography.md): when icons need labels, one family
+  and meaning per glyph, sizing, hit targets, accessible names.
+- [Native mobile](references/mobile-native.md): iOS/Android conventions,
+  permissions in context, push, deep links, offline, lifecycle, gestures.
+- [Notifications](references/notifications.md): email/SMS/push/in-app channel
+  choice, message anatomy, security, frequency control, lifecycle mapping.
+- [Data visualization](references/data-visualization.md): chart choice by
+  question, readability, chart color, data states, accessible alternatives.
+- [Color palette](references/color-palette.md): roles before hues, fixed
+  semantic colors, contrast pairs, dark theme, comparing palette options.
+- [Render verification](references/render-verification.md): procedure and
+  scripts (`scripts/render_check.js`, `scripts/contrast.py`) to check built UI.
 - [Page spec](assets/page-spec.md) and [design context](assets/design-context.md):
   templates for a complete page specification and a shared project context.
+- [Back-office worked examples](assets/layouts/worked-examples-back-office.md):
+  four PayOps pages with tiers, decisions, metrics and defects found.
 
 Existing topic references:
 
@@ -134,7 +154,7 @@ Existing topic references:
 - [Validation](references/validation.md): research methods, issue severity,
   metrics and report structure. Read before evaluating or claiming success.
 - [Output templates](assets/templates.md): use the section appropriate to the task.
-- [Layout library](assets/layouts/index.md): 40 task-based blueprints across
+- [Layout library](assets/layouts/index.md): 42 task-based blueprints across
   eight categories. Read the index when selecting a screen structure or the user
   asks for layout templates/examples; load only the relevant category and
   [shared specification](assets/layouts/specification.md). Use
@@ -201,7 +221,11 @@ Do not preload both sets for an incidental UI change.
    and assistive technology as relevant. Record actual results separately
    from proposed tests. If implementation is requested, perform the scoped
    changes and existing appropriate checks before reporting completion.
-   For built UI, run the design QA list in [measurement](references/measurement.md):
+   For built UI, follow [render verification](references/render-verification.md):
+   run `node scripts/render_check.js <page> --zoom`, inspect the screenshots,
+   drive the critical journey plus one failure path, and check token contrast
+   with `python3 scripts/contrast.py`. Then run the design QA list in
+   [measurement](references/measurement.md):
    content, layout, tokens, states, interaction, responsive, accessibility,
    performance and analytics — each passed, failed or not tested.
 7. **Report decisions.** Lead with the user outcome. Rank findings by task

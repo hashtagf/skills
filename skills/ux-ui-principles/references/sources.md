@@ -77,13 +77,13 @@ results or mirrors; recheck the live page before quoting them as exact.
 | S37 | [ISO 9241-210:2019 Human-centred design for interactive systems](https://www.iso.org/standard/77520.html) | partial — abstract only | International standard; scope of human-centred principles/activities. The detailed principles are in paid text and were not read |
 | S38 | [NN/g complex application design](https://www.nngroup.com/articles/complex-application-design/) | partial | Practitioner guidance; e.g. reduce clutter without reducing capability. Confirm exact title on the page |
 | S39 | [Data Tables: Four Major User Tasks](https://www.nngroup.com/articles/data-tables/), 2022 | partial | NN/g; find, compare, view/edit/add, take action |
-| S40 | [Carbon Data table usage](https://carbondesignsystem.com/components/data-table/usage/) | partial | IBM design system; batch action bar on selection, XS–XL row sizes, toolbar sizing |
+| S40 | [Carbon Data table usage](https://carbondesignsystem.com/components/data-table/usage/) | partial (general purpose verified from carbon-website source 2026-11-04; toolbar/batch details from search) | IBM design system; batch action bar on selection, XS–XL row sizes, toolbar sizing |
 | S41 | [Ant Design detail page](https://ant.design/docs/spec/detail-page), [form page](https://ant.design/docs/spec/research-form) | verified (source files) | Detail: group by proximity, split complex weakly related content into tabs/steps/cards. Form "Template – Settings": one mode per page, instant vs submission effect. Form/list specs are research-status |
 | S42 | [GOV.UK Complete multiple tasks](https://design-system.service.gov.uk/patterns/complete-multiple-tasks/) | verified (source file) | Task list statuses; "cannot start yet" not linked |
 | S43 | [GOV.UK Check answers](https://design-system.service.gov.uk/patterns/check-answers/) | verified (source file) | Review with per-answer Change links before submission |
 | S44 | [GOV.UK Confirmation pages](https://design-system.service.gov.uk/patterns/confirmation-pages/) | verified (source file) | Reference number, what happens next, contact, record of submission |
 | S45 | [Writing for user interfaces](https://www.gov.uk/service-manual/design/writing-for-user-interfaces), updated 2018-04 | partial | GDS Service Manual; clear, short interface text, "you"/"we" |
-| S46 | [Material 3 list-detail layout](https://m3.material.io/foundations/layout/canonical-layouts/list-detail) | partial | Google; two panes at expanded width, one pane at compact/medium |
+| S46 | [Material 3 list-detail layout](https://m3.material.io/foundations/layout/canonical-layouts/list-detail); [Android: Build a list-detail layout](https://developer.android.com/develop/ui/compose/layouts/adaptive/list-detail) | verified (Android page, 2026-11-04) | Google; two panes at expanded width, one pane at compact/medium |
 | S47 | [Understanding Timing Adjustable 2.2.1](https://www.w3.org/WAI/WCAG22/Understanding/timing-adjustable.html) | verified (source file) | W3C; Level A; off/adjust ≥10×/warn with ≥20 s to extend (≥10 times); real-time, essential, >20 h exceptions |
 | S48 | [Understanding Error Prevention (Legal, Financial, Data) 3.3.4](https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-legal-financial-data.html) | verified (source file) | W3C; Level AA; reversible, checked or confirmed; includes data changes and test responses |
 | S49 | [Language of Page 3.1.1](https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html), [Language of Parts 3.1.2](https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts.html) | verified (source files) | W3C; A and AA; exceptions for proper names, technical terms, indeterminate words |
@@ -104,6 +104,41 @@ results or mirrors; recheck the live page before quoting them as exact.
 Not cited: no official English translation of Thailand's PDPA was confirmed;
 consult the official Thai text and legal counsel rather than an unofficial
 translation.
+
+## Sources added 2026-11-04 (forms, icons, native mobile, notifications, data visualization)
+
+Access scope: checked by a research agent on 2026-11-04. developer.apple.com and
+developer.android.com were opened directly; W3C, GOV.UK Design System and FT
+items were read from their official source repositories; nngroup.com,
+baymard.com and notifications.service.gov.uk were blocked and are **partial**.
+
+| ID | Source / date if available | Status | Authority and use |
+|---|---|---|---|
+| S63 | [Understanding Non-text Content 1.1.1](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html) | verified (source) | W3C; decorative content ignorable by AT; controls named by purpose |
+| S64 | [Understanding Label in Name 2.5.3](https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html) | verified (source) | W3C, Level A; accessible name contains visible label text |
+| S65 | [Understanding Labels or Instructions 3.3.2](https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html) | verified (source) | W3C, Level A; labels/instructions provided for input |
+| S66 | [Understanding Identify Input Purpose 1.3.5](https://www.w3.org/WAI/WCAG22/Understanding/identify-input-purpose.html) | verified (source) | W3C, AA; listed user-data purposes, e.g. `autocomplete` tokens |
+| S67 | [Understanding Use of Color 1.4.1](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html) | verified (source) | W3C, Level A; color not the only visual means |
+| S68 | [GOV.UK Text input](https://design-system.service.gov.uk/components/text-input/) | verified (source) | No placeholder in place of label/hint; widths match expected input |
+| S69 | [GOV.UK Date input](https://design-system.service.gov.uk/components/date-input/) | verified (source) | Day/month/year fields for known dates |
+| S70 | [GOV.UK Radios](https://design-system.service.gov.uk/components/radios/), [Checkboxes](https://design-system.service.gov.uk/components/checkboxes/) | verified (source) | Single vs multiple choice; "none" option placement |
+| S71 | [GOV.UK Names](https://design-system.service.gov.uk/patterns/names/), [Addresses](https://design-system.service.gov.uk/patterns/addresses/), [Phone numbers](https://design-system.service.gov.uk/patterns/phone-numbers/), [Email addresses](https://design-system.service.gov.uk/patterns/email-addresses/) | verified (source) | Name fields by need; accept any phone format; email autocomplete, no spellcheck |
+| S72 | [Apple HIG Privacy](https://developer.apple.com/design/human-interface-guidelines/privacy) | verified | Request permission when needed; specific purpose string; optional pre-alert |
+| S73 | [Apple HIG Notifications](https://developer.apple.com/design/human-interface-guidelines/notifications) | verified | Consent first, concise, no duplicates, no sensitive info, interruption levels |
+| S74 | [Apple HIG Layout](https://developer.apple.com/design/human-interface-guidelines/layout), [Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility) | verified | Safe areas; iOS control size default 44×44 pt, minimum 28×28 pt |
+| S75 | [Apple HIG Icons](https://developer.apple.com/design/human-interface-guidelines/icons), [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) | verified | Recognizable simplified icons with accessibility labels; text when clearer than an icon |
+| S76 | [Android: Request runtime permissions](https://developer.android.com/training/permissions/requesting) | verified | In context, rationale UI, graceful degradation; repeated denial is permanent |
+| S77 | [Android: Notification runtime permission](https://developer.android.com/develop/ui/views/notifications/notification-permission) | verified | POST_NOTIFICATIONS on Android 13+; off by default for new installs |
+| S78 | [Android: Make apps more accessible](https://developer.android.com/guide/topics/ui/accessibility/apps) | verified | Touch targets at least 48×48 dp |
+| S79 | [Android App Links](https://developer.android.com/training/app-links) | verified | Verified links open the app directly; plain deep links may show chooser |
+| S80 | [Android predictive back](https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture) | verified | Predictive back default for recent targets; use back callbacks |
+| S81 | [NN/g Icon Usability](https://www.nngroup.com/articles/icon-usability/) | partial | Universal icons are rare; pair icons with visible labels |
+| S82 | [NN/g Placeholders in Form Fields Are Harmful](https://www.nngroup.com/articles/form-design-placeholders/), 2014 | partial | Disappearing placeholders strain memory and hinder checking |
+| S83 | [Baymard: Avoid Multi-Column Forms](https://baymard.com/blog/avoid-multi-column-forms) | partial | Multi-column forms cause skipped/misplaced input; related fields may share a line |
+| S84 | [Baymard: Inline Form Validation](https://baymard.com/blog/inline-form-validation), 2024-01 | partial | Avoid premature validation; remove errors once fixed |
+| S85 | [FT Visual Vocabulary](https://github.com/Financial-Times/chart-doctor/tree/main/visual-vocabulary) | verified | Charts by relationship: deviation, correlation, ranking, distribution, change over time, part-to-whole, magnitude, spatial, flow |
+| S86 | [W3C WAI Complex Images tutorial](https://www.w3.org/WAI/tutorials/images/complex/) | verified (source) | Short + long description; a data table is one option |
+| S87 | [GOV.UK Notify formatting guidance](https://www.notifications.service.gov.uk/using-notify/formatting) | partial | Plain formatting for emails; text messages are plain text |
 
 ## Maintenance
 
