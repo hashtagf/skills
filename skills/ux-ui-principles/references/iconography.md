@@ -58,8 +58,8 @@ icon sets use the same glyph for different meanings. [S81]
 
 Keep an icon list with: name, glyph, meaning, allowed contexts, sizes, and
 whether it may appear without a label. Add new icons through review so
-meanings don't drift. Token and component implementation belongs to
-design-system-builder.
+meanings don't drift. Record the inventory in the design context; component
+states are in [component-states.md](component-states.md).
 
 ## Review checklist
 

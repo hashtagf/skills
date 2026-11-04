@@ -5,7 +5,8 @@ an identical box, every element the same weight, generic color, no focal
 point. This file covers the composition decisions that separate a correct
 wireframe from a credible product UI. It complements [visual.md](visual.md)
 (hierarchy, type, grouping) and [visual-composition.md](visual-composition.md)
-(task-led layout); tokens and components belong to design-system-builder.
+(task-led layout); token structure is in [design-foundations.md](design-foundations.md)
+and component choice in [components-usage.md](components-usage.md).
 
 These are project recommendations for craft quality, not research findings.
 Visual polish never overrides task evidence, accessibility or the project's
@@ -20,8 +21,8 @@ existing design system; within those, it is part of the job.
 3. A new aesthetic needs a reason tied to the product, brand or audience.
 4. When tokens move between tools, the Design Tokens Format Module 2025.10 is a
    stable Community Group report (not a W3C Standard) [S58]; Figma variable
-   modes can hold theme, language or device values [S59]. Implementation detail
-   belongs to design-system-builder.
+   modes can hold theme, language or device values [S59]. Token structure is in
+   [design-foundations.md](design-foundations.md).
 
 ## One focal point per view
 

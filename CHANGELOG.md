@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `ux-ui-principles`: self-contained design coverage — design foundations
+  (tokens, type, spacing, sizing, radius, elevation, motion, breakpoints,
+  density, focus, theming), component selection and usage for ~60 components,
+  component states with keyboard contracts, and prototyping deliverables.
+- `ux-ui-principles`: sources S88–S93 (WCAG 1.4.13, 2.1.1, 2.4.3, 4.1.2, 2.2.2;
+  ARIA APG patterns verified from w3c/aria-practices).
+
+### Changed
+- `ux-ui-principles`: no longer depends on `design-system-builder` or
+  `figma-cli`; all routing points to the skill's own references.
+
 ## [0.11.0] - 2026-11-04
 
 ### Added

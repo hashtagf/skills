@@ -13,7 +13,7 @@ Product · UX · UI · Interaction · Design Engineering · Validation
 | 1. Product Strategy & Research | ปัญหา หลักฐาน role ตัวชี้วัดความสำเร็จ ข้อจำกัด | [Product discovery](references/product-discovery.md) |
 | 2. Experience Architecture | Journey, flow, IA, navigation, URL, permission flow | [Experience architecture](references/experience-architecture.md) |
 | 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing | [Back office](references/back-office.md), [Content design](references/content-design.md), [Patterns](references/patterns.md) |
-| 4. Visual & Design System | focal point, color roles, density, tokens | [Visual craft](references/visual-craft.md) + `design-system-builder` |
+| 4. Visual & Design System | tokens, type, spacing, component, state, focal point, color, icon | [Design foundations](references/design-foundations.md), [Components usage](references/components-usage.md), [Component states](references/component-states.md), [Visual craft](references/visual-craft.md) |
 | 5. Quality & Engineering | Accessibility, i18n, performance, security/privacy UX | [Trust/Security/Privacy](references/trust-security-privacy.md), [i18n & performance](references/i18n-performance.md) |
 | 6. Validation & Improvement | metric, instrumentation, A/B, design QA, รอบปรับปรุง | [Measurement](references/measurement.md), [Validation](references/validation.md) |
 
@@ -29,12 +29,16 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 
 **Design context กลาง:** [template](assets/design-context.md) สำหรับไฟล์เดียวของโปรเจกต์
 ที่เก็บ role, คำศัพท์, ชื่อ status, tokens และ pattern ที่ตัดสินใจแล้ว
-ทั้งสกิลนี้และ `design-system-builder` อ่านไฟล์นี้ร่วมกัน
+ให้ทุกงานออกแบบ พัฒนา และรีวิว ใช้ข้อมูลชุดเดียวกัน
 
 ## หัวข้อเพิ่มเติม (4 พ.ย. 2569)
 
 | เรื่อง | เอกสาร |
 |---|---|
+| Design foundations: token layers, type scale, spacing, radius, elevation, motion, breakpoint, density, focus, theme | [Design foundations](references/design-foundations.md) |
+| เลือก component ให้ถูกงาน (tooltip/popover/dialog, toast/banner, pagination/infinite scroll ฯลฯ) และกติกาการใช้ ~60 component | [Components usage](references/components-usage.md) |
+| State ครบทุกแบบ + keyboard contract ตาม ARIA APG + template spec ของ component | [Component states](references/component-states.md) |
+| วิธีส่งงานออกแบบ: text wireframe, HTML prototype พร้อม state และ variant, hand-off | [Prototyping](references/prototyping.md) |
 | การออกแบบฟอร์ม: ถามอะไร, โครงสร้าง, label, เลือก control, ที่อยู่/เบอร์/บัตรประชาชนไทย, validation | [Forms](references/forms.md) |
 | การใช้ icon: เมื่อไรต้องมี label, ชุดเดียว ความหมายเดียว, ขนาด, พื้นที่กด, accessible name | [Iconography](references/iconography.md) |
 | Native mobile: iOS/Android, ขอสิทธิ์ในจังหวะที่ใช้, push, deep link, offline, gesture | [Mobile native](references/mobile-native.md) |
@@ -60,8 +64,11 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 /ux-ui-principles design QA หน้านี้เทียบกับ spec และระบุสิ่งที่ยังไม่ได้ทดสอบ
 ```
 
-ตอบเป็นภาษาที่ผู้ใช้เลือก รองรับข้อความภาษาไทย และใช้ร่วมกับ
-`design-system-builder` หรือ `figma-cli` เมื่อต้องสร้างชิ้นงานในขอบเขตนั้น
+ตอบเป็นภาษาที่ผู้ใช้เลือก รองรับข้อความภาษาไทย
+
+**ใช้ได้ครบในตัว ไม่ต้องพึ่งสกิลอื่น:** มีทั้งหลักการ, foundations (tokens/type/spacing),
+การเลือกและใช้ component พร้อม state และ keyboard, การทำ prototype HTML
+และ script ตรวจผล ถ้าโปรเจกต์มี design system อยู่แล้วให้ใช้ของโปรเจกต์ก่อน
 
 ## สิ่งที่รวบรวมไว้
 
@@ -74,7 +81,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
 | Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |
 | วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
-| รายการแหล่งอ้างอิง 87 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S87 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
+| รายการแหล่งอ้างอิง 93 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S93 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
 | รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |
 | ตัวอย่าง layout 42 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
 | ตัวอย่างภาษาไทยแบบเต็ม: checkout, admin records, booking | [Worked examples](assets/layouts/worked-examples.md) |

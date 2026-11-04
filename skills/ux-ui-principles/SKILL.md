@@ -14,8 +14,8 @@ description: >-
   template. Triggers include "UX UI principles", "review usability", "audit
   UX", "design spec", "back office", "form design", "information architecture",
   "หลักการ UX/UI", "ตรวจ UX", "ออกแบบ user flow", "ออกแบบหน้า admin",
-  "ออกแบบฟอร์ม". Use alongside design-system-builder or figma-cli when tokens,
-  components or canvas work are requested.
+  "ออกแบบฟอร์ม", "ใช้ component ไหน". Self-contained: covers design
+  foundations, component choice, states and prototypes without other skills.
 ---
 
 # UX/UI Principles
@@ -92,7 +92,7 @@ By framework level (details in [framework.md](references/framework.md)):
 | 2 Experience architecture | [experience-architecture](references/experience-architecture.md), [back-office](references/back-office.md) |
 | 2 (channels) | [notifications](references/notifications.md), [mobile-native](references/mobile-native.md) |
 | 3 Page & interaction | [back-office](references/back-office.md), [forms](references/forms.md), [patterns](references/patterns.md), [experience-patterns](references/experience-patterns.md), [content-design](references/content-design.md), [data-visualization](references/data-visualization.md), [layout library](assets/layouts/index.md) |
-| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md), [iconography](references/iconography.md), [color-palette](references/color-palette.md); design-system-builder for tokens/components |
+| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md), [iconography](references/iconography.md), [color-palette](references/color-palette.md), [design-foundations](references/design-foundations.md), [components-usage](references/components-usage.md), [component-states](references/component-states.md), [prototyping](references/prototyping.md) |
 | 5 Quality & engineering | [accessibility](references/accessibility.md), [accessibility-verification](references/accessibility-verification.md), [i18n-performance](references/i18n-performance.md), [trust-security-privacy](references/trust-security-privacy.md), [mobile-native](references/mobile-native.md), [render-verification](references/render-verification.md) |
 | 6 Validation & improvement | [validation](references/validation.md), [measurement](references/measurement.md) |
 
@@ -129,6 +129,14 @@ New in the end-to-end set:
   question, readability, chart color, data states, accessible alternatives.
 - [Color palette](references/color-palette.md): roles before hues, fixed
   semantic colors, contrast pairs, dark theme, comparing palette options.
+- [Design foundations](references/design-foundations.md): token layers, type,
+  spacing, sizing, radius, elevation, motion, breakpoints, density, focus, theming.
+- [Components usage](references/components-usage.md): choosing between similar
+  components and per-component use / avoid / must-have rules for ~60 components.
+- [Component states](references/component-states.md): state checklist,
+  interaction-color strategy, keyboard contracts, touch, component spec template.
+- [Prototyping](references/prototyping.md): choose deliverables, text
+  wireframes, HTML prototypes with states and variants, hand-off package.
 - [Render verification](references/render-verification.md): procedure and
   scripts (`scripts/render_check.js`, `scripts/contrast.py`) to check built UI.
 - [Page spec](assets/page-spec.md) and [design context](assets/design-context.md):
@@ -261,9 +269,11 @@ marked N/A with a reason. Include relevant Do / Don't examples when explaining i
 or likely misuse; state contextual exceptions. Cover relevant failure and recovery states. Disclose untested
 behavior and assumptions. Use the user's requested output location; otherwise
 answer in conversation rather than creating unsolicited project documents.
-Coordinate with `design-system-builder` for tokens/components and `figma-cli`
-for canvas work when requested; this skill supplies UX reasoning, not a new
-rendering tool or an automatic redesign of the whole product.
+This skill is self-contained: it covers foundations, component choice and
+states, prototypes and their verification. If the project already has a design
+system or tool workflow, follow it and record deviations in the design context.
+It supplies design decisions and design artifacts, not an automatic redesign of
+the whole product.
 
 ## Host workflow and authority
 

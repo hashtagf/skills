@@ -1,8 +1,8 @@
 # Shared design context — template
 
 One project file that every design and implementation agent reads before
-deciding, so skills such as ux-ui-principles and design-system-builder do not
-make conflicting choices. Suggested location: `docs/design-context.md` in the
+deciding, so design, implementation and review work do not make
+conflicting choices. Suggested location: `docs/design-context.md` in the
 product repository (or the path the project already uses). Keep it short and
 current; link to detailed documents instead of copying them.
 

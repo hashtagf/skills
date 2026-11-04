@@ -139,6 +139,12 @@ baymard.com and notifications.service.gov.uk were blocked and are **partial**.
 | S85 | [FT Visual Vocabulary](https://github.com/Financial-Times/chart-doctor/tree/main/visual-vocabulary) | verified | Charts by relationship: deviation, correlation, ranking, distribution, change over time, part-to-whole, magnitude, spatial, flow |
 | S86 | [W3C WAI Complex Images tutorial](https://www.w3.org/WAI/tutorials/images/complex/) | verified (source) | Short + long description; a data table is one option |
 | S87 | [GOV.UK Notify formatting guidance](https://www.notifications.service.gov.uk/using-notify/formatting) | partial | Plain formatting for emails; text messages are plain text |
+| S88 | [Understanding Content on Hover or Focus 1.4.13](https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html) | verified (source) | W3C, AA; dismissible, hoverable, persistent; user-agent tooltips exempt |
+| S89 | [Understanding Keyboard 2.1.1](https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html) | verified (source) | W3C, A; all functionality via keyboard, path-dependent input exception |
+| S90 | [Understanding Focus Order 2.4.3](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html) | verified (source) | W3C, A; sequential focus order preserves meaning and operation |
+| S91 | [Understanding Name, Role, Value 4.1.2](https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html) | verified (source) | W3C, A; components expose name, role, states and change notifications |
+| S92 | [Understanding Pause, Stop, Hide 2.2.2](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html) | verified (source) | W3C, A; auto-moving content >5 s needs pause/stop/hide; auto-updating content needs control regardless of duration |
+| S93 | [ARIA APG patterns](https://www.w3.org/WAI/ARIA/apg/patterns/): accordion, alert, alertdialog, breadcrumb, button, carousel, checkbox, combobox, dialog-modal, disclosure, feed, grid, link, listbox, menu-button, menubar, meter, radio, slider, spinbutton, switch, table, tabs, toolbar, tooltip, treegrid, treeview, landmarks | verified (w3c/aria-practices source, 2026-09-29 commit) | W3C WAI note, non-normative; keys are recommended conventions, many optional. Tooltip pattern is work in progress without consensus. "Not for site navigation" guidance comes from the navigation menubar and disclosure navigation examples. Sliders carry a touch-AT warning |
 
 ## Maintenance
 
