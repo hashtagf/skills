@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and a visual-feedback diagnosis table (visual craft), data-ramp guidance
   (color palette), layout D06 Matrix / heatmap (43 blueprints) and the SkillMap
   worked example.
+- `ux-ui-principles`: design-quality reference — plan-then-review with subject
+  inventory, idea sentence and competitor test, template devices to avoid,
+  substance over restraint, frame and rhythm, screenshot critique loop.
 - `ux-ui-principles`: customer-facing UI reference (page taxonomy, onboarding,
   trust, metrics) and UX for AI features (human control by consequence, output
   states, feedback).

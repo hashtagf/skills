@@ -112,7 +112,9 @@ on operational screens.
 
 ## Avoid the generic look
 
-Unconsidered defaults make products look templated: identical rounded boxes,
+See [design-quality.md](design-quality.md) for the full plan-review process,
+template-device list and critique loop. In short, unconsidered defaults make
+products look templated: identical rounded boxes,
 centered everything, a purple-to-blue gradient hero, emoji as section markers,
 one stock font for everything, numbered markers on content that is not a
 sequence. Choose deliberately from the product's own world (its units,
@@ -137,7 +139,7 @@ repainting:
 | "ดูยาก / อ่านยาก" (hard to read) | Too many signals per element; text color changes with background; low contrast; faded states; small type | Apply the signal budget; one text color per ramp; check pairs with `scripts/contrast.py`; remove opacity states |
 | "สีดูยาก / สีแรง" (colors are hard) | Saturated or dark fills dominate; semantic colors used for decoration; ramp steps too similar or too extreme | Lighter ramp, darkest step reserved; semantic colors only for exceptions; test both themes |
 | "รก" (cluttered) | Every section boxed; repeated metadata; equal emphasis everywhere | Containers by role; move repeated facts to headers; choose one focal point |
-| "ไม่สวย / ดูเหมือน wireframe" (plain, unfinished) | No focal point; default fonts and greys; placeholder data; identical boxes | Focal point, deliberate neutrals and accent, real content, type scale contrast |
+| "ไม่สวย / ดูเหมือน wireframe" (plain, unfinished) | No focal point; default fonts and greys; placeholder data; identical boxes; template devices (eyebrows, mono labels, card rows, hairlines, gradients) | Write the idea sentence and run the competitor test ([design-quality.md](design-quality.md)); focal point, real content or working fragments, decisive type scale |
 | "หาไม่เจอ" (can't find it) | Weak hierarchy, action far from context, unlabeled icons | Move action next to its object, label icons, strengthen heading hierarchy |
 
 Change the cause, re-render, re-run contrast, and show before/after. When the

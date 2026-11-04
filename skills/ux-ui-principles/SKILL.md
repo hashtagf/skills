@@ -92,7 +92,7 @@ By framework level (details in [framework.md](references/framework.md)):
 | 2 Experience architecture | [experience-architecture](references/experience-architecture.md), [back-office](references/back-office.md) |
 | 2 (channels) | [notifications](references/notifications.md), [mobile-native](references/mobile-native.md) |
 | 3 Page & interaction | [back-office](references/back-office.md), [customer-ui](references/customer-ui.md), [ai-features](references/ai-features.md), [forms](references/forms.md), [patterns](references/patterns.md), [experience-patterns](references/experience-patterns.md), [content-design](references/content-design.md), [data-visualization](references/data-visualization.md), [layout library](assets/layouts/index.md) |
-| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md), [iconography](references/iconography.md), [color-palette](references/color-palette.md), [design-foundations](references/design-foundations.md), [components-usage](references/components-usage.md), [component-states](references/component-states.md), [prototyping](references/prototyping.md) |
+| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md), [iconography](references/iconography.md), [color-palette](references/color-palette.md), [design-quality](references/design-quality.md), [design-foundations](references/design-foundations.md), [components-usage](references/components-usage.md), [component-states](references/component-states.md), [prototyping](references/prototyping.md) |
 | 5 Quality & engineering | [accessibility](references/accessibility.md), [accessibility-verification](references/accessibility-verification.md), [i18n-performance](references/i18n-performance.md), [trust-security-privacy](references/trust-security-privacy.md), [mobile-native](references/mobile-native.md), [render-verification](references/render-verification.md) |
 | 6 Validation & improvement | [validation](references/validation.md), [measurement](references/measurement.md) |
 
@@ -141,6 +141,11 @@ New in the end-to-end set:
   interaction-color strategy, keyboard contracts, touch, component spec template.
 - [Prototyping](references/prototyping.md): choose deliverables, text
   wireframes, HTML prototypes with states and variants, hand-off package.
+- [Design quality](references/design-quality.md): avoid the generic look —
+  plan-then-review with subject inventory, idea sentence and competitor test,
+  template devices to avoid, substance over restraint, frame and rhythm, and a
+  screenshot critique loop. Read for any landing, marketing or product page,
+  or when someone says a design looks templated or "not beautiful".
 - [Visual craft](references/visual-craft.md) also holds the **signal budget**
   and a **feedback diagnosis** table ("ดูยาก", "สีดูยาก", "รก", "ไม่สวย") — read it
   whenever someone says a screen is hard to read or unattractive.

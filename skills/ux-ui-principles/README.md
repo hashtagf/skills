@@ -39,6 +39,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | เลือก component ให้ถูกงาน (tooltip/popover/dialog, toast/banner, pagination/infinite scroll ฯลฯ) และกติกาการใช้ ~60 component | [Components usage](references/components-usage.md) |
 | State ครบทุกแบบ + keyboard contract ตาม ARIA APG + template spec ของ component | [Component states](references/component-states.md) |
 | วิธีส่งงานออกแบบ: text wireframe, HTML prototype พร้อม state และ variant, hand-off | [Prototyping](references/prototyping.md) |
+| คุณภาพงานออกแบบ: วางแผน → ตรวจแผนเทียบหน้าตาสำเร็จรูป, idea sentence + competitor test, รายการสิ่งที่ทำให้ดู "เป็น template", วิธี critique จากภาพหน้าจอ | [Design quality](references/design-quality.md) |
 | หน้าฝั่งลูกค้า: ประเภทหน้า 13 แบบ, ต่างจากหลังบ้านอย่างไร, onboarding, ความน่าเชื่อถือ | [Customer UI](references/customer-ui.md) |
 | UX ของฟีเจอร์ AI: เหมาะเมื่อไร, ให้ผู้ใช้ควบคุมตามความเสี่ยง, state ของผลลัพธ์ AI | [AI features](references/ai-features.md) |
 | การออกแบบฟอร์ม: ถามอะไร, โครงสร้าง, label, เลือก control, ที่อยู่/เบอร์/บัตรประชาชนไทย, validation | [Forms](references/forms.md) |
