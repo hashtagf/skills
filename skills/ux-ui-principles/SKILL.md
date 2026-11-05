@@ -131,7 +131,9 @@ page must look designed, and this skill holds the examples that show how:
    (kind: landing, cafe, saas, dashboard, deck, mobile, portfolio …) and open **every**
    image it lists: real designed pages of your kind, then the direction's preview and its
    product UI. Name in the answer which you looked at and the one move you take from
-   them. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components; its
+   them. When it lists fewer than three pages of your kind, screenshot 8–12 design-led
+   sites of the category yourself (first screen plus one scroll at 1440) and name one
+   move from each; take three to five. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components; its
    radius is a **default** to check against the subject, not a rule) and
    start from the composition it names in `scripts/compositions.js`. Never default to
    warm cream + serif + terracotta or near-black + one neon accent ([design quality](references/design-quality.md) §2).

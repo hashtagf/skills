@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (lessons from a café landing that went from correct to crafted)
+- Diagnosis: the first build passed every check but read as unfinished because of boxed placeholders, a fake dot overlay, an empty photo slot, a heading-sized hero and flat bands with straight edges. A survey of 12 design-led roaster sites (Perc, Stumptown, Coava, Irving Farm, Tandem, Partners …) gave the fixes.
+- New `scripts/halftone.py`: a real one-ink AM dot screen from a photo (`--size --cell --ink --paper --angle --bright --crop-x --eq`). `visual-assets.md` §2b: print-led directions print their pictures; dark or busy photos become a duotone band.
+- Halftone direction (`directions.json`): an `images` rule and a Thai pair (Mitr 600 + Noto Sans Thai). `direction_recipe.py` prints `images` and uses a direction's `thai` value instead of always printing Noto Sans Thai.
+- Placeholder mode (`marketing-copy.md`): `.ph` is now a dotted underline only, with no box, tint or outline.
+- `design-quality.md` §1 adds **Subject edges**: one edge shape from the subject (awning scallop, perforation) at the hero bottom and the closing band. `visual-system.md` §13 adds poster-scale hero type for print directions and one break-out picture. `visual-assets.md` Do/Don't: a missing picture becomes a one-line spot drawing from the subject, not an empty box or a recropped photo.
+- `SKILL.md` §3 step 2: when `look.py` lists fewer than three pages of the kind, screenshot 8–12 design-led sites of the category and take one move from each.
+- Reference library: `cafe-halftone` (our own build).
+
 ### Changed (ux-ui-principles internal cleanup; each skill stays self-contained, no cross-skill links)
 - **One value per topic inside the skill:** focus ring lives in `component-states.md` "Focus" (2px + 2px offset; 3px or two-tone on varied surfaces), referenced from `visual-system.md` and `design-system-benchmarks.md`; component token layer optional everywhere.
 - **Merged:** `scoring-caps.md` → `review-loop.md` §8; `tablet-rtl-dark.md` split into `visual-system.md` Part B "Tablet", `i18n-performance.md` "Right-to-left", `color-palette.md` "Dark pages"; the duplicate Forms section in `patterns.md` now links to `forms.md`. Evals remapped.

@@ -708,7 +708,10 @@ After UX decisions and the idea sentence are settled:
 
 1. Map project tokens (or a preset) onto §1–§4 roles; define named text styles.
 2. Reduce: one radius camp, three text tones, one accent, few type steps.
-3. Set display type: weight, tracking, line-height by size; balance line breaks.
+3. Set display type: weight, tracking, line-height by size; balance line breaks. A
+   print or poster direction puts the hero headline at poster scale (about 6–6.5rem on
+   desktop, Thai included); 5rem in a half column reads as a heading, not a poster.
+   One hero picture may break out of its band edge into the next section (one per page).
 4. Apply the gap bands; replace containers that spacing can do.
 5. Shadows only on floats; hairlines only where they carry meaning.
 6. One bespoke hero visual plus a visual anchor in most sections

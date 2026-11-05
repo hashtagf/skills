@@ -64,6 +64,11 @@ it more than any amount of drawing. Do this when the client has none:
 5. **Treatment**: one treatment for all pictures (greyscale with contrast, a
    single tint, or natural with slightly lowered saturation) so mixed sources
    look like one set; crops share one ratio family; radius follows the direction.
+   Print-led directions (Halftone, Riso, Paste-up, Newsprint) print their pictures:
+   `python3 scripts/halftone.py` makes a real one-ink dot screen whose dots follow the
+   picture's darkness. A CSS dot pattern over a photo reads as a filter, not print.
+   Halftone only photos with clear shapes; a dark, busy one goes muddy, so use it as a
+   one-colour duotone band.
 6. **Technical**: size to the layout (`sizes`), give each an `alt` that describes
    it (swap with the language on bilingual pages), load the first-screen picture
    eagerly, and make a failed load degrade to the slot colour, not a broken icon.
@@ -129,6 +134,7 @@ service menus, process steps, contact methods, deliverables, comparison rows.
 |---|---|
 | Give each section one anchor and vary its type. | Ship five sections of heading + paragraph. |
 | Build product fragments and diagrams when no photos exist. | Leave space empty because mockups and icons are on the avoid list. |
+| Fill a missing-picture slot, or a section that would reuse a photo, with a one-line spot drawing of an object from the subject (a shopfront with its awning, a coffee bag, a cup) in the accent, plus the placeholder label. | Ship an empty tinted box with "[photo]" in it, or recrop the hero photo for a second section. |
 | Use one icon family with labels for scannable lists. | Mix icon sets or use icons as the only label. |
 | Compose 2–3 fragments into a hero scene on a field of colour. | Put a shrunken screenshot in a laptop frame. |
 

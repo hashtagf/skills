@@ -68,9 +68,11 @@ def recipe(d):
     A("- **Ground** `%s`, **surface** `%s`, **ink** `%s`, **muted** `%s` (never pure black or white)." % (d["ground"], d["surface"], d["ink"], d["muted"]))
     A("- **One accent** `%s` with `%s` text on it. The solid accent fill (primary CTA) appears once per view; a nav CTA is outlined or is the same action; other uses are small (eyebrow, link, focus). Links and small accent text use the derived `accent-text` step (`scripts/export_tokens.py`)." % (d["accent"], d["accentInk"]))
     A("- **Tints** %s for fills only, never for text." % ", ".join("`%s`" % t for t in d["tints"]))
-    A("- **Type**: display %s %s, tracking %s%s; body %s. One pair per language; Thai uses Noto Sans Thai, body line-height 1.55-1.7." % (d["display"], d["dw"], d["track"], ", uppercase" if d.get("case") == "upper" else "", d["body"]))
+    A("- **Type**: display %s %s, tracking %s%s; body %s. One pair per language; Thai uses %s, body line-height 1.55-1.7." % (d["display"], d["dw"], d["track"], ", uppercase" if d.get("case") == "upper" else "", d["body"], d.get("thai", "Noto Sans Thai")))
     A("- **Shape (default, check against the subject)**: radius %dpx on cards, buttons %s, corner treatment `%s`. List 3-5 objects from the client's world first; keep this default only if they agree (a bean, cup or bag is round; a ledger, ticket or poster is square)." % (r, shape, d.get("corner", "even")))
     A("- **Depth**: %s." % surf_rule)
+    if d.get("images"):
+        A("- **Images**: %s" % d["images"])
     A("- Section padding 96px or more on desktop; display scale clamp(2.75rem, 5vw + 1rem, 5.25rem).")
     A("\n## Banned")
     A("\n".join("- %s" % b for b in bans))

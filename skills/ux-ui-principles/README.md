@@ -115,6 +115,7 @@
 | `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |
 | `look.py` | รายการภาพอ้างอิงตามประเภทหน้า | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
 | `placeholders.py` | หา placeholder ที่เหลือ | ห้ามส่งของปลอมเป็นของจริง | §3 ข้อ 6 |
+| `halftone.py` | ทำรูปฮาล์ฟโทนหมึกเดียวจริงจากรูปถ่าย | สไตล์งานพิมพ์ต้องดูพิมพ์จริง ไม่ใช่ลายจุดโปะทับ | §3 ข้อ 4, visual-assets §2b |
 | `render_check.js` | render หลายขนาด light/dark, overflow, JS error, ชื่อปุ่ม | smoke check ทั่วไปของทุกหน้า | ผ่าน `check.py --render` |
 | `review_report.py` | finding → รายงาน HTML | รีวิวที่ส่งต่อได้ | review-loop.md 'Report format' |
 | `script_check.js` | syntax ของ script และ global ที่ชน window | บั๊กที่ทำให้หน้าเปล่า | ผ่าน `check.py` |

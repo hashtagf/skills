@@ -534,7 +534,9 @@
       "corner": "even",
       "comp": "c6",
       "subject": "streetfood",
-      "photoFilter": "contrast(1.1)"
+      "photoFilter": "contrast(1.1)",
+      "thai": "Mitr 600 (display), Noto Sans Thai (body)",
+      "images": "Pictures are printed, not filtered: a real one-ink dot screen from `scripts/halftone.py` (ink on the ground colour) for photos with clear shapes; a dark or busy photo becomes a one-colour duotone band (greyscale multiplied over the accent). Never a CSS dot pattern laid over a photo."
     },
     {
       "id": "squeeze",

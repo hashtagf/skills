@@ -225,8 +225,9 @@ strip (length of the first call, price of the first step, languages). Say so in 
 When the user says "use placeholders for everything" (a real business whose facts are not in yet), the page
 renders its **facts** as visible placeholders, which overrides "never rendered" in §0 for facts only:
 
-- Mark each one `<span class="ph">[ชื่อร้าน]</span>`: a tint, no other styling, so the page still reads as designed
-  and every slot is easy to find. Short Thai labels in square brackets; numbers that drive behaviour (prices in
+- Mark each one `<span class="ph">[ชื่อร้าน]</span>` styled as a **dotted underline only**
+  (`text-decoration: underline dotted; text-underline-offset: .22em`), no box, tint or outline: forty boxed
+  slots make the page read as a wireframe, the underline keeps it designed and every slot is still easy to find. Short Thai labels in square brackets; numbers that drive behaviour (prices in
   a picker) stay numeric in `data-*` and visible inside `.ph`.
 - **Proof is never a placeholder.** Reviews, ratings, customer counts, awards and logos stay off the page until
   real ("Pages with no proof yet").
