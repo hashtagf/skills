@@ -11,7 +11,7 @@ project with a new direction: the code is rank 4 evidence
 | # | Step | Command / source | Output | Ask? |
 |---|---|---|---|---|
 | 1 | Inspect | [design memory](design-memory.md) §1; `python3 scripts/code_extract.py SRC` | One line per source found; stack; token sources | No |
-| 2 | Page inventory | Routes/router files, nav config, sitemap | Table: page, role, job, pattern ([page anatomy](page-anatomy-by-job.md)), tier | No |
+| 2 | Page inventory | Routes/router files, nav config, sitemap | Table: page, role, job, pattern ([page anatomy](../assets/layouts/index.md)), tier | No |
 | 3 | Extract DESIGN.md | `python3 scripts/design_md.py --from-code SRC [--interview iv.json] --out . --wire` | DESIGN.md, Status: draft, evidence per role, Drift section | No (draft only) |
 | 4 | Baseline audit | AUDIT mode on the 3-5 most used pages: `render_check.js --fast`, `contrast.py --css`, `slop_check.py`, [review loop](review-loop.md) | Scored findings per page, before-screenshots kept | No |
 | 5 | Agree | Show: guessed/derived rows, Drift list, top audit findings | Approved DESIGN.md (Status: approved) or corrections | **Yes**: values, merges and scope are the team's call |

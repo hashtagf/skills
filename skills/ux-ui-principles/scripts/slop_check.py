@@ -274,10 +274,10 @@ def check(path):
         has_handler = n.attrs.get("action") or n.attrs.get("method") == "dialog" or n.attrs.get("onsubmit") or re.search(r"submit|addEventListener|onSubmit|FormData", js)
         if not has_handler:
             add("flag", "inert-form", "form with no action and no submit handling; specify submit, validation, error and success behavior")
-        rules = any(any(k in d.attrs for k in ("required", "pattern", "min", "max", "minlength", "maxlength"))
+        has_rules = any(any(k in d.attrs for k in ("required", "pattern", "min", "max", "minlength", "maxlength"))
                     or d.attrs.get("type") in ("email", "url", "number", "tel", "date") for d in fields)
         messages = re.search(r"aria-invalid|field-error|error-message|role=\"alert\"", html) or VAL_JS.search(js)
-        if not rules and not messages:
+        if not has_rules and not messages:
             add("flag", "form-without-validation", f"form with {len(fields)} field(s) but no rules (required/type/pattern) and no error messages; see forms.md §6b")
         elif not messages:
             add("flag", "form-without-messages", "fields have rules but no own error messages / aria-invalid / error summary; browser bubbles only (forms.md §6b)")

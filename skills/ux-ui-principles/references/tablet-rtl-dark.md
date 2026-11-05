@@ -1,11 +1,11 @@
-# Tablet, right-to-left and dark customer pages
+# Tablet, right-to-left and dark pages
 
-Pictures: back-office `previews/tablet/` (820 × 1366), `previews/rtl/` (mirrored layout),
-customer dark sheets in `assets/site/previews/dark/`.
+Pictures: back-office `previews/tablet/` (820 × 1366), `previews/rtl/` (mirrored layout).
+Dark theme of a light direction: `python3 scripts/export_tokens.py <id> --print-dark`.
 
-## Tablet (768–1024px; breakpoints in [design-foundations.md](design-foundations.md))
+## Tablet (768–1024px; breakpoints in [visual-system.md](visual-system.md))
 - Navigation: a side nav collapses to an icon rail (tooltips on hover/focus); top navs keep working or fold into a menu.
-- Tables: hide secondary columns (account, dates) before shrinking text; row details open in a drawer. Never shrink below the minimum text size in [design-foundations.md](design-foundations.md#typography) (14px in tablet tables).
+- Tables: hide secondary columns (account, dates) before shrinking text; row details open in a drawer. Never shrink below the minimum text size in [visual-system.md](visual-system.md#typography) (14px in tablet tables).
 - Cards: KPI rows go to 2 columns; two-pane layouts stack, list first.
 - Filter bars wrap onto two lines; bulk actions stay visible.
 - Touch targets: project default in [accessibility.md](accessibility.md); support both portrait and landscape; no hover-only actions.

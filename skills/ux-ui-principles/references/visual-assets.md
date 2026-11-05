@@ -87,7 +87,7 @@ service menus, process steps, contact methods, deliverables, comparison rows.
 - **Containers are allowed** when consistent: plain glyph, or a 40–48px circle
   or rounded square in a tint of the field colour, but not repeated as rows of
   identical card tiles ([design-quality.md](design-quality.md) §2). Pick one treatment per page.
-- Sizes: 20–24px in lists; 32px as a step marker (icon sizes: [design-foundations.md](design-foundations.md)); never as hero art.
+- Sizes: 20–24px in lists; 32px as a step marker (icon sizes: [visual-system.md](visual-system.md)); never as hero art.
 - Meaning must match: a plug for integrations, a calendar for scheduling; if
   no glyph fits honestly, drop the icon rather than force one.
 
@@ -108,7 +108,7 @@ service menus, process steps, contact methods, deliverables, comparison rows.
 ## 5. Mockups and frames — when they are fine
 
 - A **phone outline** is fine on app pages, where it tells the visitor the
-  platform; keep it a simple rounded rectangle, content at or above the minimum text size ([design-foundations.md](design-foundations.md)).
+  platform; keep it a simple rounded rectangle, content at or above the minimum text size ([visual-system.md](visual-system.md)).
 - A **window chrome strip** (title bar with the product name) is fine when it
   identifies which product the fragment belongs to; no fake traffic lights.
 - Shrinking a full screenshot until text is unreadable is not fine; crop to the

@@ -13,7 +13,7 @@ Product · UX · UI · Interaction · Design Engineering · Validation
 | 1. Product Strategy & Research | ปัญหา หลักฐาน role ตัวชี้วัดความสำเร็จ ข้อจำกัด | [Product discovery](references/product-discovery.md) |
 | 2. Experience Architecture | Journey, flow, IA, navigation, การจัดกลุ่มเมนู, URL, permission flow | [Experience architecture](references/experience-architecture.md), [Navigation grouping](references/navigation-grouping.md) |
 | 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing, copy การตลาด, การแสดงค่าข้อมูล | [Back office](references/back-office.md), [Content design](references/content-design.md), [Marketing copy](references/marketing-copy.md), [Patterns](references/patterns.md) |
-| 4. Visual & Design System | tokens, type, spacing, component, state, focal point, color, icon | [Design foundations](references/design-foundations.md), [Components usage](references/components-usage.md), [Component states](references/component-states.md), [Visual craft](references/visual-craft.md) |
+| 4. Visual & Design System | tokens, type, spacing, component, state, focal point, color, icon | [visual system](references/visual-system.md) Part A, [Components usage](references/components-usage.md), [Component states](references/component-states.md), [design quality](references/design-quality.md) §7 |
 | 5. Quality & Engineering | Accessibility, i18n, performance, security/privacy UX | [Trust/Security/Privacy](references/trust-security-privacy.md), [i18n & performance](references/i18n-performance.md) |
 | 6. Validation & Improvement | metric, instrumentation, A/B, design QA, รอบปรับปรุง | [Measurement](references/measurement.md), [Validation](references/validation.md) |
 
@@ -52,7 +52,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 
 | เรื่อง | เอกสาร |
 |---|---|
-| Design foundations: token layers, type scale, spacing, radius, elevation, motion, breakpoint, density, focus, theme | [Design foundations](references/design-foundations.md) |
+| Design foundations: token layers, type scale, spacing, radius, elevation, motion, breakpoint, density, focus, theme | [visual system](references/visual-system.md) Part A |
 | เลือก component ให้ถูกงาน (tooltip/popover/dialog, toast/banner, pagination/infinite scroll ฯลฯ) และกติกาการใช้ ~60 component | [Components usage](references/components-usage.md) |
 | State ครบทุกแบบ + keyboard contract ตาม ARIA APG + template spec ของ component | [Component states](references/component-states.md) |
 | วิธีส่งงานออกแบบ: text wireframe, HTML prototype พร้อม state และ variant, hand-off | [Prototyping](references/prototyping.md) |
@@ -72,11 +72,11 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | แนวคิดจาก Hallmark / Impeccable / Hue / Taste / Interface Design: structural slop และ one strong idea, สกัดภาษาดีไซน์จากแบรนด์, เสนอ 2–3 direction ก่อนสร้าง, script `slop_check.py` ตรวจหน้าตาแบบ template และ `design_md_check.py` ตรวจ DESIGN.md | [Design quality](references/design-quality.md) §2b, [Design memory](references/design-memory.md) §3b, [Design direction](references/design-direction.md) §7 |
 | **ค่าเริ่มต้นห้ามข้าม (หน้าเว็บสาธารณะ / หน้าตาใหม่):** interview ก่อนเขียนโค้ด → palette จาก keyword → motion baseline → mobile ที่ออกแบบสำหรับ 390px → render ดู 1440 + 390 | [SKILL.md](SKILL.md) |
 | Palette: สูตร OKLCH (neutral ย้อมสีเดียวกับแบรนด์, accent เดียว, ไม่เกิน 2 hue, 70/20/10) + palette ตั้งต้น 8 ชุดตาม keyword ที่ตรวจ contrast ผ่านแล้ว 96/96 | [Color palette](references/color-palette.md) |
-| Mobile web: gutter, header, hero, ขนาดตัวอักษร, section, grid, ตาราง, พื้นที่กด, sticky, รูป | [Visual composition](references/visual-composition.md) |
+| Mobile web: gutter, header, hero, ขนาดตัวอักษร, section, grid, ตาราง, พื้นที่กด, sticky, รูป | [visual system](references/visual-system.md) Part B |
 | Motion ของเว็บและแอป: ระดับตาม dial, 10 ประเภท, ลำดับการเคลื่อนไหวบนหน้าเว็บ, reduced motion, performance, motion spec, ตรวจด้วย `render_check --reduced-motion` | [Motion](references/motion.md) |
 | Style 18 แบบ, keyword ภาษาไทย/อังกฤษ → style + dial, interview 3 รอบสำหรับหน้าตาใหม่ (A: goal/audience/proof/constraints, B: feel/shape/reference/energy พร้อมภาพ, C: ยืนยัน) แล้วเขียน DESIGN.md ด้วย `design_md.py --wire` | [Design direction](references/design-direction.md) §4, §8, §9 |
 | รอบรีวิว: คำสั่งปรับงาน (critique, polish, bolder, quieter, distill ฯลฯ), scorecard visual/UX, hard gate ที่ห้ามส่งงาน | [Review loop](references/review-loop.md) |
-| Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [Visual craft](references/visual-craft.md) |
+| Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [design quality](references/design-quality.md) §7 |
 | กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ, สถานะ live/syncing/stale ของ dashboard ที่ refresh | [Data visualization](references/data-visualization.md) |
 
 ## หัวข้อเพิ่มเติม (5 พ.ย. 2569, 0.12.0 และ Unreleased)
@@ -92,7 +92,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | DESIGN.md รูปแบบ Google Labs design.md (YAML tokens + 8 section), สร้างด้วย `design_md.py`, ตรวจด้วย `design_md_check.py` | [Design memory](references/design-memory.md) |
 | โปรเจกต์เดิม (brownfield) — mode ONBOARD: ถอด DESIGN.md จากโค้ด (`code_extract.py`, `design_md.py --from-code`), หา drift, baseline audit | [Brownfield](references/brownfield.md) |
 | ลำดับการตรวจบังคับ: `--fast` baseline → แก้ทีเดียว → `--fast` ยืนยัน → `--zoom` เต็มครั้งเดียว; panel ปรับค่าสด (`tweaks_panel.py`), รายงานรีวิว HTML (`review_report.py`) | [Render verification](references/render-verification.md), [Review loop](references/review-loop.md) |
-| บทเรียนจาก OpenDesign 51 templates (กติกา) และ 25 หน้าที่ render แล้ววัดค่า | [Templates study](assets/open-design-templates-study.md), [Visual study](assets/open-design-visual-study.md) |
+| บทเรียนจาก OpenDesign 51 templates (กติกา) และ 25 หน้าที่ render แล้ววัดค่า | [evidence](assets/evidence.md) |
 
 **หมายเหตุการเรียกใช้:** SKILL.md เป็นตัวชี้ทางอย่างเดียว (ตาราง "งาน → ไฟล์ที่ต้องเปิด") กติกาจริงอยู่ใน references
 ถ้าต้องการให้ใช้กรอบนี้แน่นอน เรียก `/ux-ui-principles` โดยตรง
@@ -125,8 +125,8 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 |---|---|
 | Workflow และขอบเขตการใช้งาน | [SKILL.md](SKILL.md) |
 | Nielsen heuristics, mental model, signifier, Fitts, Hick–Hyman, IA | [Interaction](references/interaction.md) |
-| Hierarchy, typography, grouping, responsive และข้อความไทย | [Visual composition](references/visual-composition.md) |
-| ค่าวัดจริงด้านภาพ: น้ำหนัก/tracking/line-height ตามขนาด, อัตราส่วน type, โทนสี, spacing 3 ชั้น, ค่าย radius, motion, ความสมจริงของ content, ค่าภาษาไทย, preset และ craft pass — จาก 35 เว็บจริง + curated.design 18 + Dribbble 18 + Behance 14 + website templates | [Visual benchmarks](references/visual-benchmarks.md) · [Site measurements](assets/site-measurements.md) · [Gallery study](assets/gallery-study.md) |
+| Hierarchy, typography, grouping, responsive และข้อความไทย | [visual system](references/visual-system.md) Part B |
+| ค่าวัดจริงด้านภาพ: น้ำหนัก/tracking/line-height ตามขนาด, อัตราส่วน type, โทนสี, spacing 3 ชั้น, ค่าย radius, motion, ความสมจริงของ content, ค่าภาษาไทย, preset และ craft pass — จาก 35 เว็บจริง + curated.design 18 + Dribbble 18 + Behance 14 + website templates | [visual system](references/visual-system.md) Part C · [Site measurements](assets/evidence.md) · [Gallery study](assets/evidence.md) |
 | ข้อตกลงร่วมของ design system สาธารณะ 126 ระบบ: ชั้น token และชื่อ role, focus ring 3px, ค่า radius/breakpoint/density, flow ของงานบริการภาครัฐ (หน้า review, ลิงก์ Change, คงคำตอบ), กฎเรื่อง identity และ provenance | [Design system benchmarks](references/design-system-benchmarks.md) · [คู่มือ 126 ระบบฉบับเต็ม](assets/design-systems/index.md) |
 | WCAG 2.2 ระดับ A/AA/AAA, ข้อยกเว้น, keyboard และ modal | [Accessibility](references/accessibility.md) |
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |

@@ -37,7 +37,7 @@ icon sets use the same glyph for different meanings. [S81]
 
 | Rule | Detail |
 |---|---|
-| Size from the type scale | Common pairs: 16 px icon with 14–16 px text, 20 px with 16–18 px, 24 px for standalone controls, 32 px for large markers (sizes: [design-foundations.md](design-foundations.md)) |
+| Size from the type scale | Common pairs: 16 px icon with 14–16 px text, 20 px with 16–18 px, 24 px for standalone controls, 32 px for large markers (sizes: [visual-system.md](visual-system.md)) |
 | Optical alignment | Center the icon on the text's x-height or cap height, not the line box; check Thai text with ascenders/descenders |
 | Spacing | Consistent gap between icon and label (e.g. 6–8 px) from spacing tokens |
 | Hit target | The **target** meets minimums even if the glyph is small: WCAG 2.5.8 24×24 CSS px (AA, with exceptions), iOS default 44×44 pt (HIG minimum 28×28 pt), Android at least 48×48 dp [S07, S74, S78] |

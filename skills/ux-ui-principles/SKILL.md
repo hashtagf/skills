@@ -35,26 +35,26 @@ not whole folders.
 
 | The request is about | Open |
 |---|---|
-| Admin / back-office / internal tool page (records, approval, audit, access, settings) | **[back office](references/back-office.md)**, **[page spec](assets/page-spec.md)**; money, approvals, permissions or deletion → [trust, security, privacy](references/trust-security-privacy.md) |
-| Customer-facing app screen (account, checkout, booking, onboarding) | **[customer UI](references/customer-ui.md)**, **[page spec](assets/page-spec.md)**, [app-screen rules](references/app-screen-rules.md) |
+| Admin / back-office / internal tool page (records, approval, audit, access, settings) | **[back office](references/back-office.md)**, **[page spec](assets/page-spec.md)**, blueprints in [admin layouts](assets/layouts/admin.md); money, approvals, permissions or deletion → [trust, security, privacy](references/trust-security-privacy.md) |
+| Customer-facing app screen (account, checkout, booking, onboarding) | **[customer UI](references/customer-ui.md)**, **[page spec](assets/page-spec.md)**, blueprints in [accounts](assets/layouts/accounts.md) / [commerce](assets/layouts/commerce.md), [app-screen rules](references/app-screen-rules.md) |
 | States (loading, empty, error, success), async outcomes, dialogs, bulk actions, dashboards behavior | **[patterns](references/patterns.md)**; dashboard / admin / CRM screens → **[app-screen rules](references/app-screen-rules.md)** §7 (doctrine + state matrix) |
-| Landing / marketing / public page (any business: clinic, café, SaaS …), new look, redesign, "ทำให้สวยขึ้น" | Before the first reply, even the interview: **[design direction](references/design-direction.md)** §9, **[direction library](references/direction-library.md)** (the interview shows its previews) and **[marketing copy](references/marketing-copy.md)** (Round A asks for the offer and proof it needs). Before building: **[design quality](references/design-quality.md)**, **[visual benchmarks](references/visual-benchmarks.md)**, **[direction recipes](references/direction-recipes.md)**, **[visual assets](references/visual-assets.md)**, **[reference library](assets/references/README.md)** (look at 2–3), [marketing layouts](assets/layouts/marketing.md), [what the best pages do](assets/open-design-visual-study.md); after the interview also [color palette](references/color-palette.md) and [motion](references/motion.md) |
+| Landing / marketing / public page (any business: clinic, café, SaaS …), new look, redesign, "ทำให้สวยขึ้น" | Before the first reply, even the interview: **[design direction](references/design-direction.md)** §9, **[direction library](references/direction-library.md)** (the interview shows its previews) and **[marketing copy](references/marketing-copy.md)** (Round A asks for the offer and proof it needs). Before building: **`python3 scripts/look.py <kind>`** (open every image it lists), **[design quality](references/design-quality.md)**, **[visual system](references/visual-system.md)**, **[visual assets](references/visual-assets.md)**, [direction recipes](references/direction-recipes.md), [marketing layouts](assets/layouts/marketing.md); after the interview also [color palette](references/color-palette.md) and [motion](references/motion.md) |
 | Switch the look / theme / direction ("from the previews") of an existing page | **[direction library](references/direction-library.md)** (the previews are in this skill: `assets/directions/previews/`), [direction recipes](references/direction-recipes.md), [tokens to code](references/tokens-export.md) |
 | Colors, palette, contrast, dark mode | [color palette](references/color-palette.md) |
 | Animation / motion | [motion](references/motion.md) |
-| Type, spacing, radius, tokens, Thai + Latin faces, headline length | **[design foundations](references/design-foundations.md)**; measured values → [visual benchmarks](references/visual-benchmarks.md); token naming, focus ring, radius/breakpoint/density norms, gov-style service flows → [design system benchmarks](references/design-system-benchmarks.md) |
-| Starting a design system or tokens from nothing (which tokens, focus style, radius, breakpoints) | **[design foundations](references/design-foundations.md)**, **[design system benchmarks](references/design-system-benchmarks.md)**, [accessibility](references/accessibility.md) (focus, targets); public-sector / multi-step service → also [forms](references/forms.md) §7 |
-| Layout, hierarchy, mobile web composition | [visual composition](references/visual-composition.md), [layout library](assets/layouts/index.md) (one category file) |
-| "ดูยาก / รก / ไม่สวย", focal point, signal budget | [visual craft](references/visual-craft.md) |
+| Type, spacing, radius, tokens, Thai + Latin faces, headline length | **[visual system](references/visual-system.md) Part A**; measured values → [visual system](references/visual-system.md) Part C; token naming, focus ring, radius/breakpoint/density norms, gov-style service flows → [design system benchmarks](references/design-system-benchmarks.md) |
+| Starting a design system or tokens from nothing (which tokens, focus style, radius, breakpoints) | **[visual system](references/visual-system.md) Part A**, **[design system benchmarks](references/design-system-benchmarks.md)**, [accessibility](references/accessibility.md) (focus, targets); public-sector / multi-step service → also [forms](references/forms.md) §7 |
+| Layout, hierarchy, mobile web composition, which sections a page needs | **[layout index](assets/layouts/index.md)** (page anatomy by job, then one category file), [visual system](references/visual-system.md) Part B |
+| "ดูยาก / รก / ไม่สวย", focal point, signal budget | [design quality](references/design-quality.md) §7 |
 | Forms (fields, validation, multi-step and review step, Thai address / phone / ID) | **[forms](references/forms.md)** |
 | Which component; component states and keyboard | [components usage](references/components-usage.md), [component states](references/component-states.md); grids, drag, pickers, rich text, tours → [advanced components](references/advanced-components.md) |
 | Navigation, menus, settings-page structure, IA, journeys, permissions model | [experience architecture](references/experience-architecture.md), [navigation grouping](references/navigation-grouping.md) |
-| Charts (which chart, how to color it), KPIs, tables of values, heatmaps, live data | **[data visualization](references/data-visualization.md)** |
+| Charts (which chart, how to color it), KPIs, tables of values, heatmaps, live data | **[data visualization](references/data-visualization.md)**, blueprints in [dashboard layouts](assets/layouts/dashboards.md) |
 | Any phone app screen or flow (onboarding, permissions, push, offline, gestures), even when it is also a customer screen | **[mobile native](references/mobile-native.md)**, [notifications](references/notifications.md) |
 | AI features (agents, chat, tool calls, generated output) | **[AI features](references/ai-features.md)** |
 | UX writing, errors, empty states | [content design](references/content-design.md) |
 | Accessibility / WCAG question or check | **[accessibility](references/accessibility.md)**; "confirm it passes" on built UI → also **[render verification](references/render-verification.md)** (no browser → report *not tested*) |
-| Thai / bilingual pages, localization, performance | [i18n & performance](references/i18n-performance.md), [design foundations](references/design-foundations.md) "Thai with Latin display faces" |
+| Thai / bilingual pages, localization, performance | [i18n & performance](references/i18n-performance.md), [visual system](references/visual-system.md) Part A "Thai with Latin display faces" |
 | Review, critique, score, usability audit, "rank the problems", refinement verb (polish, bolder, quieter, distill …) | **[review loop](references/review-loop.md)** (scorecards, hard gates) first, then [scoring caps](references/scoring-caps.md); "looks generic / like a template", bolder → [design quality](references/design-quality.md) |
 | DESIGN.md, design memory, conflicts between docs, code and other skills | [design memory](references/design-memory.md) |
 | Existing product without DESIGN.md (brownfield) | [brownfield](references/brownfield.md) (`scripts/code_extract.py`, `scripts/design_md.py --from-code`) |
@@ -104,33 +104,31 @@ page must look designed, and this skill holds the examples that show how:
    [design direction](references/design-direction.md) §9 (Round A business, B taste
    with pictures, C confirm), then `scripts/design_md.py … --wire`. An existing
    product without DESIGN.md runs ONBOARD instead. Away: pick by subject and say so.
-2. **Look before you build.** First open 2–3 pages of your kind from the
-   [reference library](assets/references/README.md) and the `template` rows of the
-   [showcase catalog](assets/showcase/README.md) (real designed pages, the bar to meet). Then the chosen direction's preview (`assets/directions/previews/<id>.jpg`,
-   drawn in its own composition on real content) and its product UI
-   (`previews/product/<id>-overview.jpg`: same tokens), run
-   `scripts/direction_recipe.py <id>` (tokens, bans and required components are the
-   spec), and start from the matching composition in `scripts/compositions.js`. Never default to warm cream + serif +
-   terracotta or near-black + one neon accent ([design quality](references/design-quality.md) §2).
+2. **Look before you build.** Run `python3 scripts/look.py <kind> [--direction <id>]`
+   (kind: landing, cafe, saas, dashboard, deck, mobile, portfolio …) and open **every**
+   image it lists: real designed pages of your kind, then the direction's preview and its
+   product UI. Name in the answer which you looked at and the one move you take from
+   them. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components) and
+   start from the composition it names in `scripts/compositions.js`. Never default to
+   warm cream + serif + terracotta or near-black + one neon accent ([design quality](references/design-quality.md) §2).
 3. **Write the plan** ([design quality](references/design-quality.md) §1): idea
    sentence, competitor test, one live thing, **one decisive move**; values from
-   [visual benchmarks](references/visual-benchmarks.md) §1–§6 (display size,
-   tracking, section rhythm), not from habit.
+   [visual system](references/visual-system.md) Part C §1–§6 (display size, tracking,
+   section rhythm), not from habit.
 4. **Pictures:** real photographs ([visual assets](references/visual-assets.md) §2b)
    when you can reach the web; otherwise type-led and fragment-led. Never generic
    clip-art illustration (a cup, a rocket, a blob) as the hero.
 5. **Palette** from the chosen keyword ([color palette](references/color-palette.md)),
    **motion baseline** with a reduced-motion branch ([motion](references/motion.md) §1),
    **mobile composition** designed for 390px, not the desktop shrunk.
-6. **Before delivery (any built page, back office included):**
-   `node scripts/script_check.js <page>` (syntax and globals that clash with
-   `window`, e.g. `const top`; no browser needed) and `python3 scripts/slop_check.py <page>`;
-   fix each flag or waive it in one sentence. Without a shell, walk
-   [design quality](references/design-quality.md) §2 row by row, wrap page scripts
-   in an IIFE, and list each device as absent or waived in the answer.
-7. **Render and look** at 1440 and 390, light and dark (`render_check.js`), then the
-   [visual benchmarks](references/visual-benchmarks.md) §13 craft pass: put the
-   render beside one benchmark page of the same category and fix the top three
+6. **Check before delivery (any built page, back office included):**
+   `python3 scripts/check.py <page>` runs every static check in one go (script syntax
+   and globals that clash with `window`, template devices, contrast pairs, state markers)
+   and, with `--render`, the 1440/390 light/dark render. Fix each failure or waive it in
+   one sentence. Without a shell, walk [design quality](references/design-quality.md) §2
+   row by row, wrap page scripts in an IIFE, and list each device as absent or waived.
+7. **Look at the render** beside the pictures from step 2 and run the
+   [visual system](references/visual-system.md) Part C §13 craft pass: fix the top three
    differences. No browser: say *not rendered*, never "looks good".
 
 For any **Critical** work (money, approvals, permissions, irreversible or legal

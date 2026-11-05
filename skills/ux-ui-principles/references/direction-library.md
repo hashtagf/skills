@@ -39,7 +39,6 @@ material, type voice and surface; it never changes the page pattern
    structure) is in `previews/product/<id>-overview.jpg` and `-records.jpg`. Try another
    arrangement or subject, or the user's own copy:
    `node scripts/direction_preview.js --ids dose,riso [--comp c3] [--subject cafe] [--brief "Headline|Sentence|Button"] [--sheet]`;
-   `--legacy` draws the old identical agency sample when only palette and type should differ.
    Optional richer pictures: if the Hallmark skill is installed, its
    `<skills dir>/hallmark/references/themes/<slug>.jpg` (the *Preview slug*
    column) shows a bespoke first screen of a sample site. Without either, render a
@@ -50,7 +49,7 @@ material, type voice and surface; it never changes the page pattern
    [design direction](design-direction.md) §9, per [design workflow](design-workflow.md) "Asking well"). When the user asks for "more", show the next 2-3 from the
    other groups; never repeat shown ones.
 5. **Record the choice** in the design context card: direction, dials, ground
-   (light/dark), the Thai type pair ([design foundations](design-foundations.md)
+   (light/dark), the Thai type pair ([visual system](visual-system.md) Part A
    "Thai with Latin display faces") and one sentence on why it fits.
 6. **Keep the previous version.** A direction change replaces the look; copy the
    existing files first ([design workflow](design-workflow.md) phase 5) so the
@@ -59,26 +58,17 @@ material, type voice and surface; it never changes the page pattern
 Provide preview images only for the directions you actually offer; a preview of
 a direction the user did not ask about is noise.
 
-### Richer first screens
+### Preview sets (rebuild with `node scripts/build_previews.js`)
 
-After reviewing 21st.dev ([study](../assets/21st-study.md)), the first screens
-gained six compositions beyond the split hero: image fan, ring of thumbnails,
-image accordion, full-bleed overlay with oversized type, centered headline over
-a product mock, and a centered hero on a mesh background, plus an announcement
-pill, avatar group with rating and a placeholder logo cloud. They are in
-`assets/site/previews/sheet-hero-<group>.jpg` (`company`, `premium`, `playful`,
-`atmospheric`) and in the `home` page. They are still drawn from palettes: real
-photography, shaders and motion are what the reference pieces add on top.
+| Set | Script | Folder | Shows |
+|---|---|---|---|
+| directions | `direction_preview.js --sheet` | `assets/directions/previews/` | each direction in its composition on a subject, plus group sheets |
+| brand | `backoffice_preview.js --direction all` | `previews/product/` | the same direction as product UI (overview, records) |
+| backoffice, mobile, tablet, rtl | `backoffice_preview.js` | `assets/backoffice/previews/…` | admin looks, density, phone, 820px tablet, mirrored layout |
 
-### Beyond the first screen
-
-A direction must be judged on a checkout, a dense table and a form, not only a
-hero. `scripts/site_preview.js` renders the pages listed in [preview coverage](preview-coverage.md), every landing section and a
-customer component sheet in six representative directions (`--all` for every direction), and
-preview coverage maps the layout IDs to their
-pictures and lists what is still missing. Compare the shortlisted looks on the
-pages the project actually needs (`assets/site/previews/sheet-<page>.jpg`)
-before choosing.
+Judge a direction on a dense table and a form too, not only a hero: look at its product
+previews before choosing. Dark variants of a light direction come from
+`python3 scripts/export_tokens.py <id> --print-dark`.
 
 ### Shape language
 

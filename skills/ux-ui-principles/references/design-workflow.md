@@ -99,7 +99,7 @@ type first ([back office](back-office.md)).
 
 **Read.** [direction library](direction-library.md) when a new look is needed, [design direction](design-direction.md) §3–9,
 [design quality](design-quality.md) §1–2b,
-[visual composition](visual-composition.md), layout library category +
+[visual system](visual-system.md) Part B, layout library category +
 [specification](../assets/layouts/specification.md); depth in
 [worked examples](../assets/layouts/worked-examples.md) and
 [back-office worked examples](../assets/layouts/worked-examples-back-office.md);
@@ -147,12 +147,11 @@ from its landing page.
 [content design](content-design.md) or [marketing copy](marketing-copy.md),
 [data visualization](data-visualization.md), [ai features](ai-features.md),
 [trust/security/privacy](trust-security-privacy.md);
-visual: [visual composition](visual-composition.md) (hierarchy, grouping, Thai text), [design foundations](design-foundations.md), [color palette](color-palette.md),
-[visual craft](visual-craft.md), [visual assets](visual-assets.md),
-[visual benchmarks](visual-benchmarks.md) §13 craft pass, [iconography](iconography.md).
+visual: [visual system](visual-system.md) Part B (hierarchy, grouping, Thai text), [visual system](visual-system.md) Part A, [color palette](color-palette.md),
+[design quality](design-quality.md) §7, [visual assets](visual-assets.md),
+[visual system](visual-system.md) Part C §13 craft pass, [iconography](iconography.md).
 Evidence behind values and wording, open only to justify or check a choice:
-[site measurements](../assets/site-measurements.md), [gallery study](../assets/gallery-study.md),
-[copy study](../assets/copy-study.md), [nav study](../assets/nav-study.md).
+[evidence](../assets/evidence.md).
 
 **Ask.**
 - ASK-IF real content is required and cannot be drafted honestly: prices,
@@ -165,8 +164,8 @@ Evidence behind values and wording, open only to justify or check a choice:
 Apply principles selectively: for each decision connect evidence → affected
 task → principle → proposed behavior → verification; no list of laws
 disconnected from the UI. Finish with a visual pass (focal point,
-containers, density, color roles — [visual craft](visual-craft.md)) and the
-craft pass with measured values ([visual benchmarks](visual-benchmarks.md) §13).
+containers, density, color roles — [design quality](design-quality.md) §7) and the
+craft pass with measured values ([visual system](visual-system.md) Part C §13).
 
 **Any form on the page** (sign-up, checkout, settings, filters with
 input, create/edit) makes [forms](forms.md) mandatory: per-field rules
@@ -175,7 +174,7 @@ messages for each rule, validation timing (§6) and submission states (§7).
 
 **Public pages also need:** a palette from the keyword ([color palette](color-palette.md)
 "Making it look good" + starter palettes), the mobile composition
-([visual composition](visual-composition.md) "Mobile web composition") and a motion spec.
+([visual system](visual-system.md) Part B "Mobile web composition") and a motion spec.
 
 **Motion spec** for every page at or above the motion baseline ([motion](motion.md) §1): one table of
 element · trigger · motion · duration/easing · reduced-motion behavior within
@@ -233,7 +232,7 @@ specific refinement verb for each issue. Report the final visual and UX scores f
 Product-UI builds: run the one-round [polish pass](review-loop.md#product-ui-polish-pass) here, before phase 7.
 
 **Read.** [review loop](review-loop.md), [scoring caps](scoring-caps.md), [gate tiers](gate-tiers.md), [design quality](design-quality.md) §5,
-[visual craft](visual-craft.md), [do and don't](do-and-dont.md); admin pages also
+[design quality](design-quality.md) §7, [do and don't](do-and-dont.md); admin pages also
 the page review in [back office](back-office.md).
 
 **Ask.** NO — critique is internal. Fix within scope; surface taste-level
@@ -247,8 +246,8 @@ notes in the report instead of asking.
 "Run order": `--fast` baseline on all pages → one batch of all fixes → `--fast`
 confirm on changed pages + journey once → full `--zoom` run once per page before
 delivery. Never re-run a check after a single fix; report the run counts.
-`node scripts/script_check.js <page>` runs first on every built page, with or without a
-browser: a syntax error or a global such as `const top` silently kills the page's scripts.
+`python3 scripts/check.py <page>` runs first on every built page, with or without a browser
+(script syntax and `window` clashes such as `const top`, template devices, contrast, state markers).
 
 **Do.** At the depth tools allow: `node scripts/render_check.js <page>`
 (`--fast` while iterating, `--zoom` full run once per page at the end; add `--reduced-motion` when the page animates; `--doctor` exit 3 → mark *not tested*, run the static checks,
@@ -380,7 +379,6 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [design direction](design-direction.md) | Eight dimensions, page pattern by question, compositions, styles, dials, named directions (§7), keywords (§8), interview (§9) | 2 (§1–2), 3 (§3–9) |
 | [direction library](direction-library.md) | Every direction with fit, risk and previews; how to show and pick | 3 |
 | [direction recipes](direction-recipes.md) | Hard rules, bans, required components, pre-flight per direction | 3 (after the pick), 5, 7 |
-| [preview coverage](preview-coverage.md) | Which blueprints, sections and components have previews; how to regenerate | 3 |
 | [motion](motion.md) | Motion level per dial, motion types, choreography, reduced motion, spec | 3 (§1), 4 (§7), 5 (§5–6), 7 (§8) |
 | **Experience architecture** | | |
 | [experience architecture](experience-architecture.md) | Journeys, IA, navigation, URLs, permission flows | 2 |
@@ -403,15 +401,16 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [layout index](../assets/layouts/index.md), [specification](../assets/layouts/specification.md) | 43 blueprints in 8 categories; the shared contract | 3 |
 | [worked examples](../assets/layouts/worked-examples.md), [back-office worked examples](../assets/layouts/worked-examples-back-office.md), [OpenDesign](../assets/layouts/opendesign.md) | Deliverable depth; external references | 3, 4 |
 | **Visual and design system** | | |
-| [design foundations](design-foundations.md) | Token layers, type scale, Thai + Latin faces, headline length, spacing, radius, elevation, density, focus | 4 |
+| [visual system](visual-system.md) Part A | Token layers, type scale, Thai + Latin faces, headline length, spacing, radius, elevation, density, focus | 4 |
 | [color palette](color-palette.md) | Roles and role names, semantic colors, contrast pairs, dark, OKLCH recipe, starter palettes | 4 |
-| [visual composition](visual-composition.md) | Hierarchy, grouping, responsive, mobile web composition, Thai text, page rhythm | 3, 4, 7 |
-| [visual craft](visual-craft.md) | Focal point, containers, signal budget, "ดูยาก / รก / ไม่สวย" diagnosis | 4, 6 |
+| [visual system](visual-system.md) Part B | Hierarchy, grouping, responsive, mobile web composition, Thai text, page rhythm | 3, 4, 7 |
+| [design quality](design-quality.md) §7 | Focal point, containers, signal budget, "ดูยาก / รก / ไม่สวย" diagnosis | 4, 6 |
 | [design quality](design-quality.md) | Reading order for public pages, template devices to avoid, structural slop, render critique | 3 (§1–2b), 6 (§5) |
 | [visual assets](visual-assets.md) | What picture goes in each section when there are no photos | 4 |
-| [visual benchmarks](visual-benchmarks.md) | Measured values: type, tone, spacing, radius, motion, presets, craft pass | 4 |
+| [visual system](visual-system.md) Part C | Measured values: type, tone, spacing, radius, motion, presets, craft pass | 4 |
 | [reference library](../assets/references/README.md) | 30 rendered pages that look designed (landing, editorial, report, product, mobile), each mapped to a composition | 3, 4, 6 (compare the render) |
 | [showcase catalog](../assets/showcase/README.md), `scripts/showcase_fetch.py` | 98 Open Design showcase entries as 65 distinct captures, each marked template / study / skip with a composition; pictures fetched locally | 3, 4, 6 |
+| `scripts/look.py` | Lists the pictures to open before building a page of a kind (references, showcase, direction and product previews) | 3, 5 |
 | `scripts/compositions.js`, [content packs](../assets/directions/content-packs.json), [photos](../assets/photos/README.md) | Fourteen first-screen compositions; sample content per kind of business; licensed stand-in photographs | 3, 5 |
 | `scripts/brand.js` | One direction → public pages and product UI on one token set (`backoffice_preview.js --direction`) | 3, 5 |
 | [design system guides](../assets/design-systems/index.md) | all 126 study guides (14 curated with sector and reading notes) | 2, 4 |
@@ -422,11 +421,11 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [component states](component-states.md) | State checklist, focus ring, keyboard contracts, spec template | 4 |
 | [advanced components](advanced-components.md) | Editable grids, drag, pickers, rich text, mentions, tours, autosave, recovery | 4 |
 | [app-screen rules](app-screen-rules.md) | One question per screen, quiet chrome, grid arithmetic, data honesty | 4, 6 |
-| [page anatomy by job](page-anatomy-by-job.md) | Job → sections, signature, mirror test, screen budget | 2, 3 |
+| [page anatomy by job](../assets/layouts/index.md) | Job → sections, signature, mirror test, screen budget | 2, 3 |
 | [prototyping](prototyping.md) | Wireframes, HTML prototypes with states, hand-off | 5 |
 | [build recipes](build-recipes.md) | Surface modes, no-JS demos, hero grid, placeholders, headless fallback | 4, 5, 7 |
 | [tokens to code](tokens-export.md), [tailwind](tailwind.md), [shadcn rules](shadcn-rules.md) | Direction → CSS / Tailwind v4 / shadcn tokens; stack rules | 5 |
-| Evidence: [21st.dev study](../assets/21st-study.md), [21st.dev dashboard study](../assets/21st-dashboard-study.md), [site measurements](../assets/site-measurements.md), [gallery study](../assets/gallery-study.md), [copy study](../assets/copy-study.md), [nav study](../assets/nav-study.md), [OpenDesign templates study](../assets/open-design-templates-study.md), [OpenDesign visual study](../assets/open-design-visual-study.md) | Where measured values and rules came from | 4 (to justify a value), RESEARCH |
+| Evidence: [evidence](../assets/evidence.md) | Where measured values and rules came from | 4 (to justify a value), RESEARCH |
 | **Quality, review and verification** | | |
 | [gate tiers](gate-tiers.md) | Floor / Reflex / Finish, pre-emit critique, verification budget, refine vs redesign | 6, 7, 8 |
 | [review loop](review-loop.md) | Refinement verbs, critique format, visual and UX scorecards, hard gates (§5), report | 6, REFINE |
@@ -444,7 +443,8 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | `scripts/design_md_check.py` | 3 (after brand extraction), 8 (after editing DESIGN.md) |
 | `scripts/slop_check.py` | 6 |
 | `scripts/render_check.js`, `scripts/contrast.py` | 7 |
-| `scripts/script_check.js` | 6, 7 (syntax and globals that clash with `window`; no browser needed) |
+| `scripts/check.py` | 6, 7: one command for every delivery check (runs script_check.js, slop_check.py, contrast.py, state_check.py, and render_check.js with `--render`) |
+| `scripts/script_check.js` | called by check.py: syntax and globals that clash with `window`; no browser needed |
 | `scripts/direction_preview.js`, `scripts/build_previews.js` | 3 (pictures of directions; build_previews regenerates all preview sets) |
 | `scripts/export_tokens.py` | 5 (direction to CSS, Tailwind, shadcn tokens) |
 | `scripts/backoffice_preview.js` | 3 (pictures of back-office density and tone) |
@@ -453,4 +453,3 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | `scripts/direction_recipe.py` | 3, 5, 7 (recipe and pre-flight for the chosen direction) |
 | `scripts/tweaks_panel.py` | 6 (live tuning during reviews; remove before shipping) |
 | `scripts/review_report.py` | 6, 8 (findings → HTML report) |
-| `scripts/site_preview.js` | 3 (a direction on every page type, section and component) |

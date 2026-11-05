@@ -3,7 +3,7 @@
 Which component fits a task, when not to use it, and the behavior it must have.
 States and keyboard contracts for every family are in
 [component-states.md](component-states.md); visual tokens in
-[design-foundations.md](design-foundations.md); form controls in depth in
+[visual-system.md](visual-system.md); form controls in depth in
 [forms.md](forms.md). Keyboard expectations follow the ARIA Authoring Practices
 patterns. [S14, S93] Source IDs resolve in [sources.md](sources.md).
 
@@ -160,7 +160,7 @@ Each entry: **Use when · Avoid when · Must have · Notes**.
 
 **Description list (key–value)** — Use: record details. Must have: labels muted and aligned, values selectable/copyable, empty values shown as "—" with meaning ("ไม่มีข้อมูล" vs "ไม่ได้ระบุ").
 
-**Card** — Use: browsable, heterogeneous items with an image or summary. Avoid: for data users must compare (use table) and as decoration around every section ([visual-craft.md](visual-craft.md)). Must have: one primary click target; nested interactive elements reachable separately.
+**Card** — Use: browsable, heterogeneous items with an image or summary. Avoid: for data users must compare (use table) and as decoration around every section ([design-quality.md](design-quality.md)). Must have: one primary click target; nested interactive elements reachable separately.
 
 **Stat / KPI** — Must have: value, unit, comparison, time window, freshness; abnormal state with text, not color only.
 

@@ -2,8 +2,8 @@
 
 Two quality areas that are cheap to design in and expensive to retrofit.
 Source IDs resolve in [sources.md](sources.md). Thai typography and wrapping
-are owned by [design-foundations.md](design-foundations.md) "Thai with Latin display faces"
-(see also [visual-composition.md](visual-composition.md#thai-and-mixed-language-interfaces)).
+are owned by [visual-system.md](visual-system.md) "Thai with Latin display faces"
+(see also [visual-system.md](visual-system.md#thai-and-mixed-language-interfaces)).
 
 ## Internationalization (i18n) — design so localization is possible
 
@@ -47,7 +47,7 @@ A single-page site that offers Thai and English with a toggle:
   script ("EN" on the Thai page, "TH" on the English page). Give it an
   `aria-label` in both languages.
 - Switch the **font family per language**, not only the text
-  ([design foundations](design-foundations.md) "Thai with Latin display
+  ([visual system](visual-system.md) Part A "Thai with Latin display
   faces"), and set line-height and tracking per language.
 - Select options and other text that live in attributes or form controls need
   script to translate; keep the keys in one object and set them in `setLang()`.

@@ -20,7 +20,7 @@ change only what that verb covers, and check its result.
 | bolder | Page reads flat / generic | Stronger focal point, scale contrast, one brand move | Focal point identifiable in 1 s |
 | quieter | Too loud, too many effects | Remove shadows/gradients/colors; signal budget ≤ 2 per element | Fewer competing signals, hierarchy intact |
 | distill | Dense, confusing | Cut or defer elements, progressive disclosure | Main task needs the same or fewer steps; nothing required was hidden |
-| typeset | Weak type hierarchy | Scale, weight, leading, measure, Thai line-height | Headings vs body distinct; line length 60–75 ch (Latin; [design foundations](design-foundations.md)) |
+| typeset | Weak type hierarchy | Scale, weight, leading, measure, Thai line-height | Headings vs body distinct; line length 60–75 ch (Latin; [visual system](visual-system.md) Part A) |
 | layout | Proportions off | Grid, composition, spacing steps | Edges align; related items grouped |
 | colorize | Color decorative or unclear | Map color to roles and statuses | Every color has a role; contrast passes |
 | animate | No interaction feedback | Purposeful transitions (durations in [motion](motion.md) §2), reduced-motion path | Motion explains change; nothing blocks input |
@@ -32,7 +32,7 @@ change only what that verb covers, and check its result.
 ### Product-UI polish pass
 
 Mandatory once for BUILD/IMPROVE of dashboards, admin and ERP screens (public pages use the
-[craft pass](visual-benchmarks.md)). Bounded: one round over this list, then stop; no new features, copy or
+[craft pass](visual-system.md)). Bounded: one round over this list, then stop; no new features, copy or
 structure changes (those are other verbs). Keep before/after renders at 1440 and 390.
 
 | # | Check | Done when |
@@ -50,7 +50,7 @@ Report the changes made per number and anything left (with reason). A pass that 
 
 Thai shorthand mapping: "ดูธรรมดา / ไม่มีอะไรเด่น" → bolder; "รก / ลายตา" →
 quieter or distill; "อ่านยาก" → typeset; "ไม่ลงตัว" → layout; "สีมั่ว" →
-colorize; "พังบนมือถือ" → adapt. Diagnosis detail: [visual craft](visual-craft.md).
+colorize; "พังบนมือถือ" → adapt. Diagnosis detail: [design quality](design-quality.md) §7.
 
 ## 2. Critique format
 

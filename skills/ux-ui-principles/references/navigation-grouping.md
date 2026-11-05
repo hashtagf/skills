@@ -7,7 +7,7 @@ component choice (tabs vs segmented control vs anchors) in
 
 Evidence: navigation of 21 products studied from public pages, docs, help
 centres, public demos and open source on 2026-11-04 — see
-[nav study](../assets/nav-study.md). No signed-in dashboards were opened.
+[nav study](../assets/evidence.md). No signed-in dashboards were opened.
 Counts describe practice in that set; they are project recommendations, not
 research findings. Validate a proposed menu with tree testing [S32].
 
@@ -205,7 +205,7 @@ Help
 
 1. Groups follow objects and tasks, not departments; one structure for all roles.
 2. Personal hub first with actionable counts; Create and Search reachable everywhere.
-3. Heuristic from the [nav study](../assets/nav-study.md), not a rule: about 5–9 visible top-level items, 3–5 groups, ≤2 levels for features.
+3. Heuristic from the [nav study](../assets/evidence.md), not a rule: about 5–9 visible top-level items, 3–5 groups, ≤2 levels for features.
 4. Labels 1–2 words, plural nouns for collections, front-loaded, icon + label.
 5. No duplicates, no "Add X" items, saved views as tabs or filters.
 6. Settings follow a scope ladder; admin areas hidden for non-admins.

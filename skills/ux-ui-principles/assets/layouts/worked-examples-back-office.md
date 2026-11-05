@@ -115,6 +115,6 @@ Role ที่ได้รับ (checkbox + ความเสี่ยง)  | 
 (สีพื้นเข้ม, ตัวเลขสลับดำ/ขาว, กรอบเป้า, ▼ มุมช่อง, ความจางของข้อมูลเก่า)
 แก้โดย ramp สีอ่อนพร้อมตัวเลขสีเดียว, "ไม่มี" เป็นช่องว่าง, สถานะเป็นข้อความ "−1" ในช่อง
 และย้ายข้อมูลเก่าไปที่หัวแถว กติกานี้อยู่ใน [data-visualization.md](../../references/data-visualization.md)
-(heatmaps) และ [visual-craft.md](../../references/visual-craft.md) (signal budget)
+(heatmaps) และ [design-quality.md](../../references/design-quality.md) (signal budget)
 
 **Metric:** % สมาชิกที่ข้อมูลไม่เกิน 12 เดือน · **Guardrail:** ส่วนต่างระหว่างประเมินตนเองกับผลที่ยืนยัน

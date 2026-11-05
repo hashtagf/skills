@@ -141,7 +141,7 @@ once (legend, tooltip or help text):
 - Long records: section anchors or tabs only when sections are independent.
 
 **KPI tiles** — value + unit + comparison + time window + freshness
-("อัปเดต 14:32"); emphasize only abnormal ones ([visual-craft.md](visual-craft.md)).
+("อัปเดต 14:32"); emphasize only abnormal ones ([design-quality.md](design-quality.md)).
 
 ## Data states
 

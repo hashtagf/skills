@@ -4,7 +4,7 @@ Motion either **explains change** (feedback, continuity, state) or
 **expresses the brand** (a hero moment, a reveal). Decide which job each
 animation does; an animation with neither job is removed. Values here are
 starting points. This file owns durations, easing, token names and the dial/baseline;
-measured values are in [visual benchmarks](visual-benchmarks.md) §7.
+measured values are in [visual system](visual-system.md) Part C §7.
 
 ## 1. Motion level from the dial
 

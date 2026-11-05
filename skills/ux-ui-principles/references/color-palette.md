@@ -1,7 +1,7 @@
 # Building and checking a color palette
 
 Use when a product has no palette, when changing brand color, or when adding a
-theme (dark mode, alternate brand). Token structure is in [design-foundations.md](design-foundations.md); this
+theme (dark mode, alternate brand). Token structure is in [visual-system.md](visual-system.md); this
 file covers color decisions and checks. Run
 `scripts/contrast.py` for the numeric checks. Source IDs resolve in [sources.md](sources.md).
 

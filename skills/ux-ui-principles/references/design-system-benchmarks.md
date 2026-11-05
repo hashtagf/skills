@@ -92,7 +92,7 @@ Contents: §1 Token architecture · §2 Type and spacing · §3 Focus and target
   2px (20), 6px (15), 12–16px (28). Government and enterprise kits sit
   at 0–4px (Foundation 0, Flowbite/Twilio/Fluent/TDesign 2px); consumer-leaning kits at 8–16px (Kobalte 16px); automotive/finance brands
   (Porsche 2px, Volvo 4px, Visa 6px) stay small with one saturated blue.
-  Choose one camp per product ([visual benchmarks](visual-benchmarks.md) §4).
+  Choose one camp per product ([visual system](visual-system.md) Part C §4).
 - **Primary blue is the common default** (e.g. `#0070f2` SAP, `#0c66e4` Atlassian,
   `#165dff` Arco, `#2d72d2` Blueprint, `#0052d9` TDesign; not counted across all 126).
   A non-blue primary needs an idea ([design quality](design-quality.md)), not a default.

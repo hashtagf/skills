@@ -527,7 +527,7 @@
           "forms"
         ],
         [
-          "design-foundations",
+          "visual-system",
           "accessibility"
         ]
       ],
@@ -919,7 +919,7 @@
         ],
         [
           "i18n-performance",
-          "design-foundations",
+          "visual-system",
           "marketing-copy"
         ]
       ],
@@ -1264,7 +1264,7 @@
       "prompt": "Set up type scale and spacing tokens for a Thai and English web app.",
       "expected_reads": [
         [
-          "design-foundations"
+          "visual-system"
         ],
         [
           "design-system-benchmarks",
@@ -1780,7 +1780,7 @@
       "expected_reads": [
         [
           "design-quality",
-          "visual-craft",
+          "design-quality",
           "review-loop"
         ],
         [
@@ -1799,8 +1799,8 @@
       "prompt": "The Thai headline wraps to four lines on mobile. Fix it.",
       "expected_reads": [
         [
-          "design-foundations",
-          "visual-composition"
+          "visual-system",
+          "visual-system"
         ]
       ],
       "must_not_read": [
@@ -1924,7 +1924,7 @@
           "data-visualization"
         ],
         [
-          "visual-craft",
+          "design-quality",
           "app-screen-rules",
           "back-office"
         ]

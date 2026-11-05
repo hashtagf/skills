@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added (Codex UI-skill study: orchestrator, webapp-ui, frontend-design)
 - `ux-ui-principles`: `app-screen-rules.md` §7 operational-UI doctrine (scan-first, stable geometry, no nested cards, type caps, control-by-job, semantic palette, never-ship list, state matrix) from Codex `webapp-ui-skill`.
+- `assets/backoffice/styles.json`: `canopy` look from the Canopy MongoDB-MCP dashboard (deep green #214f3e primary 9.3:1, warm off-white ground, light sidebar, muted text darkened to 6:1, separate status colors, line tables) with a records preview; `design_md.py --backoffice canopy` writes its DESIGN.md.
 - `scripts/state_check.py`: static state-coverage scan (loading/empty/error/disabled/focus/selected/submitting/success/hover); misses = unverified.
 - `slop_check.py`: `viewport-scaled-font`, `nested-cards`, `hero-in-app` flags.
 - `design-memory.md` §2: cross-domain conflict decision order with vetoes (from the Codex orchestrator council); `render-verification.md` + SKILL.md §6: Ran / Skipped / Planned / Manual evidence labels.
@@ -57,6 +58,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (no full audit for one label, self-contained, record deviations) → `design-workflow.md` phase 8; "make it beautiful"
   reading order → `design-quality.md`; how to use the pairs → `do-and-dont.md`. SKILL.md §6 links to them; the
   reference → phase index lists `design-workflow.md` itself.
+
+### Changed (simplify: fewer files, one way to look, one way to check)
+- Eval data showed 40 of 81 docs never opened in 100 routing runs. Merged: design-foundations + visual-composition +
+  visual-benchmarks → `references/visual-system.md` (Parts A/B/C, Part C keeps its section numbers); visual-craft →
+  `design-quality.md` §7; eight study files (gallery, 21st, 21st dashboard, site measurements, copy, nav, two Open Design
+  studies) → `assets/evidence.md`; page-anatomy-by-job → `assets/layouts/index.md` "Page anatomy by job". Layout
+  category files are now named in the admin, customer, chart and layout routes. Links and eval names updated.
+- `scripts/look.py <kind> [--direction id]`: the single "look before you build" step; lists the reference, showcase and
+  direction pictures to open. SKILL.md §3 step 2 and the landing route require it.
+- `scripts/check.py <page> [--render]`: one command for script, slop, contrast, state and render checks (PASS / FLAG /
+  FAIL / ERROR / N/A / MANUAL / NOT RUN). Run order, phase 7 and SKILL.md §3 step 6 use it.
+- Removed the legacy palette-swatch previews: `site_preview.js`, `direction_preview.js --legacy`, build sets `site` and
+  `dark`, and `preview-coverage.md` (preview sets now listed in direction-library.md).
+- `slop_check.py`: fixed a crash on any page with a form (a form-rules flag shadowed the CSS rule list).
 
 ### Changed (one design system, real compositions, a reference library)
 - `ux-ui-principles`: direction previews no longer paint one agency template 63 ways. `scripts/compositions.js` holds ten

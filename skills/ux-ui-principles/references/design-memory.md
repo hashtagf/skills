@@ -97,7 +97,7 @@ Status: draft | approved (<date>, <owner>)
 
 ## Overview            <- personality, each adjective with what it means on screen; ranked philosophy
 ## Colors              <- roles and why; which pairs are contrast-checked; dark theme decision
-## Typography          <- families, scale, weights, Thai pairing and line-height ([design foundations](design-foundations.md))
+## Typography          <- families, scale, weights, Thai pairing and line-height ([visual system](visual-system.md) Part A)
 ## Layout              <- page pattern and composition per area; breakpoints
 ## Elevation & Depth   <- one depth strategy; border vs shadow policy
 ## Shapes              <- radius per component class; corner treatment
@@ -198,10 +198,10 @@ run when it was not.
 
 | Need | Prefer, if available | Fallback in this skill |
 |---|---|---|
-| New design language / tokens / component library | `design-system-builder` | [design foundations](design-foundations.md), [color palette](color-palette.md) |
-| Brand extraction from a site or references | A brand/design-language skill (e.g. Hue) | §3b procedure + [visual benchmarks](visual-benchmarks.md) |
+| New design language / tokens / component library | `design-system-builder` | [visual system](visual-system.md) Part A, [color palette](color-palette.md) |
+| Brand extraction from a site or references | A brand/design-language skill (e.g. Hue) | §3b procedure + [visual system](visual-system.md) Part C |
 | Expressive landing or creative direction | `frontend-design`, Taste Skill or Hallmark | [design direction](design-direction.md) §7, [design quality](design-quality.md) |
-| Admin / SaaS product UI craft | Interface Design | [back office](back-office.md), [visual craft](visual-craft.md) |
+| Admin / SaaS product UI craft | Interface Design | [back office](back-office.md), [design quality](design-quality.md) §7 |
 | React components on a shadcn project | shadcn tooling (`components.json` present) | [components usage](components-usage.md) |
 | Vue components | The project's Vue library | same |
 | Figma output | Figma MCP / figma-cli skill | [prototyping](prototyping.md) |

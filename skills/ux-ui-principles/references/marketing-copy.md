@@ -7,7 +7,7 @@ sentence are in [design-quality.md](design-quality.md) §1; the visitor's
 question order is in [customer-ui.md](customer-ui.md).
 
 Evidence: hero and section copy extracted from 32 public pages (22 English,
-10 Thai) on 2026-11-04 — see [copy study](../assets/copy-study.md). Counts are
+10 Thai) on 2026-11-04 — see [copy study](../assets/evidence.md). Counts are
 manual classification. These are project recommendations, not conversion
 findings; only a test on the real audience shows what converts
 ([measurement.md](measurement.md)).
@@ -32,7 +32,7 @@ page; leave that proof out instead ("Pages with no proof yet" below). Claims han
 
 ## 1. Headline
 
-**Types observed (English n=22, Thai n=9 of 10 pages; counts in [copy study](../assets/copy-study.md)):**
+**Types observed (English n=22, Thai n=9 of 10 pages; counts in [copy study](../assets/evidence.md)):**
 
 | Type | Count | Use when | Example |
 |---|---|---|---|
@@ -194,7 +194,7 @@ Rewrites reuse only facts each page states elsewhere; confirm with the client.
 
 ## Review checklist
 
-1. Headline passes the competitor test and fits two lines at every width (Thai: [design foundations](design-foundations.md) "Headline length").
+1. Headline passes the competitor test and fits two lines at every width (Thai: [visual system](visual-system.md) Part A "Headline length").
 2. Subheadline adds mechanism, consequence, scope or proof — not more adjectives.
 3. Primary CTA is verb + what they get; one per view; secondary is a different path.
 4. A risk-reducer sits next to the CTA when one is true.

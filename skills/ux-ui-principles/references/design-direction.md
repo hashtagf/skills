@@ -16,7 +16,7 @@ decisions, and words from different layers are not substitutes for each other
 | 4 | Layout composition | How is content arranged inside it? | Sidebar, three-panel, bento, editorial | §3 |
 | 5 | Visual style | What does it look and feel like? | Minimal, soft, editorial, glass accent | §4 |
 | 6 | Interaction pattern | How does the user operate it? | Inline edit, wizard, drag & drop, bulk actions | [interaction](interaction.md), [components usage](components-usage.md) |
-| 7 | Design system | Which tokens and components realize it? | Semantic tokens, variants | [design foundations](design-foundations.md) |
+| 7 | Design system | Which tokens and components realize it? | Semantic tokens, variants | [visual system](visual-system.md) Part A |
 | 8 | Quality & validation | How do we know it works? | States, a11y, render checks, metrics | [review loop](review-loop.md) |
 
 Rule: an upper dimension constrains every lower one. Never change a page
@@ -261,4 +261,4 @@ with a default: did anything change?), *token* (do the variable names fit this
 product when read aloud?), *signature* (point to five places the signature shows).
 Choose light or dark from who uses it, where and under what ambient light, not
 from the category ("dev tool, so dark"). See also
-[page anatomy by job](page-anatomy-by-job.md) and [gate tiers](gate-tiers.md).
+[page anatomy by job](../assets/layouts/index.md) and [gate tiers](gate-tiers.md).

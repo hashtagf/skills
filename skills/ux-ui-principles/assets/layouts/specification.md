@@ -29,7 +29,7 @@ first; their wide arrangement may change without changing the task.
 | Zoom/reflow | Content and functions remain usable; test applicable WCAG conditions |
 
 Use content-driven breakpoints and project tokens; do not copy arbitrary values
-from another example. See [visual guidance](../../references/visual-composition.md) and
+from another example. See [visual guidance](../../references/visual-system.md) and
 [accessibility criteria](../../references/accessibility.md).
 
 ## Interaction and state contract

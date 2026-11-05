@@ -26,12 +26,12 @@ than leaving a required row blank.
 | 4 | Information | Data shown, priority order, source system, freshness | back-office |
 | 5 | Page pattern | Page type, layout ID, structural pattern, and why; tradeoff | back-office, layouts |
 | 6 | Navigation | Where users come from, where they go, Back behavior, URL | experience-architecture |
-| 7 | Components | Components chosen and why; variants and states; any new ones and why | components-usage, component-states, design-foundations |
+| 7 | Components | Components chosen and why; variants and states; any new ones and why | components-usage, component-states, visual-system |
 | 8 | Interaction | What each action does: trigger, feedback, result, focus | patterns |
 | 9 | States | Loading, empty (first use / no results), error, success, disabled, permission, stale, offline as applicable | patterns |
 | 10 | Validation and recovery | Prevention, field validation, error summary, preserved input, unknown outcomes | patterns, content-design |
-| 11 | Responsive | What changes at each supported width; zoom/reflow behavior | visual-composition |
-| 12 | Visual design | Focal point, hierarchy, density mode, tokens used | visual-craft, visual |
+| 11 | Responsive | What changes at each supported width; zoom/reflow behavior | visual-system |
+| 12 | Visual design | Focal point, hierarchy, density mode, tokens used | design-quality, visual-system |
 | 13 | Accessibility and language | Keyboard path, focus, names/roles, contrast, language attributes, Thai copy checks | accessibility, i18n-performance, content-design |
 | 14 | Privacy and security | Who sees what, masked data, consequential actions, audit events, session behavior | trust-security-privacy |
 | 15 | Performance | Budget and measurement method; large-data strategy | i18n-performance |

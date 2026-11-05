@@ -37,7 +37,7 @@ honest about what it demonstrates.
 
 **Structure**
 - Tokens first: a `:root` block with color roles (light + dark), type styles,
-  spacing, radius, elevation ([design-foundations.md](design-foundations.md)).
+  spacing, radius, elevation ([visual-system.md](visual-system.md)).
   Every color in the page comes from a token.
 - Semantic HTML: landmarks, headings in order, native controls, labels.
 - Real content in the user's language; realistic data volume; marked as sample data.

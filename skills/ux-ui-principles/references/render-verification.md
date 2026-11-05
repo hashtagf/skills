@@ -13,8 +13,7 @@ passed, failed or not tested.
 |---|---|---|
 | `scripts/render_check.js` | Renders at 1440/768/390 px (+320 px with `--zoom`) in light and dark; reports JS/console errors, failed requests, horizontal page overflow with the offending elements, images without alt, unnamed buttons/links, unlabeled fields, form controls with different heights, fields in one row not top-aligned, invalid fields styled like valid ones, spaces or over-wide glyphs before punctuation, text left at opacity 0 on the first screen, **images that failed to load** (lazy images are forced eager first), **text touching the viewport edge** (no gutter), phone tap targets, and a NOTE when an h1/h2 wraps to 3+ lines; `--reduced-motion` adds animations still moving and content never revealed; `--toggle "<selector>"` clicks a language or theme switch after the first pass and repeats every viewport (screenshots prefixed `alt-`); saves full-page screenshots | `node scripts/render_check.js <url-or-file> --out <dir> [--zoom]`; while iterating `--fast` (1440 + 390, light, viewport shots) |
 | `scripts/state_check.py` | Static scan of source for markers of loading, empty, error, disabled, focus, selected, submitting, success, hover (`--need` adds offline, permission); a miss means unverified, a hit does not prove the state works | `python3 scripts/state_check.py <src-dir> [--json]` |
-| `scripts/direction_preview.js` | Renders one-screen previews of the directions in `assets/directions/directions.json` (and `--sheet`, `--thai`, `--brief`) so a look can be chosen from pictures; not a verification of a built page | `node scripts/direction_preview.js [--ids a,b] [--group company] [--sheet]` |
-| `scripts/site_preview.js` | Renders the customer-facing pages listed in [preview coverage](preview-coverage.md), every landing section and a customer component sheet in six directions (`--all` for every direction in `assets/directions/directions.json`), with `--pages`, `--ids`, `--sheet`, `--thai`; not a verification of a built page | `node scripts/site_preview.js [--ids dose,editorial] [--pages home,checkout] [--sheet]` |
+| `scripts/direction_preview.js` | Renders one-screen previews of the directions in `assets/directions/directions.json` in their compositions (`--sheet`, `--comp`, `--subject`, `--brief`) so a look can be chosen from pictures; not a verification of a built page | `node scripts/direction_preview.js [--ids a,b] [--group company] [--sheet]` |
 | `scripts/backoffice_preview.js` | Renders previews of the back-office screens (pages plus component, advanced and page-states sheets) in every back-office look from `assets/backoffice/styles.json`, with `--mobile` (390 x 844 phone set), `--thai`, `--sheet`, `--style-sheets` and `--singles`, so density and tone can be chosen from pictures; not a verification of a built screen | `node scripts/backoffice_preview.js [--styles a,b] [--screens records,approval] [--sheet]` |
 | `scripts/slop_check.py` | Template-look and slop heuristics in HTML + local CSS: eyebrow labels, accent-word headlines, gradient text, identical icon-card rows, >2 typefaces, >4 raw radii, raw hex count, filler copy, generic CTAs, inert forms, forms without validation or own error messages, format fields without example/hint, removed focus, motion without reduced-motion; flag vs note | `python3 scripts/slop_check.py page.html [--json]` |
 | `scripts/design_md_check.py` | DESIGN.md against the Google design.md spec (alpha): front matter tokens, `{refs}`, value formats, canonical section order, duplicates, component contrast, plus our dials, status, dark values, don'ts, decision log; prose-only files are flagged legacy |
@@ -59,7 +58,7 @@ deviating from it is a process defect, like skipping a check.
 
 | Step | Run | Scope | Count |
 |---|---|---|---|
-| A. Baseline | `script_check.js` (no browser needed; also the only check when there is none), `--fast` on every page/route, `slop_check.py`, `contrast.py --css`, look at the shots | All pages | Once |
+| A. Baseline | `python3 scripts/check.py <page> --render` on every page/route (script, slop, contrast, states, then `render_check --fast`; without a browser the static checks still run and render says NOT RUN), look at the shots | All pages | Once |
 | B. Batch fix | Collect **every** finding from A (render, screenshots, slop, contrast) into one list, then fix them all | — | No checks between fixes |
 | C. Confirm | `--fast` only on pages the batch touched; journey script (happy + failure path) once | Changed pages | Once per fix round |
 | D. Final | `render_check.js --zoom` (full) + `--reduced-motion` if animated; journey script; contrast | Each page once | Once, before delivery |
@@ -96,7 +95,7 @@ deviating from it is a process defect, like skipping a check.
    - Fonts: Thai rendered in the intended face (not a monospace or fallback),
      tone marks not clipped, line height adequate.
    - Hierarchy: one focal point, consistent alignment, density as specified
-     ([visual-craft.md](visual-craft.md)).
+     ([design-quality.md](design-quality.md)).
 3. **Drive the critical journey** with a script or manually: the happy path
    plus at least one failure path from the page spec (validation error,
    server failure, permission denial). Assert the visible result, not only the
@@ -135,7 +134,7 @@ const { chromium } = require('playwright');
 |---|---|---|
 | Text touches the screen edge at every width | A later shorthand (`.section{padding:96px 0}`) overrides the container's side padding | Use `padding-block` for vertical section spacing; keep the gutter on `.container` |
 | Empty image slots in a full-page screenshot | `loading="lazy"` images never entered the viewport, or the URL failed | Load the first-screen pictures eagerly; confirm URLs resolve; `render_check.js` reports failures |
-| Thai heading breaks mid-word | No spaces in Thai; the heading column is narrow | Wrap phrases in `display:inline-block` chunks ([design foundations](design-foundations.md)) |
+| Thai heading breaks mid-word | No spaces in Thai; the heading column is narrow | Wrap phrases in `display:inline-block` chunks ([visual system](visual-system.md) Part A) |
 | English headline wraps to 3 lines on phones while Thai fits | Latin display faces are wider per character than the Thai text implies | Check both languages (`--toggle`); shorten the English line or lower its size at 390 px |
 | Page scrolls sideways on phone | Grid track sized by content (`grid` without `minmax(0,1fr)`), long unbroken strings, fixed widths | `grid-template-columns: minmax(0,1fr)`; `min-width:0` on flex/grid children; `overflow-wrap:anywhere` for IDs; tables in their own `overflow-x:auto` |
 | Hidden element still visible | Component sets `display:grid/flex`, overriding `[hidden]` | Global `[hidden]{display:none !important}` |
@@ -146,7 +145,7 @@ const { chromium } = require('playwright');
 | Dark mode text unreadable | Literal colors outside the token system | Use tokens only; check pairs in both themes |
 | Focus ring invisible on accent buttons | Focus color equals button color | Offset outline or a contrasting focus token |
 | White text on a light semantic color in dark mode | Badge text hard-coded to white while the dark theme lightens the badge | Give badges an `--on-<color>` token per theme |
-| Cells or rows faded to show state become unreadable | Opacity used as a state | Use a text badge or header label instead ([visual-craft.md](visual-craft.md)) |
+| Cells or rows faded to show state become unreadable | Opacity used as a state | Use a text badge or header label instead ([design-quality.md](design-quality.md)) |
 | Users say colors are hard to read | Too many encodings per element | Apply the signal budget; one text color per ramp |
 
 ## Reporting

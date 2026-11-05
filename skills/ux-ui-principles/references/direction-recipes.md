@@ -2,7 +2,7 @@
 
 A direction in the library says what the look is. A **recipe** says how to build and check it: hard rules, banned
 devices, required components, motion and a tick-box pre-flight. Adopted from the template pre-flights in
-[OpenDesign templates study](../assets/open-design-templates-study.md).
+[OpenDesign templates study](../assets/evidence.md).
 
 ```
 python3 scripts/direction_recipe.py <direction-id>            # print the recipe
@@ -59,7 +59,7 @@ three times; motion is mechanical (instant reveals, press inverts ink and paper 
 
 ## Typographic voice and editorial furniture (from the rendered template study)
 
-These are what separate a designed page from a themed one ([measured study](../assets/open-design-visual-study.md)). Add them
+These are what separate a designed page from a themed one ([measured study](../assets/evidence.md)). Add them
 per direction, sparingly; a recipe may require one or two, never all.
 
 | Device | Build | Fits |
@@ -83,7 +83,7 @@ captions, numbering everything. `slop_check.py` reports the allowed italic empha
 phrase with weight contrast (400 against 700), a soft tint highlight (marker style, `tint` fill behind the phrase) or the
 `primary-text` color step. Mono labels: uppercase and tracking apply to Latin only; Thai labels stay at normal case and
 spacing in a Thai-capable face, at 12px or more. Thai headlines wrap by characters: up to 3 lines at 1440 and 4 at 390 is fine;
-do not shrink type to force 2 ([design foundations](design-foundations.md) "Headline length").
+do not shrink type to force 2 ([visual system](visual-system.md) Part A "Headline length").
 
 **No true facts to show** (no issue, date, version, numbers). Do not invent volume or coordinates. Skip the register
 strip, rail and oversized numeral; keep the typographic voice (italic or weight emphasis) and at most one object (a

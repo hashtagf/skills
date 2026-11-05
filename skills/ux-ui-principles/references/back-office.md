@@ -241,10 +241,10 @@ chips, segmented control, swipe item, bottom sheet, snackbar with undo,
 pull to refresh, settings rows, confirm dialog). Tables become cards, key
 actions sit in the thumb zone, and every target is 44px or more. Only
 `<look>-m-states.jpg` and `<look>-m-components.jpg` are kept as full-size
-singles; the rest are in the sheets. Tablet and RTL: run `node scripts/backoffice_preview.js --width 820 --height 1366` and `--rtl`; see [tablet-rtl-dark.md](tablet-rtl-dark.md) and [preview-coverage.md](preview-coverage.md).
+singles; the rest are in the sheets. Tablet and RTL: run `node scripts/backoffice_preview.js --width 820 --height 1366` and `--rtl`; see [tablet-rtl-dark.md](tablet-rtl-dark.md).
 
 Dashboard surfaces follow what the strongest 21st.dev dashboards do
-([study](../assets/21st-study.md)): quiet cards with a 1px edge and a soft
+([study](../assets/evidence.md)): quiet cards with a 1px edge and a soft
 layered shadow on a faintly glowing ground, one emphasised KPI card, KPI values
 with an icon chip, a delta pill and a sparkline with a gradient area, charts
 with rounded gradient bars or a gradient area under the line, a donut
@@ -309,7 +309,7 @@ glossary of object and status names ([content design](content-design.md)).
 | State instant vs submission effect for each settings group. | Leave users guessing whether a toggle already applied. |
 | Show effective permissions and their source. | Show only a role name and expect admins to remember what it grants. |
 
-## Widget recipes (from `assets/21st-dashboard-study.md`)
+## Widget recipes (from `assets/evidence.md`)
 
 - **Stat tile**: muted label, tabular number 2–3× label size, delta as a tinted pill with base/period, optional sparkline. One tile per row may be dark or accent-tinted to anchor the page.
 - **Chart card**: 2px line, soft gradient fill, end-point dot, month ticks only, no vertical grid.

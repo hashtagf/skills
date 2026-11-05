@@ -15,7 +15,7 @@ Caps override the arithmetic:
 
 | Condition | Cap |
 |---|---|
-| Automated check failed, or a headline runs past its line limit ([design foundations](design-foundations.md) "Headline length") | Visual and UX 60–65 |
+| Automated check failed, or a headline runs past its line limit ([visual system](visual-system.md) Part A "Headline length") | Visual and UX 60–65 |
 | Fewer than 4 real pictures on a page that needs them | Visual 65 |
 | Blank stretches taller than half a screen, or unequal outer margins | Visual 65 |
 | Placeholder or invented content shipped as real | UX 50 |

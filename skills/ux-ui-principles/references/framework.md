@@ -10,9 +10,9 @@ project to run every activity. Source IDs resolve in [sources.md](sources.md).
 |---|---|---|---|
 | Product design | What should exist, for whom, and why? | Problem statement, user/role evidence, success metric, constraints | [product-discovery.md](product-discovery.md) |
 | UX design | How will people complete their goal across the system? | Journey, flows, IA map, navigation model, permission flow | [experience-architecture.md](experience-architecture.md) |
-| UI design | How should each screen be arranged and presented? | Page spec, layout ID, hierarchy, density, visual decisions | [visual-composition.md](visual-composition.md), [visual-craft.md](visual-craft.md), [back-office.md](back-office.md) |
+| UI design | How should each screen be arranged and presented? | Page spec, layout ID, hierarchy, density, visual decisions | [visual-system.md](visual-system.md), [design-quality.md](design-quality.md), [back-office.md](back-office.md) |
 | Interaction design | What does every action and state do? | Action contract, state matrix, validation, recovery | [patterns.md](patterns.md) |
-| Design engineering | Will the built UI match the intent and work in real conditions? | Tokens/components, accessibility, i18n, performance, security behavior | [design-foundations.md](design-foundations.md), [component-states.md](component-states.md), [render-verification.md](render-verification.md), [accessibility.md](accessibility.md), [i18n-performance.md](i18n-performance.md), [trust-security-privacy.md](trust-security-privacy.md) |
+| Design engineering | Will the built UI match the intent and work in real conditions? | Tokens/components, accessibility, i18n, performance, security behavior | [visual-system.md](visual-system.md), [component-states.md](component-states.md), [render-verification.md](render-verification.md), [accessibility.md](accessibility.md), [i18n-performance.md](i18n-performance.md), [trust-security-privacy.md](trust-security-privacy.md) |
 | Design validation | How do we know the design is good? | Usability findings, metrics, design QA, production data | [validation.md](validation.md), [measurement.md](measurement.md) |
 
 An agent asked to "design a page" usually works in UI and interaction design.
@@ -26,7 +26,7 @@ assumptions instead of silently inventing product strategy.
 | 1. Product strategy & research | Business goal, users/roles, problem evidence, constraints, success metrics | Problem, audience, measurable outcome and riskiest assumptions are written down | product-discovery, validation |
 | 2. Experience architecture | Journeys, flows, IA, navigation, URLs, cross-page relationships, permission flows | Every page has a known entry, exit, parent and owner role; no orphan or dead-end flow | experience-architecture, navigation-grouping, back-office |
 | 3. Page & interaction | Page type, layout, hierarchy, actions, forms, search, states, recovery | Page spec covers the applicable rows of [page-spec.md](../assets/page-spec.md) | back-office, patterns, layouts |
-| 4. Visual & design system | Type, grid, spacing, color roles, components, tokens, motion, brand | Screens use project tokens/components; exceptions are justified | design-foundations, color-palette, components-usage, component-states, iconography, visual, visual-craft |
+| 4. Visual & design system | Type, grid, spacing, color roles, components, tokens, motion, brand | Screens use project tokens/components; exceptions are justified | visual-system, color-palette, components-usage, component-states, iconography, design-quality |
 | 5. Quality & engineering | Responsive, accessibility, localization, performance, privacy, security | Applicable checks are executed or explicitly listed as untested | accessibility, render-verification, i18n-performance, trust-security-privacy, tablet-rtl-dark, mobile-native (native products) |
 | 6. Validation & improvement | Usability testing, analytics, experiments, design QA, iteration | Success measure is instrumented and a review point is scheduled | validation, measurement |
 

@@ -7,7 +7,7 @@ Usage:
 
 The recipe is derived from assets/directions/directions.json (palette, type, radius, button shape, corner
 treatment, surface rule, hero composition). It is a checklist to build and review against, in the style of
-the template pre-flights studied in assets/open-design-templates-study.md. Standard library only.
+the template pre-flights studied in assets/evidence.md. Standard library only.
 """
 import json
 import os
