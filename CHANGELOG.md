@@ -7,6 +7,160 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (Codex UI-skill study: orchestrator, webapp-ui, frontend-design)
+- `ux-ui-principles`: `app-screen-rules.md` §7 operational-UI doctrine (scan-first, stable geometry, no nested cards, type caps, control-by-job, semantic palette, never-ship list, state matrix) from Codex `webapp-ui-skill`.
+- `scripts/state_check.py`: static state-coverage scan (loading/empty/error/disabled/focus/selected/submitting/success/hover); misses = unverified.
+- `slop_check.py`: `viewport-scaled-font`, `nested-cards`, `hero-in-app` flags.
+- `design-memory.md` §2: cross-domain conflict decision order with vetoes (from the Codex orchestrator council); `render-verification.md` + SKILL.md §6: Ran / Skipped / Planned / Manual evidence labels.
+
+### Added (design-system study)
+- `design_md_check.py` reports malformed token groups (non-map `rounded`/`spacing`/`typography`/`components`, non-string colors) instead of crashing; `ds_lookup.py` maps standard section names onto guides with another layout (Radix).
+- `ux-ui-principles`: `references/design-system-benchmarks.md` from 126 public design systems (open-design.ai, S102): token layers and
+  role ladder, composite type, scheme-switch dark mode, 3px focus ring and target norms, radius/breakpoint/density distributions,
+  public-sector service flows (review + contextual Change links, retained answers, lookup outcomes), identity and provenance rules.
+  `assets/design-systems/`: `scripts/ds_lookup.py` (outline / one section / `--find` across guides); all 126 full guides copied (Apache-2.0 source) + index (14 curated rows). Routed from SKILL.md; `forms.md` §7 gains the review step; `design-memory.md` marks token provenance; eval 19 added.
+
+### Added (product-UI builds)
+- `ux-ui-principles`: "Defaults for product UI builds" in SKILL.md. A dashboard/admin/ERP build with no DESIGN.md writes a draft first,
+  and navigation, actions and status use icon + label from one family. Phase 5/7 and `iconography.md` carry the build checklist.
+- `ux-ui-principles`: bounded product-UI polish pass (8 checks, one round, before/after renders) in review-loop; required once before phase 7 for dashboard/admin builds.
+- `design_md.py --backoffice <look-id>` writes a draft DESIGN.md from `assets/backoffice/styles.json` (tokens, icon rules, data honesty).
+- `slop_check.py` flags `nav-without-icons`, notes ▲▼ glyphs used as icons, and no longer flags `method="dialog"` forms as inert.
+- `design_md.py --from-code` resolves `var(--x)` fonts and radius; `code_extract.py` maps `--line`/`--hair` to border and never guesses a lighter-than-canvas border.
+
+### Changed (routing and triggering)
+- `ux-ui-principles`: SKILL.md rewritten as a router (335 → ~140 lines, 30 KB → 11 KB): a "request → files to open
+  first" table, modes, phases in one paragraph, must-not-skip defaults, asking rules, evidence and completion; it states
+  that answering from SKILL.md alone is a defect. The full file catalog (descriptions + phases + terms) is now the single
+  index at the end of `references/design-workflow.md`; the Do/Don't pairs moved to `do-and-dont.md`, the other-skills
+  table to `design-memory.md` §5, host rules and the away-mode direction rule to `design-workflow.md`.
+- Description rewritten: imperative "use whenever…", states the skill holds rules general knowledge gets wrong.
+- Route table marks must-open files in **bold** (open every bold file of each matching row, not only the first);
+  landing row requires design-direction, direction-library and marketing-copy before the first reply (the interview
+  needs offer and proof) and visual-assets before building; page-spec is must-open for customer and back-office pages; new rows/wording for phone app screens (mobile-native), starting a design system (foundations,
+  benchmarks, accessibility), "confirm it passes" (render verification), review/score (review-loop before caps).
+  Description trimmed to 1012 chars (spec max 1024) and gains usability review, states, chart choice and Thai café/clinic
+  landing triggers. Routing (Sonnet, 30 turns): 14/19 → 17/19, then #10/#14 2/2 after the last two row fixes; trigger 13/18 → 14/18.
+  Then: bold files of *every* matching row are opened before the first reply, interview included (fixes landing +
+  back-office requests); "this page" with nothing attached → look in the working directory first; description front-loads
+  questions about the user's own component or code (states question 0/3 → 3/3), 1020 chars.
+  Final routing v7 (Sonnet, 30 turns): 18/19 (the one miss, #2 shadcn-rules, passed in v4–v6).
+  `trigger_eval.py --repeat N --match TEXT` reports per-prompt trigger rates: v6 40/54 (74%), all should-not prompts clean.
+  Known misses: short WCAG fact questions (~25%, answered from memory), chart choice (goes to the `dataviz` skill),
+  "extract DESIGN.md" (0/3 in the eval, loads when traced by hand).
+  `route_eval.py`/`trigger_eval.py`: per-prompt progress, incremental save, timeout-safe, `--max-turns`.
+- Merged overlapping references: `visual.md` → `visual-composition.md`, `experience-patterns.md` → `patterns.md`,
+  `accessibility-verification.md` → `accessibility.md` (56 → 53 files); links updated.
+- Away mode with no artifact: design from the brief with defaults instead of stopping.
+- Content the router rewrite had dropped now has a home: evidence discipline (claim labels, browsing, dated register,
+  no universal rules, px vs native units, user control) → `sources.md` "Evidence discipline"; scope and completion
+  (no full audit for one label, self-contained, record deviations) → `design-workflow.md` phase 8; "make it beautiful"
+  reading order → `design-quality.md`; how to use the pairs → `do-and-dont.md`. SKILL.md §6 links to them; the
+  reference → phase index lists `design-workflow.md` itself.
+
+### Changed (one design system, real compositions, a reference library)
+- `ux-ui-principles`: direction previews no longer paint one agency template 63 ways. `scripts/compositions.js` holds ten
+  first-screen compositions (editorial, collage, full-bleed photo, Swiss, soft product, poster, question, centred, magazine,
+  board), each distilled from a rendered reference page; every direction names its `comp` and `subject` in directions.json and
+  is drawn on content from a real kind of business (`assets/directions/content-packs.json`, 14 packs) with licensed
+  photographs (`assets/photos/`, 14 Wikimedia Commons files with credits). `direction_preview.js --comp/--subject/--brief`
+  try other pairings; `--legacy` keeps the old palette comparison.
+- One brand, one token set: `scripts/brand.js` derives a direction's product UI (same ground, ink, accent, faces, radius;
+  structure and density from the closest back-office look), `backoffice_preview.js --direction <id|all>`, build set `brand`
+  (`previews/product/`). `tokens-export.md` states the rule.
+- `assets/references/`: 30 rendered pages from the Apache-2.0 Open Design templates (first screen + long view, NOTICE),
+  each mapped to a composition, now the first thing to look at before building (SKILL.md §3 step 2, landing route).
+- `open-design-visual-study.md`, `direction-library.md`, `visual-assets.md` and the reference → phase index updated.
+- Open Design showcase (98 entries): `scripts/showcase_fetch.py` fetches pictures and design notes into a local, git-ignored
+  study set; `assets/showcase/README.md` + `catalog.json` are our own catalog of the 65 distinct captures (21 template, 24 study,
+  20 skip: shaders, videos, placeholder captures), each with a composition. Four compositions distilled from it: c11 nocturne,
+  c12 portrait, c13 nature, c14 cover (14 in total); ten directions moved onto them.
+
+### Changed (visual quality gate)
+- `ux-ui-principles`: an A/B run (same task with and without the skill) showed the skill's landing page passing UX checks
+  but looking plainer than the no-skill page: the build never opened design-quality, visual-benchmarks, direction-recipes
+  or a preview image, and fell into the banned warm-cream + serif + terracotta default. SKILL.md §3 now requires, for
+  public pages: look at the chosen direction's preview and run `direction_recipe.py` before building, a plan with one
+  decisive move and values from visual-benchmarks, real photos or type-led (no clip-art hero), and before delivery
+  `script_check.js` + `slop_check.py` (or a row-by-row walk of design-quality §2 without a shell), then the craft pass
+  beside one benchmark page. The landing route makes design-quality, visual-benchmarks and direction-recipes must-open.
+- `open-design-visual-study.md` no longer reads as an endorsement of warm paper + terracotta (it is also the most common
+  generated look).
+- New `scripts/script_check.js`: compiles every inline/local script without a browser and flags top-level names that
+  clash with `window` (`const top` silently broke both dashboard runs). Wired into the run order and phase 7.
+- `slop_check.py`: `nav-without-icons` applies to app navigation only (sidebar/aside or 7+ links), not a public page's
+  short text menu.
+
+### Added (evals)
+- A/B tools: `evals/ab_run.py` (same task with the skill and with no skills, in temp dirs outside the plugin folder),
+  `evals/ab_shots.js` (screenshots, reduced motion, console errors) and `evals/ab_report.py` (side-by-side HTML report).
+- `evals.json` grows from 19 to 100 routing scenarios (64 greenfield, 36 brownfield), each tagged `field` and `category`;
+  brownfield scenarios run inside 8 fixture projects in `evals/fixtures/` (React admin, Tailwind + shadcn site, legacy HTML
+  admin, landing with an approved DESIGN.md, React Native app, checkout, chart dashboard, Thai form). Routing v8: 93/100
+  (greenfield 61/64, brownfield 32/36, $18.67). `evals/export_dashboard_data.py` writes the results as JSON for the eval dashboard.
+- `evals/route_eval.py`: runs each eval headless and scores opened files against `expected_reads` / `must_not_read`
+  (new fields in `evals.json`; `fixture` for prompts about an existing page). Sonnet: 1/18 → 14/18.
+- `evals/trigger_eval.py`: 12 should / 6 should-not prompts without a slash command. 0/12 → 8/12 trigger, 6/6 clean.
+
+### Changed (consistency pass)
+- `ux-ui-principles`: one owner per rule, others link to it. Thai headline length (design-foundations "Headline length"),
+  motion baseline at any dial (motion §1), focus ring 3px (component-states), color role names with a DESIGN.md / CSS
+  mapping table (color-palette), typeface count (two plus optional mono), accent ≤ 2 strong uses, line length 60–75ch.
+- Asking: ≤ 3 questions per batch everywhere; the new-look interview (§9 rounds A/B/C) is the named exception (≤ 4 per round).
+- Scoring: caps now apply to the visual and UX scorecards (out of 100); four-part weighting removed; report bands and
+  P0/P1 mapped to the rubric and severity scale.
+- Counts and catalog: 43 layouts, 101 sources, 51 OpenDesign templates; file → phase index lists every reference and script;
+  context card gains language/entry context and direction/overrides rows; README covers 0.12.0 and Unreleased topics.
+- Scripts: `contrast.py` and `direction_recipe.py` accept `--help`; `slop_check.py` does not count mono families as typefaces;
+  `export_tokens.py` display size minimum 2.25rem (36px, matching mobile hero 32–40px); docstrings of `review_report.py`
+  and `design_md_check.py` match behavior.
+
+### Added (Tailwind, brownfield)
+- `references/tailwind.md`: Tailwind v4 workflow tested with the real CLI (tokens build to utilities, dark via `data-theme`);
+  `slop_check.py` notes arbitrary Tailwind colors; each tint has its own readable ink.
+- `scripts/code_extract.py` and `design_md.py --from-code`: read an existing codebase's design language and draft its DESIGN.md.
+
+### Added (brownfield onboarding)
+- `ux-ui-principles`: ONBOARD mode and `references/brownfield.md` (inspect → page inventory →
+  extract DESIGN.md → baseline audit → agree → scoped changes → verify and record).
+- `scripts/code_extract.py`: scans an existing codebase (CSS/SCSS/Tailwind/JSX/Vue/Svelte) for stack,
+  CSS variables (light and dark), color literals, fonts, sizes, radii, Tailwind usage; maps variables
+  to DESIGN.md roles (found / guessed / derived) and reports drift (near-duplicate colors, hard-coded
+  literals, conflicting variables across monorepo apps). `--json` for raw data.
+- `scripts/design_md.py --from-code SRC`: writes a draft DESIGN.md from the extract (passes
+  `design_md_check.py`), with an evidence table per color role and a Drift section.
+
+### Changed (verification run order)
+- `ux-ui-principles`: verification now has a mandatory run order
+  (`references/render-verification.md` "Run order"): `--fast` baseline on all
+  pages → one batch of all fixes → `--fast` confirm on changed pages + journey
+  script once → full `--zoom` run once per page before delivery. Re-checking after
+  each single fix is a process defect; known heuristic false positives are judged
+  once; delivery reports fast/full/journey run counts. Linked from SKILL.md phase 7,
+  `design-workflow.md` Phase 7 and `gate-tiers.md` §4.
+
+### Added (OpenDesign templates study)
+- `assets/open-design-visual-study.md`: 25 template pages rendered at 1440px and measured (display 72-106px, tracking -0.02 to -0.04em,
+  section padding 96px+), what makes the best ones beautiful, the design-system library page; typographic-voice and
+  editorial-furniture recipes in `direction-recipes.md`.
+- `assets/open-design-templates-study.md`: 51 template skills read from the OpenDesign catalogue repo; patterns kept.
+- `references/direction-recipes.md` + `scripts/direction_recipe.py`: per-direction hard rules, bans, required components,
+  motion and pre-flight; component recipes (double-bezel, button-in-button, floating pill nav, hairline ink grid, uneven bento).
+- `scripts/tweaks_panel.py` (live tweak panel on CSS custom properties) and `scripts/review_report.py` (radar, bands, Keep / Fix / Quick wins).
+- New rules: section rhythm and one flourish (visual-composition), waitlist honesty (marketing-copy), pricing tiers and FAQ
+  (layout M03), live data states (data-visualization), wireframe deliverables (prototyping), mobile archetypes (mobile-native),
+  state the section list first (design-workflow).
+
+### Added (interview, DESIGN.md)
+- `ux-ui-principles`: three-round interview before any new look (business, taste with pictures, confirm) with a shape
+  question that is not inferred from feel words; assumed answers are marked, never presented as the client's.
+- DESIGN.md now follows the Google Labs design.md spec (alpha): YAML front matter tokens (`colors` incl. `dark-*`, `typography`,
+  `rounded`, `spacing`, `components` with `{refs}`) plus the eight canonical sections, then our dials, interaction rules and
+  decision log. `design_md_check.py` validates it (references, formats, order, duplicates, component contrast) and flags the
+  older prose-only format as legacy.
+- `scripts/design_md.py`: interview + direction to DESIGN.md (AA-checked light and dark roles, reasons, decision log)
+  and a marked pointer block in `AGENTS.md` / `CLAUDE.md` so the next agent reads DESIGN.md first.
+
 ## [0.12.0] - 2026-11-05
 
 ### Changed (consistency audit)

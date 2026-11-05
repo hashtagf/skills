@@ -1,0 +1,2 @@
+new Chart(pie,{type:"pie",data:{labels:["Damaged","Late","Wrong size","Changed mind","Duplicate","Fraud","Missing","Quality","Other"],datasets:[{data:[31,22,14,9,7,6,5,4,2],backgroundColor:["red","orange","yellow","green","blue","indigo","violet","pink","gray"]}]}})
+new Chart(line,{type:"line",data:{labels:["W1","W2","W3","W4"],datasets:[{label:"Refunds",data:[120,98,143,110]}]},options:{scales:{y:{min:90}}}})

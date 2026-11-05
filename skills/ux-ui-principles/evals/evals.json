@@ -1,0 +1,1975 @@
+{
+  "skill_name": "ux-ui-principles",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Design the payout approval page for our payment back office. Finance operators approve or reject ~300 payouts a day. No existing design docs, I'm away — use sensible defaults.",
+      "expected_output": "Design context card, Critical tier, table + master-detail, low variance/motion high density, full state coverage incl. unknown outcome, hard gates named.",
+      "files": [],
+      "assertions": [
+        "Includes a design context card (product type, role, primary job, risk, density, device, pattern, dials, success metric)",
+        "States the rigor tier as Critical",
+        "Primary page pattern is a data table and/or master-detail, not a dashboard of KPI cards or bento",
+        "Direction dials set low variance and low motion with high density",
+        "Specifies an unknown/pending outcome state and does not show success before backend confirmation",
+        "Approve/reject has proportional confirmation and shows amount and scope before commit",
+        "Labels defaults as assumptions rather than claiming research"
+      ],
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "page-spec"
+        ],
+        [
+          "trust-security-privacy",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library",
+        "motion"
+      ],
+      "field": "greenfield",
+      "category": "back-office"
+    },
+    {
+      "id": 2,
+      "prompt": "ออกแบบหน้า inbox สำหรับทีม support ตอบแชทลูกค้า (Allchat) ใช้ React + shadcn อยู่แล้ว",
+      "expected_output": "Thai answer; inbox / three-panel; reuse existing shadcn components; real-time, unread, assign, reconnect states.",
+      "files": [],
+      "assertions": [
+        "Answers in Thai with technical identifiers intact",
+        "Chooses inbox / master-detail with a three-panel composition",
+        "Reuses existing shadcn components rather than inventing a new component set",
+        "Covers unread, assignment and offline/reconnect states",
+        "Includes a keyboard path for triage"
+      ],
+      "expected_reads": [
+        [
+          "shadcn-rules"
+        ],
+        [
+          "back-office",
+          "layouts/productivity",
+          "app-screen-rules"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "field": "greenfield",
+      "category": "back-office"
+    },
+    {
+      "id": 3,
+      "prompt": "Our DESIGN.md says operations screens use a dense table, but the creative direction skill suggests a bento layout to make the ops page feel more distinctive. Which should I do?",
+      "expected_output": "Keeps the dense table per precedence; explains ranking; offers variety only where DESIGN.md allows.",
+      "files": [],
+      "assertions": [
+        "Recommends keeping the dense table",
+        "Explains that approved DESIGN.md outranks specialist skill guidance",
+        "Ties the decision to the operator's job, not to taste",
+        "Offers where visual distinctiveness could go without changing the page pattern"
+      ],
+      "expected_reads": [
+        [
+          "design-memory",
+          "design-direction",
+          "back-office"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ],
+      "field": "brownfield",
+      "category": "design-memory"
+    },
+    {
+      "id": 4,
+      "prompt": "Make our SaaS marketing landing page bolder — it looks like every other AI template. Here's the HTML: <section class='hero'><h1>Supercharge your workflow</h1><p>The all-in-one platform</p><button>Get started</button></section>",
+      "expected_output": "REFINE/bolder: names the template devices, rewrites generic copy specifically, one focal point, sets dials, re-render check.",
+      "files": [],
+      "assertions": [
+        "Treats the request as the 'bolder' refinement and scopes changes to it",
+        "Identifies the generic headline and subheadline and proposes specific copy or asks for the concrete product value",
+        "Proposes one stronger focal point / single idea rather than stacking several trends",
+        "Does not mix many visual styles without a brand reason",
+        "Says the result must be checked in a rendered screenshot, and does not claim it was checked if it was not"
+      ],
+      "expected_reads": [
+        [
+          "review-loop",
+          "design-direction"
+        ],
+        [
+          "design-quality"
+        ]
+      ],
+      "must_not_read": [
+        "back-office",
+        "forms"
+      ],
+      "field": "brownfield",
+      "category": "refine"
+    },
+    {
+      "id": 5,
+      "prompt": "Review this AI agent console screen for us and give it a score. It shows a chat on the left and a log stream on the right; tool calls run without asking.",
+      "expected_output": "Critique format with severity, separate visual and UX scores labelled internal rubric, flags missing human approval for tool calls.",
+      "files": [],
+      "assertions": [
+        "Findings use severity levels with evidence, impact, fix and verify",
+        "Gives visual and UX scores separately",
+        "States the score is an internal rubric, not proof of usability",
+        "Flags tool calls running without approval/interrupt control as a major or blocker issue",
+        "Marks anything not observable from the description as unverified"
+      ],
+      "expected_reads": [
+        [
+          "review-loop"
+        ],
+        [
+          "ai-features"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "field": "brownfield",
+      "category": "review"
+    },
+    {
+      "id": 6,
+      "prompt": "Can you finish the mobile onboarding screens and confirm they pass accessibility? I don't have a browser tool set up.",
+      "expected_output": "Delivers design/spec; explicitly states accessibility was not tested; lists the checks to run.",
+      "files": [],
+      "assertions": [
+        "Does not claim accessibility passed",
+        "Lists concrete checks to run (keyboard/screen reader, contrast, zoom/reflow, touch targets)",
+        "Covers permission-prompt timing or offline state for onboarding where relevant"
+      ],
+      "expected_reads": [
+        [
+          "mobile-native"
+        ],
+        [
+          "accessibility",
+          "render-verification"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "field": "brownfield",
+      "category": "mobile"
+    },
+    {
+      "id": 7,
+      "prompt": "Extract a design language from our current marketing site and product screenshots and write a DESIGN.md we can reuse in every session. I'll attach screenshots later; set up the process now.",
+      "expected_output": "Brand extraction procedure (collect, observe, interpret, translate, write draft, prove on two page patterns); DESIGN.md with reasons and anti-patterns; runs or names design_md_check.py.",
+      "files": [],
+      "assertions": [
+        "Separates observed values from inferred ones",
+        "Captures philosophy and what the brand avoids, not only a hex list",
+        "DESIGN.md is marked draft, not approved",
+        "Mentions validating with design_md_check.py and contrast.py, without claiming they ran if they did not",
+        "Proposes proving the language on two different page patterns"
+      ],
+      "expected_reads": [
+        [
+          "design-memory"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "field": "brownfield",
+      "category": "onboard"
+    },
+    {
+      "id": 8,
+      "prompt": "ออกแบบหน้า landing ใหม่ให้ Changeloop AI (AI agent console สำหรับทีม dev) ยังไม่มี DESIGN.md อยากได้หลายแนวให้เลือกก่อน",
+      "expected_output": "Thai; 2-3 named directions each with idea, dials, moves, risk; recommends one; render critique plan at multiple widths.",
+      "files": [],
+      "assertions": [
+        "Gives 2 or 3 named directions",
+        "Each direction has an idea, dial values, concrete moves and a risk",
+        "Directions differ in idea/composition, not only in color",
+        "Recommends one with a reason",
+        "Plans render critique at desktop, tablet and phone widths"
+      ],
+      "expected_reads": [
+        [
+          "design-direction"
+        ],
+        [
+          "direction-library"
+        ]
+      ],
+      "must_not_read": [
+        "back-office",
+        "forms"
+      ],
+      "field": "greenfield",
+      "category": "landing"
+    },
+    {
+      "id": 9,
+      "prompt": "ช่วยออกแบบหน้าอนุมัติคำขอคืนเงิน (refund) ให้ทีม finance หน่อย",
+      "expected_output": "Phase 1 ask point: asks ≤3 batched questions on Critical business rules (approvers, thresholds, reversibility) with recommended defaults, and proceeds on reversible choices without asking.",
+      "files": [],
+      "assertions": [
+        "Identifies the work as Critical tier",
+        "Asks about business rules that must not be guessed (who approves, limits/thresholds, reversibility) before finalizing the flow",
+        "Asks at most 3 questions in one batch, each with a recommended default",
+        "Does not ask about reversible choices such as spacing, copy tone or component choice",
+        "Answers in Thai"
+      ],
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "page-spec"
+        ],
+        [
+          "trust-security-privacy",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "field": "greenfield",
+      "category": "back-office"
+    },
+    {
+      "id": 10,
+      "prompt": "Redesign the settings page of our app. I'm offline for the day, just do it with sensible defaults.",
+      "expected_output": "Away mode: no questions; runs phases with recommended options, labels assumptions, ends with Decisions to confirm.",
+      "files": [],
+      "assertions": [
+        "Does not stop to ask questions",
+        "Labels assumed facts on a context card or equivalent",
+        "Ends with a 'Decisions to confirm' list with impact per item",
+        "Does not redesign pages other than settings"
+      ],
+      "expected_reads": [
+        [
+          "layouts/accounts",
+          "layouts/admin",
+          "navigation-grouping",
+          "back-office",
+          "customer-ui"
+        ],
+        [
+          "page-spec",
+          "forms",
+          "component-states"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ],
+      "field": "brownfield",
+      "category": "improve"
+    },
+    {
+      "id": 11,
+      "prompt": "สร้างฟอร์มสมัครสมาชิก (ชื่อ, อีเมล, เบอร์มือถือ, รหัสผ่าน) เป็น HTML ไฟล์เดียว",
+      "expected_output": "Built form meets forms.md §6b: rules in markup, own Thai messages on blur and submit, error summary with focus, example placeholders on format fields, visible labels, pending submit; slop_check shows no form flags.",
+      "files": [],
+      "assertions": [
+        "Every field has a visible label (placeholder is not the only label)",
+        "Email and phone fields have example placeholders (e.g. name@company.com, 081 234 5678) or hints",
+        "Fields carry rules in markup (required, type, pattern/minlength)",
+        "Specific per-field error messages in Thai shown on blur and submit, with aria-invalid and aria-describedby",
+        "Submitting empty shows an error summary that receives focus and links to fields",
+        "Submit button shows pending state and prevents double submit; input is kept on error",
+        "Password rules are shown before the user fails them",
+        "Uses one column, or only pairs related fields per row with top alignment so an error does not shift the neighbouring field",
+        "All single-line controls share one height",
+        "Invalid fields show a danger border, an icon and the message, driven by aria-invalid",
+        "Thai characters typed into the email field get a 'switch keyboard to English' message"
+      ],
+      "expected_reads": [
+        [
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "back-office"
+      ],
+      "field": "greenfield",
+      "category": "forms"
+    },
+    {
+      "id": 12,
+      "prompt": "ทำ landing page สำหรับแอปจองคิวคลินิกความงาม อยากให้ดูหรู ๆ มี animation สวย ๆ",
+      "expected_output": "Maps 'หรู' to editorial + restrained dials, states the interpretation, sets motion within dial with a motion spec incl. reduced motion; one signature motion; first screen paints complete.",
+      "files": [],
+      "assertions": [
+        "States how 'หรู' was interpreted (style base and dial values) in one line",
+        "Provides a motion spec table with element, trigger, motion, duration/easing and reduced-motion behavior",
+        "Motion stays restrained (no parallax+tilt+glow stack); at most one signature motion",
+        "Hero headline and CTA are visible without waiting for scroll or JS",
+        "Mentions checking with render_check --reduced-motion, without claiming it ran if it did not"
+      ],
+      "expected_reads": [
+        [
+          "design-direction"
+        ],
+        [
+          "direction-library"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "field": "greenfield",
+      "category": "landing"
+    },
+    {
+      "id": 13,
+      "prompt": "I want a new look for our product website but I can't describe it. Help me figure out the direction.",
+      "expected_output": "Runs the direction interview: ≤3 multiple-choice questions (feel words, references, energy) with a recommended option, then 2–3 named directions.",
+      "files": [],
+      "assertions": [
+        "Asks at most 3 questions in one batch",
+        "Questions are multiple choice (feel words, energy) plus optional references",
+        "Offers a recommended option",
+        "Explains that answers lead to 2–3 named directions to choose from",
+        "Offers steering words the user can use later (bolder, quieter, more premium, dials)"
+      ],
+      "expected_reads": [
+        [
+          "design-direction"
+        ],
+        [
+          "direction-library"
+        ]
+      ],
+      "must_not_read": [
+        "back-office",
+        "forms"
+      ],
+      "field": "greenfield",
+      "category": "direction"
+    },
+    {
+      "id": 14,
+      "prompt": "ทำเว็บ landing page ให้ร้านกาแฟ specialty ของเรา เป็น HTML ไฟล์เดียว",
+      "expected_output": "Asks the direction interview before code (user did not say away); then builds with a starter/recipe palette, motion baseline with reduced-motion, designed 390px composition, and renders 1440 + 390.",
+      "files": [],
+      "assertions": [
+        "Asks the ≤3-question direction interview (feel, references, energy) with a recommended option before writing code",
+        "Does not treat the session as 'user away' without the user saying so",
+        "Palette uses tinted neutrals, one accent and at most 2 saturated hues, with light and dark values",
+        "Ships the landing motion baseline (hero stagger, some section reveals once, hover/press) with a prefers-reduced-motion branch",
+        "Phone layout: 16–20px gutters, hero headline ≤ 3 lines, CTA in first screen, tap targets ≥ 44px, body ≥ 16px",
+        "Renders and inspects 1440 and 390 screenshots (or states not tested)"
+      ],
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "marketing-copy",
+          "visual-assets",
+          "layouts/marketing"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "field": "greenfield",
+      "category": "landing"
+    },
+    {
+      "id": 15,
+      "prompt": "Build a landing page for a marketing agency, then show me what its back office would look like. No photos or client logos yet.",
+      "expected_output": "Persuade-mode page with real structure, honest placeholders and no invented proof; a back-office mock sharing the page's tokens; hero checked at 1280x800; stack and next step proposed before backend code.",
+      "files": [],
+      "assertions": [
+        "Names the surface modes (landing = persuade, admin = operate) and applies different rules to each",
+        "Hero headline, one sentence and primary action visible at 1280x800, verified from a screenshot that was looked at",
+        "Uses a neutral labelled slot for the missing photo and shows empty stats as a dash; invents no logos, quotes, case studies or metrics",
+        "Contact path is a prefilled mailto or a wired form, and the placeholder address is reported",
+        "Includes one interactive demo that works with scripting off",
+        "Back-office mock reuses the landing page tokens and keeps the accent for the state that needs attention",
+        "Proposes stack, data model and screens and asks for go-ahead before scaffolding a backend",
+        "Reports any render or lint tier that could not run instead of claiming it passed"
+      ],
+      "expected_reads": [
+        [
+          "visual-assets",
+          "marketing-copy"
+        ],
+        [
+          "back-office"
+        ]
+      ],
+      "must_not_read": [],
+      "field": "greenfield",
+      "category": "landing"
+    },
+    {
+      "id": 16,
+      "prompt": "ทำ landing page เอเจนซี่การตลาดให้หน่อย ภาษาไทยกับอังกฤษสลับได้ ยังไม่มีรูปกับโลโก้ลูกค้า",
+      "expected_output": "Bilingual public page with a direction chosen from pictures, Thai font pairing, real open-collection photographs with credits, no invented proof, rendered and checked in both languages at 1440 and 390.",
+      "files": [],
+      "assertions": [
+        "Asks the direction interview (feel, references, energy) before any code, in at most 3 questions with a recommended option",
+        "Shows named directions with a picture or rendered sketch of each, not names only, and offers more without repeating shown ones when asked",
+        "Chooses a Thai display and body pair for the Latin display face, switches the font family per language and does not track or uppercase Thai",
+        "Page works with scripting off in the default language; the language toggle updates html lang, title, image alt and select options",
+        "Uses open-collection photographs with licence, a footer credit line and an honest label; none presented as the client's team or product",
+        "Invents no logos, testimonials or metrics; sample figures are labelled and listed in the hand-off",
+        "Runs render_check at 1440 and 390 in light and dark, and again after the language toggle (--toggle); reports headlines that wrap to 3+ lines in either language",
+        "Reports any tier that could not run instead of claiming it passed"
+      ],
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "field": "greenfield",
+      "category": "landing"
+    },
+    {
+      "id": 17,
+      "prompt": "Switch the agency landing page you just built to a different theme from the previews, keep all content and the form working.",
+      "expected_output": "Previous version kept, direction swapped through tokens and composition, form and language toggle still working, conflicts with other skills' house rules reported as accepted.",
+      "files": [],
+      "assertions": [
+        "Copies the existing files (or confirms a clean tree) and takes before screenshots before editing",
+        "Keeps every link, form field id, handler and the language toggle; verifies the form's invalid and success states after the change",
+        "States which house rules of other installed checkers the new direction overrides (for example shadows or hairlines) and reports those findings as accepted, not as failures",
+        "Does not edit a checker or its config to make it pass",
+        "Re-runs render_check with --toggle and contrast.py --css on the new tokens, including oklch values and the dark block",
+        "Hand-off states where the previous version is, what changed, and what was not re-checked"
+      ],
+      "expected_reads": [
+        [
+          "direction-library",
+          "direction-recipes",
+          "tokens-export"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/results/eval16/with2",
+      "field": "brownfield",
+      "category": "direction"
+    },
+    {
+      "id": 18,
+      "prompt": "Critique this agency landing page and score it, then say what to fix first.",
+      "expected_output": "Weighted score with caps, layout-word test, rule tiers, fix order, fresh-context review note.",
+      "files": [],
+      "assertions": [
+        "Scores design/usability/creativity/content with stated weights and applies any hard caps",
+        "Writes one layout word per section and flags repeats",
+        "Classifies findings as Floor, Reflex (with waiver reason) or Finish",
+        "Orders fixes idea → hierarchy → composition → type → imagery → colour → detail → motion",
+        "States whether the review was fresh-context or self-run",
+        "Does not recommend a redesign inside a polish pass without saying so"
+      ],
+      "expected_reads": [
+        [
+          "review-loop"
+        ],
+        [
+          "scoring-caps"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/results/eval16/with2",
+      "field": "brownfield",
+      "category": "review"
+    },
+    {
+      "id": 19,
+      "prompt": "We're building a citizen-facing permit application (6 steps, Thai + English). No design system yet. Which tokens, focus style, radius and breakpoints should we start with, and how should the review step work?",
+      "expected_output": "Token layers with role names, 3px+ high-contrast focus ring, small radius, content-driven breakpoints, review page with contextual Change links, retained answers, error summary; provenance marked assumed.",
+      "files": [],
+      "assertions": [
+        "Names primitive, semantic-role and component token layers with role-based names, not hex in components",
+        "Specifies a focus indicator of at least 3px with 3:1 contrast and keeps it in forced-colors",
+        "Chooses a small radius camp and a 4px or 8px base, marked as assumed",
+        "Review step has a summary list with contextual Change links, returns to review after a change, retains answers",
+        "Error summary links to fields and moves focus; Thai typography/line-height considered",
+        "Marks token values as assumed/derived rather than official and does not copy a government identity or font"
+      ],
+      "expected_reads": [
+        [
+          "design-system-benchmarks"
+        ],
+        [
+          "forms"
+        ],
+        [
+          "design-foundations",
+          "accessibility"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "field": "greenfield",
+      "category": "design-system"
+    },
+    {
+      "id": 20,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "Design a user and role management page for our internal HR tool: invite, change role, deactivate.",
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "trust-security-privacy",
+          "experience-architecture"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 21,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "ออกแบบหน้า audit log ให้ทีม compliance ค้นหาว่าใครแก้ไขข้อมูลลูกค้าเมื่อไหร่",
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "page-spec",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 22,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "We need a bulk action to cancel up to 2,000 subscriptions at once in our admin. Design the flow.",
+      "expected_reads": [
+        [
+          "patterns",
+          "back-office"
+        ],
+        [
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 23,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "Design the inventory list screen for warehouse staff on tablets: 5k SKUs, filters, stock adjustments.",
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "page-spec",
+          "patterns",
+          "tablet-rtl-dark",
+          "data-visualization"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 24,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "ออกแบบหน้าจัดการสิทธิ์ (permissions) สำหรับระบบที่มี 5 role และสิทธิ์ระดับสาขา",
+      "expected_reads": [
+        [
+          "experience-architecture",
+          "back-office"
+        ],
+        [
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 25,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "Design an approval queue for expense claims with two-level approval (manager, then finance).",
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "trust-security-privacy",
+          "page-spec"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 26,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "Design the admin page where support agents issue a partial refund to a customer's card.",
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 27,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "Design the account deletion flow for our consumer app (PDPA/GDPR).",
+      "expected_reads": [
+        [
+          "customer-ui",
+          "trust-security-privacy"
+        ],
+        [
+          "page-spec",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy"
+      ]
+    },
+    {
+      "id": 28,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "ออกแบบ flow จองคิวร้านตัดผมในแอป เลือกช่าง เลือกเวลา จ่ายมัดจำ",
+      "expected_reads": [
+        [
+          "customer-ui"
+        ],
+        [
+          "page-spec",
+          "forms",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 29,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "Design the order tracking page customers see after buying: shipped, delayed, lost.",
+      "expected_reads": [
+        [
+          "customer-ui"
+        ],
+        [
+          "patterns",
+          "content-design",
+          "page-spec"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 30,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "Design a subscription pause/cancel screen that won't feel like a dark pattern.",
+      "expected_reads": [
+        [
+          "customer-ui",
+          "trust-security-privacy",
+          "patterns"
+        ],
+        [
+          "content-design",
+          "page-spec",
+          "sources"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 31,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "Design the first-run onboarding for a budgeting web app: connect a bank, set a goal.",
+      "expected_reads": [
+        [
+          "customer-ui"
+        ],
+        [
+          "page-spec",
+          "app-screen-rules",
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 32,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "ออกแบบหน้าเติมเงิน wallet ด้วย PromptPay QR ให้ลูกค้า",
+      "expected_reads": [
+        [
+          "customer-ui"
+        ],
+        [
+          "trust-security-privacy",
+          "patterns",
+          "page-spec"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 33,
+      "field": "greenfield",
+      "category": "customer-app",
+      "prompt": "Design a password reset flow: email link, expired link, too many attempts.",
+      "expected_reads": [
+        [
+          "customer-ui",
+          "forms",
+          "advanced-components"
+        ],
+        [
+          "patterns",
+          "content-design",
+          "page-spec",
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 34,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Build a landing page for a B2B payroll SaaS in Thailand. Single HTML file.",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "marketing-copy",
+          "visual-assets"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 35,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "ทำเว็บ portfolio ให้ช่างภาพงานแต่งงาน ดูมินิมอล",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "visual-assets",
+          "marketing-copy"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 36,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Make a waitlist page for an app that hasn't launched; we have no users or testimonials yet.",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "marketing-copy",
+          "visual-assets"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 37,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Design a pricing page with three plans and a monthly/yearly toggle.",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library",
+          "marketing-copy"
+        ],
+        [
+          "marketing-copy",
+          "layouts/marketing"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 38,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "ทำ landing page งานสัมมนา มีตารางเวลาและฟอร์มลงทะเบียน",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "marketing-copy",
+          "visual-assets",
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 39,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Landing page for a Thai street-food restaurant with LINE ordering, Thai and English.",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "i18n-performance",
+          "design-foundations",
+          "marketing-copy"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 40,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Build a launch page for a smart water bottle with lots of motion.",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "motion",
+          "marketing-copy",
+          "visual-assets"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 41,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Make an About page for a law firm; it should feel trustworthy and calm.",
+      "expected_reads": [
+        [
+          "design-direction",
+          "direction-library"
+        ],
+        [
+          "marketing-copy",
+          "visual-assets"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 42,
+      "field": "greenfield",
+      "category": "forms",
+      "prompt": "ออกแบบฟอร์มกรอกที่อยู่จัดส่งภาษาไทย (จังหวัด อำเภอ ตำบล รหัสไปรษณีย์)",
+      "expected_reads": [
+        [
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 43,
+      "field": "greenfield",
+      "category": "forms",
+      "prompt": "Design a five-step loan application with save and resume.",
+      "expected_reads": [
+        [
+          "forms"
+        ],
+        [
+          "page-spec",
+          "patterns",
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 44,
+      "field": "greenfield",
+      "category": "forms",
+      "prompt": "When should form fields validate: on blur, on submit or as I type?",
+      "expected_reads": [
+        [
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "back-office"
+      ]
+    },
+    {
+      "id": 45,
+      "field": "greenfield",
+      "category": "forms",
+      "prompt": "Design a job application form with CV upload.",
+      "expected_reads": [
+        [
+          "forms"
+        ],
+        [
+          "advanced-components",
+          "components-usage",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 46,
+      "field": "greenfield",
+      "category": "data-viz",
+      "prompt": "Which chart shows market share of four products over 12 months?",
+      "expected_reads": [
+        [
+          "data-visualization"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 47,
+      "field": "greenfield",
+      "category": "data-viz",
+      "prompt": "Design an executive KPI dashboard for a hotel chain: occupancy, ADR, RevPAR.",
+      "expected_reads": [
+        [
+          "data-visualization"
+        ],
+        [
+          "back-office",
+          "page-spec",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 48,
+      "field": "greenfield",
+      "category": "data-viz",
+      "prompt": "ออกแบบ dashboard ติดตามเซิร์ฟเวอร์แบบ real-time ให้ทีม ops",
+      "expected_reads": [
+        [
+          "data-visualization"
+        ],
+        [
+          "back-office",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
+    },
+    {
+      "id": 49,
+      "field": "greenfield",
+      "category": "data-viz",
+      "prompt": "How should we show a heatmap of orders by hour and weekday, and pick its colors?",
+      "expected_reads": [
+        [
+          "data-visualization"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 50,
+      "field": "greenfield",
+      "category": "mobile",
+      "prompt": "Design push notification permission timing for a food delivery app on iOS and Android.",
+      "expected_reads": [
+        [
+          "mobile-native"
+        ],
+        [
+          "notifications"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 51,
+      "field": "greenfield",
+      "category": "mobile",
+      "prompt": "ออกแบบแอปมือถือที่ใช้งาน offline ได้ สำหรับพนักงานส่งของ",
+      "expected_reads": [
+        [
+          "mobile-native"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 52,
+      "field": "greenfield",
+      "category": "mobile",
+      "prompt": "Design the bottom tab navigation for a banking app with seven features.",
+      "expected_reads": [
+        [
+          "mobile-native"
+        ],
+        [
+          "navigation-grouping",
+          "experience-architecture"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 53,
+      "field": "greenfield",
+      "category": "mobile",
+      "prompt": "Swipe-to-delete on a list in our Android app: good idea? What about accessibility?",
+      "expected_reads": [
+        [
+          "mobile-native"
+        ],
+        [
+          "accessibility",
+          "components-usage",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 54,
+      "field": "greenfield",
+      "category": "ai",
+      "prompt": "Design a chat assistant inside our CRM that drafts customer emails.",
+      "expected_reads": [
+        [
+          "ai-features"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 55,
+      "field": "greenfield",
+      "category": "ai",
+      "prompt": "ออกแบบ UI ให้ AI agent ที่สั่งโอนเงินแทนผู้ใช้ได้ ต้องปลอดภัย",
+      "expected_reads": [
+        [
+          "ai-features"
+        ],
+        [
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 56,
+      "field": "greenfield",
+      "category": "ai",
+      "prompt": "How should we show AI-generated summaries that might be wrong?",
+      "expected_reads": [
+        [
+          "ai-features"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 57,
+      "field": "greenfield",
+      "category": "ia-nav",
+      "prompt": "Our admin has 40 menu items. Propose the IA and navigation.",
+      "expected_reads": [
+        [
+          "navigation-grouping",
+          "experience-architecture"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 58,
+      "field": "greenfield",
+      "category": "ia-nav",
+      "prompt": "ออกแบบโครงสร้างเมนูหน้า settings ของแอป SaaS",
+      "expected_reads": [
+        [
+          "navigation-grouping",
+          "experience-architecture"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 59,
+      "field": "greenfield",
+      "category": "ia-nav",
+      "prompt": "Map the journeys and pages for a clinic booking system with patients, doctors and front desk.",
+      "expected_reads": [
+        [
+          "experience-architecture"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 60,
+      "field": "greenfield",
+      "category": "design-system",
+      "prompt": "Set up type scale and spacing tokens for a Thai and English web app.",
+      "expected_reads": [
+        [
+          "design-foundations"
+        ],
+        [
+          "design-system-benchmarks",
+          "i18n-performance"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 61,
+      "field": "greenfield",
+      "category": "accessibility",
+      "prompt": "What contrast ratio do disabled buttons need under WCAG?",
+      "expected_reads": [
+        [
+          "accessibility",
+          "color-palette",
+          "component-states"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 62,
+      "field": "greenfield",
+      "category": "accessibility",
+      "prompt": "Is a focus ring required on every interactive element, and how thick should it be?",
+      "expected_reads": [
+        [
+          "accessibility",
+          "component-states"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 63,
+      "field": "greenfield",
+      "category": "content",
+      "prompt": "Write the error messages for a failed bank transfer: insufficient funds, timeout, unknown result.",
+      "expected_reads": [
+        [
+          "content-design"
+        ],
+        [
+          "patterns",
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 64,
+      "field": "greenfield",
+      "category": "content",
+      "prompt": "ข้อความ empty state ของหน้า inbox ที่ว่างควรเขียนยังไง",
+      "expected_reads": [
+        [
+          "content-design",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 65,
+      "field": "greenfield",
+      "category": "components",
+      "prompt": "Modal, drawer or a new page for editing a customer record?",
+      "expected_reads": [
+        [
+          "components-usage"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 66,
+      "field": "greenfield",
+      "category": "components",
+      "prompt": "Design a date range picker for a reporting tool.",
+      "expected_reads": [
+        [
+          "components-usage",
+          "advanced-components",
+          "component-states"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 67,
+      "field": "greenfield",
+      "category": "color",
+      "prompt": "Make me a palette for a meditation app, light and dark.",
+      "expected_reads": [
+        [
+          "color-palette"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 68,
+      "field": "greenfield",
+      "category": "components",
+      "prompt": "Spec the states for a primary button and a toggle: hover, focus, disabled, loading.",
+      "expected_reads": [
+        [
+          "component-states"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 69,
+      "field": "greenfield",
+      "category": "motion",
+      "prompt": "How should page transitions and micro-interactions work in our fintech app? Some users get motion sick.",
+      "expected_reads": [
+        [
+          "motion"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 70,
+      "field": "greenfield",
+      "category": "research",
+      "prompt": "Define success metrics for our redesigned checkout and how to measure them.",
+      "expected_reads": [
+        [
+          "measurement",
+          "product-discovery",
+          "validation"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 71,
+      "field": "greenfield",
+      "category": "research",
+      "prompt": "Plan a usability study for our new booking flow.",
+      "expected_reads": [
+        [
+          "validation",
+          "product-discovery"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 72,
+      "field": "greenfield",
+      "category": "research",
+      "prompt": "ควรเชื่อ 'กฎ 3 คลิก' ไหม มีงานวิจัยรองรับหรือเปล่า",
+      "expected_reads": [
+        [
+          "sources",
+          "interaction",
+          "validation",
+          "navigation-grouping"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 73,
+      "field": "brownfield",
+      "category": "onboard",
+      "prompt": "Our app has no DESIGN.md. Extract one from this codebase.",
+      "expected_reads": [
+        [
+          "brownfield",
+          "design-memory"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 74,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Add loading, empty and error states to the Orders table.",
+      "expected_reads": [
+        [
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 75,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "The Refunds page approves up to 500k THB with one click. Fix the approval UX.",
+      "expected_reads": [
+        [
+          "trust-security-privacy",
+          "back-office"
+        ],
+        [
+          "patterns",
+          "page-spec",
+          "back-office"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 76,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Reorganize our 31-item settings page.",
+      "expected_reads": [
+        [
+          "navigation-grouping",
+          "experience-architecture"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 77,
+      "field": "brownfield",
+      "category": "review",
+      "prompt": "Audit this admin app's UX and rank the top problems. Don't change code.",
+      "expected_reads": [
+        [
+          "review-loop"
+        ],
+        [
+          "back-office",
+          "brownfield"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 78,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "ช่วยจัดกลุ่ม sidebar 23 เมนูในแอปนี้ใหม่",
+      "expected_reads": [
+        [
+          "navigation-grouping"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 79,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Add a dark mode to this app that actually passes contrast.",
+      "expected_reads": [
+        [
+          "color-palette"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/react-admin"
+    },
+    {
+      "id": 80,
+      "field": "brownfield",
+      "category": "refine",
+      "prompt": "Our landing page looks AI-generated. Make it look designed.",
+      "expected_reads": [
+        [
+          "design-quality"
+        ],
+        [
+          "visual-assets",
+          "design-direction",
+          "direction-library"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/tailwind-saas"
+    },
+    {
+      "id": 81,
+      "field": "brownfield",
+      "category": "direction",
+      "prompt": "Switch this site to a calmer visual direction using our Tailwind and shadcn setup.",
+      "expected_reads": [
+        [
+          "direction-library"
+        ],
+        [
+          "tailwind",
+          "shadcn-rules",
+          "tokens-export",
+          "direction-recipes"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/tailwind-saas"
+    },
+    {
+      "id": 82,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Add a pricing section to this landing page.",
+      "expected_reads": [
+        [
+          "marketing-copy",
+          "layouts/marketing"
+        ],
+        [
+          "tailwind",
+          "shadcn-rules",
+          "design-memory",
+          "build-recipes"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/tailwind-saas"
+    },
+    {
+      "id": 83,
+      "field": "brownfield",
+      "category": "review",
+      "prompt": "Score this landing page out of 100 and list what to fix.",
+      "expected_reads": [
+        [
+          "review-loop"
+        ],
+        [
+          "scoring-caps"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/tailwind-saas"
+    },
+    {
+      "id": 84,
+      "field": "brownfield",
+      "category": "refine",
+      "prompt": "Make the hero bolder.",
+      "expected_reads": [
+        [
+          "review-loop",
+          "design-quality"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/tailwind-saas"
+    },
+    {
+      "id": 85,
+      "field": "brownfield",
+      "category": "onboard",
+      "prompt": "ช่วยรีดีไซน์ระบบหลังบ้านเก่านี้ให้ทันสมัย แต่ทีมยังต้องใช้งานระหว่างทำ",
+      "expected_reads": [
+        [
+          "brownfield"
+        ],
+        [
+          "back-office"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/legacy-admin"
+    },
+    {
+      "id": 86,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "The 'delete all inactive users' link in this admin scares me. Fix it.",
+      "expected_reads": [
+        [
+          "trust-security-privacy",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/legacy-admin"
+    },
+    {
+      "id": 87,
+      "field": "brownfield",
+      "category": "review",
+      "prompt": "Check this legacy admin for accessibility problems.",
+      "expected_reads": [
+        [
+          "accessibility"
+        ],
+        [
+          "render-verification",
+          "accessibility"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/legacy-admin"
+    },
+    {
+      "id": 88,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Add a 'visit us' map section to the cafe page; keep to our DESIGN.md.",
+      "expected_reads": [
+        [
+          "design-memory",
+          "design-workflow"
+        ],
+        [
+          "visual-assets",
+          "marketing-copy",
+          "layouts/marketing"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/landing-designmd"
+    },
+    {
+      "id": 89,
+      "field": "brownfield",
+      "category": "design-memory",
+      "prompt": "The owner wants a neon green gradient hero. Our DESIGN.md says otherwise. What do we do?",
+      "expected_reads": [
+        [
+          "design-memory"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/landing-designmd"
+    },
+    {
+      "id": 90,
+      "field": "brownfield",
+      "category": "refine",
+      "prompt": "ทำให้หน้านี้สวยขึ้น แต่ยังคุมตาม DESIGN.md",
+      "expected_reads": [
+        [
+          "design-quality",
+          "visual-craft",
+          "review-loop"
+        ],
+        [
+          "design-memory"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/landing-designmd"
+    },
+    {
+      "id": 91,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "The Thai headline wraps to four lines on mobile. Fix it.",
+      "expected_reads": [
+        [
+          "design-foundations",
+          "visual-composition"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/landing-designmd"
+    },
+    {
+      "id": 92,
+      "field": "brownfield",
+      "category": "mobile",
+      "prompt": "Fix the permission prompts in our onboarding.",
+      "expected_reads": [
+        [
+          "mobile-native"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/rn-app"
+    },
+    {
+      "id": 93,
+      "field": "brownfield",
+      "category": "mobile",
+      "prompt": "Our booking screen has no pending state while payment is processing. Fix it.",
+      "expected_reads": [
+        [
+          "patterns"
+        ],
+        [
+          "mobile-native"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/rn-app"
+    },
+    {
+      "id": 94,
+      "field": "brownfield",
+      "category": "accessibility",
+      "prompt": "Review this app's tap targets and text sizes against accessibility guidelines.",
+      "expected_reads": [
+        [
+          "accessibility"
+        ],
+        [
+          "mobile-native"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/rn-app"
+    },
+    {
+      "id": 95,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Improve trust on this checkout. The subscription box is pre-checked and fees show after payment.",
+      "expected_reads": [
+        [
+          "customer-ui",
+          "trust-security-privacy"
+        ],
+        [
+          "forms",
+          "patterns"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/checkout"
+    },
+    {
+      "id": 96,
+      "field": "brownfield",
+      "category": "improve",
+      "prompt": "Users double-submit payment here. Fix the submit behavior.",
+      "expected_reads": [
+        [
+          "patterns",
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ],
+      "fixture": "evals/fixtures/checkout"
+    },
+    {
+      "id": 97,
+      "field": "brownfield",
+      "category": "data-viz",
+      "prompt": "Fix the charts on this dashboard: the pie has nine slices and the line axis starts at 90.",
+      "expected_reads": [
+        [
+          "data-visualization"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/dashboard"
+    },
+    {
+      "id": 98,
+      "field": "brownfield",
+      "category": "data-viz",
+      "prompt": "There are too many KPI tiles here. Which should stay and how should they look?",
+      "expected_reads": [
+        [
+          "data-visualization"
+        ],
+        [
+          "visual-craft",
+          "app-screen-rules",
+          "back-office"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/dashboard"
+    },
+    {
+      "id": 99,
+      "field": "brownfield",
+      "category": "forms",
+      "prompt": "ปรับฟอร์มสมัครนี้ให้ใช้ง่ายขึ้น โดยเฉพาะการ validate และ placeholder",
+      "expected_reads": [
+        [
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/thai-form"
+    },
+    {
+      "id": 100,
+      "field": "brownfield",
+      "category": "verify",
+      "prompt": "Verify this form renders correctly and is accessible at 390px; report what you tested.",
+      "expected_reads": [
+        [
+          "render-verification"
+        ],
+        [
+          "accessibility",
+          "forms"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ],
+      "fixture": "evals/fixtures/thai-form"
+    }
+  ]
+}

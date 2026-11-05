@@ -25,6 +25,9 @@ __pycache__/
 
 # Skill eval suites (dev-only, not distributed)
 skills/*/evals/
+# ux-ui-principles keeps its eval suite (scenarios, fixtures, scripts) under version control; run output stays local
+!skills/ux-ui-principles/evals/
+skills/ux-ui-principles/evals/results/
 
 # Generated preview images (rebuild with skills/ux-ui-principles/scripts/build_previews.js)
 skills/*/assets/*/previews/
@@ -34,3 +37,7 @@ node_modules/
 
 # Design-inspector output (screenshots, report.json)
 .taste-skill/
+
+# Open Design showcase study pictures (rights cover the plugin, not every depicted asset); rebuild with scripts/showcase_fetch.py
+skills/*/assets/showcase/img/
+skills/*/assets/showcase/items.json

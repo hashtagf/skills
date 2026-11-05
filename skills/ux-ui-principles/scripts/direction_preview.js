@@ -8,9 +8,12 @@
  *        [--out dir] [--width 1440] [--height 1240] [--sheet] [--brief "Headline|Sentence|Button"]
  *        [--thai]   # use Thai sample copy (headings keep the direction's Latin faces + a Thai fallback)
  *
- * Every direction is drawn from the same neutral agency sample (hero, three work tiles, a four-step
- * row) so the pictures compare fairly: they show colour, type voice, surface material, radius and
- * hero composition. They do NOT show photography; the art is built from the palette. Fonts load
+ * Each direction is drawn in its own composition (scripts/compositions.js: editorial, collage, full-bleed
+ * photo, Swiss, soft product, poster, question, centred, magazine, board) on content from a real kind
+ * of business (assets/directions/content-packs.json) with open-collection photographs (assets/photos/).
+ * The pairing lives in directions.json (comp, subject, photoFilter); --comp c1..c10 and
+ * --subject <pack> override it to try a direction in another arrangement. --legacy draws the old
+ * single agency sample (palette and type compared on identical content). Fonts load
  * from Google Fonts (network); offline, generic fallbacks are used and the previews say so.
  * --sheet also writes sheet.jpg: every preview as a labelled thumbnail grid.
  * Setup needs Playwright; nothing is downloaded (see render_check.js --doctor).
@@ -32,6 +35,16 @@ if (opt('--group')) list = list.filter(d => d.group === opt('--group'));
 if (!list.length) { console.error('no directions matched'); process.exit(2); }
 
 const thai = has('--thai');
+const legacy = has('--legacy');
+const comps = require('./compositions');
+const packs = JSON.parse(fs.readFileSync(path.join(root, 'assets/directions/content-packs.json'), 'utf8')).packs;
+const photoDir = path.join(root, 'assets/photos');
+const photos = {};
+if (fs.existsSync(photoDir)) for (const f of fs.readdirSync(photoDir)) if (/\.jpe?g$/i.test(f)) photos[f.replace(/\.jpe?g$/i, '')] = 'data:image/jpeg;base64,' + fs.readFileSync(path.join(photoDir, f)).toString('base64');
+// --brief "Headline|Sentence|Button" replaces the pack's headline, sentence and action with the user's copy
+const withBrief = (p) => (brief[0] ? Object.assign({}, p, { h1: [brief[0], '', ''], sub: brief[1] || p.sub, cta: brief[2] || p.cta }) : p);
+const pageFor = (d) => (legacy || !d.comp) ? html(d)
+  : comps.render(d, opt('--comp', d.comp), withBrief(packs[opt('--subject', d.subject)] || packs.cafe), photos, { width: W, height: H, photoFilter: d.photoFilter, subject: opt('--subject', d.subject) });
 const brief = (opt('--brief', '') || '').split('|');
 const copy = thai
   ? { h1: brief[0] || 'แบรนด์ที่คนจำได้ ไม่ใช่แค่คนเห็น', sub: brief[1] || 'กลยุทธ์ ออกแบบ คอนเทนต์ และโฆษณา ในทีมเดียว', cta: brief[2] || 'นัดคุย 30 นาที', cta2: 'ดูผลงาน', work: 'ผลงานที่ตัวเลขขยับจริง', steps: ['ทำความเข้าใจ', 'วางทิศทาง', 'ออกแบบและผลิต', 'ปล่อยและต่อยอด'], weeks: ['สัปดาห์ที่ 1', 'สัปดาห์ที่ 2 ถึง 3', 'สัปดาห์ที่ 3 ถึง 8', 'สัปดาห์ที่ 6 เป็นต้นไป'], cases: [['2.4×', 'ยอดสมัคร', 'Mango Soda'], ['+61%', 'ลูกค้าสั่งซ้ำ', 'Baan Lanna'], ['−42%', 'ต้นทุนต่อลีด', 'Northwind']] }
@@ -169,9 +182,9 @@ ${hero}
   const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
   const page = await browser.newPage({ viewport: { width: W, height: H } });
   for (const d of list) {
-    await page.setContent(html(d), { waitUntil: 'load', timeout: 30000 }).catch(() => {});
+    await page.setContent(pageFor(d), { waitUntil: 'load', timeout: 30000 }).catch(() => {});
     await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(legacy ? 400 : 900);
     const file = path.join(out, `${d.id}${thai ? '-th' : ''}.jpg`);
     await page.screenshot({ path: file, type: 'jpeg', quality: 82, clip: { x: 0, y: 0, width: W, height: H } });
     console.log(`${d.id}  ${d.group}  → ${file}`);

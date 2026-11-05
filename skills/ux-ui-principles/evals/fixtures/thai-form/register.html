@@ -1,0 +1,5 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"></head><body>
+<form><input placeholder="ชื่อ-นามสกุล"><input placeholder="เลขบัตรประชาชน"><input placeholder="เบอร์โทร 08x-xxx-xxxx">
+<input placeholder="ที่อยู่ (บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์)"><input type="password" placeholder="รหัสผ่าน" onpaste="return false">
+<button>ส่ง</button></form>
+<script>document.querySelectorAll("input").forEach(i=>i.onkeyup=()=>{if(i.value.length<5)i.style.borderColor="red"})</script></body></html>

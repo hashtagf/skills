@@ -5,7 +5,7 @@
  * (references/back-office.md "Choosing density and tone from pictures").
  *
  * Usage:
- *   node scripts/backoffice_preview.js [--styles calm,dense] [--screens records,approval]
+ *   node scripts/backoffice_preview.js [--styles calm,dense | --direction dose,editorial] [--screens records,approval]
  *        [--out dir] [--width 1440] [--height 900] [--sheet] [--thai] [--singles records,approval|all]
  *        [--mobile]   # 390 x 844 phone set: records, approval, overview, inbox, detail, form, menu (drawer),
  *                     # filter (bottom sheet), states (loading/empty/error), components (bottom nav, FAB, sheet…)
@@ -53,7 +53,11 @@ const thai = has('--thai');
 const singles = opt('--singles', 'records,approval');
 const SCREENS = mobile ? ['records', 'approval', 'overview', 'inbox', 'detail', 'form', 'menu', 'filter', 'states', 'components'] : ['records', 'approval', 'audit', 'overview', 'access', 'settings', 'detail', 'import', 'finance', 'incidents', 'inbox', 'kanban', 'form', 'analytics', 'compare', 'heatmap', 'status', 'signin', 'denied', 'notfound', 'components', 'advanced', 'states'];
 const TALL = ['components', 'advanced', 'states'];
-const pickS0 = opt('--styles') ? styles.filter(s => opt('--styles').split(',').includes(s.id)) : styles;
+// --direction <id,…>: the admin screens of a brand direction (scripts/brand.js), same tokens as its public pages
+const brand = require('./brand');
+const directions = JSON.parse(fs.readFileSync(path.join(root, 'assets/directions/directions.json'), 'utf8')).directions;
+const pickS0 = opt('--direction') ? directions.filter(d => opt('--direction') === 'all' || opt('--direction').split(',').includes(d.id)).map(d => brand.productStyle(d, styles))
+  : opt('--styles') ? styles.filter(s => opt('--styles').split(',').includes(s.id)) : styles;
 const pickS = pickS0.map(s => (!mobile && W < 1100 && s.nav === 'side') ? Object.assign({}, s, { nav: 'rail' }) : s); // tablet: side nav collapses to a rail
 const pickC = opt('--screens') ? SCREENS.filter(s => opt('--screens').split(',').includes(s)) : SCREENS;
 if (!pickS.length || !pickC.length) { console.error('nothing matched'); process.exit(2); }
@@ -197,7 +201,7 @@ function css0(s) {
 body{width:${W}px;height:${H}px;overflow:hidden;background:${glow}var(--g);color:var(--ink);font:400 var(--fs)/1.45 "${s.font}","Noto Sans Thai",system-ui,sans-serif;display:grid;grid-template-columns:${grid}}
 .ic{flex:none}
 aside{background:var(--sd);color:${sideFg};padding:18px 12px;display:flex;flex-direction:column;${s.edge !== 'tone' && !s.sideDark ? 'border-right:' + th + ';' : ''}}
-.brand{display:flex;align-items:center;gap:10px;font:700 19px/1 "${s.font}",sans-serif;padding:6px 10px 22px}
+.brand{display:flex;align-items:center;gap:10px;font:700 19px/1 "${s.displayFont || s.font}",sans-serif;padding:6px 10px 22px}
 .brand i{width:30px;height:30px;border-radius:min(var(--br),12px);background:var(--a);color:var(--ai);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:16px}
 .rail .brand,.brand.rail{justify-content:center;padding:6px 0 22px}
 .nav a{display:flex;align-items:center;gap:12px;height:${Math.max(40, s.rowH - 8)}px;padding:0 12px;border-radius:var(--r);color:inherit;opacity:.8;font-size:var(--fs);margin-bottom:2px}
@@ -219,7 +223,7 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .page{padding:calc(var(--pad) - 6px) var(--pad) var(--pad);flex:1;min-height:0;display:flex;flex-direction:column;gap:16px}
 .crumb{font-size:13px;color:var(--m);display:flex;align-items:center;gap:6px}
 .ph{display:flex;align-items:flex-end;gap:12px}.ph h1{margin:0}.ph .sub{color:var(--m);margin-top:2px}
-h1{font:700 28px/1.15 "${s.font}","Noto Sans Thai",sans-serif;letter-spacing:-.015em}
+h1{font:${s.displayFont ? 600 : 700} ${s.displayFont ? 32 : 28}px/1.15 "${s.displayFont || s.font}","Noto Sans Thai",sans-serif;letter-spacing:-.015em}
 .bar{display:flex;align-items:center;gap:10px}
 .btn{height:40px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;border-radius:var(--br);background:var(--sf);color:var(--ink);border:${s.edge === 'strong' ? '2px solid var(--ink)' : '1px solid var(--ln)'};font-weight:600;font-size:var(--fs);white-space:nowrap}
 .btn.p{background:var(--a);color:var(--ai);border-color:var(--a)}.btn.sel{background:var(--as);border-color:var(--a);color:var(--ink)}.btn.dis{opacity:.5;background:var(--g);box-shadow:none}
@@ -240,7 +244,7 @@ tr.sel td{background:var(--as)!important}
 .pager .pg{margin-left:auto;display:flex;gap:6px;align-items:center}.pager .pn{min-width:32px;height:32px;border-radius:var(--r);display:grid;place-items:center;font-weight:600;color:var(--ink)}.pager .pn.on{background:var(--a);color:var(--ai)}
 .grid2{display:grid;grid-template-columns:340px 1fr;gap:16px;flex:1;min-height:0}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.kpi{padding:16px 18px;display:flex;flex-direction:column;gap:6px}.kpi .row{display:flex;align-items:flex-end;justify-content:space-between}.kpi .v{font:700 34px/1.05 "${s.font}","Noto Sans Thai",sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi{padding:16px 18px;display:flex;flex-direction:column;gap:6px}.kpi .row{display:flex;align-items:flex-end;justify-content:space-between}.kpi .v{font:${s.displayFont ? 500 : 700} 34px/1.05 "${s.displayFont || s.font}","Noto Sans Thai",sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .delta{font-size:12px;font-weight:700;display:inline-flex;gap:4px;align-items:center}
 .field{height:42px;border-radius:var(--fr);border:${s.edge === 'strong' ? '2px solid var(--ink)' : '1px solid var(--m)'};background:var(--sf);padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
 .tog{display:inline-block;width:44px;height:26px;border-radius:99px;background:var(--a);position:relative;flex:none}.tog::after{content:"";position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--ai)}
@@ -282,7 +286,7 @@ tr.sel td{background:var(--as)!important}
 }
 
 function shell(s, active, body, extra = '') {
-  const fams = [...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
+  const fams = [...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
   const me = `<div class="me"><span class="av">${initials(T.user)}</span><div><b>${T.user}</b><span>${T.role}</span></div></div>`;
   const bar = `<div class="top"><div class="search">${ic('search', 17)}<span>${T.search}</span><kbd>/</kbd></div><div class="sp"><span class="tag">${T.sample}</span><span class="bellw">${ic('bell', 20)}<i></i></span>${me}</div></div>`;
   const items = (rail) => T.nav.map((n, i) => `<a class="${i === active ? 'on' : ''}" title="${n}">${ic(NAVI[i], 19)}${rail ? '' : `<span>${n}</span>`}${!rail && i === 2 ? '<span class="badge">14</span>' : ''}</a>`).join('');
@@ -420,7 +424,7 @@ screens.status = s => {
 <div style="display:flex;flex-direction:column;gap:16px;min-height:0">
 ${hosts.map(h => `<div class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px"><div class="bar"><b class="mono">${h[0]}</b><span class="chip" style="margin-left:auto;color:${(h[1] > 70 ? s.warn : s.ok)[0]};background:${(h[1] > 70 ? s.warn : s.ok)[1]}">${h[1] > 70 ? '◔' : '●'}</span></div>${meter('CPU', h[1])}${meter('MEM', h[2])}${meter('DISK', h[3])}</div>`).join('')}
 <div class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:9px"><b>${T.ranked}</b>${rank.map(r => `<div style="display:grid;grid-template-columns:96px 1fr 52px;gap:8px;align-items:center" class="muted"><span class="mono">${r[0]}</span><span style="height:8px;border-radius:99px;background:${s.accent};width:${(r[1] / 840) * 100}%"></span><b class="mono" style="color:${s.ink};text-align:right">${r[1]}ms</b></div>`).join('')}</div></div></div></div>`); };
-const bare = (s, inner) => { const fams = [...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&'); return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${fams}&display=swap" rel="stylesheet"><style>${css(s)}body{display:grid;place-items:center}</style></head><body>${inner}</body></html>`; };
+const bare = (s, inner) => { const fams = [...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&'); return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${fams}&display=swap" rel="stylesheet"><style>${css(s)}body{display:grid;place-items:center}</style></head><body>${inner}</body></html>`; };
 screens.signin = s => bare(s, `<div class="card" style="width:440px;padding:34px;display:flex;flex-direction:column;gap:16px;${s.edge === 'tone' ? 'box-shadow:0 18px 50px rgba(0,0,0,.1);' : ''}"><div class="brand" style="padding:0"><i>P</i>Plume Pay</div><div><h1 style="font-size:26px">${T.signin}</h1><div class="muted" style="margin-top:4px">${T.signinSub}</div></div>
 <div class="flag" style="color:${s.bad[0]};background:${s.bad[1]};font-weight:500">${ic('alert', 18)}${T.signErr}</div>
 <div><div style="font-weight:600;margin-bottom:6px">${T.email}</div><span class="field">napa@plume.example</span></div><div><div class="bar" style="margin-bottom:6px"><b>${T.pw}</b><span style="margin-left:auto;color:var(--a);font-weight:600">${T.forgot}</span></div><span class="field" style="border-color:${s.bad[0]};border-width:2px">••••••••••</span></div>
@@ -458,7 +462,7 @@ ${cc(L('Filter bar and bulk actions', 'แถบตัวกรองและ�
 ${cc(L('Share dialog and profile menu', 'แชร์และเมนูบัญชี'), `<div class="dlg"><b>${L('Share report', 'แชร์รายงาน')}</b>${[['Napa S.', L('Owner', 'เจ้าของ')], ['Kanya T.', L('Can view', 'ดูได้')]].map(r => `<div class="bar">${av(r[0], s)}${r[0]}<span class="muted" style="margin-left:auto">${r[1]} ${ic('chevron', 13)}</span></div>`).join('')}<div class="bar"><span class="field" style="flex:1;height:36px">plume.example/r/8841</span><span class="btn" style="height:36px">${L('Copy link', 'คัดลอกลิงก์')}</span></div></div><div class="menu" style="width:230px"><div class="bar">${av('Napa S.', s)}<span><b>${T.user}</b><br><span class="muted" style="font-size:12px">${T.role}</span></span></div><div>${ic('settings', 16)}${T.nav[5]}</div><div style="border-top:1px solid var(--ln);margin-top:4px;padding-top:12px;color:${s.bad[0]}">${L('Sign out', 'ออกจากระบบ')}</div></div>`)}
 ${cc(L('Consent banner and notification preferences', 'ความยินยอมและการตั้งค่าแจ้งเตือน'), `<div class="dlg"><b>${L('Cookies on this site', 'คุกกี้บนเว็บนี้')}</b><span class="muted">${L('Essential cookies are always on. Choose the rest.', 'คุกกี้จำเป็นเปิดเสมอ เลือกส่วนที่เหลือได้')}</span><div class="bar"><span class="btn">${L('Reject optional', 'ปฏิเสธที่ไม่จำเป็น')}</span><span class="btn">${L('Accept all', 'ยอมรับทั้งหมด')}</span><span class="btn" style="border-color:transparent;color:var(--a)">${L('Settings', 'ตั้งค่า')}</span></div></div><table><thead><tr><th></th><th>Email</th><th>LINE</th></tr></thead><tbody>${[L('Approval needed', 'ต้องอนุมัติ'), L('Payment failed', 'จ่ายไม่สำเร็จ'), L('Daily summary', 'สรุปรายวัน')].map((t, i) => `<tr><td>${t}${i < 2 ? ' <span class="muted" style="font-size:12px">' + L('essential', 'จำเป็น') + '</span>' : ''}</td><td><span class="tog${i === 2 ? ' off' : ''}" style="transform:scale(.8)"></span></td><td><span class="tog${i === 1 ? '' : ' off'}" style="transform:scale(.8)"></span></td></tr>`).join('')}</tbody></table>`)}
 </div></div>`;
-  return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${[...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&')}&display=swap" rel="stylesheet"><style>${css(s)}body{display:block;height:auto;overflow:visible;width:${W}px}</style></head><body>${cmp}</body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${[...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&')}&display=swap" rel="stylesheet"><style>${css(s)}body{display:block;height:auto;overflow:visible;width:${W}px}</style></head><body>${cmp}</body></html>`;
 };
 
 /* ---- advanced components: editable grid, drag reorder, color picker, rich text, mention/tag, notification centre, tour, autosave form, recovery flow, interaction-state matrix ---- */
@@ -523,7 +527,7 @@ ${panel(L('No permission', 'ไม่มีสิทธิ์'), `<div class="ph
 ${panel(L('Bulk action: partial failure', 'ทำหลายรายการ: สำเร็จบางส่วน'), `<div class="flag" style="color:${s.warn[0]};background:${s.warn[1]}">${ic('alert', 18)}${L('12 approved, 2 could not be approved', 'อนุมัติแล้ว 12 รายการ ไม่สำเร็จ 2 รายการ')}</div>${[['PAY-20927', L('Daily limit reached', 'เกินวงเงินรายวัน')], ['PAY-20915', L('Duplicate payee', 'ผู้รับเงินซ้ำ')]].map(r => `<div class="bar"><span class="mono">${r[0]}</span><span class="muted">${r[1]}</span><span style="margin-left:auto;color:${s.bad[0]}">▲ ${T.st.failed}</span></div>`).join('')}<div class="bar" style="margin-top:auto"><span class="btn p">${L('Retry the 2 failed', 'ลองใหม่ 2 รายการที่ไม่สำเร็จ')}</span><span class="btn">${L('Download report', 'ดาวน์โหลดรายงาน')}</span></div>`)}
 ${panel(L('Stale or offline data', 'ข้อมูลเก่าหรือออฟไลน์'), `<div class="flag" style="color:${s.warn[0]};background:${s.warn[1]}">${ic('clock', 18)}${L('You are offline. Showing data from 14:02.', 'คุณออฟไลน์ แสดงข้อมูลเมื่อ 14:02')}<span class="btn" style="margin-left:auto;height:34px">${L('Refresh', 'รีเฟรช')}</span></div><table class="t"><tbody>${genRows(4).map(r => `<tr style="opacity:.75"><td class="mono">${r[0]}</td><td>${r[1]}</td><td class="num">${r[3]}</td></tr>`).join('')}</tbody></table><span class="muted" style="font-size:13px">${L('Actions that change data are disabled until you are back online.', 'การกระทำที่แก้ข้อมูลถูกปิดจนกว่าจะออนไลน์')}</span>`)}
 </div></div>`;
-  return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${[...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&')}&display=swap" rel="stylesheet"><style>${css(s)}body{display:block;height:auto;overflow:visible;width:${W}px}</style></head><body>${body}</body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${[...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&')}&display=swap" rel="stylesheet"><style>${css(s)}body{display:block;height:auto;overflow:visible;width:${W}px}</style></head><body>${body}</body></html>`;
 };
 
 /* ================= MOBILE (390 x 844): --mobile ================= */
@@ -583,7 +587,7 @@ body{width:390px;height:844px;overflow:hidden;position:relative;background:var(-
 `;
 }
 const mphone = (s, title, body, opts = {}) => {
-  const fams = [...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
+  const fams = [...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
   const back = opts.back;
   const app = opts.noApp ? '' : `<div class="app">${back ? `<span class="ib">${ic('back', 22)}</span>` : `<span class="ib">${ic('more2', 22)}</span>`}<h1>${title}</h1>${opts.search === false ? '' : `<span class="ib">${ic('search', 21)}</span>`}<span class="ib">${ic('bell', 21)}<i></i></span></div>`;
   const nav = opts.noNav ? '' : `<div class="bnav">${T.mnav.map((n, i) => `<a class="${i === (opts.active ?? 0) ? 'on' : ''}"><span class="pill">${ic(MNAV[i] === 'more' ? 'more2' : MNAV[i], 22)}</span>${n}${i === 2 ? '<span class="bd">14</span>' : ''}</a>`).join('')}</div>`;
@@ -601,12 +605,12 @@ const mscreens = {
   filter: s => mphone(s, T.records, `${genRows(3).map((r, i) => mrow(s, r, i)).join('')}`, { active: 1, search: false, extra: `<div class="scrim"></div><div class="sheet"><div class="grab"></div><div class="bar"><b style="font-size:18px">${T.filtersT}</b><span style="margin-left:auto;color:var(--a);font-weight:700">${T.clearAll}</span></div><div><div class="muted" style="font-size:14px;margin-bottom:8px">${T.statusF}</div><div class="bar" style="flex-wrap:wrap;gap:8px"><span class="fc on">${T.st.pending}</span><span class="fc">${T.st.approved}</span><span class="fc">${T.st.paid}</span><span class="fc">${T.st.failed}</span></div></div><div><div class="muted" style="font-size:14px;margin-bottom:8px">${T.dateF}</div><div class="bar" style="flex-wrap:wrap;gap:8px"><span class="fc">${L('Today', 'วันนี้')}</span><span class="fc on">${T.filters[1]}</span><span class="fc">${L('30 days', '30 วัน')}</span></div></div><div><div class="muted" style="font-size:14px;margin-bottom:8px">${T.methodF}</div><div class="bar" style="flex-wrap:wrap;gap:8px">${T.methods.map((m, i) => `<span class="fc ${i === 0 ? 'on' : ''}">${m}</span>`).join('')}</div></div><span class="btn p">${T.apply}</span></div>` })
 };
 mscreens.states = s => { const ph = (t, body) => `<div style="position:relative;width:390px;height:520px;background:var(--g);border-radius:0;overflow:hidden;flex:none"><div class="app" style="position:absolute;top:0;left:0;right:0"><span class="ib"></span><h1>${t}</h1></div><div class="scr" style="top:58px;bottom:0">${body}</div></div>`;
-  const fams = [...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
+  const fams = [...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
   return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${fams}&display=swap" rel="stylesheet"><style>${mcss(s)}body{width:1210px;height:auto;display:flex;gap:20px;background:#9aa0a8;padding:20px}</style></head><body>
 ${ph(L('Loading', 'กำลังโหลด'), `<div class="bar" style="gap:10px"><i class="spin"></i><span class="muted">${L('Loading payments…', 'กำลังโหลด…')}</span></div>${Array.from({ length: 4 }, () => `<div class="card item"><div class="skel" style="width:60%"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:40%"></div></div>`).join('')}`)}
 ${ph(L('Empty', 'ว่าง'), `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center"><div class="avs" style="width:64px;height:64px">${ic('search', 28)}</div><b style="font-size:18px">${L('No payments match', 'ไม่พบรายการที่ตรง')}</b><span class="muted">${L('Try fewer filters.', 'ลองลดตัวกรอง')}</span><span class="btn p">${L('Clear filters', 'ล้างตัวกรอง')}</span></div>`)}
 ${ph(L('Error', 'ข้อผิดพลาด'), `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center"><div class="avs" style="width:64px;height:64px;background:${s.bad[1]};color:${s.bad[0]}">${ic('alert', 28)}</div><b style="font-size:18px">${L('Could not load payments', 'โหลดรายการจ่ายไม่สำเร็จ')}</b><span class="muted">${L('Check your connection. Your filters are kept.', 'ตรวจการเชื่อมต่อ ตัวกรองของคุณยังอยู่')}</span><span class="btn p">${L('Try again', 'ลองอีกครั้ง')}</span></div>`)}</body></html>`; };
-mscreens.components = s => { const fams = [...new Set([s.font, 'DM Mono', 'Noto Sans Thai'])].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
+mscreens.components = s => { const fams = [...new Set([s.font, s.displayFont, 'DM Mono', 'Noto Sans Thai'].filter(Boolean))].map(f => 'family=' + f.replace(/ /g, '+')).join('&');
   const blk = (t, h) => `<div><div class="muted" style="font:700 12px 'DM Mono',monospace;margin-bottom:8px">${t}</div><div style="display:flex;flex-direction:column;gap:10px">${h}</div></div>`;
   const body = `${blk(L('App bars', 'แถบบนสุด'), `<div class="app card" style="height:56px;border-radius:var(--r)"><span class="ib">${ic('more2', 22)}</span><h1>${T.records}</h1><span class="ib">${ic('search', 21)}</span><span class="ib">${ic('bell', 21)}<i></i></span></div><div class="app card" style="height:56px"><span class="ib">${ic('back', 22)}</span><h1>PAY-20929</h1><span class="ib">${ic('more', 21)}</span></div><div class="card" style="padding:14px 16px"><div class="muted" style="font-size:13px">${T.nav[1]}</div><b style="font-size:28px;font-family:'${s.font}'">${T.records}</b></div>`)}
 ${blk(L('Bottom navigation', 'เมนูล่าง'), `<div class="card" style="display:flex;padding:8px 6px 10px">${T.mnav.map((n, i) => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:${i === 1 ? 'var(--ink)' : 'var(--m)'};position:relative"><span style="height:30px;width:58px;border-radius:99px;display:grid;place-items:center;background:${i === 1 ? 'var(--as)' : 'transparent'}">${ic(MNAV[i] === 'more' ? 'more2' : MNAV[i], 22)}</span>${n}${i === 2 ? `<span style="position:absolute;top:-2px;left:50%;margin-left:8px;min-width:18px;height:18px;border-radius:99px;background:${s.bad[0]};color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px">14</span>` : ''}</div>`).join('')}</div>`)}

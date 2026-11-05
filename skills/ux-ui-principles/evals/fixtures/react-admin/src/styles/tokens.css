@@ -1,0 +1,6 @@
+:root{--bg:#ffffff;--fg:#1f2937;--muted:#9ca3af;--primary:#2563eb;--danger:#ef4444;--border:#e5e7eb;--radius:6px;--font:"Inter",sans-serif}
+[data-theme="dark"]{--bg:#111827;--fg:#f9fafb;--muted:#6b7280;--border:#374151}
+.card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.btn{background:var(--primary);color:#fff;border-radius:4px;padding:6px 12px}
+.btn-danger{background:#dc2626}
+.badge-green{background:#22c55e;color:#fff}.badge-red{background:#f87171;color:#fff}
