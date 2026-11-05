@@ -26,7 +26,8 @@ Collect, in one batch, and write nothing until the facts exist:
 
 **Never invent proof.** Customer counts, ratings, testimonials, logos, savings
 and awards come from the client. Missing facts become marked placeholders
-(`{{จำนวนลูกค้า}}`) listed in the hand-off. Claims hanging on an asterisk
+(`{{จำนวนลูกค้า}}`) in draft copy and the hand-off only, never rendered on the
+page; leave that proof out instead ("Pages with no proof yet" below). Claims hanging on an asterisk
 ("ถูกสุดทุกวัน*") are a trust and legal risk: state the condition in words.
 
 ## 1. Headline
@@ -193,7 +194,7 @@ Rewrites reuse only facts each page states elsewhere; confirm with the client.
 
 ## Review checklist
 
-1. Headline passes the competitor test and fits two lines at every width.
+1. Headline passes the competitor test and fits two lines at every width (Thai: [design foundations](design-foundations.md) "Headline length").
 2. Subheadline adds mechanism, consequence, scope or proof — not more adjectives.
 3. Primary CTA is verb + what they get; one per view; secondary is a different path.
 4. A risk-reducer sits next to the CTA when one is true.
@@ -212,3 +213,16 @@ Rewrites reuse only facts each page states elsewhere; confirm with the client.
 | Rating with review count under the sign-up button | "Trusted by thousands" with no number |
 | State the condition of a price claim in words | Hang the headline claim on an asterisk |
 | One "A, not B" line on the page | Every section as a contrast slogan |
+
+## Pages with no proof yet
+
+When there are no clients, numbers or testimonials, do not fill the proof slot. Replace it with something true: how the
+work runs (three steps), what you get and by when, who will do it, an honest "first project" offer, or a plain fact
+strip (length of the first call, price of the first step, languages). Say so in the hand-off; add real proof when it exists.
+
+## Waitlist and pre-launch pages
+
+One path only: a single email form. No countdown, no invented scarcity, no fake social proof, no emoji. The email
+field is `type="email"` and required; other fields are optional; validate per the [forms](forms.md) §6b contract. The success
+message is announced (`role="status"` or `aria-live="polite"`) and says what happens next. Brand colors and fonts come
+from DESIGN.md; the page works at 390px and 320px with no horizontal scroll ([render verification](render-verification.md)).

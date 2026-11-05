@@ -233,7 +233,7 @@ Each entry: **Use when · Avoid when · Must have · Notes**.
 | Pattern | Key guidance |
 |---|---|
 | Filter bar | Applied filters visible as removable chips, "clear all", result count, filters in URL |
-| Bulk actions | Selection scope (page vs all matches) explicit, count, partial failure report ([experience-patterns.md](experience-patterns.md)) |
+| Bulk actions | Selection scope (page vs all matches) explicit, count, partial failure report ([patterns.md](patterns.md#dashboards-tables-and-expert-work)) |
 | Share dialog | Who has access, role per person, link scope, copy link with confirmation |
 | Cookie / consent banner | Accept and reject equally easy; granular settings; no pre-ticked optional categories; remembers choice ([trust-security-privacy.md](trust-security-privacy.md)) |
 | Notification preferences | Per type × channel matrix; essential types labeled as not switchable |

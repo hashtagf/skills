@@ -212,3 +212,10 @@ full information, e.g. a data table or long description. [S86]
 - **Ranked bars**: sorted, value at bar end, one hue unless categories differ in meaning.
 - **Donut**: 2–5 parts, rounded caps, total in the centre only when the legend carries each part's label, value and percent.
 - **Resource card**: host, status chip, CPU/memory/disk as thin bars that change colour at thresholds.
+
+## Live data states (dashboards that refresh)
+
+- A **live pill** in the header shows one of three states: *Live, synced* · *Syncing…* · *Stale, 4 min ago* (amber after a stated threshold). Color is never the only cue.
+- Refresh on open and on demand; keep the last good data visible while syncing; on failure say what is stale and since when.
+- Show change: tween changed numbers briefly, flash changed rows once, state the diff in a toast ("3 new, 1 updated").
+- Footer names the source and time: "Source: <system>, refreshed 12:41". Respect reduced motion for tween and flash.

@@ -1,8 +1,8 @@
 # Gate tiers, reviews and change scope
 
 How strict each rule is (rule classes), who reviews and how much verification
-to spend. This file owns the rule classes and which devices are Floor, Reflex
-or Finish; "tier" elsewhere means the rigor tier (Light / Standard / Critical,
+to spend. This file owns the rule classes (Floor, Reflex, Finish); the device list itself is owned by
+[design quality](design-quality.md) §2; "tier" elsewhere means the rigor tier (Light / Standard / Critical,
 [framework](framework.md)). Source studies: Hallmark gates (S97), Impeccable
 refine/redesign rules (S96); see [sources](sources.md).
 
@@ -45,6 +45,8 @@ Inside each fix round: one batched inspection → one fix batch → one confirmi
 check. The number of rounds is capped at ≤ 3 by [design workflow](design-workflow.md)
 Phase 8 (the single fix-round budget). Each review adds one fix batch and its
 recapture to a round. Never report a pass for a check or rule class that did not run.
+Which run goes where (fast vs full, journey script, counts):
+[render verification](render-verification.md) "Run order" — mandatory.
 
 ## 5. Refine preserves, redesign replaces
 
@@ -61,5 +63,5 @@ A pinned brief, aesthetic or brand beats these rules except the Floor. Every
 direction round offers one quiet, category-standard option played straight;
 the user chooses it, you do not recommend it.
 
-Questioning cadence before code (2–3 questions, usually one round) lives in
+Questioning cadence before code (≤ 3 questions per batch; the new-look interview runs in rounds A/B/C) lives in
 [design workflow](design-workflow.md) "Asking well".

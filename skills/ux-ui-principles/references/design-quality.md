@@ -13,6 +13,12 @@ version full of template devices, a cleaner version that still had them, and
 a final version built around working product fragments. The lessons below are
 project recommendations; they are taste guidance, not research findings.
 
+**Reading order for "make it beautiful / ทำให้สวยขึ้น" and every public page:**
+this file first (what to avoid), then [visual assets](visual-assets.md) (what to
+show in each section), [visual benchmarks](visual-benchmarks.md) (values), and
+[visual craft](visual-craft.md)'s critique. Inspect the screenshots before calling
+the page done.
+
 ## 1. Plan before code, then review the plan
 
 Write a short plan first, then compare it with what you would produce for any
@@ -25,7 +31,7 @@ similar brief. Change every part that would come out the same.
 | The idea | "On this page, **[something from the inventory]** becomes **[the main visual device]**." |
 | Competitor test | Put the nearest competitor's name in the sentence. If it still works, the idea is the category, not the client; strengthen it or record that the brief lacks the information |
 | One live thing | One thing the visitor can do with real content (pick their problem and operate a fragment, choose an option and see the result), works on a phone and without script |
-| Tokens | Ground, ink, one accent (plus at most one field colour); one typeface, two at most; 3–5 type sizes used ([design-foundations.md](design-foundations.md)) with a decisive jump from body to headline |
+| Tokens | Ground, ink, one accent (plus at most one field colour); one typeface, two at most (plus an optional mono for code/data); 3–5 type sizes used ([design-foundations.md](design-foundations.md)) with a decisive jump from body to headline |
 | Section argument | One line per section: the claim and its proof. Delete sections with no claim; don't default to hero → logos → three features → testimonial → pricing → CTA |
 
 If the brief lacks subject facts (as with a company whose site can't be read),
@@ -41,8 +47,8 @@ a visual anchor from [visual-assets.md](visual-assets.md), not by empty space.
 
 | Device | Use instead |
 |---|---|
-| Small uppercase or monospace label above every heading ("eyebrow") | Put the information in the heading or first sentence |
-| Monospace for captions, labels and numbers outside code | The text face with tabular figures |
+| Small uppercase or monospace label above every heading ("eyebrow") | Put the information in the heading or first sentence; a single label that carries a true fact (date, version) is allowed ([recipes](direction-recipes.md)) |
+| Monospace for captions, labels and numbers outside code | The text face with tabular figures; exception: micro labels that carry true facts in print-led directions |
 | Index numbering (01 / 02 / 03) on content that is not a sequence | Position, size and words; a real ordered list only for real sequences |
 | One word in the headline in a different color, italic or weight | Let the words carry emphasis; one face, one colour |
 | Rows of identical rounded cards with an icon in a tinted square | Varied compositions: bento with one large fragment, icon-led lists, splits. Icons themselves are fine with labels in one family ([visual-assets.md](visual-assets.md) §3) |
@@ -54,7 +60,7 @@ a visual anchor from [visual-assets.md](visual-assets.md), not by empty space.
 | Warm cream background with serif display and terracotta accent | Same: choose from the subject |
 | Middle-dot meta strings ("A · B · C") and "→" appended to links | Plain sentences and labels |
 | Fake interfaces made of grey bars, browser/laptop frames | Real, working interface fragments with real labels and numbers, composed into a scene; a simple phone outline is fine on app pages ([visual-assets.md](visual-assets.md) §5) |
-| Headlines of three or more lines | Cut words to fit two lines at every width (roughly 25–35 Thai/Latin characters at display size) |
+| Headlines of three or more lines | Cut words to fit two lines at every width (roughly 25–35 Thai/Latin characters at display size); Thai limits in [design-foundations.md](design-foundations.md) "Headline length" |
 
 ## 2b. Structural slop — beyond surface devices
 
@@ -120,7 +126,7 @@ Use screenshots at desktop and phone width, not the code. Make each pass on its 
 3. Cover the logo: could this belong to a competitor?
 4. Edges: how many distinct left edges? (Two or three is composed.)
 5. Space: accidental holes, empty half-widths, sections that look the same?
-6. Type: decisive headline jump, ≤5 sizes, headlines ≤2 lines, no orphan word?
+6. Type: decisive headline jump, ≤5 sizes, headlines ≤2 lines (Thai ≤3 at 1440, ≤4 at 390: [design-foundations.md](design-foundations.md) "Headline length"), no orphan word?
    No gap before punctuation ("address .") from letter-spacing or a fallback font?
 7. Colour: where is the accent? Only on the action and perhaps one detail?
 8. Pictures: real and doing a job, or decoration and placeholders? Does every
@@ -129,7 +135,7 @@ Use screenshots at desktop and phone width, not the code. Make each pass on its 
 9. Phone: its own composition, or the desktop squeezed?
 10. Template devices from §2 still visible?
 
-Score honestly (design, usability, creativity, content); fix the top three
+Score with the visual and UX scorecards in [review-loop.md](review-loop.md) (the final visual and UX scores); fix the top three
 problems; look again. Three rounds at most. Report what still falls short.
 
 ## 6. Honest content
@@ -147,6 +153,6 @@ problems; look again. Three rounds at most. Report what still falls short.
 | Write the idea sentence and run the competitor test before code. | Start from a hero-features-testimonial template. |
 | Show the product working at real size. | Draw a dashboard of grey bars in a laptop frame. |
 | Use one accent on the action. | Colour headings, icons, borders and one headline word with the accent. |
-| Fit headlines in two lines at every width. | Let a 40-character headline wrap to four lines on a phone. |
+| Fit headlines in two lines at every width (Thai: see design-foundations "Headline length"). | Let a 40-character headline wrap to four lines on a phone. |
 | Fill space with scale, content or real pictures. | Fill space with labels, rules, gradients or blobs. |
 | Replace each removed device with a visual anchor. | Answer the avoid-list with a page of text. |

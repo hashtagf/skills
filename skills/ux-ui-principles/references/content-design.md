@@ -45,7 +45,7 @@ Marketing and landing-page copy (headlines, CTAs, proof) is in
 
 For system errors, say whether the action happened. "ยังไม่ได้ทำรายการ" or
 "ระบบกำลังตรวจสอบผล" are different promises; never imply success or failure
-you cannot confirm (see unknown outcomes in [experience-patterns.md](experience-patterns.md)).
+you cannot confirm (see unknown outcomes in [patterns.md](patterns.md#async-and-interrupted-operations)).
 
 ## Thai-language specifics
 

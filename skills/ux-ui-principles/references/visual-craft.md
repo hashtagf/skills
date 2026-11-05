@@ -3,9 +3,8 @@
 A screen can satisfy every UX rule and still look unfinished: every section in
 an identical box, every element the same weight, generic color, no focal
 point. This file covers the composition decisions that separate a correct
-wireframe from a credible product UI. It complements [visual.md](visual.md)
-(hierarchy, type, grouping) and [visual-composition.md](visual-composition.md)
-(task-led layout); token structure is in [design-foundations.md](design-foundations.md)
+wireframe from a credible product UI. It complements [visual-composition.md](visual-composition.md)
+(hierarchy, type, grouping, task-led layout); token structure is in [design-foundations.md](design-foundations.md)
 and component choice in [components-usage.md](components-usage.md).
 
 These are project recommendations for craft quality, not research findings.
@@ -17,7 +16,7 @@ existing design system; within those, it is part of the job.
 1. Use the project's tokens, components and patterns when they exist.
 2. If none exist, define a compact token set first (4–6 color roles, 2 type
    roles + optional data face, spacing scale, radius, elevation) and build only
-   from it. Record it in [design-context.md](../assets/design-context.md).
+   from it. Record it in DESIGN.md ([design memory](design-memory.md)); the context card only links it.
 3. A new aesthetic needs a reason tied to the product, brand or audience.
 4. When tokens move between tools, the Design Tokens Format Module 2025.10 is a
    stable Community Group report (not a W3C Standard) [S58]; Figma variable
@@ -59,7 +58,7 @@ an approval; the exception list for an operator dashboard.
 
 - Two families at most (display/heading + body), plus a monospace or tabular
   face for IDs and numbers if useful. For Thai, choose fonts with good Thai
-  glyph design and test real copy (see [visual.md](visual.md)).
+  glyph design and test real copy (see [visual-composition.md](visual-composition.md)).
 - A small type scale used consistently (step count and sizes:
   [design-foundations.md](design-foundations.md)). Large size jumps for
   the focal element, small steps elsewhere.

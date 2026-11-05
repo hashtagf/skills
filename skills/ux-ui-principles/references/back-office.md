@@ -10,7 +10,7 @@ The page taxonomy and pattern tables below are **this skill's synthesis** from
 Ant Design, IBM Carbon, GOV.UK and NN/g guidance; they are not a joint
 classification published by those organizations.
 
-## Eight dimensions to settle per page
+## Eight page questions to settle per page
 
 | # | Dimension | Question |
 |---|---|---|
@@ -84,7 +84,7 @@ Table rules (project recommendations):
 - First column identifies the row in users' terms; numeric columns right-aligned
   with tabular figures; status as text plus color, never color alone.
 - Bulk selection states whether it covers this page or all matches and shows
-  the count before acting (see [experience-patterns.md](experience-patterns.md)).
+  the count before acting (see [patterns.md](patterns.md#destructive-and-consequential-actions)).
 - Preserve filters, sort, page and selection across detail visits and in URL.
 - Narrow screens: keep identifier, status and primary value; move the rest to an
   expandable row or detail. Data tables may need two-dimensional scrolling under

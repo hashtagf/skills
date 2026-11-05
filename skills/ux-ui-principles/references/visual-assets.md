@@ -37,6 +37,13 @@ illustration, a photo, an icon-led list or a figure/number band.
 
 ### 2b. Open-collection photographs
 
+`assets/photos/` holds 14 already-licensed stand-ins (coffee roasting, concrete, stage
+light, street food, misty forest, a potter's hands, type cases, a wet street at night …)
+with credits in `credits.json`; use one when the subject matches and web search is not
+available, credit it, and list it in the hand-off as a picture to replace.
+
+#### Finding more
+
 A page with no photographs reads as unfinished; four to six real pictures lift
 it more than any amount of drawing. Do this when the client has none:
 

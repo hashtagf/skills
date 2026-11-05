@@ -1,8 +1,7 @@
 # Form design
 
 Forms are where most tasks succeed or fail. This file is the full form
-reference; [patterns.md](patterns.md) and [experience-patterns.md](experience-patterns.md)
-hold the short summaries. Source IDs resolve in [sources.md](sources.md).
+reference; [patterns.md](patterns.md) holds the short summary. Source IDs resolve in [sources.md](sources.md).
 
 ## 1. Decide what to ask
 
@@ -109,8 +108,8 @@ Set `autocomplete` tokens for personal data fields so browsers can fill them
 | Server-side | Same messages as client; keep all entered values; distinguish user-fixable errors from service failures [S19] |
 
 **Error state visuals** (one look across the product): field border in the
-danger role (≥ 3:1 against the surface, WCAG 1.4.11), an error icon before the
-message, message text in danger color with ≥ 4.5:1, the field's own background
+error role (≥ 3:1 against the surface, WCAG 1.4.11), an error icon before the
+message, message text in error color with ≥ 4.5:1, the field's own background
 unchanged. Style it from `[aria-invalid="true"]` so state and visuals can't drift.
 Remove all three as soon as the value is valid.
 
@@ -129,6 +128,11 @@ Use an icon plus text, never color alone (WCAG 1.4.1). [S67] See
 Inline real-time validation that fires too early annoys users and can
 interrupt legitimate input; validate after the field is completed unless the
 rule is incremental. [S84]
+
+**Message placement.** The error appears directly below its field, in the same place as the hint, and never moves
+the control or the fields around it. Give every field one reserved message line (hint, error or empty) so showing
+an error causes no layout shift; in dense grids or table cells reserve it too, so inputs in one row stay on one
+baseline. A message that must wrap needs a wide enough column, not a taller row.
 
 ### 6b. Implementation contract — every built form
 
@@ -160,8 +164,8 @@ Minimal vanilla pattern:
   input, select, textarea, button { font: inherit; font-size: 16px; min-height: 48px; padding: 0 14px; }
   label { display: block; margin-bottom: 6px; }
   /* one error look, driven by state */
-  [aria-invalid="true"] { border-color: var(--danger); }
-  .field-error { color: var(--danger-ink); display: flex; gap: .4em; }
+  [aria-invalid="true"] { border-color: var(--error); }
+  .field-error { color: var(--error-ink); display: flex; gap: .4em; }
   .field-error::before { content: "⚠"; } /* or the product's icon */
   .form-row { display: grid; gap: 16px 24px; align-items: start; }
   @media (min-width: 640px) { .form-row.pair { grid-template-columns: 1fr 1fr; } }
@@ -212,10 +216,14 @@ f.addEventListener('submit', e => {
 - Prevent double submission; show pending state on the button.
 - Preserve input on failure, timeout or session expiry (save drafts where policy allows).
 - Unknown outcome: say the result is being checked; never invite a second payment
-  ([experience-patterns.md](experience-patterns.md)).
+  ([patterns.md](patterns.md#async-and-interrupted-operations)).
 - Success: confirmation page or message with reference, what happens next, and
   how to change. [S44]
 - Leaving with unsaved changes: warn in-page; don't trap users.
+- Multi-step or long forms: end with a review page (summary list: key, value, a
+  "Change" link whose accessible name includes the key); returning from a change
+  goes back to the review; answers are retained throughout [S102]
+  ([design system benchmarks](design-system-benchmarks.md) §5).
 
 ## 8. Mobile forms
 
@@ -243,7 +251,7 @@ f.addEventListener('submit', e => {
 3. Single reading path; groups with headings/legends.
 4. Control matches answer type; native controls preferred.
 5. `autocomplete`, `type` and `inputmode` set for personal data and numbers.
-6. Validation timing doesn't flag untouched fields; messages explain the fix.
+6. Validation timing doesn't flag untouched fields; messages explain the fix and sit below the field in a reserved line (no layout shift).
 7. Error summary links to fields on submit; focus goes to it.
 8. Input preserved on every failure path; double submit prevented.
 9. Works with keyboard only, at 200% zoom and on a phone with the keyboard open.

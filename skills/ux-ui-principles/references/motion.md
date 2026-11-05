@@ -20,13 +20,14 @@ The motion dial ([design direction](design-direction.md) §5) sets the budget.
 
 Above the dial is a defect, even if it looks good. **Below the baseline is
 also a defect** — "no motion" is only correct when the user, DESIGN.md or the
-dial (1–2) says so.
+context card says so. A public page ships the hero entrance and a once-only
+section reveal at **any** dial, including 1–3 (owner of this rule).
 
 **Baseline by page type** (use when no dial is given):
 
 | Page | Minimum that must ship |
 |---|---|
-| Landing / marketing / portfolio (dial 4–6; a low-motion direction at 3–4 still ships the hero entrance and a once-only section reveal unless the context card states why not) | Hero entrance (headline → line → CTA stagger), one section-reveal style used on some sections (once), hover/press on every button and card link, smooth anchor scroll, one signature motion from the idea |
+| Landing / marketing / portfolio (dial 4–6; a lower dial still ships the hero entrance and a once-only section reveal unless the context card states why not) | Hero entrance (headline → line → CTA stagger), one section-reveal style used on some sections (once), hover/press on every button and card link, smooth anchor scroll, one signature motion from the idea |
 | Customer app screens (dial 3–4) | Press/hover states, dialog/drawer/toast enter-exit, skeleton → content, list insert/remove, tab/accordion transitions |
 | Back office / ops (1–2) | Press/hover/focus, loading and saved feedback, dialog/drawer enter-exit; nothing decorative |
 

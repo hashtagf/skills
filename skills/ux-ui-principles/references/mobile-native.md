@@ -82,8 +82,9 @@ edits silently.
   platform allows; notify on completion.
 - **Updates:** force-update screens only for security or breaking API changes;
   explain why and keep data.
-- **First launch:** let users see value before sign-up when possible; skip
-  multi-screen tours; teach in context.
+- **First launch:** let users see value before sign-up when possible; teach in context;
+  an intro sequence is allowed only when the value is not visible without it —
+  3 screens maximum, skip always visible (in-product tours: [advanced components](advanced-components.md), max 4 steps).
 
 ## Authentication on mobile
 
@@ -137,3 +138,10 @@ skill does not track policy changes.
 | Follow each platform's back and navigation patterns. | Ship an iOS-style back button on Android that ignores the system back. |
 | Deep-link notifications to the exact item. | Open the app home screen from every notification. |
 | Restore in-progress input after interruptions. | Lose a half-filled form when a call comes in. |
+
+## Screen archetypes
+
+Pick exactly one per mockup and say which: **Feed** (scannable list, pull to refresh), **Detail** (one item, primary action
+fixed), **Onboarding** (3 screens maximum, skip always visible, last screen is sign-in or continue), **Profile** (identity,
+stats, settings entry), **Checkout** (order, price, one pay action, errors inline), **Focus** (one task, no tab bar).
+A mockup must not fake a device: no invented status icons, correct safe areas, real tab bar with 3 to 5 items.

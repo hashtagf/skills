@@ -138,7 +138,7 @@ Starting presets (adjust with evidence):
 
 Variance ≥ 6 on a task screen needs a stated reason. Motion follows
 `prefers-reduced-motion` regardless of the dial; what each motion level allows
-is in [motion](motion.md) §1. A marketing direction at dial 2-3 still ships a hero entrance and a once-only section reveal (the motion.md baseline) unless the context card states why not.
+is in [motion](motion.md) §1. A public page at any motion dial still ships a hero entrance and a once-only section reveal unless the context card states why not ([motion](motion.md) §1 owns this).
 
 ## 6. Same principle, different context
 
@@ -193,7 +193,7 @@ direction (then work inside it).
 Users describe feelings, not styles. Map their words, then confirm the
 interpretation in one line ("'premium' → editorial type, restrained color,
 variance 5, motion 3"). Ambiguous words (ทันสมัย / modern, สวย / beautiful,
-clean) carry no direction: ask for a reference or pick from §9.
+clean) carry no direction: ask for a reference or run the §9 interview.
 
 | User says | Means on screen | Style base (+ accent) | Dials V · M · D |
 |---|---|---|---|
@@ -214,26 +214,40 @@ Words the user can use to steer later (offer these when they say "ไม่ช�
 - **Dials:** "แปลกขึ้น/ธรรมดาขึ้น" (variance), "ขยับมากขึ้น/นิ่งขึ้น" (motion), "โล่งขึ้น/แน่นขึ้น" (density).
 - **Refinement verbs:** [review loop](review-loop.md) §1 (polish, distill, typeset, colorize, …).
 
-## 9. Direction interview — before code, for every new look
+## 9. Interview before code, for every new look
 
-Required in phase 3 when there is no DESIGN.md or stated direction and the
-work is a public page, a new product look or a rebrand. Skip for internal task
-screens (choose by task) and only when the user said they are away or to use
-defaults (use §8 from the brief and mark *assumed*); a background session is
-not "away". Answers also pick the starter palette ([color palette](color-palette.md)). It is
-one ask point: at most 3 questions in one batch, multiple choice with a
-recommended option, so it costs the user one click each.
+Required in phase 3 when there is no DESIGN.md or stated direction and the work is a
+public page, a new product look or a rebrand. Skip for internal task screens (choose
+by task). Skip only when the user said they are away or to use defaults; then take
+the recommended answer, mark every answer *assumed* in DESIGN.md and the hand-off,
+and never present assumed answers as the client's. A background session is not "away".
+Use the host's question tool, multiple choice with a recommended option; free text
+only where marked.
 
-1. **Feel** — "Pick up to 3 words" with options from §8 (trustworthy, premium,
-   playful, bold, techy, natural …). Drives style base and dials.
-2. **References** — "Any site or app you like, and one you don't?" (free
-   text, optional). Extract principles, not layouts ([design memory](design-memory.md) §3b).
-3. **Energy** — "How much should it move and how dense?" options: *Calm &
-   spacious* (V3 M2 D3) · *Balanced* (V5 M4 D4) · *Expressive* (V7 M6 D3) ·
-   *Dense & fast* (V2 M1 D8).
+**Round A: the business (one batch, up to 4 questions, ~2 minutes)**
+1. **Goal**: the one action that counts (book a call, buy, sign up, call, visit). Options plus Other.
+2. **Audience**: who visits and what they must be able to do in one visit (free text, one line).
+3. **Proof you can show today**: real case studies · numbers · testimonials · client logos · photos · none yet.
+   "None yet" means no invented logos, numbers or people; plan placeholders honestly.
+4. **Constraints**: languages, launch date, existing brand assets, things that must not appear (multi-select).
 
-Then propose 2–3 named directions (§7) built from the answers; choosing one is
-the second and last ask in this phase.
+**Round B: the taste (show pictures first, then ask; one batch, up to 4 questions)**
+Show pictures of 2–3 directions at a time (one picture sheet holds at most 6), at least one soft or round and
+at least one square ([direction library](direction-library.md) step 2), never names alone.
+5. **Feel**: up to 3 words (trustworthy, premium, playful, bold, techy, natural, warm, calm).
+6. **Shape**: *Soft and round* · *Mixed (round buttons, sharp cards)* · *Sharp and printed*. Do not infer shape from the feel words: "premium + playful" is not "sharp".
+7. **References**: one site or app you like and why, one you dislike and why (free text, optional). Extract principles, not layouts ([design memory](design-memory.md) §3b).
+8. **Energy**: *Calm and spacious* (V3 M2 D3) · *Balanced* (V5 M4 D4) · *Expressive* (V7 M6 D3) · *Dense and fast* (V2 M1 D8).
+
+**Round C: confirm.** Propose 2-3 named directions built from the answers (§7), each shown as a picture,
+lead with the recommendation, state what each trades away, and let the user pick. Then play the choice back in
+three lines (goal, feel+shape, what you will not do) and ask "right?" once.
+
+**Record it.** Write the answers to `interview.json` and generate DESIGN.md:
+`python3 scripts/design_md.py <direction-id> --interview interview.json --out . --wire`
+(`--template-interview` prints the empty file). It writes Status: draft, with the interview as the decision log,
+and adds a marked block to `AGENTS.md` / `CLAUDE.md` so the next agent reads DESIGN.md first. Ask once, with
+the direction pick, whether to save it; the default is yes. Set Status: approved only after the user confirms.
 
 
 ## 10. Domain exploration and token names (from Interface Design)

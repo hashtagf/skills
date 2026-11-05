@@ -170,8 +170,10 @@ def roles(t, dark, label=""):
     t["surface_muted"] = t["muted"] if ratio(t["muted"], t["surface"]) >= 4.5 else reach(mix(t["surface"], si, 0.35), t["surface"], 4.5, -1 if lum(si) < lum(t["surface"]) else +1)
     if si != t["ink"]:
         NOTES.append("%s: cards are the opposite tone; use surface-ink/surface-muted on cards" % label)
+    # tints are brand fills; each gets its own readable ink (best of ink, ground, white, black)
+    t["tint_inks"] = [t["ink"] if ratio(t["ink"], tn) >= 4.5 else max([g, "#ffffff", "#000000"], key=lambda c: ratio(c, tn)) for tn in t["tints"]]
     t["border"] = mix(g, t["ink"], 0.16)
-    t["subtle"] = mix(g, t["ink"], 0.05)
+    t["subtle"] = mix(g, t["surface"], 0.7) if dark else mix(g, t["ink"], 0.04)
     t["focus"] = reach(t["accent"], g, 3.0, d)
     return t
 
@@ -185,6 +187,8 @@ def checks(name, t):
              ("border on ground", t["border"], t["ground"], 1.0)]
     for k in ("ok", "warn", "bad", "info"):
         pairs.append((k + " on ground", t[k], t["ground"], 4.5))
+    for i, tn in enumerate(t["tints"]):
+        pairs.append(("on-tint-%d on tint-%d" % (i + 1, i + 1), t["tint_inks"][i], tn, 4.5))
     out = []
     for label, fg, bg, need in pairs:
         r = ratio(fg, bg)
@@ -195,7 +199,7 @@ def checks(name, t):
 # ---------- emit ----------
 SPACE = "--space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px;"
 TEXT = ("--text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;\n"
-        "  --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem); --text-section: clamp(2rem, 2.5vw + 1rem, 3.5rem);")
+        "  --text-display: clamp(2.25rem, 5vw + 1rem, 5.25rem); --text-section: clamp(2rem, 2.5vw + 1rem, 3.5rem);")
 MOTION = ("--ease-out: cubic-bezier(0.22, 1, 0.36, 1); --ease-in: cubic-bezier(0.64, 0, 0.78, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);\n"
           "  --dur-fast: 120ms; --dur-base: 240ms; --dur-slow: 600ms;  /* motion.md: micro 100-150, layout 200-300, reveal 500-800 */")
 
@@ -205,6 +209,7 @@ def color_block(t, indent="  "):
             ("rule", t["border"]), ("subtle", t["subtle"]), ("accent", t["accent"]), ("accent-ink", t["accent_ink"]), ("accent-text", t["accent_text"]),
             ("focus", t["focus"]), ("ok", t["ok"]), ("warn", t["warn"]), ("bad", t["bad"]), ("info", t["info"])]
     rows += [("tint-%d" % (i + 1), c) for i, c in enumerate(t["tints"])]
+    rows += [("on-tint-%d" % (i + 1), c) for i, c in enumerate(t["tint_inks"])]
     return "\n".join("%s--color-%s: %s; /* %s */" % (indent, k, ok_css(v), v) for k, v in rows)
 
 
@@ -274,6 +279,10 @@ def emit_tailwind(d):
   --color-tint-2: var(--color-tint-2);
   --color-tint-3: var(--color-tint-3);
   --color-tint-4: var(--color-tint-4);
+  --color-on-tint-1: var(--color-on-tint-1);
+  --color-on-tint-2: var(--color-on-tint-2);
+  --color-on-tint-3: var(--color-on-tint-3);
+  --color-on-tint-4: var(--color-on-tint-4);
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono);

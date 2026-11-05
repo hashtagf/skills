@@ -27,7 +27,7 @@ than leaving a required row blank.
 | 5 | Page pattern | Page type, layout ID, structural pattern, and why; tradeoff | back-office, layouts |
 | 6 | Navigation | Where users come from, where they go, Back behavior, URL | experience-architecture |
 | 7 | Components | Components chosen and why; variants and states; any new ones and why | components-usage, component-states, design-foundations |
-| 8 | Interaction | What each action does: trigger, feedback, result, focus | patterns, experience-patterns |
+| 8 | Interaction | What each action does: trigger, feedback, result, focus | patterns |
 | 9 | States | Loading, empty (first use / no results), error, success, disabled, permission, stale, offline as applicable | patterns |
 | 10 | Validation and recovery | Prevention, field validation, error summary, preserved input, unknown outcomes | patterns, content-design |
 | 11 | Responsive | What changes at each supported width; zoom/reflow behavior | visual-composition |

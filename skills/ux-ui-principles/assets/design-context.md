@@ -25,9 +25,10 @@ or marked *assumed*:
 | Main action | Approve / reject |
 | Risk → rigor tier | High → Critical |
 | Data volume / density | High · density 8/10 |
-| Main device | Desktop |
+| Main device · language · entry context | Desktop · Thai + English · from the payout alert email |
 | Page pattern · composition | Data table + master–detail · sidebar workspace |
 | Style · dials | Minimal, calm, precise · variance 2 · motion 2 |
+| Direction · rules it overrides · stated exceptions (no motion, all-square) | Back-office look "Calm" · none · none |
 | Success metric · guardrail | Review time · error / reversal rate |
 | Idea sentence · signature element (public pages) | One ledger is the page's main visual device · ruled rows as dividers |
 | Waivers (Reflex rule class, one-line reason each) | None — see [gate tiers](../references/gate-tiers.md) §1 |

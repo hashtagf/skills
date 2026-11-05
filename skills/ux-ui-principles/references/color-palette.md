@@ -15,9 +15,27 @@ Define roles first, then pick values. Components use roles, never raw hex.
 | Line, line-strong | Dividers, input borders | 2 |
 | Text, text-muted, text-faint | Primary, secondary, disabled/meta | 3 |
 | Accent, accent-soft, on-accent | Primary action, selection, focus links; tint; text on accent | 3 |
-| Semantic: success, warning, critical, info (+ soft) | Status only | 8 |
+| Semantic: success, warning, error, info (+ soft) | Status only | 8 |
 | Data palette | Charts (categorical, sequential, diverging) | separate set |
 | Focus | Focus indicator if not the accent | 1 |
+
+**Role names across files (this table owns them).** The same role has one name per layer;
+do not invent a fourth.
+
+| Role (prose here) | DESIGN.md token ([design memory](design-memory.md)) | CSS from `export_tokens.py` ([tokens to code](tokens-export.md)) |
+|---|---|---|
+| ground / background | `canvas` | `--color-paper` |
+| line / border | `border` | `--color-rule` |
+| text-muted | `muted` | `--color-muted` |
+| surface | `surface` | `--color-surface` |
+| ink / text | `on-surface` | `--color-ink` |
+| accent | `primary` | `--color-accent` |
+| on-accent | `on-primary` | `--color-accent-ink` |
+| focus | `focus` | `--color-focus` |
+| success · warning · error · info | `success` · `warning` · `error` · (info) | `--color-ok` · `--color-warn` · `--color-bad` · `--color-info` |
+
+Code you write by hand (forms, prototypes) uses the CSS names of the project; in this
+skill's examples `--error` / `--error-ink` stand for the error role.
 
 Rules:
 - **Semantic colors stay fixed across brand palettes** so status meaning never
@@ -108,7 +126,7 @@ keeping the lightness values.
 | **minimal** | มินิมอล / minimal — general SaaS, utilities | `#FAFAFA` `#FFFFFF` `#171717` `#525252` `#E5E5E5` `#2563EB` `#FFFFFF` | `#0B0B0C` `#161618` `#F5F5F5` `#A3A3A3` `#27272A` `#60A5FA` `#0B0B0C` |
 | **developer** | นักพัฒนา / developer — dev tools, docs, consoles | `#F5F7F9` `#FFFFFF` `#1E2329` `#57606A` `#D3DAE1` `#1A7F37` `#FFFFFF` | `#0E1116` `#161B22` `#E6EDF3` `#949BA4` `#2A313A` `#3FB950` `#0E1116` |
 
-Status colours (success/warning/danger/info) stay separate from the accent
+Status colours (success/warning/error/info) stay separate from the accent
 and follow §"Roles before hues".
 
 ## Dark theme

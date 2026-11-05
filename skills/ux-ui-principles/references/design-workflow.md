@@ -92,7 +92,7 @@ type first ([back office](back-office.md)).
 - **Direction:** if DESIGN.md fixes the look, work inside it and skip
   exploration. Otherwise translate the user's words with the keyword table
   ([design direction](design-direction.md) §8), set the three dials and, for a
-  new look or a public page, run the direction interview (§9, user present)
+  new look or a public page, run the interview (§9: rounds A/B/C, user present)
   and propose 2–3 named directions (§7).
 - **Motion level:** the motion dial sets what may move ([motion](motion.md) §1).
 - Brand from references: [design memory](design-memory.md) §3b.
@@ -105,13 +105,16 @@ type first ([back office](back-office.md)).
 [back-office worked examples](../assets/layouts/worked-examples-back-office.md);
 external [OpenDesign references](../assets/layouts/opendesign.md) (verify before
 importing tokens). After brand extraction run
-`python3 scripts/design_md_check.py DESIGN.md` on the draft.
+`python3 scripts/design_md_check.py DESIGN.md` on the draft. Generate the first draft with
+`python3 scripts/design_md.py <direction-id> --interview interview.json --out . --wire`; it also adds a marked
+pointer block to `AGENTS.md` / `CLAUDE.md`.
 
 **Ask.**
-- ASK the **direction interview** (≤ 3 multiple-choice questions: feel, references,
-  energy) for every new look / public page without DESIGN.md or a stated direction,
-  **before writing code**. Skip only when the user said they are away or to use
-  defaults (then infer via §8 and mark *assumed*); a background session is not "away".
+- ASK the **interview** (§9 of [design direction](design-direction.md): Round A business,
+  Round B taste with pictures, Round C confirm) for every new look / public page
+  without DESIGN.md or a stated direction, **before writing code**. Skip only when
+  the user said they are away or to use defaults (then take recommended answers and mark them
+  *assumed*); a background session is not "away".
 - ASK to **pick a direction** when 2–3 are proposed for a new look — this is
   taste and brand, the user's call. Lead with the recommendation. Show
   pictures, not only names ([direction library](direction-library.md) §1); when
@@ -129,7 +132,7 @@ importing tokens). After brand extraction run
 **Do.** Specify the screen so it can be built and checked: content priority,
 real copy, labels, controls, component choices, every applicable state,
 keyboard/focus, responsive behavior, error recovery. Answer the
-[page spec](../assets/page-spec.md) rows the tier requires. Hard components (editable grid, drag reorder, pickers, rich text, mention input,
+[page spec](../assets/page-spec.md) rows the tier requires. Before building, state the chosen section list or layout in one sentence so the user can redirect it cheaply. Hard components (editable grid, drag reorder, pickers, rich text, mention input,
 notification centre, tour, autosave form, password recovery) follow
 [advanced components](advanced-components.md); every interactive part defines
 default, hover, focus-visible, pressed and disabled. Use project
@@ -140,11 +143,11 @@ from its landing page.
 
 **Read.** By the decision at hand, one or two files:
 [components usage](components-usage.md), [component states](component-states.md),
-[forms](forms.md), [advanced components](advanced-components.md), [patterns](patterns.md), [experience patterns](experience-patterns.md),
+[forms](forms.md), [advanced components](advanced-components.md), [patterns](patterns.md),
 [content design](content-design.md) or [marketing copy](marketing-copy.md),
 [data visualization](data-visualization.md), [ai features](ai-features.md),
 [trust/security/privacy](trust-security-privacy.md);
-visual: [visual](visual.md) (hierarchy, grouping, Thai text), [design foundations](design-foundations.md), [color palette](color-palette.md),
+visual: [visual composition](visual-composition.md) (hierarchy, grouping, Thai text), [design foundations](design-foundations.md), [color palette](color-palette.md),
 [visual craft](visual-craft.md), [visual assets](visual-assets.md),
 [visual benchmarks](visual-benchmarks.md) §13 craft pass, [iconography](iconography.md).
 Evidence behind values and wording, open only to justify or check a choice:
@@ -197,9 +200,14 @@ the hand-off where the previous version is and what changed.
 **Ask.**
 - ASK before **expanding scope**: touching pages not requested, adding a
   dependency or component library, changing tokens system-wide, migrating a stack.
-- ASK before writing project documents (DESIGN.md, design context) unless asked
-  or owned by the host workflow.
+- ASK before writing project documents (design context, wiring DESIGN.md into
+  `AGENTS.md`/`CLAUDE.md`) unless asked or owned by the host workflow. **Exception:** a
+  product-UI build (dashboard, admin, ERP) with no DESIGN.md writes the draft DESIGN.md
+  first with `design_md.py --backoffice <look-id>` (or `--from-code` for brownfield).
 - NO for implementation details inside the agreed scope.
+
+Icons: navigation, primary actions, status and toolbars use icon + label from one
+family ([iconography](iconography.md)); record the glyph table in DESIGN.md.
 
 Motion follows the spec with CSS / View Transitions first; a motion library
 only if the project has one ([motion](motion.md) §5–6). Reduced-motion is the
@@ -217,10 +225,12 @@ server errors mapped, input kept), using the project's form library if any.
 Run `slop_check.py`, then critique with severity (blocker/major/minor/note),
 evidence, impact, fix and verify. Check UX (task, flow, states, recovery) and
 visual (hierarchy, type, spacing, color, consistency) separately; apply the
-specific refinement verb for each issue. Report one final score from the
+specific refinement verb for each issue. Report the final visual and UX scores from the
 [review loop](review-loop.md) §3–4 rubric, capped and calibrated by
 [scoring caps](scoring-caps.md); run the fresh-context reviews in
 [gate tiers](gate-tiers.md) §3 when subagents exist.
+
+Product-UI builds: run the one-round [polish pass](review-loop.md#product-ui-polish-pass) here, before phase 7.
 
 **Read.** [review loop](review-loop.md), [scoring caps](scoring-caps.md), [gate tiers](gate-tiers.md), [design quality](design-quality.md) §5,
 [visual craft](visual-craft.md), [do and don't](do-and-dont.md); admin pages also
@@ -233,9 +243,15 @@ notes in the report instead of asking.
 
 ## Phase 7 — Verify
 
-**Do.** At the depth tools allow: `node scripts/render_check.js <page> --zoom`
-(use `--fast` for re-checks between fixes, the full run once before
-delivery; add `--reduced-motion` when the page animates; `--doctor` exit 3 → mark *not tested*, run the static checks,
+**Order (mandatory).** Follow the run order in [render verification](render-verification.md)
+"Run order": `--fast` baseline on all pages → one batch of all fixes → `--fast`
+confirm on changed pages + journey once → full `--zoom` run once per page before
+delivery. Never re-run a check after a single fix; report the run counts.
+`node scripts/script_check.js <page>` runs first on every built page, with or without a
+browser: a syntax error or a global such as `const top` silently kills the page's scripts.
+
+**Do.** At the depth tools allow: `node scripts/render_check.js <page>`
+(`--fast` while iterating, `--zoom` full run once per page at the end; add `--reduced-motion` when the page animates; `--doctor` exit 3 → mark *not tested*, run the static checks,
 never install or wait for browsers mid-task) and inspect the screenshots; drive the critical journey plus one failure path — for each form: empty
 submit, one invalid value (also Thai typed into email), one request failure,
 and look at the error state at desktop and phone width (rows stay aligned); when the brief covers them, also check tablet, right-to-left and dark (ranges, test widths and rules: [tablet, RTL and dark](tablet-rtl-dark.md));
@@ -244,10 +260,10 @@ screen, targets, stacking);
 `python3 scripts/contrast.py --css <page>`; keyboard, zoom/reflow, language,
 assistive technology as relevant; the design QA list in
 [measurement](measurement.md) — each item passed, failed or not tested. Check
-every **hard gate** ([review loop](review-loop.md) §5).
+every **hard gate** ([review loop](review-loop.md) §5). Icon check: nav and
+actions have icon + label, one family, status never color alone (`slop_check.py` flags nav without icons).
 
 **Read.** [render verification](render-verification.md),
-[accessibility verification](accessibility-verification.md),
 [accessibility](accessibility.md), [i18n & performance](i18n-performance.md).
 
 **Ask.**
@@ -275,13 +291,38 @@ templates in [output templates](../assets/templates.md).
 - Publishing, committing, deploying follow host rules; a design or preview
   grants no authority to do them.
 
-**Exit.** Completion criteria in SKILL.md met; open items listed, not dropped.
+**Scope and completion** (moved from SKILL.md; SKILL.md §6 keeps the summary).
+- Match the deliverable to the request: do not produce a full audit for a single
+  label correction, and supply design decisions and artifacts, not an automatic
+  redesign of the whole product.
+- Deliver actionable decisions with rationale and a way to verify each. Required
+  page-spec rows for the tier are answered or N/A with a reason; no hard gate
+  ([review loop](review-loop.md) §5) is failing or untested on built UI without saying so.
+- When explaining intended usage or likely misuse, include the relevant
+  [Do / Don't](do-and-dont.md) pairs and state contextual exceptions.
+- Cover the relevant failure and recovery states; disclose untested behavior and
+  assumptions.
+- Use the user's output location; otherwise answer in conversation rather than
+  creating unsolicited project documents.
+- The skill is self-contained (foundations, component choice and states,
+  prototypes and their verification). If the project already has a design system
+  or tool workflow, follow it and record deviations on the design context card.
+
+**Exit.** The scope and completion list above and SKILL.md §6 are met; open items listed, not dropped.
+
+**Host workflow.** Follow the host's workspace, agreement, and approval rules. Within Change Loop,
+record consequential choices and scenarios in the compiled OpenSpec agreement;
+project providers and the harness own evidence execution and lifecycle state.
+Do not create a parallel implementation ledger or treat a UX checklist as proof.
+A design decision or successful preview grants no authority to publish, deploy,
+commit, push, or Land.
 
 ---
 
 ## Asking well
 
-- **One batch per checkpoint**, at most 3 questions, each with a recommended
+- **One batch per checkpoint**, at most 3 questions (exception: the new-look
+  interview, [design direction](design-direction.md) §9, up to 4 per round), each with a recommended
   default and what changes depending on the answer. Use the host's question
   tool when available; otherwise a short numbered list.
 - Ask only what changes the design and cannot be read from artifacts, the
@@ -291,8 +332,13 @@ templates in [output templates](../assets/templates.md).
 - **Away / "use defaults" mode:** do not stop. Take the recommended option at
   every ASK, mark it *assumed* on the context card, and end the report with
   "Decisions to confirm" listing each one and its impact.
+  Assumed directions must still match the feel the user already chose ("premium +
+  playful" means soft or mixed shapes, not a sharp print look) and mix at least two
+  shape treatments (e.g. round buttons, rounded cards, one free-form shape); an
+  all-square page needs a stated reason on the context card. A low-motion direction
+  still ships the hero entrance and once-only reveal ([motion](motion.md) §1).
 - Match the user's language; Thai questions keep technical identifiers in English.
-- **Shape before code:** usually one round of 2–3 questions; state the likely
+- **Shape before code** (work that is not a new look): usually one round of 2–3 questions; state the likely
   reading and invite correction. Ask only what changes the result: purpose,
   people, outcome, what only this product can claim, content ranges
   (min/typical/max), states, constraints, what must stay untouched. Never ask
@@ -311,44 +357,100 @@ Example (Phase 1, Critical, Thai):
 
 ## Reference → phase index
 
-Every file in this skill and the phases that open it. A file not listed here
-is reached through the one that links it (layout category files via the
-layout index).
+The single catalog: every file in this skill, what it answers, and the phases
+that open it. SKILL.md routes requests to the first file; this table is for the
+rest. Layout category files are reached through the layout index.
 
-| File | Phases |
-|---|---|
-| [design memory](design-memory.md) | 0 (§1–2), 3 (§3b), 5 (§6), 8 (§3) |
-| [product discovery](product-discovery.md), [framework](framework.md) | 1 |
-| [sources](sources.md) | 1, RESEARCH, any external claim |
-| [back office](back-office.md) | 1, 2, 6 |
-| [customer UI](customer-ui.md) | 1, 2 |
-| [experience architecture](experience-architecture.md), [navigation grouping](navigation-grouping.md), [interaction](interaction.md), [mobile native](mobile-native.md), [notifications](notifications.md) | 2 |
-| [design direction](design-direction.md), [direction library](direction-library.md), [preview coverage](preview-coverage.md) | 2 (§1–2), 3 (§3–9: styles, dials, directions, keywords, interview; library and preview coverage for pictures) |
-| [design quality](design-quality.md) | 3 (§1–2b), 6 (§5) |
-| [visual composition](visual-composition.md) (also 4 and 7: mobile web composition), layout [index](../assets/layouts/index.md), [specification](../assets/layouts/specification.md), [worked examples](../assets/layouts/worked-examples.md), [back-office worked examples](../assets/layouts/worked-examples-back-office.md), [OpenDesign](../assets/layouts/opendesign.md) | 3 |
-| [page spec](../assets/page-spec.md), [components usage](components-usage.md), [component states](component-states.md), [forms](forms.md), [patterns](patterns.md), [experience patterns](experience-patterns.md), [content design](content-design.md), [marketing copy](marketing-copy.md), [data visualization](data-visualization.md), [ai features](ai-features.md), [trust/security/privacy](trust-security-privacy.md) | 4 |
-| [visual](visual.md), [design foundations](design-foundations.md), [color palette](color-palette.md) (recipe + starter palettes), [visual assets](visual-assets.md), [visual benchmarks](visual-benchmarks.md), [iconography](iconography.md) | 4 |
-| [visual craft](visual-craft.md) | 4, 6 |
-| Evidence: [21st.dev study](../assets/21st-study.md), [21st.dev dashboard study](../assets/21st-dashboard-study.md), [site measurements](../assets/site-measurements.md), [gallery study](../assets/gallery-study.md), [copy study](../assets/copy-study.md), [nav study](../assets/nav-study.md) | 4 (to justify a value), RESEARCH |
-| [motion](motion.md) | 3 (§1 level), 4 (§7 spec), 5 (§5–6), 7 (§8) |
-| [prototyping](prototyping.md), [tokens to code](tokens-export.md) | 5 |
-| [build-recipes](build-recipes.md) | 4, 5, 7 |
-| [gate-tiers](gate-tiers.md) | 6, 7, 8 |
-| [page-anatomy-by-job](page-anatomy-by-job.md) | 2, 3 |
-| [scoring-caps](scoring-caps.md) | 6 |
-| [app-screen-rules](app-screen-rules.md) | 4, 6 |
-| [shadcn-rules](shadcn-rules.md) | 5 |
-| [review loop](review-loop.md), [do and don't](do-and-dont.md) | 6 (and REFINE) |
-| [render verification](render-verification.md), [accessibility](accessibility.md), [accessibility verification](accessibility-verification.md), [i18n & performance](i18n-performance.md), [measurement](measurement.md) | 7 |
-| [validation](validation.md), [output templates](../assets/templates.md) | 8 |
-| [design context](../assets/design-context.md) | all (context card) |
+**Terms.** *Direction*: a named customer-page visual system (`assets/directions/directions.json`).
+*Back-office look*: a style in `assets/backoffice/styles.json`. *Page*: a URL/route;
+*screen*: a state of a page, or the phone/app shell. *Rigor tier* (Light / Standard /
+Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / Finish,
+[gate tiers](gate-tiers.md)) set how strict a rule is. *Phase 0–8* is this workflow;
+[framework](framework.md)'s steps are *stages*.
+
+| File | Answers | Phases |
+|---|---|---|
+| **Strategy and research** | | |
+| [design workflow](design-workflow.md) | Phases 0–8: steps, ask points, exit criteria, scope and completion (phase 8), asking well, this index | all |
+| [framework](framework.md) | Disciplines, levels, rigor tiers, stages; anything beyond one screen | 1 |
+| [product discovery](product-discovery.md) | Problem framing, roles, evidence labels, success metrics | 1 |
+| [sources](sources.md) | Source register (S-IDs), dates, authority, evidence discipline (claim labels, browsing, no universal rules, user control) | 1, RESEARCH, any external claim |
+| [design memory](design-memory.md) | Phase 0 inspection, precedence, DESIGN.md format and generation, brand extraction (§3b), specialist-skill routing (§5), reuse | 0 (§1–2), 3 (§3b), 5 (§6), 8 (§3) |
+| [brownfield](brownfield.md) | Existing product without DESIGN.md: inventory, extract, drift, baseline audit | ONBOARD, IMPROVE |
+| [design direction](design-direction.md) | Eight dimensions, page pattern by question, compositions, styles, dials, named directions (§7), keywords (§8), interview (§9) | 2 (§1–2), 3 (§3–9) |
+| [direction library](direction-library.md) | Every direction with fit, risk and previews; how to show and pick | 3 |
+| [direction recipes](direction-recipes.md) | Hard rules, bans, required components, pre-flight per direction | 3 (after the pick), 5, 7 |
+| [preview coverage](preview-coverage.md) | Which blueprints, sections and components have previews; how to regenerate | 3 |
+| [motion](motion.md) | Motion level per dial, motion types, choreography, reduced motion, spec | 3 (§1), 4 (§7), 5 (§5–6), 7 (§8) |
+| **Experience architecture** | | |
+| [experience architecture](experience-architecture.md) | Journeys, IA, navigation, URLs, permission flows | 2 |
+| [navigation grouping](navigation-grouping.md) | Grouping, ordering, labelling menus; settings, mega menus, mobile tabs | 2 |
+| [interaction](interaction.md) | Heuristics, mental models, cognition, competing principles | 2 |
+| [notifications](notifications.md) | Channel choice, message anatomy, frequency, lifecycle | 2 |
+| [mobile native](mobile-native.md) | iOS/Android conventions, permissions, push, offline, gestures | 2 |
+| **Page and interaction** | | |
+| [back office](back-office.md) | Admin page taxonomy, pattern fit, role layout, page review, back-office looks and previews | 1, 2, 6 |
+| [customer UI](customer-ui.md) | Customer page types, onboarding, trust, brand tone | 1, 2 |
+| [page spec](../assets/page-spec.md) | The 16 rows per rigor tier | 4 |
+| [patterns](patterns.md) | States, async and unknown outcomes, dialogs, continuity, destructive actions, dashboards and tables, speed, ethics | 4 |
+| [forms](forms.md) | Fields, structure, Thai address/phone/ID, validation timing, §6b build contract | 4, 5 |
+| [content design](content-design.md) | UX writing, errors, empty states, Thai register | 4 |
+| [marketing copy](marketing-copy.md) | Headline, CTA, proof, section copy, no-proof and waitlist pages | 4 |
+| [data visualization](data-visualization.md) | Chart choice, values display, heatmaps, widgets, live data | 4 |
+| [AI features](ai-features.md) | When AI fits, human control, AI output states | 4 |
+| [trust, security, privacy](trust-security-privacy.md) | Confirmation, masking, sessions, auditability | 4 |
+| [do and don't](do-and-dont.md) | Paired usage/misuse examples with reasons and checks | 4, 6 |
+| [layout index](../assets/layouts/index.md), [specification](../assets/layouts/specification.md) | 43 blueprints in 8 categories; the shared contract | 3 |
+| [worked examples](../assets/layouts/worked-examples.md), [back-office worked examples](../assets/layouts/worked-examples-back-office.md), [OpenDesign](../assets/layouts/opendesign.md) | Deliverable depth; external references | 3, 4 |
+| **Visual and design system** | | |
+| [design foundations](design-foundations.md) | Token layers, type scale, Thai + Latin faces, headline length, spacing, radius, elevation, density, focus | 4 |
+| [color palette](color-palette.md) | Roles and role names, semantic colors, contrast pairs, dark, OKLCH recipe, starter palettes | 4 |
+| [visual composition](visual-composition.md) | Hierarchy, grouping, responsive, mobile web composition, Thai text, page rhythm | 3, 4, 7 |
+| [visual craft](visual-craft.md) | Focal point, containers, signal budget, "ดูยาก / รก / ไม่สวย" diagnosis | 4, 6 |
+| [design quality](design-quality.md) | Reading order for public pages, template devices to avoid, structural slop, render critique | 3 (§1–2b), 6 (§5) |
+| [visual assets](visual-assets.md) | What picture goes in each section when there are no photos | 4 |
+| [visual benchmarks](visual-benchmarks.md) | Measured values: type, tone, spacing, radius, motion, presets, craft pass | 4 |
+| [reference library](../assets/references/README.md) | 30 rendered pages that look designed (landing, editorial, report, product, mobile), each mapped to a composition | 3, 4, 6 (compare the render) |
+| [showcase catalog](../assets/showcase/README.md), `scripts/showcase_fetch.py` | 98 Open Design showcase entries as 65 distinct captures, each marked template / study / skip with a composition; pictures fetched locally | 3, 4, 6 |
+| `scripts/compositions.js`, [content packs](../assets/directions/content-packs.json), [photos](../assets/photos/README.md) | Fourteen first-screen compositions; sample content per kind of business; licensed stand-in photographs | 3, 5 |
+| `scripts/brand.js` | One direction → public pages and product UI on one token set (`backoffice_preview.js --direction`) | 3, 5 |
+| [design system guides](../assets/design-systems/index.md) | all 126 study guides (14 curated with sector and reading notes) | 2, 4 |
+| `scripts/ds_lookup.py` | Outline, one section/table or cross-system search of the 126 guides (stdlib) | 2, 4 |
+| [design system benchmarks](design-system-benchmarks.md) | What 126 public design systems agree on: token layers and role ladder, focus ring, radius/breakpoint/density norms, public-sector service flows, identity and provenance | 2, 4 |
+| [iconography](iconography.md) | Labels, one family, sizing, accessible names | 4 |
+| [components usage](components-usage.md) | Which component for the job; use / avoid / must-have for ~60 | 4 |
+| [component states](component-states.md) | State checklist, focus ring, keyboard contracts, spec template | 4 |
+| [advanced components](advanced-components.md) | Editable grids, drag, pickers, rich text, mentions, tours, autosave, recovery | 4 |
+| [app-screen rules](app-screen-rules.md) | One question per screen, quiet chrome, grid arithmetic, data honesty | 4, 6 |
+| [page anatomy by job](page-anatomy-by-job.md) | Job → sections, signature, mirror test, screen budget | 2, 3 |
+| [prototyping](prototyping.md) | Wireframes, HTML prototypes with states, hand-off | 5 |
+| [build recipes](build-recipes.md) | Surface modes, no-JS demos, hero grid, placeholders, headless fallback | 4, 5, 7 |
+| [tokens to code](tokens-export.md), [tailwind](tailwind.md), [shadcn rules](shadcn-rules.md) | Direction → CSS / Tailwind v4 / shadcn tokens; stack rules | 5 |
+| Evidence: [21st.dev study](../assets/21st-study.md), [21st.dev dashboard study](../assets/21st-dashboard-study.md), [site measurements](../assets/site-measurements.md), [gallery study](../assets/gallery-study.md), [copy study](../assets/copy-study.md), [nav study](../assets/nav-study.md), [OpenDesign templates study](../assets/open-design-templates-study.md), [OpenDesign visual study](../assets/open-design-visual-study.md) | Where measured values and rules came from | 4 (to justify a value), RESEARCH |
+| **Quality, review and verification** | | |
+| [gate tiers](gate-tiers.md) | Floor / Reflex / Finish, pre-emit critique, verification budget, refine vs redesign | 6, 7, 8 |
+| [review loop](review-loop.md) | Refinement verbs, critique format, visual and UX scorecards, hard gates (§5), report | 6, REFINE |
+| [scoring caps](scoring-caps.md) | Calibration and caps on the scorecards, report format | 6 |
+| [accessibility](accessibility.md) | WCAG criteria and exceptions, keyboard, evidence plan, reporting limits | 4, 7 |
+| [render verification](render-verification.md) | `render_check.js` run order, contrast, slop and DESIGN.md checks, failure table | 7 |
+| [tablet, RTL and dark](tablet-rtl-dark.md) | Tablet ranges, right-to-left, dark for light directions | 7 |
+| [i18n & performance](i18n-performance.md) | Thai calendar/currency, expansion, two-language checks, Core Web Vitals | 4, 7 |
+| [measurement](measurement.md) | Metrics, instrumentation, experiments, design QA | 7 |
+| [validation](validation.md), [output templates](../assets/templates.md) | Research methods, severity, report structure | 8 |
+| [design context](../assets/design-context.md) | The context card | all |
 
 | Script | Phase |
 |---|---|
 | `scripts/design_md_check.py` | 3 (after brand extraction), 8 (after editing DESIGN.md) |
 | `scripts/slop_check.py` | 6 |
 | `scripts/render_check.js`, `scripts/contrast.py` | 7 |
+| `scripts/script_check.js` | 6, 7 (syntax and globals that clash with `window`; no browser needed) |
 | `scripts/direction_preview.js`, `scripts/build_previews.js` | 3 (pictures of directions; build_previews regenerates all preview sets) |
 | `scripts/export_tokens.py` | 5 (direction to CSS, Tailwind, shadcn tokens) |
 | `scripts/backoffice_preview.js` | 3 (pictures of back-office density and tone) |
+| `scripts/design_md.py` | 3 (after the interview: DESIGN.md + `--wire`), ONBOARD (`--from-code`) |
+| `scripts/code_extract.py` | 0 / ONBOARD (what existing code ships, drift) |
+| `scripts/direction_recipe.py` | 3, 5, 7 (recipe and pre-flight for the chosen direction) |
+| `scripts/tweaks_panel.py` | 6 (live tuning during reviews; remove before shipping) |
+| `scripts/review_report.py` | 6, 8 (findings → HTML report) |
 | `scripts/site_preview.js` | 3 (a direction on every page type, section and component) |

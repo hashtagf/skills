@@ -20,7 +20,7 @@ picture should generate just those instead of rebuilding all.
 | Set | Generator | Output | Directions or styles |
 |---|---|---|---|
 | First screen per direction | `scripts/direction_preview.js` | `assets/directions/previews/` | every direction in `directions.json` |
-| First screen with richer compositions (fan, ring, accordion, overlay, product mock, centered) | `scripts/site_preview.js --all --pages hero` | `assets/site/previews/sheet-hero-<group>.jpg` | 50 |
+| First screen with richer compositions (fan, ring, accordion, overlay, product mock, centered) | `scripts/site_preview.js --all --pages hero` | `assets/site/previews/sheet-hero-<group>.jpg` | every direction |
 | Site pages, landing sections, customer components | `scripts/site_preview.js` | `assets/site/previews/` | 6 by default (`--all` for every direction) |
 | Back office (desktop, phone), component library, page states | `scripts/backoffice_preview.js` | `assets/backoffice/previews/` | every back-office look in `styles.json` |
 

@@ -21,6 +21,10 @@ Look for, in this order, and note what exists:
 Report what was found in one line each. Missing ≠ permission to invent a full
 system; propose defaults and label them unapproved.
 
+Shipped UI but no DESIGN.md (brownfield): `python3 scripts/code_extract.py SRC` reports
+tokens, roles and drift; `design_md.py --from-code SRC` writes a draft DESIGN.md from it
+([brownfield](brownfield.md)).
+
 ## 2. Precedence when sources disagree
 
 | Rank | Source | Wins over lower ranks because |
@@ -29,7 +33,8 @@ system; propose defaults and label them unapproved.
 | 2 | Product goal and the role's job | The page exists for this |
 | 3 | Approved DESIGN.md / design context | Agreed brand and system decisions |
 | 4 | Existing code and components | What actually ships today |
-| 5 | Specialist skill guidance | General craft, not project facts |
+| 4a | The chosen direction's own rules ([direction library](direction-library.md)) | The look the user picked |
+| 5 | This skill's defaults, then specialist skill guidance (house rules) | General craft, not project facts |
 | 6 | Creative defaults | Unapproved proposals |
 
 Rules:
@@ -40,6 +45,14 @@ Rules:
   report both values and where each lives, recommend one, change neither
   system-wide without approval. Scoped work follows the code for consistency
   and records the deviation.
+- **Cross-domain conflict** (UX vs SEO vs Figma vs code vs a generated preview):
+  decide in this order and record the accepted trade-off. 1 security, privacy,
+  legal accuracy, user safety → 2 accessibility and primary-task completion →
+  3 true visible facts and product constraints → 4 semantic HTML, crawlability →
+  5 conversion and comprehension → 6 design-system consistency → 7 maintainability
+  and verification cost → 8 novelty and trend fit. Items 1–3 may veto. Real
+  evidence (render, source, readback) beats generated previews; AI-exploration
+  tools and style libraries are candidates, never authority. No majority votes.
 - A user request that conflicts with rank 3 is followed for the scope asked,
   and the answer names the deviation so DESIGN.md can be updated or not.
 
@@ -55,46 +68,52 @@ what should the brand feel like; what does typography express; what density
 fits the users; why these shapes and this whitespace; what does the brand
 deliberately avoid.
 
+DESIGN.md follows the Google Labs **design.md** format (alpha, `github.com/google-labs-code/design.md`):
+YAML front matter with machine-readable tokens, then prose sections with the reasons. We add a few
+sections and a dark theme on top; the spec keeps unknown sections and tokens.
+
 ```markdown
-# DESIGN.md — <product>
+---
+version: alpha
+name: <product>
+description: <one line>
+colors:                      # hex recommended; {refs} allowed elsewhere
+  canvas: "#..."  surface: "#..."  on-surface: "#..."  muted: "#..."  border: "#..."
+  primary: "#..."  on-primary: "#..."  primary-text: "#..."  focus: "#..."
+  success: "#..."  warning: "#..."  error: "#..."
+  dark-canvas: "#..."        # our extension: the dark theme as dark-* tokens
+typography:
+  headline-display: { fontFamily: ..., fontSize: 56px, fontWeight: 700, lineHeight: 1.1, letterSpacing: -0.03em }
+  body-md: { fontFamily: ..., fontSize: 16px, fontWeight: 400, lineHeight: 1.6 }   # Thai body 1.55-1.7
+rounded: { none: 0px, sm: 4px, md: 10px, lg: 18px, full: 9999px }
+spacing: { xs: 4px, sm: 8px, md: 16px, lg: 24px, xl: 40px }
+components:
+  button-primary: { backgroundColor: "{colors.primary}", textColor: "{colors.on-primary}", rounded: "{rounded.full}", height: 44px }
+  button-primary-hover: { backgroundColor: "{colors.primary-text}", textColor: "{colors.on-primary}" }
+---
+
+# DESIGN.md: <product>
 Status: draft | approved (<date>, <owner>)
 
-## Personality
-3–5 adjectives, each with what it means on screen.
-e.g. Calm — one accent, no motion except feedback.
-
-## Philosophy (ranked)
-1. Clarity over decoration  2. Information first  3. Consistent interaction
-
-## Direction dials
-Variance <n>/10 · Motion <n>/10 · Density <n>/10 (per area if they differ)
-
-## Typography
-Display / body / mono / Thai families; scale; weights; Thai body line-height per [design foundations](design-foundations.md) "Thai with Latin display faces" (1.55–1.7; ≤ 1.35 is a defect).
-
-## Color roles
-canvas, surface, text, muted, border, primary, focus, success/warning/danger/info
-— values for light and dark, and which pairs are contrast-checked.
-
-## Space, shape, depth
-Spacing scale; radius per component class; border vs shadow policy; elevation levels.
-
-## Layout rules
-Which page pattern and composition each area uses
-(e.g. operations = dense table + detail drawer; marketing = editorial; bento only on feature overview).
-
-## Components
-Library + version; approved variants; local overrides with reason.
-
-## Interaction rules
-Loading visibility, destructive confirmation, validation timing, keyboard support, motion limits.
-
-## Anti-patterns (never)
-e.g. decorative KPI cards · gradients behind data · low-contrast controls · mixed radii · glass on forms.
-
-## Decision log
-| Date | Decision | Reason | Replaces |
+## Overview            <- personality, each adjective with what it means on screen; ranked philosophy
+## Colors              <- roles and why; which pairs are contrast-checked; dark theme decision
+## Typography          <- families, scale, weights, Thai pairing and line-height ([design foundations](design-foundations.md))
+## Layout              <- page pattern and composition per area; breakpoints
+## Elevation & Depth   <- one depth strategy; border vs shadow policy
+## Shapes              <- radius per component class; corner treatment
+## Components          <- library + version; approved variants; overrides with reason
+## Do's and Don'ts     <- what the brand deliberately avoids (3 or more)
+## Direction dials     <- ours: Variance n/10 · Motion n/10 · Density n/10
+## Interaction rules   <- ours: loading, destructive confirmation, validation timing, keyboard, motion limits
+## Decision log        <- ours: date, decision, reason, replaces; the interview answers
+                          Mark each token group documented / derived / assumed, and pin library versions
+                          ([design system benchmarks](design-system-benchmarks.md) §6)
 ```
+
+The first eight `##` headings are the spec's canonical sections and must stay in that order (omit what does not apply and say so in
+`omitted:`); ours follow them. No duplicate headings or keys. Token references use `{colors.primary}`.
+`python3 scripts/design_md.py` writes this shape ([generate and wire](#generate-and-wire-new-look) below); `design_md_check.py`
+validates it, and files without front matter are flagged as the older prose-only format.
 
 This is a starter structure, not values to impose. Example values in any
 template are placeholders until the project approves them. The idea of keeping
@@ -102,9 +121,28 @@ decisions in a project file read every session follows Interface Design's
 `.interface-design/system.md` (S100) and the DESIGN.md draft format (S101).
 
 Validate before handing it on: `python3 scripts/design_md_check.py DESIGN.md`
-(required sections, reasons, color roles and dark values, anti-patterns,
-dials in range, status line, placeholders). Then check the built tokens with
+(front matter, token references, value formats, canonical section order, contrast of component pairs,
+dark values, don'ts, dials in range, status line, placeholders). Optionally also run the official linter,
+`npx @google/design.md lint DESIGN.md` (third-party package; alpha, so it may disagree with us). Then check the built tokens with
 `python3 scripts/contrast.py --css <page>`.
+
+### Generate and wire (new look)
+
+After the interview ([design direction](design-direction.md) §9), write the answers to `interview.json` and run
+`python3 scripts/design_md.py <direction-id> --interview interview.json --out . --wire`. It creates DESIGN.md
+(Status: draft; spec front matter with `colors`, `typography`, `rounded`, `spacing`, `components`; the eight canonical
+sections; AA-checked light and `dark-*` colors; dials; the interview as the decision log) and adds a block between `<!-- design-md:start -->` and `<!-- design-md:end -->`
+to `AGENTS.md` and `CLAUDE.md` (creating `AGENTS.md` if neither exists). Running it again replaces the block; it
+never overwrites DESIGN.md without `--force`. Validate with `design_md_check.py`; mark Status: approved only after
+the user confirms.
+
+### Brownfield: draft DESIGN.md from existing code
+
+For a project that already ships UI: `python3 scripts/code_extract.py SRC` reports what the code actually uses (stack, custom properties for light and
+dark, color literals with counts, fonts, sizes, radii, Tailwind utility usage, drift such as near-duplicate colors and hard-coded colors in
+components) and maps variables to the DESIGN.md color roles by name, marking each value found, guessed or derived.
+`python3 scripts/design_md.py --from-code SRC --out . --wire` writes a Status: draft DESIGN.md from it. It reports; the team decides what
+should change, then approves.
 
 ## 3b. Brand extraction — from references to a design language
 
@@ -142,6 +180,17 @@ alone is not a reason.
 
 ## 5. Routing to specialist skills
 
+When the user names a design skill:
+
+| Skill | Use it for | Do not use it for |
+|---|---|---|
+| This skill | Decisions, page spec, verification, Thai and bilingual pages, quality gates | — |
+| Hallmark | A named direction or a redesign of a public page: material, type, a stamped CSS header, its `sloplint`, direction previews | App screens; changing a design that is not a Hallmark run |
+| Taste Skill | Art direction for pages, its `draw`/`inspect`/`lint` scripts, critique | Pages whose direction needs shadows, hairlines or gradients (see below) |
+| Impeccable | Refinement verbs (polish, bolder, quieter, typeset, layout) and design critique, after its context step | Skipping its context step; do not run its edits without it |
+| Interface Design | Product UI: dashboards, admin, settings, tools | Marketing or landing pages |
+| shadcn/ui | Projects with a `components.json` | Static pages or projects without it |
+
 Use a specialist only if it is **actually available** in this session (listed
 skills, installed plugins, files in the repo). If it is not, apply the
 matching reference in this skill instead. Never write that a tool or skill was
@@ -167,7 +216,7 @@ optional. Check that one is installed before naming it as used.
 **Direction versus another skill's house rules** (extension of §2, which owns the
 precedence): House rules differ: Taste Skill bans resting shadows, hairlines and
 gradients; some Hallmark themes (paper lift, plastic, hard offsets) require
-them. Within ranks 3–5 the order is: approved DESIGN.md → the chosen direction's
+them. Within ranks 3–5 (§2 table) the order is: approved DESIGN.md → the chosen direction's
 own rules (from the [direction library](direction-library.md)) → this skill's
 defaults → another skill's house rules. The user's job and the hard gates in the
 [review loop](review-loop.md) §5 sit above all of them. A chosen direction is a

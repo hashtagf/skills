@@ -48,3 +48,36 @@ line and one sentence, not an illustration.
 
 Use a modal only when the task needs interruption or protected focus (a
 destructive confirm, a required decision). Otherwise inline, a sheet or a page.
+
+## 7. Operational UI doctrine (dashboards, admin, CRM, internal tools)
+
+Source: Codex `webapp-ui-skill`, kept where it adds to the rules above.
+
+- **Scan, compare, repeat.** Optimize for scanning rows, comparing values and
+  repeating an action; not for composition. Open on the task, never on a hero.
+- **Stable geometry.** Buttons, controls, table columns and row heights keep
+  their size on hover, loading and selection; a spinner replaces the icon, not
+  the width. Filters and sticky headers never move the data under the cursor.
+- **Frames.** A card is for repeated items, a modal or a genuinely framed tool.
+  No card inside a card (use spacing or a divider); no page section as a card.
+- **Type.** Panel and page headings ≤ 24px in dense layouts; no viewport-scaled
+  font sizes (`vw` without `clamp`); no negative tracking.
+- **Control by job.** Segmented = mode switch (2–5 options); toggle = binary
+  setting applied now; menu = option set; stepper/slider/input = numbers; icon
+  alone only for familiar tool actions, label for destructive or ambiguous ones.
+- **Layout.** Predictable shell (sidebar, topbar, tabs, split pane, command
+  menu); high-frequency filters beside the data they change; detail pane for
+  repeated inspect/edit; full-width operational layouts over decorative sections.
+- **Palette.** One neutral ground, one brand hue, a semantic set (success,
+  warning, danger, info) that never doubles as decoration. A one-note palette
+  cannot show status.
+- **Never ship:** empty state without a next action; error that discards the
+  user's input; hidden keyboard focus; disabled control with no reason when the
+  user could reasonably expect it to work; hero as the first screen.
+- **State matrix.** Per surface, fill loading · empty (no data / filtered /
+  no permission) · error (network / validation / auth / unknown) · disabled ·
+  focus · selected · submitting · success. Each cell: designed, N/A with
+  reason, or unverified. `scripts/state_check.py <src>` finds markers only; a
+  hit is not proof the state is reachable, so label it Manual.
+- **Checks:** `slop_check.py` flags `viewport-scaled-font`, `nested-cards`,
+  `hero-in-app`; `render_check.js` covers overflow and tap targets.

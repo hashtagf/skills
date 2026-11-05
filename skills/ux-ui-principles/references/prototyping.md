@@ -85,3 +85,12 @@ honest about what it demonstrates.
 | Show error, empty and permission states. | Demo only the happy path. |
 | Keep variants side by side for comparison. | Overwrite the previous option when asked to "try another". |
 | Render and check before presenting. | Send a prototype that was never opened at phone width. |
+
+## Wireframe deliverables (greybox, annotated, flow, sketch)
+
+Use when the question is structure, not skin. Medium-grey blocks with crisp darker borders so the thumbnail does not
+read blank; placeholder text as grey bars; images as a rectangle with a diagonal cross; exactly one accent (a redline)
+reserved for annotations in monospace. **Annotated**: a browser-chrome canvas on the left, numbered pins on regions, a
+narrow spec panel on the right turning each pin into one engineering or UX note. **Mobile flow**: 3 to 4 phone frames in
+a row, connectors labelled verb-first with a number ("1 tap Start"). **Sketch**: loose connectors and notes are fine,
+the blocks stay clean. Ignore finished-UI tokens here; do not add real brand color or copy.

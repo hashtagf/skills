@@ -61,6 +61,14 @@ whether it may appear without a label. Add new icons through review so
 meanings don't drift. Record the inventory in the design context; component
 states are in [component-states.md](component-states.md).
 
+## Build checklist (product UI)
+
+1. Every navigation item has an icon and a visible label, from one family.
+2. Icon-only controls are limited to bell, search, close, menu and similar, each with `aria-label` and `title`.
+3. Status pills pair an icon with text; trend uses an icon plus hidden text, never the characters ▲▼.
+4. Delivered as one sprite or one package; the glyph → meaning table lives in DESIGN.md.
+5. Run `scripts/slop_check.py <page>`: `nav-without-icons` must be clear.
+
 ## Review checklist
 
 1. Every icon-only control is from the "universally recognized" list or has a visible label.

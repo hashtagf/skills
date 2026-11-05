@@ -204,7 +204,7 @@ def main(argv):
     if len(argv) == 3:
         print(f"{ratio(argv[1], argv[2]):.2f}:1")
         return 0
-    if len(argv) != 2:
+    if len(argv) != 2 or argv[1] in ("-h", "--help"):
         print(__doc__)
         return 2
     with open(argv[1], encoding="utf-8") as f:

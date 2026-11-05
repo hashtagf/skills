@@ -29,20 +29,25 @@ material, type voice and surface; it never changes the page pattern
    direction has `assets/directions/previews/<id>.jpg`, plus labelled overviews
    per group (`sheet-company.jpg`, `sheet-premium.jpg`, `sheet-playful.jpg`,
    `sheet-atmospheric.jpg`) and `sheet.jpg` with all of them: read the images
-   and show them (the sheets are for you to choose from; show the user 2-3 at a time). They
-   are drawn from `assets/directions/directions.json` (tokens, type, surface,
-   hero composition) on one neutral agency sample, so they compare fairly; they
-   show colour, type voice, material and rhythm, **not photography**. Regenerate
-   them with the user's own copy when it matters:
-   `node scripts/direction_preview.js --ids dose,riso --brief "Headline|Sentence|Button" [--thai] [--out dir] [--sheet]`.
+   and show them (the sheets are for you to choose from; show the user 2-3 at a time). Each
+   direction is drawn in **its own composition** (`comp` in directions.json: one of fourteen
+   in `scripts/compositions.js`, each distilled from a page in the
+   [reference library](../assets/references/README.md) or the [showcase catalog](../assets/showcase/README.md)) on **content from a real kind of
+   business** (`subject`, `assets/directions/content-packs.json`) with open-collection
+   photographs (`assets/photos/`). They show a designed first screen and the section under
+   it, not a palette swatch. The same direction as product UI (same tokens, admin
+   structure) is in `previews/product/<id>-overview.jpg` and `-records.jpg`. Try another
+   arrangement or subject, or the user's own copy:
+   `node scripts/direction_preview.js --ids dose,riso [--comp c3] [--subject cafe] [--brief "Headline|Sentence|Button"] [--sheet]`;
+   `--legacy` draws the old identical agency sample when only palette and type should differ.
    Optional richer pictures: if the Hallmark skill is installed, its
    `<skills dir>/hallmark/references/themes/<slug>.jpg` (the *Preview slug*
    column) shows a bespoke first screen of a sample site. Without either, render a
    one-screen sketch yourself; never describe looks in words only.
 3. **Say what each costs**: one line on risk for this subject, and which one you
    recommend and why. Lead with the recommendation.
-4. **Ask once** (host question tool, ≤ 3 questions per [design workflow](design-workflow.md)
-   "Asking well"). When the user asks for "more", show the next 2-3 from the
+4. **Ask once** (host question tool; this is Round C of the interview in
+   [design direction](design-direction.md) §9, per [design workflow](design-workflow.md) "Asking well"). When the user asks for "more", show the next 2-3 from the
    other groups; never repeat shown ones.
 5. **Record the choice** in the design context card: direction, dials, ground
    (light/dark), the Thai type pair ([design foundations](design-foundations.md)
@@ -214,4 +219,4 @@ When the user says "company", "corporate" or "marketing company" without more:
 - Write the rules the direction forbids on the context card (for example
   "no soft shadows on controls", "red is never a warning").
 - External skills may carry the same directions with stricter rules; follow the
-  precedence in [SKILL.md](../SKILL.md) "Working with other design skills".
+  precedence in [design memory](design-memory.md) §2 and §5.

@@ -20,7 +20,7 @@ change only what that verb covers, and check its result.
 | bolder | Page reads flat / generic | Stronger focal point, scale contrast, one brand move | Focal point identifiable in 1 s |
 | quieter | Too loud, too many effects | Remove shadows/gradients/colors; signal budget ≤ 2 per element | Fewer competing signals, hierarchy intact |
 | distill | Dense, confusing | Cut or defer elements, progressive disclosure | Main task needs the same or fewer steps; nothing required was hidden |
-| typeset | Weak type hierarchy | Scale, weight, leading, measure, Thai line-height | Headings vs body distinct; line length 45–75 ch (Latin) |
+| typeset | Weak type hierarchy | Scale, weight, leading, measure, Thai line-height | Headings vs body distinct; line length 60–75 ch (Latin; [design foundations](design-foundations.md)) |
 | layout | Proportions off | Grid, composition, spacing steps | Edges align; related items grouped |
 | colorize | Color decorative or unclear | Map color to roles and statuses | Every color has a role; contrast passes |
 | animate | No interaction feedback | Purposeful transitions (durations in [motion](motion.md) §2), reduced-motion path | Motion explains change; nothing blocks input |
@@ -28,6 +28,25 @@ change only what that verb covers, and check its result.
 | adapt | Mobile/tablet poor | Reflow, touch targets, nav collapse | 320 px and 200% zoom usable |
 | optimize | Slow | Image sizes, lazy load, skeletons, bundle | LCP/INP/CLS measured, not guessed |
 | clarify | Copy confuses | Labels, errors, empty states, glossary | One name per object/status — [content design](content-design.md) |
+
+### Product-UI polish pass
+
+Mandatory once for BUILD/IMPROVE of dashboards, admin and ERP screens (public pages use the
+[craft pass](visual-benchmarks.md)). Bounded: one round over this list, then stop; no new features, copy or
+structure changes (those are other verbs). Keep before/after renders at 1440 and 390.
+
+| # | Check | Done when |
+|---|---|---|
+| 1 | Spacing rhythm | Paddings and gaps come from the token scale; related items closer than unrelated ones |
+| 2 | Alignment | Card edges, table columns and baselines line up; cards in a row share a bottom edge; no block stretched to emptiness |
+| 3 | Type | Three text tones, tabular figures for numbers, Thai line-height intact, no orphaned labels |
+| 4 | Icons | One family, same size per context, optically centered with text, same stroke |
+| 5 | Control states | Hover, active, focus, disabled, selected on every control and row; same treatment everywhere |
+| 6 | Surfaces | One border-or-shadow strategy; no doubled borders; quiet chrome ([app-screen rules](app-screen-rules.md)) |
+| 7 | Motion | 120–150 ms on hover/focus/drawer/toast only; `prefers-reduced-motion` branch |
+| 8 | Realistic fill | Real-length Thai names, long values, large numbers, empty and first-run states look intended |
+
+Report the changes made per number and anything left (with reason). A pass that finds nothing says so.
 
 Thai shorthand mapping: "ดูธรรมดา / ไม่มีอะไรเด่น" → bolder; "รก / ลายตา" →
 quieter or distill; "อ่านยาก" → typeset; "ไม่ลงตัว" → layout; "สีมั่ว" →
@@ -47,7 +66,7 @@ Severity: **blocker** (hard gate, §5) · **major** (task slowed or error-prone)
 
 Mapping to the scale in [validation](validation.md) and
 [templates](../assets/templates.md): blocker → Critical or High; major →
-Medium; minor → Low; note → Low (taste). "Critical" here is a severity, not the
+Medium; minor → Low; note → Low (taste). In the HTML report, P0 = blocker and P1 = major. "Critical" here is a severity, not the
 Critical rigor tier ([framework](framework.md)).
 
 ## 3. Visual scorecard (final score, internal rubric)
@@ -74,7 +93,7 @@ Critical rigor tier ([framework](framework.md)).
 Score each criterion 0–10, multiply by weight/10, sum to 100. Score visual and
 UX separately — a beautiful page can fail its task and a usable page can look
 unfinished. Bands: 90+ excellent · 85–89 ready for review · 70–84 refine · < 70 rework.
-This is the one final score to report; apply the caps and the real-site
+These two scores (visual, UX) are the final scores to report; apply the caps and the real-site
 calibration in [scoring caps](scoring-caps.md) (strong real sites sit near
 75–80, so 85+ is rare and needs evidence).
 
@@ -104,7 +123,7 @@ the states that apply: default · loading · empty (first use) · no results ·
 validation error · request error · partial failure · permission denied ·
 timeout / unknown outcome · offline / reconnect · conflict (edited elsewhere) ·
 success · disabled / unavailable. Details per state:
-[patterns](patterns.md), [experience patterns](experience-patterns.md),
+[patterns](patterns.md),
 [component states](component-states.md).
 
 ## 7. Loop
@@ -112,3 +131,12 @@ success · disabled / unavailable. Details per state:
 Critique → fix blockers/majors → re-render → audit → polish → re-render →
 score → report. Stop when gates pass and remaining findings are minor or
 notes; list those as known limitations rather than silently dropping them.
+
+## Report format (optional)
+
+When the user wants a shareable review, produce the report from your findings with
+`python3 scripts/review_report.py findings.json --out review.html` (`--template` prints an example): one score per
+criterion of §3 or §4 (0–10, the same criterion score as the rubric) with its band (0-4 Broken, 5-6 Functional, 7-8 Strong, 9-10 Exceptional; the 90+/85/70 bands above apply to the 100-point totals), evidence that cites elements, a radar
+chart, then three lists: **Keep** (do not touch), **Fix** (P0/P1, costly) and **Quick wins** (5 to 15 minutes, big effect).
+Do not average dimensions away: a 9 and a 4 stay visible. The score itself comes from the rubric above; the report only
+changes the presentation.

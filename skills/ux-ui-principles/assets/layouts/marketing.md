@@ -79,6 +79,11 @@ Limits, fees and renewal | FAQ
 **Customize:** Substitute real content, labels and permission rules; apply existing
 tokens and the actual data model. Record why this structure serves the user task.
 
+### M03 additions (from the OpenDesign template study)
+- Tier shape: 3 tiers by default; 2 for individual vs business; 4 only for "scale / enterprise plus". Mark the recommended tier once (accent border or small badge), nowhere else.
+- Comparison table groups rows into 2 to 3 sections (core, collaboration, support, security), sticky header, stacks or scrolls below 768px; every row is something the product really offers.
+- FAQ: 4 to 6 items with `<details><summary>`, no script needed. Prices are plausible for the product, never "$X / month".
+
 ## M04: Campaign landing
 
 **Task:** Connect a specific entry message to one focused action.

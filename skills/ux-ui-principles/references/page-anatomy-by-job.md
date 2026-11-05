@@ -1,6 +1,6 @@
 # Page anatomy by job, variety and screen budget
 
-For public pages (Persuade mode). Source studies: Hallmark anatomy/layout,
+For public pages (Persuade surface). Source studies: Hallmark anatomy/layout,
 Taste Skill research, Impeccable shape.
 
 ## 1. Start from the visitor's job
@@ -34,7 +34,7 @@ Missing proof (logos, case studies, quotes) is left out, not invented.
 
 - About 80 words per 900px window, about 450 visible words per page. Hero:
   headline and subheadline length follow [marketing-copy.md](marketing-copy.md)
-  (headline ≤ 2 lines at every width), 1–2 actions. Fullness comes from
+  (headline ≤ 2 lines at every width; Thai per [design foundations](design-foundations.md) "Headline length"), 1–2 actions. Fullness comes from
   scale and pictures, not words.
 - **Invariants:** one primary button recipe, one container width, one column
   gap below the hero, one radius per nesting level; centred heading groups
@@ -53,7 +53,7 @@ Missing proof (logos, case studies, quotes) is left out, not invented.
 
 ## 5. Template tics to refuse
 
-Rotated vertical text, scroll cues, a BETA or version pill in the hero,
+Rotated vertical text, scroll cues, a BETA or version pill in the hero (a true version label elsewhere is fine: [design quality](design-quality.md) §2),
 weather/locale strips, credit captions under stand-ins, middle-dot-joined meta
 strings, arrows glued to link text, decorative status dots.
 

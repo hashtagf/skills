@@ -35,17 +35,17 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 
 สกิลทำงานตาม phase: Inspect → Understand → Architect → Explore → Design → Implement → Critique → Verify → Deliver
 แต่ละ phase ระบุว่าทำอะไร ใช้เอกสารไหน **ต้องถาม user ตอนไหน** และจบ phase เมื่อไร
-แต่ละ mode (ANSWER, DISCOVER, ARCHITECT, DESIGN, BUILD, AUDIT, IMPROVE, REFINE) ใช้เฉพาะ phase ที่จำเป็น
+แต่ละ mode (ANSWER, RESEARCH, DISCOVER, ARCHITECT, DESIGN, BUILD, AUDIT, ONBOARD, IMPROVE, REFINE) ใช้เฉพาะ phase ที่จำเป็น
 
 | ถาม user เมื่อ | ไม่ถาม (ตัดสินใจเองแล้วติดป้าย assumed) |
 |---|---|
 | ไม่รู้ role หรืองานหลัก (Standard ขึ้นไป) | spacing, ข้อความร่าง, เลือก component, ชื่อเมนู |
 | กฎธุรกิจงาน Critical: ใครอนุมัติ, วงเงิน, ค่าธรรมเนียม, ย้อนกลับได้ไหม | สิ่งที่หาได้เองจาก repo หรือไฟล์ที่แนบมา |
-| เลือก direction ของหน้าตาใหม่ | composition ของหน้าทำงานภายใน (เลือกจาก task success) |
+| หน้าตาใหม่: interview 3 รอบ (A ธุรกิจ, B รสนิยมพร้อมภาพ, C ยืนยัน) แล้วเลือก direction | composition ของหน้าทำงานภายใน (เลือกจาก task success) |
 | ขยาย scope, เพิ่ม dependency, เปลี่ยน token ทั้งระบบ, เขียนเอกสารโปรเจกต์ | รายละเอียดการ implement ภายใน scope |
 | hard gate ไม่ผ่านและแก้ใน scope ไม่ได้ | การ critique (แก้เองใน scope) |
 
-ถามครั้งละไม่เกิน 3 ข้อ และทุกข้อมีค่าแนะนำ ถ้า user ไม่อยู่หรือบอกให้ใช้ค่าเริ่มต้น จะไม่หยุดถาม แต่ใช้ค่าแนะนำแล้วสรุป "Decisions to confirm" ไว้ท้ายงาน
+ถามครั้งละไม่เกิน 3 ข้อ (ยกเว้น interview หน้าตาใหม่ ไม่เกิน 4 ข้อต่อรอบ) และทุกข้อมีค่าแนะนำ ถ้า user ไม่อยู่หรือบอกให้ใช้ค่าเริ่มต้น จะไม่หยุดถาม แต่ใช้ค่าแนะนำแล้วสรุป "Decisions to confirm" ไว้ท้ายงาน
 รายละเอียด: [Design workflow](references/design-workflow.md)
 
 ## หัวข้อเพิ่มเติม (4 พ.ย. 2569)
@@ -74,13 +74,32 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | Palette: สูตร OKLCH (neutral ย้อมสีเดียวกับแบรนด์, accent เดียว, ไม่เกิน 2 hue, 70/20/10) + palette ตั้งต้น 8 ชุดตาม keyword ที่ตรวจ contrast ผ่านแล้ว 96/96 | [Color palette](references/color-palette.md) |
 | Mobile web: gutter, header, hero, ขนาดตัวอักษร, section, grid, ตาราง, พื้นที่กด, sticky, รูป | [Visual composition](references/visual-composition.md) |
 | Motion ของเว็บและแอป: ระดับตาม dial, 10 ประเภท, ลำดับการเคลื่อนไหวบนหน้าเว็บ, reduced motion, performance, motion spec, ตรวจด้วย `render_check --reduced-motion` | [Motion](references/motion.md) |
-| Style 18 แบบ, keyword ภาษาไทย/อังกฤษ → style + dial, interview สั้น 3 ข้อ (feel, reference, energy) สำหรับหน้าตาใหม่ | [Design direction](references/design-direction.md) §4, §8, §9 |
+| Style 18 แบบ, keyword ภาษาไทย/อังกฤษ → style + dial, interview 3 รอบสำหรับหน้าตาใหม่ (A: goal/audience/proof/constraints, B: feel/shape/reference/energy พร้อมภาพ, C: ยืนยัน) แล้วเขียน DESIGN.md ด้วย `design_md.py --wire` | [Design direction](references/design-direction.md) §4, §8, §9 |
 | รอบรีวิว: คำสั่งปรับงาน (critique, polish, bolder, quieter, distill ฯลฯ), scorecard visual/UX, hard gate ที่ห้ามส่งงาน | [Review loop](references/review-loop.md) |
 | Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [Visual craft](references/visual-craft.md) |
-| กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ | [Data visualization](references/data-visualization.md) |
+| กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ, สถานะ live/syncing/stale ของ dashboard ที่ refresh | [Data visualization](references/data-visualization.md) |
 
-**หมายเหตุการเรียกใช้:** ผลทดสอบพบว่าคำถามเชิงขอคำแนะนำมักถูกตอบตรง ๆ โดยไม่โหลดสกิล
-ให้เรียก `/ux-ui-principles` โดยตรงเมื่อต้องการใช้กรอบนี้แน่นอน
+## หัวข้อเพิ่มเติม (5 พ.ย. 2569, 0.12.0 และ Unreleased)
+
+| เรื่อง | เอกสาร |
+|---|---|
+| คลัง direction 58 แบบพร้อมภาพ preview, เลือกตามหัวเรื่องและ feel | [Direction library](references/direction-library.md) |
+| หน้าตาหลังบ้าน 16 look (Calm, Dense, Night, High contrast …) พร้อม preview desktop และมือถือ | [Back office](references/back-office.md) |
+| สูตรสร้างแต่ละ direction: hard rule, สิ่งที่ห้าม, component ที่ต้องมี, pre-flight (`direction_recipe.py`) | [Direction recipes](references/direction-recipes.md) |
+| แปลง direction เป็น token CSS / Tailwind / shadcn พร้อมตรวจ contrast (`export_tokens.py`) | [Tokens to code](references/tokens-export.md) |
+| Tailwind v4: token → utility, dark ด้วย `data-theme`, กติกาและการตรวจ | [Tailwind](references/tailwind.md) |
+| Component ยาก: editable grid, drag reorder, picker, rich text, tour, autosave form | [Advanced components](references/advanced-components.md) |
+| DESIGN.md รูปแบบ Google Labs design.md (YAML tokens + 8 section), สร้างด้วย `design_md.py`, ตรวจด้วย `design_md_check.py` | [Design memory](references/design-memory.md) |
+| โปรเจกต์เดิม (brownfield) — mode ONBOARD: ถอด DESIGN.md จากโค้ด (`code_extract.py`, `design_md.py --from-code`), หา drift, baseline audit | [Brownfield](references/brownfield.md) |
+| ลำดับการตรวจบังคับ: `--fast` baseline → แก้ทีเดียว → `--fast` ยืนยัน → `--zoom` เต็มครั้งเดียว; panel ปรับค่าสด (`tweaks_panel.py`), รายงานรีวิว HTML (`review_report.py`) | [Render verification](references/render-verification.md), [Review loop](references/review-loop.md) |
+| บทเรียนจาก OpenDesign 51 templates (กติกา) และ 25 หน้าที่ render แล้ววัดค่า | [Templates study](assets/open-design-templates-study.md), [Visual study](assets/open-design-visual-study.md) |
+
+**หมายเหตุการเรียกใช้:** SKILL.md เป็นตัวชี้ทางอย่างเดียว (ตาราง "งาน → ไฟล์ที่ต้องเปิด") กติกาจริงอยู่ใน references
+ถ้าต้องการให้ใช้กรอบนี้แน่นอน เรียก `/ux-ui-principles` โดยตรง
+
+**ทดสอบการเลือกไฟล์และการถูกเรียกใช้** (ใช้ API จริง ~$3–4 ต่อรอบด้วย sonnet):
+- `python3 evals/route_eval.py` เปิดไฟล์ถูกตาม `expected_reads` ใน `evals/evals.json` ไหม (5 พ.ย. 2569: 1/18 → 14/18 หลังปรับ)
+- `python3 evals/trigger_eval.py` ถูกเรียกใช้เองโดยไม่พิมพ์ slash ไหม (5 พ.ย. 2569: 0/12 → 8/12, ไม่ถูกเรียกผิดงาน 6/6)
 
 ## เรียกใช้
 
@@ -106,13 +125,14 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 |---|---|
 | Workflow และขอบเขตการใช้งาน | [SKILL.md](SKILL.md) |
 | Nielsen heuristics, mental model, signifier, Fitts, Hick–Hyman, IA | [Interaction](references/interaction.md) |
-| Hierarchy, typography, grouping, responsive และข้อความไทย | [Visual](references/visual.md) |
+| Hierarchy, typography, grouping, responsive และข้อความไทย | [Visual composition](references/visual-composition.md) |
 | ค่าวัดจริงด้านภาพ: น้ำหนัก/tracking/line-height ตามขนาด, อัตราส่วน type, โทนสี, spacing 3 ชั้น, ค่าย radius, motion, ความสมจริงของ content, ค่าภาษาไทย, preset และ craft pass — จาก 35 เว็บจริง + curated.design 18 + Dribbble 18 + Behance 14 + website templates | [Visual benchmarks](references/visual-benchmarks.md) · [Site measurements](assets/site-measurements.md) · [Gallery study](assets/gallery-study.md) |
+| ข้อตกลงร่วมของ design system สาธารณะ 126 ระบบ: ชั้น token และชื่อ role, focus ring 3px, ค่า radius/breakpoint/density, flow ของงานบริการภาครัฐ (หน้า review, ลิงก์ Change, คงคำตอบ), กฎเรื่อง identity และ provenance | [Design system benchmarks](references/design-system-benchmarks.md) · [คู่มือ 126 ระบบฉบับเต็ม](assets/design-systems/index.md) |
 | WCAG 2.2 ระดับ A/AA/AAA, ข้อยกเว้น, keyboard และ modal | [Accessibility](references/accessibility.md) |
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
 | Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |
 | วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
-| รายการแหล่งอ้างอิง 93 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S93 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
+| รายการแหล่งอ้างอิง 101 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S101 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
 | รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |
 | ตัวอย่าง layout 43 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
 | ตัวอย่างภาษาไทยแบบเต็ม: checkout, admin records, booking | [Worked examples](assets/layouts/worked-examples.md) |
@@ -142,7 +162,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 
 ## คลัง layout examples
 
-มี 40 แบบ แบ่งเป็น marketing, commerce, dashboards, admin, content/learning,
+มี 43 แบบ แบ่งเป็น marketing, commerce, dashboards, admin, content/learning,
 productivity, accounts/settings และ mobile tasks แต่ละแบบมีโครง wide layout,
 การปรับจอเล็ก, สถานะสำคัญ, ข้อแลกเปลี่ยน/กรณีที่ควรหลีกเลี่ยง และ acceptance example
 ตัวอย่างเป็น blueprint ที่เขียนขึ้นสำหรับการปรับใช้ ไม่ใช่ภาพหน้าจอสำเร็จรูปหรือผลทดสอบผู้ใช้

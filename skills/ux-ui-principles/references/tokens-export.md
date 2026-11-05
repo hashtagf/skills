@@ -16,8 +16,20 @@ color pair cannot pass, 2 for an unknown direction.
 | File | For | Notes |
 |---|---|---|
 | `tokens.css` | any stack | `--color-*`, fonts, `--radius-*`, shadow, space, type, motion (`--dur-fast/base/slow`, `--ease-out/in/in-out`; names and meaning owned by [motion.md](motion.md) §2). Light and dark; `data-theme` or `prefers-color-scheme` switches. Reduced motion zeroes the durations. |
-| `tailwind-theme.css` | Tailwind v4 | `@theme inline` onto `tokens.css`: `bg-paper`, `text-ink`, `bg-accent`, `rounded-card`, `font-display`. |
+| `tailwind-theme.css` | Tailwind v4 (see [Tailwind](tailwind.md)) | `@theme inline` onto `tokens.css`: `bg-paper`, `text-ink`, `bg-accent`, `rounded-card`, `font-display`. |
 | `shadcn-globals.css` | shadcn/ui | `:root`, `.dark`, chart 1–5, sidebar, `--radius`, `@theme inline`. Replace the default blocks in `globals.css`. |
+
+## One brand, one token set
+
+A direction is the single source for a brand's public pages **and** its product UI. Do not
+pick a separate back-office look for the same product: `scripts/brand.js` derives the
+product style from the direction (same ground, ink, accent, faces and radius; quieter
+ground for long sessions) and borrows only structure and density (navigation, table style,
+row height) from the closest look in `assets/backoffice/styles.json` (`product.base` in the
+direction overrides the choice). Picture it with
+`node scripts/backoffice_preview.js --direction <id> --screens overview,records`. Export
+the tokens once with `export_tokens.py <id>`; the admin uses the same `tokens.css` with its
+own density variables.
 
 ## Rules the script applies
 

@@ -3,7 +3,7 @@
 Design the system, not isolated pages. Each page can be good on its own while
 the product is still hard to use if pages do not connect. Source IDs resolve in
 [sources.md](sources.md). Interaction-level navigation guidance is in
-[interaction.md](interaction.md) and [experience-patterns.md](experience-patterns.md).
+[interaction.md](interaction.md) and [patterns.md](patterns.md).
 
 ## Artifacts and when to make them
 

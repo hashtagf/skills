@@ -83,12 +83,13 @@ State in the hand-off that the address is a placeholder and what replaces it
 ## 6. Verify with what is installed
 
 1. `python3 scripts/slop_check.py page.html` and `contrast.py --css` first.
-2. Screenshot headless, no new installs. macOS example:
+2. Use `render_check.js` (`--doctor` first). Only when it reports exit 3, fall back to a headless
+   browser screenshot, no new installs. macOS example:
    `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --screenshot=/tmp/p.png --window-size=1280,800 --virtual-time-budget=4000 file://$PWD/index.html`
-   Run once at 1280×800 (the fold) and once tall (e.g. 1280×3200) for the page.
+   Run at 1440 and 390 wide (fold and a tall capture), matching SKILL.md "Render and look".
 3. **Look at the PNG.** A linter said "0 FAIL" on a page whose hero was broken
    by the grid bug in §3; only the render showed it.
-4. If `render_check.js` or a lint render step cannot run (no puppeteer), report
+4. If `render_check.js --doctor` exits 3 (no Playwright browser) and no fallback runs, report
    *render step not run*; do not claim it passed.
 
 Warnings seen on first builds from external linters such as Hallmark sloplint

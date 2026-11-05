@@ -35,7 +35,7 @@ the Design Tokens Format Module is a stable Community Group format. [S58]
 | 10 | Motion | Durations, easing, named animations | Durations, easing and token names: [motion.md](motion.md) §2 |
 | 11 | Breakpoints | Content-driven widths | e.g. compact < 600, medium 600–1023, expanded ≥ 1024 px; tablet band 768–1024 ([tablet-rtl-dark.md](tablet-rtl-dark.md)); set by content, not devices |
 | 12 | Density | Comfortable / compact modes | Row heights e.g. 48 / 36 px; same type scale |
-| 13 | Focus | One focus ring contract | 2 px ring, 2 px offset, focus color with ≥3:1 against adjacent colors [S04] |
+| 13 | Focus | One focus ring contract | 3 px ring, 2 px offset, focus color with ≥3:1 against adjacent colors [S04]; owner: [component-states.md](component-states.md) |
 
 Record which categories are deferred or N/A for the current scope.
 
@@ -54,7 +54,7 @@ Record which categories are deferred or N/A for the current scope.
 - **Composed styles:** `display`, `h1`–`h4`, `body-lg/md/sm`, `label-md/sm`,
   `caption`, `numeric` (tabular figures), `code`. Screens use styles, not raw sizes.
 - **Line height:** headings ~1.25–1.3 (Latin display ≥48px is set tighter, 0.85–1.15 — see [visual-benchmarks.md](visual-benchmarks.md) §1); body ~1.5; Thai body 1.55–1.7, and ≤1.35 is a defect (rules below) —
-  verify stacked tone marks and vowels with real fonts and zoom (see [visual.md](visual.md)).
+  verify stacked tone marks and vowels with real fonts and zoom (see [visual-composition.md](visual-composition.md#thai-and-mixed-language-interfaces)).
 - **Letter spacing:** only for Latin uppercase labels; don't track Thai by default.
 - **Numbers:** tabular figures in tables, amounts and timers.
 
@@ -84,12 +84,15 @@ Rules:
   the whole family per language: `html[lang=th] h1 { font-family: "Kanit", sans-serif; }`,
   so a toggle does not leave Latin metrics on Thai text. `slop_check.py` skips
   `:lang`/`[lang]` rules, so this pair does not count toward its two-typeface flag.
-- Thai display: `letter-spacing: 0`, line-height 1.15–1.25 (Latin display can be
-  0.9–1.05); body 1.55–1.7. Never track or uppercase Thai.
+- Thai display: `letter-spacing: 0`, line-height 1.15–1.25 (Latin display: the 0.85–1.15 range above,
+  by size band in [visual-benchmarks.md](visual-benchmarks.md) §1); body 1.55–1.7. Never track or uppercase Thai.
 - Thai has no spaces between words, so a narrow heading breaks in the middle of
   a word. Wrap phrases that must stay together in an inline-block chunk
   (`<span class="nb">…</span>` with `display:inline-block`) with a real space
   between chunks; `word-break: keep-all` does not help for Thai.
+- **Headline length (owner of this rule).** Latin headlines fit ≤ 2 lines at every
+  width. Thai headlines may take ≤ 3 lines at 1440 and ≤ 4 at 390, breaking only
+  at the chunks above; past that, cut words — never shrink the type to force 2.
 - Match optical size, not font-size: set the Thai display about 0.85–0.95× the
   Latin clamp so a Thai headline and its English version fill a similar width.
 

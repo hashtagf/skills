@@ -26,7 +26,7 @@ Rules:
 - Disabled wins over hover/pressed; a disabled control shows no hover.
 - Every state change that matters to the user is perceivable without color and,
   when it happens without focus moving, announced (status messages). [S13]
-- Focus ring: 3px, at least 3:1 against what it sits on, on every control, never removed. Hover is a hint, never the only way to see something; pressed is darker or shifts 1px; touch has no hover, so the same information must be reachable by tap.
+- Focus: visible on every control, never removed, shown for keyboard focus only (`:focus-visible`), at least 3:1 against what it sits on. Quiet forms that pass: a 2px ring with 2px offset on buttons and links; an inset ring plus a tint on items inside a list or bar (nav, tabs, rows); on text inputs a border change to the accent plus a soft halo, with no stacked border and outline. Avoid a thick ring plus a border on the same control, and focus rings on headings or containers focused by script. Hover is a hint, never the only way to see something; pressed is darker or shifts 1px; touch has no hover, so the same information must be reachable by tap.
 - State must survive forced-colors/high-contrast modes (borders and outlines,
   not only background tints).
 

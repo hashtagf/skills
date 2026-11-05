@@ -2,7 +2,8 @@
 
 Two quality areas that are cheap to design in and expensive to retrofit.
 Source IDs resolve in [sources.md](sources.md). Thai typography and wrapping
-are covered in [visual.md](visual.md) and [visual-composition.md](visual-composition.md).
+are owned by [design-foundations.md](design-foundations.md) "Thai with Latin display faces"
+(see also [visual-composition.md](visual-composition.md#thai-and-mixed-language-interfaces)).
 
 ## Internationalization (i18n) — design so localization is possible
 

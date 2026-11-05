@@ -50,7 +50,7 @@ Resolve it this way:
 **Voices.** One grotesk carries the UI on nearly every measured site. Optional
 second voice: a serif for display or emphasis (Anthropic, Cursor, Notion,
 6/18 curated, 8/14 Behance). Optional third: mono for code, data or meta labels.
-Never more than three; most strong sites use one or two. The single most
+Two families at most plus an optional mono; most strong sites use one or two. The single most
 generic curated site used Inter + Poppins + mono with no reason for any of them.
 
 **Faces.** Inter is the most common family among measured product sites, so it
@@ -120,7 +120,7 @@ width ([design-quality.md](design-quality.md) §5).
 - **Three text tones.** Primary, secondary (~45–55% L, or ink at 45–60% alpha),
   tertiary meta. 7/18 curated sites use **ink alpha** for secondary text, which
   keeps the hue consistent across surfaces. Verify secondary/tertiary contrast.
-- **One accent, ≤3 elements per viewport.** 14/18 Dribbble, 11/14 Behance,
+- **One accent, ≤2 strong uses per viewport** (rule: [visual-composition.md](visual-composition.md)). 14/18 Dribbble, 11/14 Behance,
   6/18 curated with exactly one saturated accent; on ~¼ of measured sites the
   primary button is ink, not brand color. Accent goes to the action and one
   data highlight (a grey chart with one accent bar).
@@ -284,8 +284,9 @@ what the sites showed.
 
 Measured on Wongnai, LINE MAN Wongnai, SCB, Agoda, Nike TH, Apple TH.
 
-- Thai display faces with small x-height (DB Heavent, Sukhumvit) are set 2–4px
-  larger than the Latin equivalent.
+- Observed: Thai display faces with small x-height (DB Heavent, Sukhumvit) are set 2–4px
+  larger than the Latin equivalent. For other faces follow the 0.85–0.95× rule in
+  [design-foundations.md](design-foundations.md) "Thai with Latin display faces".
 - Thai body line-height as observed (rule: [design-foundations.md](design-foundations.md) Typography; LMWN 16/26, Wongnai 16/24 and 18/28, SCB
   14/25.2, Nike TH 16/28). Agoda's 14/18 (≈1.3) crowds stacked marks — treat
   ≤1.35 on Thai body as a defect to inspect.
@@ -320,7 +321,7 @@ evidence of visual direction, never of usability.
 | #000 on #fff | ink on off-white ground |
 | Many sizes in the 13–24px band | named styles on one scale; drop the middle band |
 | Many greys | three tones or ink alpha |
-| Brand color on every button, icon, heading | ink primary; accent ≤3 per viewport |
+| Brand color on every button, icon, heading | ink primary; accent ≤2 strong uses per viewport |
 | Equal 16px gaps everywhere | three gap bands |
 | Mixed radii; 8px on everything by default | choose a radius camp; nested formula |
 | Bordered + shadowed card for every block | space first; hairline or tint; shadows only on floats |
