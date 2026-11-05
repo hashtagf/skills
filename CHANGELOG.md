@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (ux-ui-principles internal cleanup; each skill stays self-contained, no cross-skill links)
+- **One value per topic inside the skill:** focus ring lives in `component-states.md` "Focus" (2px + 2px offset; 3px or two-tone on varied surfaces), referenced from `visual-system.md` and `design-system-benchmarks.md`; component token layer optional everywhere.
+- **Merged:** `scoring-caps.md` → `review-loop.md` §8; `tablet-rtl-dark.md` split into `visual-system.md` Part B "Tablet", `i18n-performance.md` "Right-to-left", `color-palette.md` "Dark pages"; the duplicate Forms section in `patterns.md` now links to `forms.md`. Evals remapped.
+- **README rewritten** as a per-file index (what / why / how) for all 90 files; new `evals/index_check.py` fails on a file without a row, a row without a file, or a broken markdown link.
+
+### Added (enterprise back office)
+- `scripts/admin_check.js` (+ `check.py --admin list|detail|form|dashboard`): rendered rules by page type — numeric columns right-aligned with tabular figures, disabled control with a reason, sticky bar that cannot stick, one primary action, table above the fold, row-height drift, read-only shown as input, long uppercase; `--states` renders every `?state=loading|empty|nomatch|error|denied|partial` and fails a state identical to the default page. `--admin` pages skip public metadata and the marketing fold rule.
+- `assets/backoffice/styles.json`: every look gains `info` and `neutral` status tones (all ≥4.5:1) and a `compact` density; `backoffice_preview.js` maps pending → info, adds draft → neutral, and takes `--density compact`.
+- Rules: permission treatment table, field-level read-only and audited Reveal, impersonation/tenant/environment banner, worklist vs list report (`back-office.md`); feedback timing table and five distinct empties (`component-states.md`); data type → filter → cell matrix and log-table histogram filter (`search-filter.md`); KPI tiers, definitions, thresholds, data-size and chart caps (`data-visualization.md`); URL-reachable states (`render-verification.md`); A05 import specifics and new **A08 Worklist** layout. Sources S103–S107 (secondary: published agent skills).
+
 ### Changed (lessons from a coffee-roaster storefront + back office, with Codex UI skills)
 - `ux-ui-principles` shape: `design-quality.md` §1 adds **Subject shapes** (3–5 objects from the client's world decide corners, buttons, crops, signature); `direction_recipe.py` radius is a default, not a ban; `design-direction.md` §9 never skips the shape question; `direction-library.md` §4 checks the recipe against the subject; `design_md.py` philosophy line now matches the Shapes section and supports `shape_from_subject`; `slop_check.py` all-square becomes a flag (waive with `data-shape="sharp"`). Reason: a café was built square twice from Loom's radius 0.
 - Placeholder mode (`marketing-copy.md`): facts as visible `.ph` placeholders when the user asks, proof never; new `scripts/placeholders.py` lists them into the hand-off.

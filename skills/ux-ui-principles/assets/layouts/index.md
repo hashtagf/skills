@@ -100,7 +100,7 @@ Reuse relevant examples when adapting these layouts; their presence does not cer
 | Marketing and public services | Product landing; Service overview; Pricing comparison; Campaign landing; Help or contact hub | [M01–M05](marketing.md) |
 | Commerce and transactions | Product listing; Product detail; Cart review; Checkout; Booking | [C01–C05](commerce.md) |
 | Dashboards and analysis | Operational overview; Analytical exploration; Finance reporting; Monitoring incidents; Comparison workspace; Matrix / heatmap | [D01–D06](dashboards.md) |
-| Administration and back office | Record management; Record detail; Approval workbench; Access management; Import wizard; Audit log; Settings with save behavior | [A01–A07](admin.md) |
+| Administration and back office | Record management; Record detail; Approval workbench; Access management; Import wizard; Audit log; Settings with save behavior; Worklist | [A01–A08](admin.md) |
 | Content, learning and discovery | Article or documentation; Knowledge base; Search results; Course learning; Community discussion | [E01–E05](content.md) |
 | Productivity and collaboration | Inbox master-detail; Kanban board; Calendar workspace; Document editor; Collaboration workspace | [P01–P05](productivity.md) |
 | Accounts, onboarding and settings | Sign-in and recovery; Setup onboarding; Profile settings; Security settings; Subscription management | [U01–U05](accounts.md) |

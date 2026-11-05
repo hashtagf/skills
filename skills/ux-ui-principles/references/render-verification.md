@@ -7,6 +7,13 @@ contrast in dark mode. Reading the code does not find them reliably. Run this
 procedure whenever you build or change UI and tools allow it. Record results as
 passed, failed or not tested.
 
+## States reachable by URL
+
+Every page this skill builds answers `?state=loading|empty|nomatch|error|denied|partial`
+with mock data (and `?density=compact`, `?theme=dark` where they exist), so each state can
+be rendered and screenshotted, not only declared. `state_check.py` finds the markers
+statically; `scripts/admin_check.js --type <list|detail|form|dashboard> --states` (or `check.py <page> --admin <type>`) renders each URL, fails a state identical to the default page, and runs the rendered admin rules (numeric alignment, tabular figures, disabled-with-reason, sticky bars that cannot stick, one primary action, table above the fold). (S103)
+
 ## Tools in this skill
 
 | Script | Checks | Run from the skill root |

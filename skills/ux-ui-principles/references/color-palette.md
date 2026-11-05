@@ -145,6 +145,13 @@ and follow §"Roles before hues".
   Token blocks: base `:root`, `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])`,
   and `:root[data-theme="dark"]`, so the switch wins in both directions.
 
+### Dark pages for light directions
+- Derive, then check: `python3 scripts/export_tokens.py <id> --print-dark` (see [tokens to code](tokens-export.md)); every pair passes AA.
+- Surfaces step up in lightness (ground < surface < raised); no pure black or pure white; shadows give way to tone steps and a hairline border.
+- Accent moves lighter to keep contrast; art and photos are dimmed or re-graded, not left glaring.
+- Offer a toggle and honor `prefers-color-scheme`; do not make dark the only theme for light-leaning brands.
+- Check images with transparent backgrounds and logos on the dark ground.
+
 ## Procedure
 
 1. List roles and write light values; write dark values for the same roles.

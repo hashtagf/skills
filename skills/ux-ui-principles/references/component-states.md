@@ -26,9 +26,26 @@ Rules:
 - Disabled wins over hover/pressed; a disabled control shows no hover.
 - Every state change that matters to the user is perceivable without color and,
   when it happens without focus moving, announced (status messages). [S13]
-- Focus: visible on every control, never removed, shown for keyboard focus only (`:focus-visible`), at least 3:1 against what it sits on. Quiet forms that pass: a 2px ring with 2px offset on buttons and links; an inset ring plus a tint on items inside a list or bar (nav, tabs, rows); on text inputs a border change to the accent plus a soft halo, with no stacked border and outline. Avoid a thick ring plus a border on the same control, and focus rings on headings or containers focused by script. Hover is a hint, never the only way to see something; pressed is darker or shifts 1px; touch has no hover, so the same information must be reachable by tap.
+- Focus: visible on every control, never removed, shown for keyboard focus only (`:focus-visible`), at least 3:1 against what it sits on. **House value (the one focus-ring value in this skill):** a 2px ring with 2px offset on buttons and links; 3px, or a two-tone ring, where the surface behind varies or the kit targets high contrast. Other quiet forms that pass: an inset ring plus a tint on items inside a list or bar (nav, tabs, rows); on text inputs a border change to the accent plus a soft halo, with no stacked border and outline. Avoid a thick ring plus a border on the same control, and focus rings on headings or containers focused by script. Hover is a hint, never the only way to see something; pressed is darker or shifts 1px; touch has no hover, so the same information must be reachable by tap.
 - State must survive forced-colors/high-contrast modes (borders and outlines,
   not only background tints).
+
+## Feedback timing (wait states)
+
+One table so every screen waits the same way (S103; thresholds follow Nielsen's 0.1 / 1 / 10 s limits):
+
+| Expected wait | Show |
+|---|---|
+| < 1 s | Nothing new; keep the old content, disable the trigger against double submit |
+| 1–10 s | Skeleton in the final layout (first load) or an inline spinner on the trigger (actions); never a full-page overlay |
+| > 10 s | Progress with counts ("312 / 1,200 แถว"), allow leaving; finish in the background with a notification |
+| May exceed ~2 s | Offer Cancel |
+| No answer by the timeout (default 30 s) | Error with Retry; for money or submit, the *unknown outcome* state in [patterns](patterns.md), never a silent retry |
+
+Empty is five different states, each with its own copy and action: **loading** (not
+empty yet) · **no records** (first use → create/import) · **no matches** (filters →
+clear filters) · **insufficient access** (→ request access, without revealing what is
+hidden) · **service unavailable** (→ retry, status). [S104]
 
 ## Interaction-color strategy
 

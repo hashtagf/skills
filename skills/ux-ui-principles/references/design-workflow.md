@@ -226,12 +226,12 @@ evidence, impact, fix and verify. Check UX (task, flow, states, recovery) and
 visual (hierarchy, type, spacing, color, consistency) separately; apply the
 specific refinement verb for each issue. Report the final visual and UX scores from the
 [review loop](review-loop.md) §3–4 rubric, capped and calibrated by
-[scoring caps](scoring-caps.md); run the fresh-context reviews in
+[review loop](review-loop.md) §8 caps; run the fresh-context reviews in
 [gate tiers](gate-tiers.md) §3 when subagents exist.
 
 Product-UI builds: run the one-round [polish pass](review-loop.md#product-ui-polish-pass) here, before phase 7.
 
-**Read.** [review loop](review-loop.md), [scoring caps](scoring-caps.md), [gate tiers](gate-tiers.md), [design quality](design-quality.md) §5,
+**Read.** [review loop](review-loop.md) (§8 caps), [gate tiers](gate-tiers.md), [design quality](design-quality.md) §5,
 [design quality](design-quality.md) §7, [do and don't](do-and-dont.md); admin pages also
 the page review in [back office](back-office.md).
 
@@ -253,7 +253,7 @@ delivery. Never re-run a check after a single fix; report the run counts.
 (`--fast` while iterating, `--zoom` full run once per page at the end; add `--reduced-motion` when the page animates; `--doctor` exit 3 → mark *not tested*, run the static checks,
 never install or wait for browsers mid-task) and inspect the screenshots; drive the critical journey plus one failure path — for each form: empty
 submit, one invalid value (also Thai typed into email), one request failure,
-and look at the error state at desktop and phone width (rows stay aligned); when the brief covers them, also check tablet, right-to-left and dark (ranges, test widths and rules: [tablet, RTL and dark](tablet-rtl-dark.md));
+and look at the error state at desktop and phone width (rows stay aligned); when the brief covers them, also check tablet, right-to-left and dark (rules: [visual system](visual-system.md) Part B "Tablet", [i18n](i18n-performance.md) "Right-to-left", [color palette](color-palette.md) "Dark theme");
 judge the 390px screenshot as its own design (header, hero, CTA in first
 screen, targets, stacking);
 `python3 scripts/contrast.py --css <page>`; keyboard, zoom/reflow, language,
@@ -436,10 +436,8 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | **Quality, review and verification** | | |
 | [gate tiers](gate-tiers.md) | Floor / Reflex / Finish, pre-emit critique, verification budget, refine vs redesign | 6, 7, 8 |
 | [review loop](review-loop.md) | Refinement verbs, critique format, visual and UX scorecards, hard gates (§5), report | 6, REFINE |
-| [scoring caps](scoring-caps.md) | Calibration and caps on the scorecards, report format | 6 |
 | [accessibility](accessibility.md) | WCAG criteria and exceptions, keyboard, evidence plan, reporting limits | 4, 7 |
 | [render verification](render-verification.md) | `render_check.js` run order, contrast, slop and DESIGN.md checks, failure table | 7 |
-| [tablet, RTL and dark](tablet-rtl-dark.md) | Tablet ranges, right-to-left, dark for light directions | 7 |
 | [i18n & performance](i18n-performance.md) | Thai calendar/currency, expansion, two-language checks, Core Web Vitals | 4, 7 |
 | [measurement](measurement.md) | Metrics, instrumentation, experiments, design QA | 7 |
 | [validation](validation.md), [output templates](../assets/templates.md) | Research methods, severity, report structure | 8 |
@@ -450,8 +448,9 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | `scripts/design_md_check.py` | 3 (after brand extraction), 8 (after editing DESIGN.md) |
 | `scripts/slop_check.py` | 6 |
 | `scripts/render_check.js`, `scripts/contrast.py` | 7 |
-| `scripts/check.py` | 6, 7: one command for every delivery check (runs script_check.js, slop_check.py, contrast.py, state_check.py, the public-page metadata line, and render_check.js + fold_check.js with `--render`) |
+| `scripts/check.py` | 6, 7: one command for every delivery check (runs script_check.js, slop_check.py, contrast.py, state_check.py, the public-page metadata line, and render_check.js + fold_check.js with `--render`; admin_check.js with `--admin <type>`) |
 | `scripts/script_check.js` | called by check.py: syntax and globals that clash with `window`; no browser needed |
+| `scripts/admin_check.js` | 7: back-office pages by type (list, detail, form, dashboard): numeric columns, disabled with reason, sticky bars, one primary action, every `?state=` rendered; via `check.py --admin <type>` |
 | `scripts/fold_check.js` | 7: primary action above the 390×844 / 1440×900 fold, offer on the first screen, next section hinted |
 | `scripts/flow_check.js` | 7, 8: JSON-driven journey (the live thing, happy + failure path); fails on console errors |
 | `scripts/placeholders.py` | 5, 8: lists `.ph` / `[…]` placeholders with counts into the hand-off README; warns on proof-like placeholders |

@@ -74,7 +74,7 @@ from the brief; never stop at "nothing to finish".
 | UX writing, errors, empty states | [content design](references/content-design.md) |
 | Accessibility / WCAG question or check (focus ring, target size, contrast, screen reader) | **[accessibility](references/accessibility.md)**; focus-ring style → also [component states](references/component-states.md); "confirm it passes" on built UI → also **[render verification](references/render-verification.md)** (no browser → report *not tested*) |
 | Thai / bilingual pages, localization, performance | [i18n & performance](references/i18n-performance.md), [visual system](references/visual-system.md) Part A "Thai with Latin display faces" |
-| Review, critique, score, usability audit, "rank the problems", refinement verb (polish, bolder, quieter, distill …) | **[review loop](references/review-loop.md)** (scorecards, hard gates) first, then [scoring caps](references/scoring-caps.md); "looks generic / like a template", bolder → [design quality](references/design-quality.md) |
+| Review, critique, score, usability audit, "rank the problems", refinement verb (polish, bolder, quieter, distill …) | **[review loop](references/review-loop.md)** (scorecards, hard gates, §8 caps); "looks generic / like a template", bolder → [design quality](references/design-quality.md) |
 | DESIGN.md, design memory, conflicts between docs, code and other skills | [design memory](references/design-memory.md) |
 | Existing product without DESIGN.md (brownfield) | [brownfield](references/brownfield.md) (`scripts/code_extract.py`, `scripts/design_md.py --from-code`) |
 | Building UI (HTML, React, Tailwind, shadcn) | [build recipes](references/build-recipes.md), [prototyping](references/prototyping.md); [tailwind](references/tailwind.md) · [shadcn rules](references/shadcn-rules.md) · [tokens to code](references/tokens-export.md) as the stack needs |
@@ -156,7 +156,8 @@ page must look designed, and this skill holds the examples that show how:
    `python3 scripts/check.py <page>` runs every static check in one go (script syntax
    and globals that clash with `window`, template devices, contrast pairs, state markers)
    and, with `--render`, the 1440/390 light/dark render plus `fold_check.js` (CTA above the
-   390×844 fold); public pages also get a metadata line (title, description, canonical, OG).
+   390×844 fold); public pages also get a metadata line (title, description, canonical, OG); back-office pages add
+   `--admin <list|detail|form|dashboard>` (numeric columns, disabled-with-reason, sticky bars, every `?state=` rendered).
    Run the live thing or main task once with `flow_check.js steps.json`, including a failure
    path. With placeholders, list them with `placeholders.py`. Fix each failure or waive it in
    one sentence. Without a shell, walk [design quality](references/design-quality.md) §2

@@ -59,6 +59,16 @@ A single-page site that offers Thai and English with a toggle:
 - The accent-word and eyebrow heuristics of `slop_check.py` ignore
   `<span lang>` variants; count each language's headline once.
 
+### Right-to-left
+
+Picture: back-office `previews/rtl/` (mirrored layout).
+- Set `dir="rtl"` and `lang` on the document; use CSS logical properties (`margin-inline-start`, `padding-inline`, `inset-inline`, `text-align: start`).
+- Mirror layout and direction icons (chevrons, back, arrows, progress, send, undo, list bullets, sliders). Do **not** mirror logos, clocks, media controls, check marks, numbers or charts' time axis (time usually still runs as the reader expects; decide and state it).
+- Numbers and Latin names inside RTL text need bidi isolation (`<bdi>` or `unicode-bidi: isolate`); IDs, emails and codes stay left-to-right. The preview shows the failure when this is missing (a trailing period jumping to the front).
+- Inputs for numbers, emails, URLs and codes stay `dir="ltr"` even in RTL pages; table numeric columns align to the end.
+- Test with real Arabic or Hebrew copy; the preview mirrors layout only, strings stay English.
+- Fonts need the script: pick an Arabic or Hebrew face with matching weight; do not letter-space or uppercase.
+
 ## Performance as user experience
 
 Slow loading and slow response to input are usability failures. Core Web

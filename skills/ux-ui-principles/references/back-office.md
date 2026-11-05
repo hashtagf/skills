@@ -46,6 +46,7 @@ Pick the primary type first. A page can mix patterns, but one task should lead.
 | Settings | Configure without mistakes | Categories → controls → save feedback | A07 (U03/U04 as account variants) |
 | Access / permissions | Manage rights safely | Subjects → roles → effective access | A04 |
 | Audit log | Investigate past events | Search → event timeline → before/after detail | A06 |
+| Worklist (queue) | Clear known items assigned to me | Queue tabs → item → decision → next item | A08 |
 
 ## Group A — situation and analysis
 
@@ -95,8 +96,16 @@ Table rules (project recommendations):
 | Page | Prioritize | Common failure |
 |---|---|---|
 | Approval / review | Decision evidence, risk with reasons, consequence of approve/reject | Evidence spread across several pages |
-| Inbox / queue | Priority, assignment, SLA, current item, next item | Leaving and re-entering detail pages for every item |
+| Inbox / queue (**worklist**) | Priority, assignment, SLA, age, current item, next item | Leaving and re-entering detail pages for every item |
 | Workflow | Current step, owner, dependencies, status, next action | A progress bar that hides who the work is waiting on |
+
+**Worklist vs list report** (Fiori floorplans; S104). A *worklist* is a queue of known
+items the user must clear (My items · Awaiting me · Overdue tabs, age, SLA, one primary
+action per row, returning from detail keeps the list position and moves to the next item).
+A *list report* searches a large set (filters first, saved views, export). Pick by the
+role's question; a queue built as a search page makes people hunt for their own work.
+A status shown is a domain fact: "Overdue" needs the SLA it breaches and the timestamp,
+"Live" needs a real connection state; never decorative.
 
 Approval pages answer "should I approve?", not just "what is this record?".
 Order: amount/subject → evidence (identity, risk reasons, mismatches) →
@@ -127,6 +136,27 @@ role or grant), highlight high-risk rights, and record who changed what. Audit
 logs are append-only, filterable by actor, action, target and time, and show
 before/after values and the stated reason.
 
+**Permission treatment on every other page** (one rule per action, written in the page
+spec; S103 after Fiori/Ant):
+
+| The user… | Treatment |
+|---|---|
+| Can never have this right in their role | Hide the control; do not hint that it exists |
+| Could have it, but not for this record or now (state, limit, SoD) | Show disabled **with the reason** as visible text or `aria-describedby` ("อนุมัติได้ไม่เกิน ฿50,000") |
+| The reason needs data the page cannot show up front | Keep enabled; on click explain and offer the route (request access) |
+| Waits for someone else | Replace the action with "รอ คุณสมชาย (Finance lead) อนุมัติ" and the time it has waited |
+
+Field level: a field the user may read but not edit is plain text, never a greyed
+input; a masked value (national ID, account number) shows the last 4 and a **Reveal**
+that is permission-checked and written to the audit log. A disabled control with no
+reason is a defect.
+
+**Acting as someone else, tenant and environment.** Impersonation shows a banner that
+cannot be dismissed ("คุณกำลังใช้งานในฐานะ … · ออก"), the audit entry reads "Admin X as
+Y", and money, password and permission actions are disabled during it. Multi-tenant
+admins put the tenant in the header and in `<title>`; non-production environments carry a
+coloured environment strip so a test action is never mistaken for a live one. [S103]
+
 ## Choosing a structural pattern
 
 | Pattern | Suits | Avoid when |
@@ -155,9 +185,9 @@ layouts. Record these in [design-context.md](../assets/design-context.md):
 | Content width | Reading pages vs full-width tables |
 | Spacing | Section, group and field spacing tokens |
 | Typography | Title, label and value hierarchy; tabular numerals |
-| Density | Compact / comfortable / expanded and who uses each |
+| Density | Compact / comfortable / expanded and who uses each; every look in `assets/backoffice/styles.json` has a `compact` set (`backoffice_preview.js --density compact`) |
 | Action hierarchy | One primary per region; secondary; destructive styling and confirmation rules |
-| Status vocabulary | One name and color per status across all pages |
+| Status vocabulary | One name and tone per status across all pages, from five tones: ok · warn (needs attention) · bad · info (waiting on someone, in progress) · neutral (draft, archived); an entity → status → tone table lives in DESIGN.md |
 | Feedback | Success, error, loading, empty, no-permission and stale-data patterns |
 | Accessibility | Keyboard model, focus, contrast, zoom/reflow, screen-reader names |
 
@@ -172,7 +202,7 @@ evidence.
 4. **Action visibility** — the primary action is findable and its result clear.
 5. **Efficiency** — repeated work needs few clicks and context switches.
 6. **Density** — amount of data suits the role and frequency of use.
-7. **States** — loading, empty, error, success, permission and stale states exist.
+7. **States** — loading, empty, error, success, permission and stale states exist and open by URL (`?state=`); `python3 scripts/check.py <page> --admin <list|detail|form|dashboard>` renders them and runs the rendered admin rules.
 8. **Responsive** — small screens, zoom and long data still work.
 9. **Accessibility** — keyboard, readable text, visible focus.
 10. **Consistency** — statuses, navigation, components and behavior match other pages.
@@ -184,7 +214,7 @@ time on task, errors and requests for help (see [measurement.md](measurement.md)
 
 For a new back office, show the team pictures before choosing a look. The task
 (role, risk, volume) still decides the page pattern and layout first
-([layout library](../assets/layouts/index.md) A01–A07, D01–D06); pictures only
+([layout library](../assets/layouts/index.md) A01–A08, D01–D06); pictures only
 help choose **density, tone and edge treatment**.
 
 The skill generates previews of every screen in `SCREENS` (`scripts/backoffice_preview.js`)
@@ -241,7 +271,7 @@ chips, segmented control, swipe item, bottom sheet, snackbar with undo,
 pull to refresh, settings rows, confirm dialog). Tables become cards, key
 actions sit in the thumb zone, and every target is 44px or more. Only
 `<look>-m-states.jpg` and `<look>-m-components.jpg` are kept as full-size
-singles; the rest are in the sheets. Tablet and RTL: run `node scripts/backoffice_preview.js --width 820 --height 1366` and `--rtl`; see [tablet-rtl-dark.md](tablet-rtl-dark.md).
+singles; the rest are in the sheets. Tablet and RTL: run `node scripts/backoffice_preview.js --width 820 --height 1366` and `--rtl`; see [visual system](visual-system.md) Part B "Tablet" and [i18n](i18n-performance.md) "Right-to-left".
 
 Dashboard surfaces follow what the strongest 21st.dev dashboards do
 ([study](../assets/evidence.md)): quiet cards with a 1px edge and a soft

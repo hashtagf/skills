@@ -1,113 +1,20 @@
 # ux-ui-principles
 
-Skill สำหรับใช้หลัก UX/UI เปลี่ยนโจทย์ผลิตภัณฑ์เป็นการตัดสินใจที่อธิบายเหตุผล
-และตรวจสอบได้ วิจัยแหล่งต้นทางบนอินเทอร์เน็ตวันที่ 8 ตุลาคม 2026
+สกิลที่เปลี่ยนโจทย์ UX/UI เป็นการตัดสินใจที่มีเหตุผลและตรวจได้: ออกแบบหน้า, เลือก component,
+วาง state, รีวิว, และตรวจหน้าที่ render แล้ว ทั้งหน้า public และหลังบ้านระดับ enterprise
 
-## Framework 6 ระดับ (ใหม่)
+## ใช้ได้ครบในตัว
 
-สกิลครอบคลุมตั้งแต่ "ควรสร้างอะไร" จนถึง "วัดผลหลังใช้งานจริง" และแยก 6 ศาสตร์ออกจากกัน:
-Product · UX · UI · Interaction · Design Engineering · Validation
+สกิลนี้ใช้เดี่ยว ๆ ได้ ไม่ต้องติดตั้งสกิลอื่น ค่าที่หลายไฟล์ใช้ร่วมกันมีที่อยู่เดียว: focus ring →
+`references/component-states.md` "Focus"; ชื่อ role ของสี → `references/color-palette.md` "Roles before hues"
+ถ้าโปรเจกต์มี design system หรือ DESIGN.md อยู่แล้ว ให้ใช้ของโปรเจกต์ก่อน
 
-| ระดับ | ครอบคลุม | เอกสาร |
-|---|---|---|
-| 1. Product Strategy & Research | ปัญหา หลักฐาน role ตัวชี้วัดความสำเร็จ ข้อจำกัด | [Product discovery](references/product-discovery.md) |
-| 2. Experience Architecture | Journey, flow, IA, navigation, การจัดกลุ่มเมนู, URL, permission flow | [Experience architecture](references/experience-architecture.md), [Navigation grouping](references/navigation-grouping.md) |
-| 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing, copy การตลาด, การแสดงค่าข้อมูล | [Back office](references/back-office.md), [Content design](references/content-design.md), [Marketing copy](references/marketing-copy.md), [Patterns](references/patterns.md) |
-| 4. Visual & Design System | tokens, type, spacing, component, state, focal point, color, icon | [visual system](references/visual-system.md) Part A, [Components usage](references/components-usage.md), [Component states](references/component-states.md), [design quality](references/design-quality.md) §7 |
-| 5. Quality & Engineering | Accessibility, i18n, performance, security/privacy UX | [Trust/Security/Privacy](references/trust-security-privacy.md), [i18n & performance](references/i18n-performance.md) |
-| 6. Validation & Improvement | metric, instrumentation, A/B, design QA, รอบปรับปรุง | [Measurement](references/measurement.md), [Validation](references/validation.md) |
+## วิธีทำงาน
 
-ภาพรวมและกระบวนการ Discover → Define → Structure → Design → Verify → Improve อยู่ใน
-[Framework](references/framework.md)
-
-**ระดับความเข้มงวด (Rigor tier):** เลือกจากผลเสียที่อาจเกิดเมื่อออกแบบผิด
-- **Light:** หน้าอ่านอย่างเดียวหรือความเสี่ยงต่ำ
-- **Standard:** flow หลักและหน้าฝั่งลูกค้า
-- **Critical:** เงิน การอนุมัติ สิทธิ์ และการลบถาวร
-
-tier เป็นตัวกำหนดว่าต้องตอบข้อไหนใน [Page spec 16 ข้อ](assets/page-spec.md)
-
-**Design context กลาง:** [template](assets/design-context.md) สำหรับไฟล์เดียวของโปรเจกต์
-ที่เก็บ role, คำศัพท์, ชื่อ status, tokens และ pattern ที่ตัดสินใจแล้ว
-ให้ทุกงานออกแบบ พัฒนา และรีวิว ใช้ข้อมูลชุดเดียวกัน
-
-## Workflow การออกแบบ (phase 0–8)
-
-สกิลทำงานตาม phase: Inspect → Understand → Architect → Explore → Design → Implement → Critique → Verify → Deliver
-แต่ละ phase ระบุว่าทำอะไร ใช้เอกสารไหน **ต้องถาม user ตอนไหน** และจบ phase เมื่อไร
-แต่ละ mode (ANSWER, RESEARCH, DISCOVER, ARCHITECT, DESIGN, BUILD, AUDIT, ONBOARD, IMPROVE, REFINE) ใช้เฉพาะ phase ที่จำเป็น
-
-| ถาม user เมื่อ | ไม่ถาม (ตัดสินใจเองแล้วติดป้าย assumed) |
-|---|---|
-| ไม่รู้ role หรืองานหลัก (Standard ขึ้นไป) | spacing, ข้อความร่าง, เลือก component, ชื่อเมนู |
-| กฎธุรกิจงาน Critical: ใครอนุมัติ, วงเงิน, ค่าธรรมเนียม, ย้อนกลับได้ไหม | สิ่งที่หาได้เองจาก repo หรือไฟล์ที่แนบมา |
-| หน้าตาใหม่: interview 3 รอบ (A ธุรกิจ, B รสนิยมพร้อมภาพ, C ยืนยัน) แล้วเลือก direction | composition ของหน้าทำงานภายใน (เลือกจาก task success) |
-| ขยาย scope, เพิ่ม dependency, เปลี่ยน token ทั้งระบบ, เขียนเอกสารโปรเจกต์ | รายละเอียดการ implement ภายใน scope |
-| hard gate ไม่ผ่านและแก้ใน scope ไม่ได้ | การ critique (แก้เองใน scope) |
-
-ถามครั้งละไม่เกิน 3 ข้อ (ยกเว้น interview หน้าตาใหม่ ไม่เกิน 4 ข้อต่อรอบ) และทุกข้อมีค่าแนะนำ ถ้า user ไม่อยู่หรือบอกให้ใช้ค่าเริ่มต้น จะไม่หยุดถาม แต่ใช้ค่าแนะนำแล้วสรุป "Decisions to confirm" ไว้ท้ายงาน
-รายละเอียด: [Design workflow](references/design-workflow.md)
-
-## หัวข้อเพิ่มเติม (4 พ.ย. 2569)
-
-| เรื่อง | เอกสาร |
-|---|---|
-| Design foundations: token layers, type scale, spacing, radius, elevation, motion, breakpoint, density, focus, theme | [visual system](references/visual-system.md) Part A |
-| เลือก component ให้ถูกงาน (tooltip/popover/dialog, toast/banner, pagination/infinite scroll ฯลฯ) และกติกาการใช้ ~60 component | [Components usage](references/components-usage.md) |
-| State ครบทุกแบบ + keyboard contract ตาม ARIA APG + template spec ของ component | [Component states](references/component-states.md) |
-| วิธีส่งงานออกแบบ: text wireframe, HTML prototype พร้อม state และ variant, hand-off | [Prototyping](references/prototyping.md) |
-| คุณภาพงานออกแบบ: วางแผน → ตรวจแผนเทียบหน้าตาสำเร็จรูป, idea sentence + competitor test, รายการสิ่งที่ทำให้ดู "เป็น template", วิธี critique จากภาพหน้าจอ | [Design quality](references/design-quality.md) |
-| หน้าฝั่งลูกค้า: ประเภทหน้า 13 แบบ, ต่างจากหลังบ้านอย่างไร, onboarding, ความน่าเชื่อถือ | [Customer UI](references/customer-ui.md) |
-| UX ของฟีเจอร์ AI: เหมาะเมื่อไร, ให้ผู้ใช้ควบคุมตามความเสี่ยง, state ของผลลัพธ์ AI | [AI features](references/ai-features.md) |
-| การออกแบบฟอร์ม: ถามอะไร, โครงสร้าง, label, เลือก control, ที่อยู่/เบอร์/บัตรประชาชนไทย, validation | [Forms](references/forms.md) |
-| การใช้ icon: เมื่อไรต้องมี label, ชุดเดียว ความหมายเดียว, ขนาด, พื้นที่กด, accessible name | [Iconography](references/iconography.md) |
-| Native mobile: iOS/Android, ขอสิทธิ์ในจังหวะที่ใช้, push, deep link, offline, gesture | [Mobile native](references/mobile-native.md) |
-| การสื่อสารข้ามช่องทาง: email/SMS/push/in-app | [Notifications](references/notifications.md) |
-| ค้นหาและฟิลเตอร์: ช่องค้นหา, คำค้นภาษาไทย, ผลลัพธ์, facet, sort, URL state, saved view, ไม่พบผลลัพธ์ | [Search & filter](references/search-filter.md) |
-| ทำงานร่วมกันแบบ realtime: presence, แก้พร้อมกัน/conflict, comment, แชร์สิทธิ์, version history, offline sync | [Collaboration](references/collaboration.md) |
-| HTML email: layout, ข้อจำกัดของ client, dark mode, ฟอนต์ไทย, template ตามประเภท, การทดสอบ | [Email design](references/email-design.md) |
-| เอกสารพิมพ์/PDF: ใบเสร็จ ใบกำกับภาษี ใบเสนอราคา รายงาน ป้าย, print CSS, ฟอนต์ไทยใน PDF, จำนวนเงินเป็นตัวหนังสือ | [Print documents](references/print-documents.md) |
-| แพลตฟอร์มอื่น: kiosk/POS, desktop app, smartwatch, TV, voice, in-car, XR | [Other platforms](references/other-platforms.md) |
-| Engagement/gamification: habit loop, streak, แต้ม/loyalty, เมื่อไรควรใช้, ข้อห้าม dark pattern | [Engagement](references/engagement.md) |
-| วิธีวิจัย: เลือก method, interview guide, survey, persona/JTBD, journey map, diary, recruit + PDPA consent | [Research methods](references/research-methods.md) |
-| Multi-brand / white-label theme ต่อ tenant | [Tokens to code](references/tokens-export.md) |
-| Data visualization: เลือกกราฟจากคำถาม, สีในกราฟ, state ของข้อมูล | [Data visualization](references/data-visualization.md) |
-| การสร้างและตรวจชุดสี: role ก่อนค่าสี, สีสถานะคงที่, contrast สองโหมด | [Color palette](references/color-palette.md) |
-| การตรวจหน้าที่ render จริง + script `render_check.js` และ `contrast.py` (`--css` ตรวจ token ทุกธีมจากไฟล์หน้าเว็บอัตโนมัติ) | [Render verification](references/render-verification.md) |
-| ตัวอย่างระบบหลังบ้าน PayOps 4 หน้า + SkillMap (skill matrix) + layout ใหม่ A06 Audit log, A07 Settings, D06 Matrix/heatmap | [Worked examples](assets/layouts/worked-examples-back-office.md) |
-| ทิศทางการออกแบบ: แยก 8 มิติ, เลือก page pattern จากคำถามของผู้ใช้, layout composition, คลัง visual style + กติกาผสม, dial variance/motion/density | [Design direction](references/design-direction.md) |
-| ความจำด้านดีไซน์: ตรวจโปรเจกต์ก่อนออกแบบ, ลำดับ source of truth, template DESIGN.md พร้อมเหตุผลและ anti-pattern, เลือก specialist skill เฉพาะที่ติดตั้งจริง | [Design memory](references/design-memory.md) |
-| แนวคิดจาก Hallmark / Impeccable / Hue / Taste / Interface Design: structural slop และ one strong idea, สกัดภาษาดีไซน์จากแบรนด์, เสนอ 2–3 direction ก่อนสร้าง, script `slop_check.py` ตรวจหน้าตาแบบ template และ `design_md_check.py` ตรวจ DESIGN.md | [Design quality](references/design-quality.md) §2b, [Design memory](references/design-memory.md) §3b, [Design direction](references/design-direction.md) §7 |
-| **ค่าเริ่มต้นห้ามข้าม (หน้าเว็บสาธารณะ / หน้าตาใหม่):** interview ก่อนเขียนโค้ด → palette จาก keyword → motion baseline → mobile ที่ออกแบบสำหรับ 390px → render ดู 1440 + 390 | [SKILL.md](SKILL.md) |
-| Palette: สูตร OKLCH (neutral ย้อมสีเดียวกับแบรนด์, accent เดียว, ไม่เกิน 2 hue, 70/20/10) + palette ตั้งต้น 8 ชุดตาม keyword ที่ตรวจ contrast ผ่านแล้ว 96/96 | [Color palette](references/color-palette.md) |
-| Mobile web: gutter, header, hero, ขนาดตัวอักษร, section, grid, ตาราง, พื้นที่กด, sticky, รูป | [visual system](references/visual-system.md) Part B |
-| Motion ของเว็บและแอป: ระดับตาม dial, 10 ประเภท, ลำดับการเคลื่อนไหวบนหน้าเว็บ, reduced motion, performance, motion spec, ตรวจด้วย `render_check --reduced-motion` | [Motion](references/motion.md) |
-| Style 18 แบบ, keyword ภาษาไทย/อังกฤษ → style + dial, interview 3 รอบสำหรับหน้าตาใหม่ (A: goal/audience/proof/constraints, B: feel/shape/reference/energy พร้อมภาพ, C: ยืนยัน) แล้วเขียน DESIGN.md ด้วย `design_md.py --wire` | [Design direction](references/design-direction.md) §4, §8, §9 |
-| รอบรีวิว: คำสั่งปรับงาน (critique, polish, bolder, quieter, distill ฯลฯ), scorecard visual/UX, hard gate ที่ห้ามส่งงาน | [Review loop](references/review-loop.md) |
-| Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [design quality](references/design-quality.md) §7 |
-| กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ, สถานะ live/syncing/stale ของ dashboard ที่ refresh | [Data visualization](references/data-visualization.md) |
-
-## หัวข้อเพิ่มเติม (5 พ.ย. 2569, 0.12.0 และ Unreleased)
-
-| เรื่อง | เอกสาร |
-|---|---|
-| คลัง direction 58 แบบพร้อมภาพ preview, เลือกตามหัวเรื่องและ feel | [Direction library](references/direction-library.md) |
-| หน้าตาหลังบ้าน 16 look (Calm, Dense, Night, High contrast …) พร้อม preview desktop และมือถือ | [Back office](references/back-office.md) |
-| สูตรสร้างแต่ละ direction: hard rule, สิ่งที่ห้าม, component ที่ต้องมี, pre-flight (`direction_recipe.py`) | [Direction recipes](references/direction-recipes.md) |
-| แปลง direction เป็น token CSS / Tailwind / shadcn พร้อมตรวจ contrast (`export_tokens.py`) | [Tokens to code](references/tokens-export.md) |
-| Tailwind v4: token → utility, dark ด้วย `data-theme`, กติกาและการตรวจ | [Tailwind](references/tailwind.md) |
-| Component ยาก: editable grid, drag reorder, picker, rich text, tour, autosave form | [Advanced components](references/advanced-components.md) |
-| DESIGN.md รูปแบบ Google Labs design.md (YAML tokens + 8 section), สร้างด้วย `design_md.py`, ตรวจด้วย `design_md_check.py` | [Design memory](references/design-memory.md) |
-| โปรเจกต์เดิม (brownfield) — mode ONBOARD: ถอด DESIGN.md จากโค้ด (`code_extract.py`, `design_md.py --from-code`), หา drift, baseline audit | [Brownfield](references/brownfield.md) |
-| ลำดับการตรวจบังคับ: `--fast` baseline → แก้ทีเดียว → `--fast` ยืนยัน → `--zoom` เต็มครั้งเดียว; panel ปรับค่าสด (`tweaks_panel.py`), รายงานรีวิว HTML (`review_report.py`) | [Render verification](references/render-verification.md), [Review loop](references/review-loop.md) |
-| บทเรียนจาก OpenDesign 51 templates (กติกา) และ 25 หน้าที่ render แล้ววัดค่า | [evidence](assets/evidence.md) |
-
-**หมายเหตุการเรียกใช้:** SKILL.md เป็นตัวชี้ทางอย่างเดียว (ตาราง "งาน → ไฟล์ที่ต้องเปิด") กติกาจริงอยู่ใน references
-ถ้าต้องการให้ใช้กรอบนี้แน่นอน เรียก `/ux-ui-principles` โดยตรง
-
-**ทดสอบการเลือกไฟล์และการถูกเรียกใช้** (ใช้ API จริง ~$3–4 ต่อรอบด้วย sonnet):
-- `python3 evals/route_eval.py` เปิดไฟล์ถูกตาม `expected_reads` ใน `evals/evals.json` ไหม (5 พ.ย. 2569: 1/18 → 14/18 หลังปรับ)
-- `python3 evals/trigger_eval.py` ถูกเรียกใช้เองโดยไม่พิมพ์ slash ไหม (5 พ.ย. 2569: 0/12 → 8/12, ไม่ถูกเรียกผิดงาน 6/6)
+`SKILL.md` เป็น **router อย่างเดียว**: ตารางบอกว่าคำขอแบบไหนต้องเปิดไฟล์ไหน (ตัวหนา = ต้องเปิดก่อนตอบ)
+แล้วเลือกโหมด (ANSWER … REFINE) และเดินตาม phase 0–8 ใน `references/design-workflow.md`
+กฎ ค่า และ checklist ทั้งหมดอยู่ใน `references/`; สคริปต์ใน `scripts/` เป็นตัวตรวจที่รันได้จริง
+และ `check.py` เป็นทางเข้าเดียวของการตรวจ
 
 ## เรียกใช้
 
@@ -121,30 +28,115 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 /ux-ui-principles design QA หน้านี้เทียบกับ spec และระบุสิ่งที่ยังไม่ได้ทดสอบ
 ```
 
-ตอบเป็นภาษาที่ผู้ใช้เลือก รองรับข้อความภาษาไทย
+## ดัชนีไฟล์: คืออะไร · มีไว้ทำไม · ใช้อย่างไร
 
-**ใช้ได้ครบในตัว ไม่ต้องพึ่งสกิลอื่น:** มีทั้งหลักการ, foundations (tokens/type/spacing),
-การเลือกและใช้ component พร้อม state และ keyboard, การทำ prototype HTML
-และ script ตรวจผล ถ้าโปรเจกต์มี design system อยู่แล้วให้ใช้ของโปรเจกต์ก่อน
+ทุกไฟล์ในสกิลต้องมีแถวในตารางนี้ (`python3 evals/index_check.py` ตรวจทั้งสองทาง: ไฟล์ที่ไม่มีแถว
+และแถวที่ไม่มีไฟล์ รวมถึงลิงก์ markdown ที่เสีย)
 
-## สิ่งที่รวบรวมไว้
+### references/ — กฎและค่า (เปิดตาม router)
 
-| เนื้อหา | เอกสาร |
-|---|---|
-| Workflow และขอบเขตการใช้งาน | [SKILL.md](SKILL.md) |
-| Nielsen heuristics, mental model, signifier, Fitts, Hick–Hyman, IA | [Interaction](references/interaction.md) |
-| Hierarchy, typography, grouping, responsive และข้อความไทย | [visual system](references/visual-system.md) Part B |
-| ค่าวัดจริงด้านภาพ: น้ำหนัก/tracking/line-height ตามขนาด, อัตราส่วน type, โทนสี, spacing 3 ชั้น, ค่าย radius, motion, ความสมจริงของ content, ค่าภาษาไทย, preset และ craft pass — จาก 35 เว็บจริง + curated.design 18 + Dribbble 18 + Behance 14 + website templates | [visual system](references/visual-system.md) Part C · [Site measurements](assets/evidence.md) · [Gallery study](assets/evidence.md) |
-| ข้อตกลงร่วมของ design system สาธารณะ 126 ระบบ: ชั้น token และชื่อ role, focus ring 3px, ค่า radius/breakpoint/density, flow ของงานบริการภาครัฐ (หน้า review, ลิงก์ Change, คงคำตอบ), กฎเรื่อง identity และ provenance | [Design system benchmarks](references/design-system-benchmarks.md) · [คู่มือ 126 ระบบฉบับเต็ม](assets/design-systems/index.md) |
-| WCAG 2.2 ระดับ A/AA/AAA, ข้อยกเว้น, keyboard และ modal | [Accessibility](references/accessibility.md) |
-| Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
-| Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |
-| วิธีวิจัย การทดสอบ ตัวชี้วัด และจัดลำดับปัญหา | [Validation](references/validation.md) |
-| รายการแหล่งอ้างอิง 101 แหล่งและสถานะหลักฐาน (S37–S62 เพิ่ม 3 พ.ย., S63–S101 เพิ่ม 4 พ.ย. 2569) | [Sources](references/sources.md) |
-| รูปแบบ design decision, audit และ validation plan | [Templates](assets/templates.md) |
-| ตัวอย่าง layout 43 แบบ ใน 8 หมวด | [Layout library](assets/layouts/index.md) |
-| ตัวอย่างภาษาไทยแบบเต็ม: checkout, admin records, booking | [Worked examples](assets/layouts/worked-examples.md) |
-| ตัวอย่างจาก OpenDesign 16 เว็บไซต์ + 8 templates พร้อมระดับหลักฐาน | [OpenDesign references](assets/layouts/opendesign.md) |
+| ไฟล์ | คืออะไร | มีไว้ทำไม | ใช้เมื่อไร / อย่างไร |
+|---|---|---|---|
+| `accessibility.md` | เกณฑ์ WCAG 2.2 + ข้อยกเว้น + แผนหาหลักฐาน | ค่าที่คนจำผิดบ่อย (24px vs 44px, 2.4.11 vs 2.4.13) | SKILL แถว Accessibility; phase 4, 7 |
+| `advanced-components.md` | editable grid, drag, picker, rich text, tour | component ที่ library ทั่วไปไม่มี contract ให้ | แถว Which component; phase 4 |
+| `ai-features.md` | UX ของ agent/chat/tool call/ผลลัพธ์ AI | สถานะและการควบคุมของคนที่เฉพาะกับ AI | แถว AI features |
+| `app-screen-rules.md` | หลักจัดองค์ประกอบหน้าจอข้อมูล (dashboard/admin/CRM) + signature element | ทำให้ product UI ไม่ดูเป็น template | แถว Customer UI, States; phase 3–4 |
+| `back-office.md` | ประเภทหน้า admin, permission treatment, worklist, impersonation, look ของหลังบ้าน | คำถาม 8 ข้อต่อหน้า admin และการเลือก look จากภาพ | แถว Admin; คู่กับ `assets/layouts/admin.md`, `check.py --admin` |
+| `brownfield.md` | รับโปรดักต์เดิมที่ไม่มี DESIGN.md | ถอดกติกาจากโค้ดก่อนออกแบบเพิ่ม | โหมด ONBOARD; ใช้กับ `code_extract.py` |
+| `build-recipes.md` | สูตรลงมือ build (surface, no-JS demo, placeholder) | กันโค้ดที่ render แล้วพัง/ดูไม่เสร็จ | ทุกงาน BUILD/IMPROVE |
+| `collaboration.md` | presence, co-edit, conflict, version history | สถานะหลายผู้ใช้ที่หน้าเดี่ยวไม่มี | แถว Realtime |
+| `color-palette.md` | role สี, contrast, dark theme, ตารางแปลชื่อ token | **เจ้าของ** ตารางแปลชื่อ role ↔ DESIGN.md ↔ CSS | แถว Colors; phase 4 |
+| `component-states.md` | state ของ control, **focus ring (ค่าเดียวของ repo)**, feedback timing, 5 แบบของ empty, keyboard | เจ้าของค่า focus ring และตารางเวลารอ | แถว Which component, Accessibility; phase 4 |
+| `components-usage.md` | เลือก component (modal/drawer/page, select/radio, toast/banner) | ตอบ 'ใช้ตัวไหน' พร้อมเหตุผล | แถว Which component |
+| `content-design.md` | UX writing, error, empty copy | ถ้อยคำที่ทำให้ผู้ใช้กู้คืนได้ | แถว UX writing |
+| `customer-ui.md` | หน้าฝั่งลูกค้า (account, checkout, booking) | ประเภทหน้าลูกค้าและความเสี่ยงของแต่ละแบบ | แถว Customer-facing |
+| `data-visualization.md` | เลือกกราฟ, แสดงค่า, KPI governance, เพดานข้อมูล/จุดกราฟ | กราฟที่ตอบคำถามจริงและไม่โกหก | แถว Charts |
+| `design-direction.md` | มิติ 8 ด้าน, page pattern, interview §9 | ลำดับการตัดสินใจก่อนเลือกหน้าตา | แถว Landing; ขั้น 1 ของ §3 |
+| `design-memory.md` | phase 0, ลำดับความสำคัญเมื่อข้อมูลขัดกัน, DESIGN.md, การส่งต่อให้ skill อื่น | **เจ้าของ** precedence และตาราง fallback ของ skill อื่น | แถว DESIGN.md; ทุกงานที่แก้ของเดิม |
+| `design-quality.md` | สิ่งที่ทำให้ดู 'AI-generated', แผนก่อนสร้าง, critique, craft §7 | ด่านกันหน้าตา template | แถว Landing, Review |
+| `design-system-benchmarks.md` | ค่าที่พบจริงใน design system สาธารณะ 126 ระบบ | หลักฐานเชิงสถิติ (ไม่ใช่ค่าบ้าน) ของ token/radius/breakpoint | แถว Type/tokens; ค้นต่อด้วย `ds_lookup.py` |
+| `design-workflow.md` | phase 0–8, จุดถาม, เกณฑ์ออก, **ดัชนี reference → phase** | แผนที่การทำงานทั้งหมด | เปิดเมื่อไม่แน่ใจว่าอยู่ phase ไหน |
+| `direction-library.md` | แคตตาล็อก direction พร้อมภาพ preview | ให้ผู้ใช้เลือกจากภาพ ไม่ใช่จากคำคุณศัพท์ | interview Round B; `look.py` |
+| `direction-recipes.md` | สูตร component และน้ำเสียงตัวอักษรตาม direction | แปลง direction เป็นค่าในหน้า | หลังเลือก direction; คู่ `direction_recipe.py` |
+| `do-and-dont.md` | วิธีเขียนคู่ Do/Don't | ให้ตัวอย่างตรวจได้ ไม่ใช่ความเห็น | เมื่อเขียน guideline ให้ทีม |
+| `email-design.md` | HTML email | ข้อจำกัดของ email client | แถว HTML email |
+| `engagement.md` | gamification, streak, loyalty และขอบเขตจริยธรรม | กันเกิด dark pattern | แถว Engagement |
+| `experience-architecture.md` | journey, IA, URL, permission model | โครงก่อนหน้าจอ | โหมด ARCHITECT |
+| `forms.md` | field, validation, error summary, ข้อมูลไทย, multi-step | **เจ้าของ** เรื่องฟอร์มทั้งหมด (patterns ลิงก์มาที่นี่) | แถว Forms |
+| `framework.md` | 6 ศาสตร์, ระดับ, rigor tier | นิยามคำว่า Light/Standard/Critical | phase 1 |
+| `gate-tiers.md` | ชั้นกติกา Floor/Reflex/Finish | แยกกฎที่ห้ามพลาดออกจากงานขัดเกลา | phase 6; คำศัพท์ tier ทั้งหมดอธิบายใน design-workflow |
+| `i18n-performance.md` | ภาษาไทย/สองภาษา, RTL, Core Web Vitals | layout ที่แปลภาษาได้และเร็ว | แถว Thai/bilingual |
+| `iconography.md` | icon label, family, ขนาด | icon ที่ไม่มีชื่อ = ปุ่มที่ใช้ไม่ได้ | phase 4 |
+| `interaction.md` | heuristic, mental model, Fitts, Hick | หลักพื้นฐานที่ใช้อธิบายเหตุผล | ANSWER/RESEARCH |
+| `marketing-copy.md` | headline, CTA, proof | หน้า public ต้องมีข้อเสนอที่จริง | แถว Landing (Round A) |
+| `measurement.md` | metric, experiment, design QA | วัดผลหลังปล่อย | โหมด DISCOVER, phase 8 |
+| `mobile-native.md` | iOS/Android conventions | แอปมือถือไม่ใช่เว็บย่อส่วน | แถว phone app |
+| `motion.md` | ระดับ motion, reduced motion | motion ที่มีเหตุผลและปิดได้ | แถว Animation; §3 ข้อ 5 |
+| `navigation-grouping.md` | จัดกลุ่ม/ลำดับ/ชื่อเมนู | เมนูตามงานของ role | แถว Navigation |
+| `notifications.md` | ช่องทางและโครงข้อความแจ้งเตือน | ส่งให้ถูกช่องทาง ไม่รบกวนเกิน | แถว phone app, email |
+| `other-platforms.md` | kiosk, POS, TV, watch, voice | ข้อจำกัดของแต่ละอุปกรณ์ | แถว Kiosk |
+| `patterns.md` | state ระดับหน้าจอ, async, dialog, destructive action | **เจ้าของ** state ของหน้า/flow (control state อยู่ component-states) | แถว States |
+| `print-documents.md` | ใบเสร็จ/ใบกำกับภาษี/PDF | ข้อกำหนดเอกสารพิมพ์ | แถว Printable |
+| `product-discovery.md` | ปัญหา, role, metric + guardrail | ก่อนตัดสินใจว่าจะสร้างอะไร | โหมด DISCOVER |
+| `prototyping.md` | wireframe, prototype, hand-off | ระดับความละเอียดที่พอดีกับคำถาม | แถว Building UI |
+| `render-verification.md` | ลำดับการตรวจ render, state ที่เปิดด้วย URL | ผลตรวจที่ระบุ Ran/Skipped ได้จริง | phase 7 |
+| `research-methods.md` | interview, survey, persona, card sort | เลือกวิธีวิจัยให้ตรงคำถาม | แถว Discovery |
+| `review-loop.md` | refinement verb, scorecard, hard gate, **§8 caps/calibration** | รีวิวที่เทียบกันได้ข้ามรอบ | แถว Review; phase 6 |
+| `search-filter.md` | search, facet, ตาราง type → filter → cell, saved view | **เจ้าของ** search/filter | แถว Search |
+| `shadcn-rules.md` | กติกา stack shadcn | ไม่ฝืน component ของ shadcn | เมื่อมี `components.json` |
+| `sources.md` | ทะเบียนแหล่งอ้างอิง S01–S107 + evidence discipline | แยกมาตรฐาน/heuristic/ข้อเสนอโครงการ | ทุกคำตอบที่อ้างหลักฐาน |
+| `tailwind.md` | กติกา Tailwind v4 | ใช้ token ไม่ใช่ค่าลอย | เมื่อ stack เป็น Tailwind |
+| `tokens-export.md` | direction → CSS/Tailwind/shadcn token, multi-brand | แปลงการตัดสินใจเป็นโค้ด | แถว Switch look, Multi-brand |
+| `trust-security-privacy.md` | confirmation, masking, audit trail | งาน Critical (เงิน/สิทธิ์/ลบ) | แถว Admin ที่มีเงินหรือสิทธิ์ |
+| `validation.md` | usability test, severity, จัดลำดับปัญหา | จัดลำดับ finding อย่างมีหลักฐาน | AUDIT, phase 8 |
+| `visual-assets.md` | เลือกภาพต่อ section | ภาพจริงแทน clip-art | แถว Landing; §3 ข้อ 4 |
+| `visual-system.md` | A foundations · B composition (รวม tablet) · C ค่าวัดจริง | ค่าตัวเลขด้านภาพที่มีที่มา | แถว Type/spacing, Layout |
+
+### scripts/ — ตัวตรวจและตัวสร้าง (ไม่ต้องมีอะไรนอกจาก Python 3 / Node; Playwright ถ้ามี)
+
+| ไฟล์ | คืออะไร | มีไว้ทำไม | ใช้เมื่อไร / อย่างไร |
+|---|---|---|---|
+| `_pw.js` | ตัวช่วยหา Playwright/browser (ไม่ดาวน์โหลดเอง) | ให้ทุกสคริปต์ render ใช้วิธีหาเดียวกัน | ภายใน: ใช้โดย render/fold/flow/admin/preview scripts |
+| `admin_check.js` | ตรวจหน้า admin ที่ render แล้วตามประเภทหน้า + เปิดทุก `?state=` | จับคอลัมน์เงินชิดซ้าย, ปุ่ม disabled ไม่มีเหตุผล, sticky ที่ไม่ sticky, state ที่ยังไม่ได้สร้าง | `check.py <page> --admin list` |
+| `backoffice_preview.js` | render ภาพหน้าหลังบ้านทุก look (`--density compact`, `--thai`, `--mobile`) | ให้ทีมเลือก look จากภาพ | back-office.md 'Choosing density and tone' |
+| `brand.js` | direction เดียว → หน้า public และ product UI ด้วย token ชุดเดียว | กันสองหน้าตาในแบรนด์เดียว | ใช้โดย preview scripts |
+| `build_previews.js` | สร้างภาพ preview ใหม่ทั้งหมด | ภาพไม่ถูก commit (gitignore) | ครั้งแรกหลังติดตั้ง |
+| `check.py` | **ทางเข้าเดียว** ของการตรวจก่อนส่งงาน | ไม่ต้องจำ 7 สคริปต์ | SKILL §3 ข้อ 6 |
+| `code_extract.py` | ถอดภาษาออกแบบจากโค้ดเดิม | หลักฐานสำหรับ DESIGN.md ของ brownfield | brownfield.md |
+| `compositions.js` | layout หน้าแรกสำเร็จรูป | จุดเริ่มที่ไม่ใช่ hero ซ้ำ ๆ | §3 ข้อ 2 |
+| `contrast.py` | คำนวณ contrast จาก token (oklch ได้) | ตรวจคู่สีแทนการเดา | ผ่าน `check.py` |
+| `design_md.py` | เขียนและผูก DESIGN.md | บันทึกการตัดสินใจเดียวของโปรเจกต์ | หลัง interview, `--backoffice <look>` |
+| `design_md_check.py` | ตรวจ DESIGN.md | กัน DESIGN.md ที่ขาดหรือขัดกัน | phase 0 |
+| `direction_preview.js` | ภาพ preview ของ direction | ภาพสำหรับ interview | build_previews.js |
+| `direction_recipe.py` | token/ข้อห้าม/component ที่ต้องมีของ direction | แปลง direction เป็นกติกา | §3 ข้อ 2 |
+| `ds_lookup.py` | ค้นคู่มือ 126 design system | หาตัวอย่างจริงก่อนตั้งค่า | design-system-benchmarks.md |
+| `export_tokens.py` | direction → token ในโค้ด (`--print-dark`) | ส่งต่อให้โค้ดโดยไม่พิมพ์มือ | tokens-export.md |
+| `flow_check.js` | เดิน journey จาก steps.json รวม failure path | ตรวจว่างานหลักทำได้จริง | §3 ข้อ 6 |
+| `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |
+| `look.py` | รายการภาพอ้างอิงตามประเภทหน้า | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
+| `placeholders.py` | หา placeholder ที่เหลือ | ห้ามส่งของปลอมเป็นของจริง | §3 ข้อ 6 |
+| `render_check.js` | render หลายขนาด light/dark, overflow, JS error, ชื่อปุ่ม | smoke check ทั่วไปของทุกหน้า | ผ่าน `check.py --render` |
+| `review_report.py` | finding → รายงาน HTML | รีวิวที่ส่งต่อได้ | review-loop.md 'Report format' |
+| `script_check.js` | syntax ของ script และ global ที่ชน window | บั๊กที่ทำให้หน้าเปล่า | ผ่าน `check.py` |
+| `showcase_fetch.py` | ดึงภาพ showcase มาเก็บในเครื่อง | ภาพมีลิขสิทธิ์ ไม่ commit | ครั้งแรกถ้าต้องการ |
+| `slop_check.py` | สแกนหน้าตา template แบบ static | จับ device ที่ทำให้ดูเป็น AI | ผ่าน `check.py` |
+| `state_check.py` | หา marker ของ state แบบ static | รู้ว่า state ไหนยังไม่ได้ทำ | ผ่าน `check.py` |
+| `tweaks_panel.py` | แผงปรับค่าสดระหว่างรีวิว | ปรับกับผู้ใช้แบบเห็นผลทันที | review session |
+
+### assets/ และ evals/
+
+| ไฟล์ | คืออะไร | มีไว้ทำไม | ใช้เมื่อไร / อย่างไร |
+|---|---|---|---|
+| `assets/design-context.md` | การ์ด context ของโปรเจกต์ | ส่งบริบทเดียวกันข้ามทุก phase  | phase 1 |
+| `assets/page-spec.md` | page spec 16 แถว | ข้อกำหนดหน้าที่ทดสอบได้ | DESIGN mode |
+| `assets/templates.md` | รูปแบบผลลัพธ์ (decision, audit, research, validation plan) | ผลลัพธ์รูปแบบเดียวกันทุกครั้ง | ทุกโหมด |
+| `assets/evidence.md` | ค่าวัดจาก site/gallery จริง | ที่มาของตัวเลขใน visual-system Part C | อ้างอิง |
+| `assets/layouts/` | blueprint หน้า 44 แบบ (A01–A08, D01–D06 …) + worked examples ภาษาไทย | โครงหน้าที่มี state และ acceptance | `layouts/index.md` ก่อน แล้วเปิดหมวดเดียว |
+| `assets/backoffice/styles.json` | 17 look ของหลังบ้าน: สี, 5 status tone, density ปกติ + compact, รูปทรง | **template UI หลังบ้าน**: ค่าเดียวที่ preview และ `design_md.py --backoffice` ใช้ | back-office.md |
+| `assets/directions/` | direction ของหน้า public (`directions.json`, content packs) | หน้าตาที่ไม่ซ้ำแบบ default | direction-library.md |
+| `assets/design-systems/` | คู่มือ 126 design system (Apache-2.0, S102) | ข้อมูลดิบของ benchmarks | `ds_lookup.py` |
+| `assets/photos/, assets/references/, assets/showcase/` | ภาพจริงพร้อม credit | ภาพอ้างอิง/ใช้งานที่มีที่มา | `look.py` |
+| `evals/` | สถานการณ์ทดสอบ routing/trigger/A-B + `index_check.py` | วัดว่า skill เปิดไฟล์ถูกและ README ไม่ตกหล่น | ก่อน release |
 
 ## หลักสำคัญที่แปลงเป็นกติกาใน skill
 
@@ -168,18 +160,6 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 รายละเอียด แหล่งอ้างอิง และข้อยกเว้นอยู่ในเอกสารแต่ละหัวข้อ
 เอกสารนี้เป็น snapshot ของการวิจัย ควรตรวจต้นฉบับอีกครั้งเมื่ออ้างเกณฑ์ปัจจุบัน
 
-## คลัง layout examples
-
-มี 43 แบบ แบ่งเป็น marketing, commerce, dashboards, admin, content/learning,
-productivity, accounts/settings และ mobile tasks แต่ละแบบมีโครง wide layout,
-การปรับจอเล็ก, สถานะสำคัญ, ข้อแลกเปลี่ยน/กรณีที่ควรหลีกเลี่ยง และ acceptance example
-ตัวอย่างเป็น blueprint ที่เขียนขึ้นสำหรับการปรับใช้ ไม่ใช่ภาพหน้าจอสำเร็จรูปหรือผลทดสอบผู้ใช้
-
-```text
-/ux-ui-principles เลือก layout สำหรับ admin จัดการคำขอ พร้อม responsive และ error states
-/ux-ui-principles ใช้ C04 เป็นจุดเริ่มต้น วาง checkout สำหรับร้านนี้พร้อม acceptance checks
-```
-
 ## แหล่งตัวอย่างจาก OpenDesign
 
 ค้นคว้าวันที่ 9 ตุลาคม 2026 ทั้ง `opendesign.cc` และ `open-design.ai`
@@ -196,3 +176,5 @@ productivity, accounts/settings และ mobile tasks แต่ละแบบ�
 /ux-ui-principles หา reference จาก OpenDesign สำหรับ SaaS landing แล้วจับคู่กับ layout ใน skill
 /ux-ui-principles ใช้ ODA05 เป็น reference ของ kanban พร้อมระบุสิ่งที่ต้องตรวจเพิ่ม
 ```
+
+ประวัติการเปลี่ยนแปลงแต่ละเวอร์ชัน: [CHANGELOG](../../CHANGELOG.md)

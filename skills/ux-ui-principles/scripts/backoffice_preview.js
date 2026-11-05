@@ -7,6 +7,7 @@
  * Usage:
  *   node scripts/backoffice_preview.js [--styles calm,dense | --direction dose,editorial] [--screens records,approval]
  *        [--out dir] [--width 1440] [--height 900] [--sheet] [--thai] [--singles records,approval|all]
+ *        [--density compact]   # operator density from each look's "compact" (rowH, fs, pad)
  *        [--mobile]   # 390 x 844 phone set: records, approval, overview, inbox, detail, form, menu (drawer),
  *                     # filter (bottom sheet), states (loading/empty/error), components (bottom nav, FAB, sheet…)
  *
@@ -58,7 +59,12 @@ const brand = require('./brand');
 const directions = JSON.parse(fs.readFileSync(path.join(root, 'assets/directions/directions.json'), 'utf8')).directions;
 const pickS0 = opt('--direction') ? directions.filter(d => opt('--direction') === 'all' || opt('--direction').split(',').includes(d.id)).map(d => brand.productStyle(d, styles))
   : opt('--styles') ? styles.filter(s => opt('--styles').split(',').includes(s.id)) : styles;
-const pickS = pickS0.map(s => (!mobile && W < 1100 && s.nav === 'side') ? Object.assign({}, s, { nav: 'rail' }) : s); // tablet: side nav collapses to a rail
+const compact = opt('--density') === 'compact';
+const toneDefaults = s => Object.assign({}, s, {
+  info: s.info || s.warn, // looks derived from a direction (brand.js) may lack info/neutral
+  neutral: s.neutral || [s.muted, s.dark ? '#2a2f38' : '#eef0f2'],
+}, compact && s.compact ? s.compact : {});
+const pickS = pickS0.map(toneDefaults).map(s => (!mobile && W < 1100 && s.nav === 'side') ? Object.assign({}, s, { nav: 'rail' }) : s); // tablet: side nav collapses to a rail
 const pickC = opt('--screens') ? SCREENS.filter(s => opt('--screens').split(',').includes(s)) : SCREENS;
 if (!pickS.length || !pickC.length) { console.error('nothing matched'); process.exit(2); }
 
@@ -70,7 +76,7 @@ const T = {
   filters: L(['All statuses', 'Last 7 days', 'All methods'], ['ทุกสถานะ', '7 วันล่าสุด', 'ทุกวิธี']),
   bulk: L('2 selected', 'เลือก 2 รายการ'), approve: L('Approve', 'อนุมัติ'), reject: L('Reject', 'ปฏิเสธ'), export: L('Export', 'ส่งออก'), newp: L('New payment', 'สร้างรายการจ่าย'),
   showing: n => L(`Showing 1 to ${n} of 214`, `แสดง 1 ถึง ${n} จาก 214`), perPage: L('Rows per page', 'แถวต่อหน้า'),
-  st: L({ pending: 'Pending approval', approved: 'Approved', failed: 'Failed', paid: 'Paid' }, { pending: 'รออนุมัติ', approved: 'อนุมัติแล้ว', failed: 'ไม่สำเร็จ', paid: 'จ่ายแล้ว' }),
+  st: L({ pending: 'Pending approval', approved: 'Approved', failed: 'Failed', paid: 'Paid', draft: 'Draft' }, { pending: 'รออนุมัติ', approved: 'อนุมัติแล้ว', failed: 'ไม่สำเร็จ', paid: 'จ่ายแล้ว', draft: 'ฉบับร่าง' }),
   records: L('Payments', 'การจ่ายเงิน'), recordsSub: L('All outgoing payments, newest first', 'รายการจ่ายเงินทั้งหมด เรียงจากใหม่ไปเก่า'),
   approval: L('Approvals', 'คิวอนุมัติ'), approvalSub: L('Payments waiting for a decision', 'รายการที่รอตัดสินใจ'), queue: L('14 waiting', 'รอ 14 รายการ'),
   detailH: L('Payment details', 'รายละเอียดรายการ'), payee: L('Payee', 'ผู้รับเงิน'), amount: L('Amount', 'จำนวนเงิน'), acct: L('Destination account', 'บัญชีปลายทาง'), req: L('Requested by', 'ผู้ขอ'),
@@ -122,7 +128,7 @@ Object.assign(T, {
 /* ---- sample data ---- */
 const PAYEES = ['Siam Fresh Co.', 'Lanna Print', 'Chao Phraya Logistics', 'Baan Coffee', 'Northwind Clinic', 'Mango Soda Ltd.', 'Studio Plume', 'Thong Lor Parking', 'Krabi Marine Supply', 'Isan Rice Traders', 'Phuket Linen', 'Ayutthaya Tiles', 'Nonthaburi Print', 'Rayong Chemicals', 'Hua Hin Catering', 'Korat Auto Parts'];
 const AMOUNTS = ['48,200.00', '12,450.00', '326,900.00', '8,900.00', '95,000.00', '21,300.00', '4,500.00', '1,200.00', '67,750.00', '154,000.00', '9,320.00', '38,600.00', '2,980.00', '212,400.00', '15,900.00', '5,640.00'];
-const STAT = ['failed', 'pending', 'pending', 'approved', 'pending', 'paid', 'paid', 'paid', 'approved', 'paid', 'pending', 'paid', 'paid', 'pending', 'paid', 'paid'];
+const STAT = ['failed', 'pending', 'draft', 'approved', 'pending', 'paid', 'paid', 'paid', 'approved', 'paid', 'pending', 'paid', 'draft', 'pending', 'paid', 'paid'];
 const DATES = ['04 Nov', '04 Nov', '04 Nov', '04 Nov', '03 Nov', '03 Nov', '03 Nov', '03 Nov', '02 Nov', '02 Nov', '02 Nov', '01 Nov', '01 Nov', '01 Nov', '31 Oct', '31 Oct'];
 const genRows = n => Array.from({ length: n }, (_, i) => [`PAY-${20931 - i}`, PAYEES[i % 16], `•••• ${String(1000 + ((i * 3791) % 9000)).slice(0, 4)}`, AMOUNTS[(i * 5) % 16], DATES[i % 16], STAT[(i * 7) % 16]]);
 const initials = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
@@ -145,8 +151,9 @@ const IC = {
 const ic = (n, z = 18) => `<svg class="ic" viewBox="0 0 24 24" width="${z}" height="${z}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
 const NAVI = ['overview', 'payments', 'approvals', 'audit', 'access', 'settings'];
 
-const shape = k => ({ pending: '◔', approved: '✓', failed: '▲', paid: '●' }[k]);
-const tone = (k, s) => ({ pending: s.warn, approved: s.ok, failed: s.bad, paid: s.ok }[k]);
+// pending waits on someone (info); warn is kept for needs-attention; draft is neutral (styles.json _doc)
+const shape = k => ({ pending: '◔', approved: '✓', failed: '▲', paid: '●', draft: '○' }[k]);
+const tone = (k, s) => ({ pending: s.info, approved: s.ok, failed: s.bad, paid: s.ok, draft: s.neutral }[k]);
 const chipHtml = (k, s, label) => {
   const [fg, bg] = tone(k, s);
   if (s.chip === 'dot') return `<span class="chip" style="color:${s.ink}"><b aria-hidden="true" style="color:${fg}">${shape(k)}</b>${label}</span>`;

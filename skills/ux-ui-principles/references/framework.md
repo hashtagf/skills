@@ -27,7 +27,7 @@ assumptions instead of silently inventing product strategy.
 | 2. Experience architecture | Journeys, flows, IA, navigation, URLs, cross-page relationships, permission flows | Every page has a known entry, exit, parent and owner role; no orphan or dead-end flow | experience-architecture, navigation-grouping, back-office |
 | 3. Page & interaction | Page type, layout, hierarchy, actions, forms, search, states, recovery | Page spec covers the applicable rows of [page-spec.md](../assets/page-spec.md) | back-office, patterns, layouts |
 | 4. Visual & design system | Type, grid, spacing, color roles, components, tokens, motion, brand | Screens use project tokens/components; exceptions are justified | visual-system, color-palette, components-usage, component-states, iconography, design-quality |
-| 5. Quality & engineering | Responsive, accessibility, localization, performance, privacy, security | Applicable checks are executed or explicitly listed as untested | accessibility, render-verification, i18n-performance, trust-security-privacy, tablet-rtl-dark, mobile-native (native products) |
+| 5. Quality & engineering | Responsive, accessibility, localization, performance, privacy, security | Applicable checks are executed or explicitly listed as untested | accessibility, render-verification, i18n-performance, trust-security-privacy, color-palette (dark), mobile-native (native products) |
 | 6. Validation & improvement | Usability testing, analytics, experiments, design QA, iteration | Success measure is instrumented and a review point is scheduled | validation, measurement |
 
 ## Process — iterative, not linear

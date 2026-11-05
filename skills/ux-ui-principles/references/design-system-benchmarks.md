@@ -27,7 +27,7 @@ Contents: §1 Token architecture · §2 Type and spacing · §3 Focus and target
 
 ## 1. Token architecture
 
-- **Three layers, always.** Primitive (`base.size.100`, a hue ramp) → semantic
+- **Primitive → semantic always; component layer only where it earns control.** Primitive (`base.size.100`, a hue ramp) → semantic
   role (`sys.padding.md`, `color-accent-border-default`) → component. 51 of 126
   guides document aliasing; 9 name a component layer. Components read roles,
   never primitives, never hex.
@@ -70,7 +70,7 @@ Contents: §1 Token architecture · §2 Type and spacing · §3 Focus and target
 
 ## 3. Focus and targets
 
-- **Focus ring: 3px is the mode** (about 134 of ~190 declared widths; 2px next,
+- **Focus ring: 3px is the mode** (observation; the house value is in [component states](component-states.md) "Focus") (about 134 of ~190 declared widths; 2px next,
   4px for high-contrast kits). Use ≥ 3px, offset 0–2px, a color that clears 3:1
   against both the surface and the control, and a second contrasting edge
   (inner/outer) when the surface varies. GOV.UK pairs a yellow fill with a black

@@ -81,6 +81,21 @@ Facet rules (this skill's recommendation unless cited):
 - Ranges (price, date) take typed input plus presets ("7 วันล่าสุด", "เดือนนี้").
 - Filters vs facets differ: filters are fixed criteria, facets derive from the result set. [N5]
 
+**Data type → filter control → cell display** (decide per column in the page spec; S105):
+
+| Column type | Filter control | Cell |
+|---|---|---|
+| Enum / status (≤ ~12 values) | Checkbox facet with counts | Status label: text + tone + shape |
+| Free text (name, title) | Search input (debounced) | Text, truncated with full value on hover/focus |
+| Number / money | Range: two inputs + presets; slider only for coarse ranges | Right-aligned, tabular figures, unit |
+| Date / timestamp | Range with presets (วันนี้, 7 วัน, เดือนนี้) + custom; time zone stated | Relative ("2 ชม.ที่แล้ว") with absolute on hover; absolute in exports |
+| Person / owner | Combobox with "ฉัน" first | Avatar + name |
+| ID / reference | Exact match in search, not a facet | Monospace, copy button |
+| Nested record / JSON | Not filterable | Opens in the detail sheet only |
+
+Log and event tables: a time histogram above the table where dragging a range sets the
+time filter, and a command-palette filter (`status:error service:pay`) with history.
+
 ## URL state, back button, saved views
 
 - Encode query, filters, sort, page/cursor in the URL; a copied link reproduces the view.

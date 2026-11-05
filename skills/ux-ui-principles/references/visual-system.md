@@ -42,9 +42,9 @@ the Design Tokens Format Module is a stable Community Group format. [S58]
 | 8 | Opacity | Disabled, scrim | Disabled 0.4–0.5 (one value); scrim 0.5–0.6 |
 | 9 | Layering | z-order ladder | dropdown < sticky < drawer/dialog < popover < toast < tooltip |
 | 10 | Motion | Durations, easing, named animations | Durations, easing and token names: [motion.md](motion.md) §2 |
-| 11 | Breakpoints | Content-driven widths | e.g. compact < 600, medium 600–1023, expanded ≥ 1024 px; tablet band 768–1024 ([tablet-rtl-dark.md](tablet-rtl-dark.md)); set by content, not devices |
+| 11 | Breakpoints | Content-driven widths | e.g. compact < 600, medium 600–1023, expanded ≥ 1024 px; tablet band 768–1024 (Part B "Tablet"); set by content, not devices |
 | 12 | Density | Comfortable / compact modes | Row heights e.g. 48 / 36 px; same type scale |
-| 13 | Focus | One focus ring contract | 3 px ring, 2 px offset, focus color with ≥3:1 against adjacent colors [S04]; owner: [component-states.md](component-states.md) |
+| 13 | Focus | One focus ring contract | Value lives in [component-states.md](component-states.md) "Focus" (single owner; do not restate it here) [S04] |
 
 Record which categories are deferred or N/A for the current scope.
 
@@ -260,6 +260,15 @@ Keep reading order and keyboard order coherent after reflow. Test long titles,
 translated strings, empty values, zoom, orientation, sticky headers, footers,
 dialogs, and mobile keyboards for overlap with controls and messages. Do not
 remove required information or recovery actions to make the layout fit.
+
+### Tablet (768–1024px)
+- Navigation: a side nav collapses to an icon rail (tooltips on hover/focus); top navs keep working or fold into a menu.
+- Tables: hide secondary columns (account, dates) before shrinking text; row details open in a drawer. Never shrink below the minimum text size in Part A Typography (14px in tablet tables).
+- Cards: KPI rows go to 2 columns; two-pane layouts stack, list first.
+- Filter bars wrap onto two lines; bulk actions stay visible.
+- Touch targets: project default in [accessibility.md](accessibility.md); support both portrait and landscape; no hover-only actions.
+- Test at 768, 820 and 1024; both orientations.
+- Picture: back-office `previews/tablet/` (820 × 1366).
 
 ### Mobile web composition (≤ 480px) — design it, don't shrink it
 

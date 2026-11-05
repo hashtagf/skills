@@ -1,5 +1,5 @@
 {
-  "_doc": "Seventeen back-office looks. Differences: nav (side | rail | top), tbl (zebra | lines | cards | plain), chip (pill | square | dot), edge (tone | line | strong), density (rowH, fs, pad), radius, font, colour. Used by scripts/backoffice_preview.js. Shape fields: cr (card radius), br (button radius, 999 = pill), fr (field and search radius), nr (nav item radius), av (avatar radius), cb (checkbox radius).",
+  "_doc": "Seventeen back-office looks. Differences: nav (side | rail | top), tbl (zebra | lines | cards | plain), chip (pill | square | dot), edge (tone | line | strong), density (rowH, fs, pad), radius, font, colour. Used by scripts/backoffice_preview.js. Shape fields: cr (card radius), br (button radius, 999 = pill), fr (field and search radius), nr (nav item radius), av (avatar radius), cb (checkbox radius). Status tones: ok, warn, bad, info (waiting on someone, in progress) and neutral (draft, archived, n/a), each [text, tint] at ≥4.5:1; pending is info, not warn — warn is reserved for needs-attention. compact: the operator density (rowH, fs, pad) shown with backoffice_preview.js --density compact.",
   "styles": [
     {
       "id": "calm",
@@ -27,6 +27,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#58655f",
+        "#efefef"
+      ],
       "font": "Instrument Sans",
       "radius": 10,
       "rowH": 52,
@@ -42,7 +50,12 @@
       "fr": 12,
       "nr": 12,
       "av": "50%",
-      "cb": 5
+      "cb": 5,
+      "compact": {
+        "rowH": 40,
+        "fs": 14,
+        "pad": 24
+      }
     },
     {
       "id": "dense",
@@ -70,6 +83,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#5a6272",
+        "#efeff0"
+      ],
       "font": "Inter",
       "radius": 4,
       "rowH": 36,
@@ -85,7 +106,12 @@
       "fr": 4,
       "nr": 4,
       "av": "6px",
-      "cb": 3
+      "cb": 3,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 16
+      }
     },
     {
       "id": "night",
@@ -113,6 +139,14 @@
         "#ff9a93",
         "#3c1d1b"
       ],
+      "info": [
+        "#9ec0ff",
+        "#27344c"
+      ],
+      "neutral": [
+        "#97a1b3",
+        "#30343c"
+      ],
       "font": "Host Grotesk",
       "radius": 8,
       "rowH": 44,
@@ -128,7 +162,12 @@
       "fr": 8,
       "nr": 8,
       "av": "50%",
-      "cb": 4
+      "cb": 4,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 20
+      }
     },
     {
       "id": "contrast",
@@ -156,6 +195,14 @@
         "#8a0f0a",
         "#ffd9d6"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#3a3a3a",
+        "#eeeeee"
+      ],
       "font": "Atkinson Hyperlegible",
       "radius": 2,
       "rowH": 56,
@@ -171,7 +218,12 @@
       "fr": 2,
       "nr": 2,
       "av": "2px",
-      "cb": 2
+      "cb": 2,
+      "compact": {
+        "rowH": 44,
+        "fs": 15,
+        "pad": 24
+      }
     },
     {
       "id": "ledger",
@@ -199,6 +251,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#6a5d4b",
+        "#ece9e0"
+      ],
       "font": "Newsreader",
       "radius": 3,
       "rowH": 44,
@@ -214,7 +274,12 @@
       "fr": 2,
       "nr": 2,
       "av": "4px",
-      "cb": 2
+      "cb": 2,
+      "compact": {
+        "rowH": 32,
+        "fs": 14,
+        "pad": 24
+      }
     },
     {
       "id": "slate",
@@ -242,6 +307,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#586079",
+        "#efeff0"
+      ],
       "font": "Plus Jakarta Sans",
       "radius": 9,
       "rowH": 48,
@@ -257,7 +330,12 @@
       "fr": 10,
       "nr": 12,
       "av": "50%",
-      "cb": 5
+      "cb": 5,
+      "compact": {
+        "rowH": 36,
+        "fs": 13,
+        "pad": 20
+      }
     },
     {
       "id": "forest",
@@ -285,6 +363,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#59685e",
+        "#efeee7"
+      ],
       "font": "Hanken Grotesk",
       "radius": 8,
       "rowH": 48,
@@ -300,7 +386,12 @@
       "fr": 10,
       "nr": 14,
       "av": "50%",
-      "cb": 5
+      "cb": 5,
+      "compact": {
+        "rowH": 36,
+        "fs": 14,
+        "pad": 24
+      }
     },
     {
       "id": "harbor",
@@ -328,6 +419,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#4e5d75",
+        "#eeeff1"
+      ],
       "font": "IBM Plex Sans",
       "radius": 3,
       "rowH": 44,
@@ -343,7 +442,12 @@
       "fr": 3,
       "nr": 3,
       "av": "4px",
-      "cb": 3
+      "cb": 3,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 20
+      }
     },
     {
       "id": "paper",
@@ -371,6 +475,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#5f564a",
+        "#e8e4d9"
+      ],
       "font": "Instrument Sans",
       "radius": 0,
       "rowH": 40,
@@ -386,7 +498,12 @@
       "fr": 0,
       "nr": 0,
       "av": "0",
-      "cb": 0
+      "cb": 0,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 20
+      }
     },
     {
       "id": "mint",
@@ -414,6 +531,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#53695f",
+        "#eef0ef"
+      ],
       "font": "Figtree",
       "radius": 16,
       "rowH": 52,
@@ -429,7 +554,12 @@
       "fr": 18,
       "nr": 999,
       "av": "50%",
-      "cb": 7
+      "cb": 7,
+      "compact": {
+        "rowH": 40,
+        "fs": 14,
+        "pad": 24
+      }
     },
     {
       "id": "graphite",
@@ -457,6 +587,14 @@
         "#ff9a93",
         "#3c1d1b"
       ],
+      "info": [
+        "#9ec0ff",
+        "#263145"
+      ],
+      "neutral": [
+        "#989fa7",
+        "#2e3134"
+      ],
       "font": "Geist",
       "radius": 2,
       "rowH": 40,
@@ -472,7 +610,12 @@
       "fr": 2,
       "nr": 2,
       "av": "2px",
-      "cb": 2
+      "cb": 2,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 16
+      }
     },
     {
       "id": "sunrise",
@@ -500,6 +643,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#6f5848",
+        "#f0eae5"
+      ],
       "font": "Bricolage Grotesque",
       "radius": 12,
       "rowH": 52,
@@ -515,7 +666,12 @@
       "fr": 16,
       "nr": 16,
       "av": "50%",
-      "cb": 6
+      "cb": 6,
+      "compact": {
+        "rowH": 40,
+        "fs": 14,
+        "pad": 24
+      }
     },
     {
       "id": "mono",
@@ -543,6 +699,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#555555",
+        "#eeeeee"
+      ],
       "font": "Libre Franklin",
       "radius": 0,
       "rowH": 40,
@@ -558,7 +722,12 @@
       "fr": 0,
       "nr": 0,
       "av": "0",
-      "cb": 0
+      "cb": 0,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 20
+      }
     },
     {
       "id": "plum",
@@ -586,6 +755,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#5d5275",
+        "#efeff1"
+      ],
       "font": "Outfit",
       "radius": 12,
       "rowH": 48,
@@ -601,7 +778,12 @@
       "fr": 12,
       "nr": 14,
       "av": "50%",
-      "cb": 5
+      "cb": 5,
+      "compact": {
+        "rowH": 36,
+        "fs": 14,
+        "pad": 22
+      }
     },
     {
       "id": "enterprise",
@@ -629,6 +811,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#556070",
+        "#eff0f1"
+      ],
       "font": "Public Sans",
       "radius": 4,
       "rowH": 40,
@@ -644,7 +834,12 @@
       "fr": 4,
       "nr": 4,
       "av": "4px",
-      "cb": 3
+      "cb": 3,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 16
+      }
     },
     {
       "id": "sand",
@@ -672,6 +867,14 @@
         "#8c1d18",
         "#f9dcda"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#66604f",
+        "#ece9e2"
+      ],
       "font": "Albert Sans",
       "radius": 6,
       "rowH": 46,
@@ -687,7 +890,12 @@
       "fr": 8,
       "nr": 8,
       "av": "10px",
-      "cb": 4
+      "cb": 4,
+      "compact": {
+        "rowH": 34,
+        "fs": 14,
+        "pad": 22
+      }
     },
     {
       "id": "canopy",
@@ -715,6 +923,14 @@
         "#a12a22",
         "#fbe0de"
       ],
+      "info": [
+        "#1d4f91",
+        "#e2ecf9"
+      ],
+      "neutral": [
+        "#5a6660",
+        "#f0f1f1"
+      ],
       "font": "DM Sans",
       "radius": 8,
       "rowH": 44,
@@ -730,7 +946,12 @@
       "fr": 8,
       "nr": 10,
       "av": "50%",
-      "cb": 4
+      "cb": 4,
+      "compact": {
+        "rowH": 32,
+        "fs": 13,
+        "pad": 16
+      }
     }
   ]
 }

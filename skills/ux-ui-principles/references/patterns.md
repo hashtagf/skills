@@ -8,39 +8,15 @@ every decorative element.
 
 ## Forms
 
-Ask only for needed information, explain unfamiliar requirements, identify
-optional fields, and allow uncertainty when it is a meaningful answer. Reuse
-already-provided answers within the journey when safe. GOV.UK's question-page
-pattern is a service-context starting point, not a universal instruction to
-split every form. Group fields by the user's decision, not backend payload
-shape; group related fields when users need to compare or edit them together. [S17]
+Fields, labels, validation timing, error summary, Thai data and multi-step forms are
+owned by [forms.md](forms.md); this file keeps only the state rule a form shares with
+every async action:
 
-Use persistent labels, explicit formats and contextual hints; placeholders are
-examples, not the only field name. Choose controls by answer type and data
-constraints. Permit valid international names/addresses rather than imposing
-arbitrary ASCII rules. Keep input on validation failure. Avoid validating
-untouched fields while typing; choose timing that supports recovery without
-interrupting legitimate partial input.
-[S18; timing outside GOV.UK is a project decision]
-Full rules (required/optional marking, placeholders, validation timing): [forms.md](forms.md).
-
-Identify each invalid field and explain the specific problem and the correction
-using the field's terminology. Separate user-correctable validation from service
-outages or ineligibility. [S19] For long forms, pair inline errors with a linked
-error summary when it helps navigation; connect summary links to the affected
-fields and focus the summary after failed submission when using this pattern. [S20]
-
-Preserve valid input after server rejection or connection failure. Explain
-conflicts without overwriting user edits or pretending a retry is harmless.
-For a blocked action, expose the unmet prerequisite or permission reason.
-Do not disclose protected information merely to explain a denied state.
-
-Example: a profile save fails because the network disappears. Keep the edits,
-show that saving failed, and offer retry. Do not reset the form or display
-"Saved" because the client accepted the button click.
-
-Success should identify what was completed and what happens next. Irreversible
-submission: see [Destructive and consequential actions](#destructive-and-consequential-actions).
+Preserve valid input after server rejection or connection failure, and never show
+"Saved" because the client accepted the click. Example: a profile save fails because the
+network drops — keep the edits, say saving failed, offer retry. For a blocked action,
+expose the unmet prerequisite or permission reason without disclosing protected data.
+Irreversible submission: see [Destructive and consequential actions](#destructive-and-consequential-actions).
 
 ## State specification
 

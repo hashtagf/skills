@@ -178,6 +178,18 @@ full information, e.g. a data table or long description. [S86]
 - Every KPI: value, unit, comparison, time window, freshness.
 - Few charts that answer different questions beat many charts of the same metric.
 - Align chart widths and axes when users compare across charts.
+- **Tier sets cadence** (S106): strategic (executives, monthly/quarterly, few KPIs, trend),
+  tactical (managers, weekly, targets and breakdowns), operational (operators, live or
+  minutes, thresholds and the item to act on). Do not mix tiers on one screen.
+- **Every KPI tile has a definition**: formula, source, owner and refresh time in a popover
+  or info icon. Two teams reading "active users" differently is a design defect.
+- **Thresholds** are stated, not decorative: fixed targets where a business rule exists,
+  otherwise a band from history (e.g. ±2σ of the last 30 days); show what the colour means.
+- Pair a system metric with the user-perceived one (CPU with checkout latency).
+- **Data size and chart caps** (S107): render < ~1k rows client-side; 10k–100k rows
+  pre-aggregate on the server; beyond that, query on demand. Per chart: ≤ ~500 points per
+  line series, ≤ ~50 bar categories (else top-N + "อื่นๆ"), ≤ ~1k scatter points (else
+  bin or density); tables show 100–200 rows then paginate or virtualize.
 
 ## Review checklist
 

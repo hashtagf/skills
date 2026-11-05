@@ -494,9 +494,6 @@
       "expected_reads": [
         [
           "review-loop"
-        ],
-        [
-          "scoring-caps"
         ]
       ],
       "must_not_read": [
@@ -607,7 +604,7 @@
         [
           "page-spec",
           "patterns",
-          "tablet-rtl-dark",
+          "visual-system",
           "data-visualization"
         ]
       ],
@@ -1654,9 +1651,6 @@
       "expected_reads": [
         [
           "review-loop"
-        ],
-        [
-          "scoring-caps"
         ]
       ],
       "must_not_read": [
@@ -1780,7 +1774,6 @@
       "expected_reads": [
         [
           "design-quality",
-          "design-quality",
           "review-loop"
         ],
         [
@@ -1799,7 +1792,6 @@
       "prompt": "The Thai headline wraps to four lines on mobile. Fix it.",
       "expected_reads": [
         [
-          "visual-system",
           "visual-system"
         ]
       ],

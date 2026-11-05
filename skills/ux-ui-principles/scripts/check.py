@@ -2,7 +2,7 @@
 """One command for every delivery check on a built page.
 
 Usage:
-  python3 scripts/check.py <page.html> [more.html ...] [--render] [--full]
+  python3 scripts/check.py <page.html> [more.html ...] [--render] [--full] [--admin list|detail|form|dashboard]
 
 Runs, per page:
   script   node scripts/script_check.js   syntax of every script; globals that clash with window (e.g. const top)
@@ -12,6 +12,8 @@ Runs, per page:
   meta     built in                         public pages: title, description, canonical, og:title/description/image,
                                             twitter:card, exactly one h1 (N/A for /admin/ paths, noindex or data-surface="app")
   render   node scripts/render_check.js --fast (with --render; --full drops --fast)  overflow, JS errors, targets, shots
+  admin    node scripts/admin_check.js --type T --states (with --admin T)  numeric columns, disabled reasons, sticky bars,
+                                            one primary action, table above fold, every ?state= rendered and different
   fold     node scripts/fold_check.js (with --render)  primary action above the 390x844 / 1440x900 fold, next section hinted (N/A on app pages)
 
 Prints one line per check (PASS / FLAG / FAIL / ERROR / N/A / MANUAL / NOT RUN) and the first lines of anything that is not a pass.
@@ -64,7 +66,8 @@ def meta_check(page):
 
 
 def main(argv):
-    pages = [a for a in argv if not a.startswith("--")]
+    skip = {argv[i + 1] for i, a in enumerate(argv[:-1]) if a == "--admin"}
+    pages = [a for a in argv if not a.startswith("--") and a not in skip]
     if not pages:
         print(__doc__); return 2
     node = shutil.which("node")
@@ -82,12 +85,16 @@ def main(argv):
             checks.append(("render", [node, os.path.join(HERE, "render_check.js"), page] + ([] if "--full" in argv else ["--fast"]) if node else None))
             fold = os.path.join(HERE, "fold_check.js")
             with open(page, encoding="utf-8", errors="replace") as f:
-                app = is_app_page(page, f.read())
+                app = is_app_page(page, f.read()) or "--admin" in argv   # --admin declares a back-office page
             if app:
                 checks.append(("fold", "n/a"))
             else:
                 checks.append(("fold", ([node, fold, page] if os.path.isfile(fold) else "missing") if node else None))
-        status, lines = meta_check(page)
+        if "--admin" in argv:
+            i = argv.index("--admin")
+            kind = argv[i + 1] if i + 1 < len(argv) else "list"
+            checks.append(("admin", [node, os.path.join(HERE, "admin_check.js"), page, "--type", kind, "--states"] if node else None))
+        status, lines = ("N/A", ["--admin: back-office page, metadata not required"]) if "--admin" in argv else meta_check(page)
         if status == "FLAG":
             worst = 1
         print(f"  {status:<8} meta")

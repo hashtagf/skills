@@ -117,6 +117,13 @@ Preview changes | Import status + result
 
 **Acceptance example:** Check mapping, duplicate policy, resumable recovery and rejected-row reporting.
 
+**Specifics (S103):** a downloadable template with one example row; columns auto-matched by
+header with required fields marked and unmatched ones listed; an explicit policy for rows
+that already exist (create only / update / skip); large files run in the background with
+progress and a notification, so the user can leave; the result reads "1,180 created · 12
+updated · 8 failed" with **Download failed rows** (original columns + an error column) and a
+link to the imported records.
+
 **Customize:** Substitute real content, labels and permission rules; apply existing
 tokens and the actual data model. Record why this structure serves the user task.
 
@@ -166,3 +173,32 @@ Category list | Section heading + description
 **Acceptance example:** Change a limit, navigate away, and see an unsaved-changes warning; save, then find the change in the audit log.
 
 **Customize:** Decide instant vs submission per group from dependencies and consequence; record it in the design context.
+
+## A08: Worklist (queue to clear)
+
+**Task:** Clear a queue of known items assigned to me or my team, oldest or most urgent first.
+
+**Wide layout:**
+
+```text
+Tabs: My items (n) · Awaiting me (n) · Overdue (n) · Done today   | Saved view
+Row: subject · amount/key fact · age · SLA due (relative + absolute) · one primary action
+Selected row → detail panel or page; after the decision, the next item opens
+```
+
+**Compact behavior:** One item per card with the key fact and age; the decision opens a
+full-screen detail; Back returns to the same scroll position.
+
+**Applicable states:** Queue empty ("ไม่มีงานค้าง" + what arrives next); item taken by
+someone else (conflict, refresh); SLA breached (status with the SLA it breaches); no
+permission for one item (waiting-for text, not a disabled row).
+
+**Avoid / adapt:** Avoid building a queue as a search page (list report) that makes people
+filter for their own work; avoid losing list position after a decision.
+
+**Acceptance example:** Approve the second item; the third opens next, the counts update,
+and Back shows the list at the same position.
+
+**Customize:** Set the tabs from the role's real queues and the SLA from the business rule;
+record both in DESIGN.md. Worklist vs list report: [back office](../../references/back-office.md) Group C.
+
