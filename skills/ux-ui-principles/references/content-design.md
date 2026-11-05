@@ -4,6 +4,9 @@ Words are interface. Labels, buttons, help, errors and notifications decide
 whether people understand what will happen. Source IDs resolve in
 [sources.md](sources.md). Error-recovery behavior is in [patterns.md](patterns.md).
 
+Marketing and landing-page copy (headlines, CTAs, proof) is in
+[marketing-copy.md](marketing-copy.md).
+
 ## Principles
 
 | Principle | Apply | Example |

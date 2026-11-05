@@ -7,7 +7,222 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-05
+
+### Changed (consistency audit)
+- `ux-ui-principles`: four-agent audit of 53 references found 92 conflicts; fixed. One owner per rule
+  (gate-tiers for rule classes, motion.md for durations and dials, design-foundations for type and breakpoints,
+  review-loop for the score rubric, design-workflow for the fix-round budget); duplicated rules now point to the
+  owner; hard-coded counts replaced by pointers; shared terms defined in SKILL.md; script flags and thresholds
+  aligned (`export_tokens.py` motion tokens, Thai line-height 1.55, per-language fonts in `slop_check.py`).
+
+### Added (tokens, soft directions, dashboard study)
+- Back-office `advanced` screen (editable grid, drag reorder, color picker, rich text, mention/tag, notification centre,
+  onboarding tour, autosave form, password recovery, interaction-state matrix), tablet mode (`--width 820`),
+  `--rtl` mirroring, and `site_preview.js --dark` for customer pages; rules in `references/advanced-components.md`
+  and `references/tablet-rtl-dark.md`.
+- `ux-ui-principles`: **tokens to code** (`scripts/export_tokens.py`, `references/tokens-export.md`):
+  any direction becomes `tokens.css`, a Tailwind v4 theme and shadcn variables; dark theme derived,
+  every pair checked for AA, fill and text accents split, status colors derived. All 58 directions pass.
+- 8 soft premium/playful directions (Petal, Linen, Opal, Honey, Mochi, Fjord, Velvet, Sorbet); the library now
+  has 58, with a rule that every set of three recommendations includes a non-square one.
+- Back-office `status` preview (uptime strips, resource cards, ring meters, ranked bars) and
+  `assets/21st-dashboard-study.md`.
+- Reveal-on-scroll rule in `motion.md`; `slop_check.py` flags `reveal-hides-content` and notes `all-square`;
+  `render_check.js` scrolls before full-page shots and ignores off-screen skip links.
+
+### Added (from the agency landing build: Thai + English, themes, other skills)
+- `ux-ui-principles`: **direction library** (`references/direction-library.md`):
+  58 named directions (50 at first release, 8 soft ones added later) with idea, material, fit, avoid-for, risk and
+  optional preview slugs; procedure to show pictures (never names only), offer
+  the next set on "more", and choose for company marketing.
+- SKILL.md "Working with other design skills": which skill for which job
+  (Hallmark, Taste Skill, Impeccable, Interface Design, shadcn) and a conflict
+  order so one skill's house rules (no shadows or hairlines) do not fail a
+  chosen direction that needs them; never edit a checker to pass it.
+- Thai with Latin display faces (design-foundations): pairing table, per-language
+  font switching, no tracking or uppercase for Thai, inline-block chunks so Thai
+  headings do not break mid-word.
+- Open-collection photographs (visual-assets rung 1b): licences, footer credit,
+  honesty, one treatment, loading rules.
+- Two-language static pages (i18n-performance): `<span lang>` pairs, toggle
+  behaviour, font and line-count checks.
+- Design workflow phase 5 "Keep the before": copy files and take before-shots so
+  a redesign is reversible; IMPROVE mode row updated.
+- `scripts/direction_preview.js` and `assets/directions/` (directions.json +
+  50 rendered previews and group sheets): our own pictures of directions, drawn
+  from data on one neutral sample (inspired by the Hallmark theme set; tokens and
+  faces are our approximations, not copies of its files); `--thai`, `--brief`, `--sheet`, `--ids`, `--group`.
+  `scripts/_pw.js` shares Playwright discovery with `render_check.js`.
+- `scripts/backoffice_preview.js` and `assets/backoffice/` (styles.json + 26
+  sheets and 32 single previews): ten back-office screens (A01–A07, D01, D03, D04)
+  in sixteen looks that differ in nav (side/rail/top), table style, status tag,
+  edges, density and colour, on one payments sample, with `--thai`, `--sheet`,
+  `--singles`; back-office.md "Choosing density and tone from pictures".
+  Now 21 screens: adds inbox (P01), workflow board (P02), create/edit form,
+  analytics (D02), comparison (D05), heatmap (D06), sign-in, 403, 404, plus a
+  full-page `components` sheet (every component with states) and a `states`
+  sheet (loading, empty, error, no permission, bulk partial failure, offline).
+  `--mobile` adds a 390 x 844 phone set (cards, FAB, bottom nav with badge,
+  sticky decision bar, swipe action, drawer, filter bottom sheet, states and a
+  mobile component sheet) in all sixteen looks.
+  Dashboard polish from the 21st.dev study: soft layered card shadows and a
+  faint ground glow, an emphasised gradient KPI card, KPI icon chip + delta pill
+  + gradient sparkline, rounded gradient bars and gradient area lines, a donut
+  with legend, segmented range control, avatar stack, workspace switcher,
+  section label, month-end progress card and count tabs above the table.
+  Previews fill the viewport with realistic data, one inline icon set, charts
+  with axes/gridlines/average/peak label, sparklines with deltas, selection,
+  row actions, pager, breadcrumbs and a user block.
+- Shape language in previews: directions gain `btn`, `corner`, new curved arts
+  (blob, arch, wave, tilt, dots, diag, rings, pill) and new heroes (giant, full,
+  stagger, arch); back-office looks gain per-element radii (cards, buttons,
+  fields, nav items, avatars, checkboxes). Previews regenerated.
+- `scripts/site_preview.js` and `assets/site/previews/`: 34 customer pages
+  (M01 to M05, C01 to C05, E01 to E05, P03 to P05, U02 to U05, B01 to B05 plus
+  about, blog, case study, policy, order confirmation), a landing-sections sheet
+  and a customer component sheet, in six looks (`--all` for 50), with `--thai`.
+  `references/preview-coverage.md` maps all 43 layout blueprints to pictures and
+  lists what is still not covered.
+- `assets/21st-study.md`: observations from browsing 21st.dev (12K components,
+  353 templates, 962 themes): what separates strong pieces (imagery, type over
+  the picture, hero compositions, backgrounds with depth, proof details,
+  emphasised pricing tier, galleries with depth, dashboards) and what it means
+  for our previews. `site_preview.js` gains `--pages hero` and six hero
+  compositions (fan, ring, accordion, overlay, product mock, centered) with mesh
+  and grain backgrounds, announcement pill, avatar group with rating and a
+  placeholder logo cloud; `home` uses them.
+- Preview images are generated, not committed: `skills/*/assets/*/previews/` is
+  git-ignored (about 30 MB) and `scripts/build_previews.js` rebuilds all sets
+  (`--only directions|site|backoffice|mobile`). The skill stays small (about
+  2 MB of text, data and scripts); agents generate only the pictures they need.
+- Evals 16 and 17: bilingual agency landing and a mid-build theme switch.
+
+### Changed (scripts)
+- `render_check.js`: reports images that failed to load (lazy images forced
+  eager so full-page shots are not blank), text touching the viewport edge, and a
+  note when an h1/h2 wraps to 3+ lines; new `--toggle "<selector>"` repeats the
+  whole viewport matrix after clicking a language or theme switch.
+- `contrast.py --css`: reads `.css` files and follows local `@import` / `<link>`
+  stylesheets; resolves `oklch()`, `rgb()`, `hsl()` and `var()`; understands
+  `--color-ink` / `--color-paper` names (previously found 0 pairs on such pages).
+- `slop_check.py`: language-variant spans (`<span lang>`) no longer count as
+  styled accent words.
+
+### Added (study of Hallmark, Taste Skill, Impeccable, Interface Design, shadcn)
+- `ux-ui-principles`: references `gate-tiers`, `page-anatomy-by-job`, `scoring-caps`,
+  `app-screen-rules`, `shadcn-rules`; new sections in `design-direction` (domain
+  exploration, token names, swap/token/signature tests), `visual-craft` (bans vs
+  refusals, finish details), `motion` (mechanics), `visual-assets`, `design-workflow`
+  (questioning cadence). Eval 16.
+
+### Added (build recipes)
+- `ux-ui-principles`: `references/build-recipes.md` — surface modes (persuade /
+  operate / read / experience) with shared tokens, no-JS live demo, explicit
+  hero grid placement, honest placeholders, `mailto:` contact, headless
+  verification, back-office mock before backend code, theme-offer etiquette.
+  Wired into SKILL.md catalog and design-workflow phases 4, 5, 7. Eval 15.
+
+### Fixed (from user testing: no interview, no motion, weak color, odd mobile)
+- `ux-ui-principles`: SKILL.md "Defaults that must not be skipped" for public
+  pages and new looks — interview before code, palette, motion baseline,
+  mobile composition, render 1440 + 390. A background session no longer
+  counts as "user away".
+- Color: OKLCH recipe for attractive palettes and 8 contrast-checked starter
+  palettes (light + dark) keyed to style keywords.
+- Motion: baseline per page type; "no motion" needs a reason.
+- Mobile: concrete mobile web composition rules (≤ 480px).
+- `render_check.js` phone checks (targets < 44px, fields < 16px, text < 14px,
+  > 1 fixed/sticky); `slop_check.py` notes > 2 saturated hues, pure black and
+  pages with no motion. Form snippet sized for phones. Eval 14.
+
+### Added (motion & direction)
+- `ux-ui-principles`: motion reference — level per motion dial, ten motion
+  types with durations, website choreography, reduced motion, performance,
+  tooling (CSS/View Transitions first), motion spec template and checks;
+  wired into phases 3, 4, 5 and 7.
+- `ux-ui-principles`: design direction — Liquid glass added (18 styles),
+  Thai/English style keywords → style base + dials, steering vocabulary, and a
+  ≤3-question direction interview (feel, references, energy) for new looks.
+- `render_check.js`: flags text left at opacity 0 on the first screen;
+  `--reduced-motion` also flags animations still moving and content never
+  revealed. Evals 12–13.
+
+### Changed
+- `ux-ui-principles`: `render_check.js` loads the page once and switches
+  widths/color schemes in place (~2.5× faster on a long page: 11.4 s → 4.6 s);
+  overflow culprit scan runs only when the page overflows; new `--fast`,
+  `--viewport-shots`, `--timeout`; load errors reported once.
+  `slop_check.py` icon-card rule ignores table rows and reports one finding.
+- `ux-ui-principles`: `render_check.js` finds Playwright and any installed
+  Chromium/headless shell or system Chrome itself (no version-matched download),
+  wraps HTML fragments automatically, adds `--doctor`, and exits 3 with
+  "NOT TESTED" at once when nothing is available; docs forbid installing or
+  sleep-polling browsers mid-task.
+- `ux-ui-principles`: forms — placeholders now have positive rules (example
+  values for non-obvious formats, Thai examples, ≥ 4.5:1, never the only label)
+  instead of only a prohibition; new §6b implementation contract with a tested
+  vanilla pattern (rules in markup, own messages on blur/submit, error summary
+  with focus, pending submit, server errors mapped, input kept). Forms are now
+  mandatory in phases 4, 5 and 7 (empty submit, invalid value, request
+  failure); new hard gate for forms without validation; `slop_check.py` flags
+  forms without validation or messages and format fields without an example;
+  eval 11.
+- `ux-ui-principles`: form layout and error-state rules from a real defect —
+  multi-column only for related pairs with top alignment and downward-growing
+  errors, one control height, required/optional marking, border + icon +
+  message driven by `[aria-invalid]`, Thai-keyboard-in-Latin-field message.
+  `render_check.js` now flags unequal control heights, misaligned rows,
+  invalid fields styled like valid ones, and spaces/over-wide glyphs before
+  punctuation.
+
 ### Added
+- `ux-ui-principles`: phased design workflow as the skill's spine — phases
+  0–8 (inspect, understand, architect, explore, design, implement, critique,
+  verify, deliver) with the references to use, ask points and exit criteria
+  per phase (`references/design-workflow.md`); route-by-mode table (adds
+  ANSWER and BUILD modes); when-to-ask rules incl. away/defaults mode;
+  framework process mapped to phases; evals 9–10.
+- `ux-ui-principles`: ideas from Hallmark, Impeccable, Hue, Taste Skill and
+  Interface Design (as described in a user-supplied guide; sources S96–S101,
+  not independently verified) — structural slop, one strong idea, variety
+  across products vs consistency within one, respect existing design
+  (design-quality §2b); brand extraction procedure (design-memory §3b);
+  2–3 named directions before build (design-direction §7); `scripts/slop_check.py`
+  (deterministic template-look heuristics) and `scripts/design_md_check.py`
+  (DESIGN.md validator); evals 7–8.
+- `ux-ui-principles`: design direction reference — eight design dimensions,
+  page pattern chosen by the user's primary question (16 patterns), layout
+  compositions, visual style catalog with one-base/one-accent mixing rule, and
+  variance/motion/density dials with presets per product context.
+- `ux-ui-principles`: design memory reference — Phase 0 project inspection,
+  source-of-truth precedence and docs-vs-code conflict handling, DESIGN.md
+  template with rationale, anti-patterns and decision log, specialist-skill
+  routing (only when actually available), reuse before invent.
+- `ux-ui-principles`: review loop reference — 14 refinement verbs with Thai
+  complaint mapping, critique format, visual and UX scorecards (internal
+  rubric), hard gates that block delivery, state coverage list. New REFINE
+  mode, design context card, and `evals/evals.json` (6 benchmark prompts).
+- `ux-ui-principles`: visual benchmarks reference — measured type (weight,
+  tracking and line-height by size, scale ratio by intent, named text styles),
+  tone, spacing tiers, radius camps, elevation, motion, content realism, Thai
+  metrics, presets and a craft pass; evidence files for 35 measured live sites
+  and a gallery study (18 curated.design sites, 18 Dribbble shots, 14 Behance
+  projects, 19 21st.dev templates). Adapts selected rules from
+  elayadesign/ai-design-skills (MIT).
+- `ux-ui-principles`: navigation grouping reference — grouping methods, counts,
+  order, labels, settings scope ladder, permissions, mega menus, mobile tabs,
+  anti-patterns and Thai/English before-after menus, from 21 products' public
+  navigation (nav study); sources S94 (Material 3 navigation bar) and S95
+  (Apple HIG tab bars).
+- `ux-ui-principles`: marketing copy reference — headline types, subheadline
+  jobs, CTA and risk-reducer wording, proof placement, section copy, formulas,
+  Thai marketing register and filler → specific rewrites, from 30 public pages
+  (copy study).
+- `ux-ui-principles`: "Displaying values" in data visualization — empty vs zero
+  vs unknown, number precision and abbreviation, deltas and percentage points,
+  relative vs absolute time, truncation of IDs, detail pages, KPI tiles.
+
 - `ux-ui-principles`: self-contained design coverage — design foundations
   (tokens, type, spacing, sizing, radius, elevation, motion, breakpoints,
   density, focus, theming), component selection and usage for ~60 components,
@@ -29,6 +244,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dark, palette variants) from a page and checks role and naming-pattern pairs.
 
 ### Changed
+- `ux-ui-principles`: reference index in SKILL.md regrouped by framework level
+  with one entry per file and a visual-file routing table; description trimmed
+  to the 1024-character limit; display line-height note in design foundations;
+  removed README link to the undistributed `evals/` folder.
 - `ux-ui-principles`: no longer depends on `design-system-builder` or
   `figma-cli`; all routing points to the skill's own references.
 

@@ -8,7 +8,31 @@ current; link to detailed documents instead of copying them.
 
 Create or update it only when the user asks for project documentation or the
 host workflow owns such a file. Otherwise state the assumed context in the
-answer.
+answer. Look and rationale (personality, dials, anti-patterns) belong in
+`DESIGN.md` — see [design memory](../references/design-memory.md); keep one
+source per fact.
+
+## Design context card — per task
+
+Put this at the top of every DESIGN or ARCHITECT answer, filled from evidence
+or marked *assumed*:
+
+| Field | Example (assumed) |
+|---|---|
+| Product type | Payment back office |
+| Target role | Finance operator |
+| Primary job | Review and approve payouts |
+| Main action | Approve / reject |
+| Risk → rigor tier | High → Critical |
+| Data volume / density | High · density 8/10 |
+| Main device | Desktop |
+| Page pattern · composition | Data table + master–detail · sidebar workspace |
+| Style · dials | Minimal, calm, precise · variance 2 · motion 2 |
+| Success metric · guardrail | Review time · error / reversal rate |
+| Idea sentence · signature element (public pages) | One ledger is the page's main visual device · ruled rows as dividers |
+| Waivers (Reflex rule class, one-line reason each) | None — see [gate tiers](../references/gate-tiers.md) §1 |
+
+## Project file template
 
 ```markdown
 # Design context: <product>

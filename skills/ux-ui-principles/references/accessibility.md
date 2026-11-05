@@ -21,9 +21,10 @@ A and AA criteria, entire pages, and complete processes. [S02]
 | 3.3.8 Accessible Authentication (Minimum) | AA | Avoid cognitive-function tests unless an allowed alternative, assistance mechanism, or exception applies. Support password managers and paste; inspect the whole login and recovery flow. | S12 |
 | 4.1.3 Status Messages | AA | Expose qualifying status messages programmatically without requiring focus to move. Choose appropriate roles/live regions; do not make every update an interrupting alert. | S13 |
 
-Larger practical touch targets may improve motor accessibility, but a 44×44
-design preference is not the AA 24×24 rule. Verify platform-specific guidance
-for native controls rather than translating units mechanically.
+**Touch targets:** the WCAG floor is 24px. The project default for web mobile is
+≥44px, form controls 48px; render_check's 44px check is a project preference, not
+WCAG. Verify platform-specific guidance for native controls rather than
+translating units mechanically.
 
 ## Semantics and keyboard checks
 

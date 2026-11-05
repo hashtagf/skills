@@ -100,6 +100,8 @@ substitute for these, and fake urgency or social proof erodes trust.
 
 ## Review checklist (Critical tier)
 
+Standard pages that collect personal data, consent or sessions use this checklist too and answer page-spec row 14.
+
 - Consequential actions are reversible, checked or confirmed, with specific labels.
 - Confirmation shows the exact data being authorized.
 - Duplicate submission and unknown outcomes are handled.

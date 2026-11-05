@@ -11,8 +11,8 @@ Product · UX · UI · Interaction · Design Engineering · Validation
 | ระดับ | ครอบคลุม | เอกสาร |
 |---|---|---|
 | 1. Product Strategy & Research | ปัญหา หลักฐาน role ตัวชี้วัดความสำเร็จ ข้อจำกัด | [Product discovery](references/product-discovery.md) |
-| 2. Experience Architecture | Journey, flow, IA, navigation, URL, permission flow | [Experience architecture](references/experience-architecture.md) |
-| 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing | [Back office](references/back-office.md), [Content design](references/content-design.md), [Patterns](references/patterns.md) |
+| 2. Experience Architecture | Journey, flow, IA, navigation, การจัดกลุ่มเมนู, URL, permission flow | [Experience architecture](references/experience-architecture.md), [Navigation grouping](references/navigation-grouping.md) |
+| 3. Page & Interaction | ประเภทหน้า layout state การกู้คืน UX writing, copy การตลาด, การแสดงค่าข้อมูล | [Back office](references/back-office.md), [Content design](references/content-design.md), [Marketing copy](references/marketing-copy.md), [Patterns](references/patterns.md) |
 | 4. Visual & Design System | tokens, type, spacing, component, state, focal point, color, icon | [Design foundations](references/design-foundations.md), [Components usage](references/components-usage.md), [Component states](references/component-states.md), [Visual craft](references/visual-craft.md) |
 | 5. Quality & Engineering | Accessibility, i18n, performance, security/privacy UX | [Trust/Security/Privacy](references/trust-security-privacy.md), [i18n & performance](references/i18n-performance.md) |
 | 6. Validation & Improvement | metric, instrumentation, A/B, design QA, รอบปรับปรุง | [Measurement](references/measurement.md), [Validation](references/validation.md) |
@@ -30,6 +30,23 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 **Design context กลาง:** [template](assets/design-context.md) สำหรับไฟล์เดียวของโปรเจกต์
 ที่เก็บ role, คำศัพท์, ชื่อ status, tokens และ pattern ที่ตัดสินใจแล้ว
 ให้ทุกงานออกแบบ พัฒนา และรีวิว ใช้ข้อมูลชุดเดียวกัน
+
+## Workflow การออกแบบ (phase 0–8)
+
+สกิลทำงานตาม phase: Inspect → Understand → Architect → Explore → Design → Implement → Critique → Verify → Deliver
+แต่ละ phase ระบุว่าทำอะไร ใช้เอกสารไหน **ต้องถาม user ตอนไหน** และจบ phase เมื่อไร
+แต่ละ mode (ANSWER, DISCOVER, ARCHITECT, DESIGN, BUILD, AUDIT, IMPROVE, REFINE) ใช้เฉพาะ phase ที่จำเป็น
+
+| ถาม user เมื่อ | ไม่ถาม (ตัดสินใจเองแล้วติดป้าย assumed) |
+|---|---|
+| ไม่รู้ role หรืองานหลัก (Standard ขึ้นไป) | spacing, ข้อความร่าง, เลือก component, ชื่อเมนู |
+| กฎธุรกิจงาน Critical: ใครอนุมัติ, วงเงิน, ค่าธรรมเนียม, ย้อนกลับได้ไหม | สิ่งที่หาได้เองจาก repo หรือไฟล์ที่แนบมา |
+| เลือก direction ของหน้าตาใหม่ | composition ของหน้าทำงานภายใน (เลือกจาก task success) |
+| ขยาย scope, เพิ่ม dependency, เปลี่ยน token ทั้งระบบ, เขียนเอกสารโปรเจกต์ | รายละเอียดการ implement ภายใน scope |
+| hard gate ไม่ผ่านและแก้ใน scope ไม่ได้ | การ critique (แก้เองใน scope) |
+
+ถามครั้งละไม่เกิน 3 ข้อ และทุกข้อมีค่าแนะนำ ถ้า user ไม่อยู่หรือบอกให้ใช้ค่าเริ่มต้น จะไม่หยุดถาม แต่ใช้ค่าแนะนำแล้วสรุป "Decisions to confirm" ไว้ท้ายงาน
+รายละเอียด: [Design workflow](references/design-workflow.md)
 
 ## หัวข้อเพิ่มเติม (4 พ.ย. 2569)
 
@@ -50,9 +67,17 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | การสร้างและตรวจชุดสี: role ก่อนค่าสี, สีสถานะคงที่, contrast สองโหมด | [Color palette](references/color-palette.md) |
 | การตรวจหน้าที่ render จริง + script `render_check.js` และ `contrast.py` (`--css` ตรวจ token ทุกธีมจากไฟล์หน้าเว็บอัตโนมัติ) | [Render verification](references/render-verification.md) |
 | ตัวอย่างระบบหลังบ้าน PayOps 4 หน้า + SkillMap (skill matrix) + layout ใหม่ A06 Audit log, A07 Settings, D06 Matrix/heatmap | [Worked examples](assets/layouts/worked-examples-back-office.md) |
+| ทิศทางการออกแบบ: แยก 8 มิติ, เลือก page pattern จากคำถามของผู้ใช้, layout composition, คลัง visual style + กติกาผสม, dial variance/motion/density | [Design direction](references/design-direction.md) |
+| ความจำด้านดีไซน์: ตรวจโปรเจกต์ก่อนออกแบบ, ลำดับ source of truth, template DESIGN.md พร้อมเหตุผลและ anti-pattern, เลือก specialist skill เฉพาะที่ติดตั้งจริง | [Design memory](references/design-memory.md) |
+| แนวคิดจาก Hallmark / Impeccable / Hue / Taste / Interface Design: structural slop และ one strong idea, สกัดภาษาดีไซน์จากแบรนด์, เสนอ 2–3 direction ก่อนสร้าง, script `slop_check.py` ตรวจหน้าตาแบบ template และ `design_md_check.py` ตรวจ DESIGN.md | [Design quality](references/design-quality.md) §2b, [Design memory](references/design-memory.md) §3b, [Design direction](references/design-direction.md) §7 |
+| **ค่าเริ่มต้นห้ามข้าม (หน้าเว็บสาธารณะ / หน้าตาใหม่):** interview ก่อนเขียนโค้ด → palette จาก keyword → motion baseline → mobile ที่ออกแบบสำหรับ 390px → render ดู 1440 + 390 | [SKILL.md](SKILL.md) |
+| Palette: สูตร OKLCH (neutral ย้อมสีเดียวกับแบรนด์, accent เดียว, ไม่เกิน 2 hue, 70/20/10) + palette ตั้งต้น 8 ชุดตาม keyword ที่ตรวจ contrast ผ่านแล้ว 96/96 | [Color palette](references/color-palette.md) |
+| Mobile web: gutter, header, hero, ขนาดตัวอักษร, section, grid, ตาราง, พื้นที่กด, sticky, รูป | [Visual composition](references/visual-composition.md) |
+| Motion ของเว็บและแอป: ระดับตาม dial, 10 ประเภท, ลำดับการเคลื่อนไหวบนหน้าเว็บ, reduced motion, performance, motion spec, ตรวจด้วย `render_check --reduced-motion` | [Motion](references/motion.md) |
+| Style 18 แบบ, keyword ภาษาไทย/อังกฤษ → style + dial, interview สั้น 3 ข้อ (feel, reference, energy) สำหรับหน้าตาใหม่ | [Design direction](references/design-direction.md) §4, §8, §9 |
+| รอบรีวิว: คำสั่งปรับงาน (critique, polish, bolder, quieter, distill ฯลฯ), scorecard visual/UX, hard gate ที่ห้ามส่งงาน | [Review loop](references/review-loop.md) |
 | Signal budget (สัญญาณต่อ element ไม่เกิน 2) และตารางวินิจฉัยคำติ "ดูยาก / สีดูยาก / รก / ไม่สวย" | [Visual craft](references/visual-craft.md) |
 | กติกา heatmap / matrix: ramp สีอ่อน ตัวอักษรสีเดียว ไม่ใช้ความจางแทนสถานะ | [Data visualization](references/data-visualization.md) |
-| ชุดทดสอบการเรียกใช้สกิลและผลลัพธ์ | [Evals](evals/README.md) |
 
 **หมายเหตุการเรียกใช้:** ผลทดสอบพบว่าคำถามเชิงขอคำแนะนำมักถูกตอบตรง ๆ โดยไม่โหลดสกิล
 ให้เรียก `/ux-ui-principles` โดยตรงเมื่อต้องการใช้กรอบนี้แน่นอน
@@ -82,6 +107,7 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | Workflow และขอบเขตการใช้งาน | [SKILL.md](SKILL.md) |
 | Nielsen heuristics, mental model, signifier, Fitts, Hick–Hyman, IA | [Interaction](references/interaction.md) |
 | Hierarchy, typography, grouping, responsive และข้อความไทย | [Visual](references/visual.md) |
+| ค่าวัดจริงด้านภาพ: น้ำหนัก/tracking/line-height ตามขนาด, อัตราส่วน type, โทนสี, spacing 3 ชั้น, ค่าย radius, motion, ความสมจริงของ content, ค่าภาษาไทย, preset และ craft pass — จาก 35 เว็บจริง + curated.design 18 + Dribbble 18 + Behance 14 + website templates | [Visual benchmarks](references/visual-benchmarks.md) · [Site measurements](assets/site-measurements.md) · [Gallery study](assets/gallery-study.md) |
 | WCAG 2.2 ระดับ A/AA/AAA, ข้อยกเว้น, keyboard และ modal | [Accessibility](references/accessibility.md) |
 | Forms, state matrix, recovery, navigation, dashboard และความเร็ว | [Patterns](references/patterns.md) |
 | Do / Don't สำหรับ flow และหน้าจอ พร้อมเหตุผลและวิธีตรวจ | [Do / Don't](references/do-and-dont.md) |

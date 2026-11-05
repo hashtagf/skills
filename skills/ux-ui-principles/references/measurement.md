@@ -55,7 +55,7 @@ planning rules below are this skill's recommendations.
 
 ## Design QA — does the build match the design?
 
-Run before release for Standard and Critical tiers.
+Run before release for Standard and Critical tiers. Required at Standard: Content through Accessibility (the Standard verification in [framework.md](framework.md)). Performance and Analytics are required at Critical, and at Standard where the page spec has a performance row or outcome metric.
 
 | Area | Check |
 |---|---|

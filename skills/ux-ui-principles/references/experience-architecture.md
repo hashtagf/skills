@@ -30,6 +30,10 @@ the product is still hard to use if pages do not connect. Source IDs resolve in
 
 ## Navigation model
 
+How to group, order and label the menu itself (counts, depth, settings,
+mobile tabs, worked examples) is in [navigation-grouping.md](navigation-grouping.md).
+
+
 | Element | Rule | Check |
 |---|---|---|
 | Global navigation | Top-level sections reflect major user goals; current section is indicated programmatically and visually | Each page highlights exactly one section; screen reader announces current page |
@@ -46,8 +50,7 @@ the product is still hard to use if pages do not connect. Source IDs resolve in
   `/customers/C-10392/withdrawals`.
 - Encode list state that users share in query parameters:
   `/withdrawals?status=pending&sla=overdue&sort=age`.
-- Do not put secrets, tokens or personal data in URLs; they leak into history,
-  logs and referrers. (Security detail: [trust-security-privacy.md](trust-security-privacy.md).)
+- No secrets, tokens or personal data in URLs: see [trust-security-privacy.md](trust-security-privacy.md).
 - Changing a URL scheme needs redirects for existing bookmarks.
 
 ## Flows across pages

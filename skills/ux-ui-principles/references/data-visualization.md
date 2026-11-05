@@ -1,7 +1,8 @@
 # Data visualization
 
 Charts exist to answer a question someone will act on. Start from the question,
-then choose the form. Source IDs resolve in [sources.md](sources.md). Dashboard
+then choose the form. Values in tables, cards and detail pages (empties,
+numbers, deltas, dates, truncation) are covered in "Displaying values". Source IDs resolve in [sources.md](sources.md). Dashboard
 page structure is in [back-office.md](back-office.md); color in [color-palette.md](color-palette.md).
 
 ## Start from the question
@@ -11,7 +12,7 @@ page structure is in [back-office.md](back-office.md); color in [color-palette.m
 | Change over time | Line, area (single series), column for few periods | Pie; many overlapping lines |
 | Magnitude / comparison | Bar (horizontal for long labels), dot plot | 3D bars, radial bars |
 | Ranking | Ordered bar, lollipop | Unordered bars |
-| Part-to-whole | Stacked bar (few parts), 100% bar, treemap; pie only for 2–3 parts | Pie with many slices; donut with a big number hiding the parts |
+| Part-to-whole | Stacked bar (few parts), 100% bar, treemap; pie only for 2–3 parts | Pie with many slices; donut with a big number hiding the parts (a donut is allowed for 2–5 parts with a legend carrying label, value and percent) |
 | Deviation from target | Diverging bar, line with target band | Separate charts for actual and target |
 | Distribution | Histogram, box plot, strip plot | Averages alone |
 | Correlation | Scatter, connected scatter | Dual-axis lines implying causation |
@@ -71,6 +72,77 @@ legibility. These rules come from a skill-matrix prototype that users found
 Data tables and matrices may scroll in two dimensions under the WCAG reflow
 exception; keep that scroll inside the table region, not the page. [S05]
 
+## Displaying values (tables, cards, detail pages)
+
+Most data is read as values, not charts. These are project recommendations;
+locale formats are in [i18n-performance.md](i18n-performance.md).
+
+**Empty is not one state.** Use distinct, consistent displays and explain them
+once (legend, tooltip or help text):
+
+| Situation | Display | Not |
+|---|---|---|
+| Real zero | `0`, `฿0.00` | `—` |
+| Not yet entered / not provided | `—` (with accessible name "ไม่ได้ระบุ") or "ยังไม่ระบุ" | `0`, blank cell |
+| Not applicable to this row | "ไม่เกี่ยวข้อง" or `—` with a column note | `0` |
+| Unknown / not measured | "ไม่ทราบ" | `0`, `—` silently |
+| Still loading | skeleton in the cell size | `0` that later jumps |
+| Hidden by permission | "ไม่มีสิทธิ์ดู" or masked `****4821` | an empty cell that looks like no data |
+| Failed to load | "โหลดไม่สำเร็จ [ลองใหม่]" | `—` |
+
+**Numbers**
+- Precision follows the decision: money to the satang in transactions, whole
+  baht in summaries; rates to 1 decimal unless smaller changes matter.
+- Same decimals within a column; right-align; tabular figures.
+- Units and currency in the column header or label ("ยอด (฿)"), not repeated in
+  every cell, unless cells mix units.
+- Abbreviate only in summaries and charts, never where users copy or reconcile:
+  `12.5K`, `1.2M`; Thai `1.2 ล้าน`. Avoid mixing หมื่น/แสน units in business UI.
+  Show the exact value on focus/hover **and** in the detail view.
+- Negative numbers with a true minus `−1,250` (or accounting brackets where the
+  audience expects them), plus a word or icon when the sign carries meaning.
+
+**Change and comparison**
+- A delta states its base and period: `+12.4% เทียบ 7 วันก่อน`.
+- Distinguish percent from percentage points: conversion 3.1% → 3.4% is
+  `+0.3 pp` (`+9.7%` relative). Say which.
+- Color a delta by meaning (good/bad for this metric), not by direction; keep
+  the sign and arrow so it reads without color. Rising refunds are bad.
+- Small bases make large percentages: show counts beside rates (`50% (2/4)`).
+
+**Dates and times**
+- Relative time for recent activity in feeds and queues ("5 นาทีที่แล้ว"), with
+  the absolute timestamp available on focus/hover and in detail; switch to
+  absolute after ~7 days.
+- Absolute timestamps with seconds and time zone for audit logs, payments,
+  legal records and anything users quote to support.
+- Durations in human units ("2 ชม. 15 นาที"); countdowns for SLAs state the
+  deadline too ("เหลือ 8 นาที · ครบกำหนด 14:40").
+- Label the era where Buddhist and Gregorian years could be confused.
+
+**Text and identifiers**
+- Truncate names and titles at the end; truncate IDs, file names, emails and
+  URLs in the middle (`WD-2048…9F3A`, `report…2569.pdf`) so both ends stay readable.
+- Every truncated value has a non-hover path to the full value (expand, detail,
+  copy button); tooltips alone exclude touch and keyboard users.
+- IDs users type or read aloud: monospace or tabular figures, grouped
+  (`081 234 5678`, `RN-2612-0471`), with a copy button.
+- Thai text has no spaces between words: set `lang="th"` so browsers break lines
+  at word boundaries; test line clamps with real Thai copy.
+
+**Booleans and statuses** — words from the glossary ("เปิดใช้งาน",
+"ปิดอยู่", "รอตรวจ"), not ✓/✗ alone; color is secondary.
+
+**Detail pages (key–value)**
+- Group fields into named sections in the order the role decides; the
+  identifying fields and status first, audit metadata last.
+- Labels muted and consistent width; values selectable and copyable.
+- Show who changed what and when for consequential fields.
+- Long records: section anchors or tabs only when sections are independent.
+
+**KPI tiles** — value + unit + comparison + time window + freshness
+("อัปเดต 14:32"); emphasize only abnormal ones ([visual-craft.md](visual-craft.md)).
+
 ## Data states
 
 | State | Show |
@@ -116,6 +188,9 @@ full information, e.g. a data table or long description. [S86]
 5. Color is not the only cue; contrast meets 3:1 for needed graphics.
 6. Zero, missing, stale and error states are distinct.
 7. A text summary and table/alternative exist.
+8. Zero, not provided, not applicable, unknown, restricted and failed values look different.
+9. Deltas state base and period; percent vs percentage points is clear.
+10. Truncated values and abbreviated numbers have a non-hover path to the exact value.
 
 ## Do / Don't
 
@@ -125,3 +200,15 @@ full information, e.g. a data table or long description. [S86]
 | Use a bar chart for comparing categories. | Use a pie chart with eight slices. |
 | Show a target line on performance charts. | Make users remember the target. |
 | Show missing data as a gap with a note. | Draw missing data as zero. |
+| Show `—` for "not provided" and `0` for a real zero. | Use `0` for everything empty. |
+| Middle-truncate IDs and file names with a copy button. | Cut `WD-2048-9F3A` to `WD-20…` with the full value only on hover. |
+| Write `+0.3 pp (3.1% → 3.4%)`. | Write `+0.3%` when the rate moved 0.3 points. |
+
+## Dashboard widgets
+
+- **Uptime strip**: 60–90 bars per service, green default, amber/red for incidents, % at right, "90 days ago → Today" caption; give incident bars a text label or tooltip.
+- **End-dot line**: mark the latest point with a dot and the value; drop gridlines to a whisper.
+- **Ring meters**: 3–4 max, % inside, caption below; track at low contrast, value arc in one hue.
+- **Ranked bars**: sorted, value at bar end, one hue unless categories differ in meaning.
+- **Donut**: 2–5 parts, rounded caps, total in the centre only when the legend carries each part's label, value and percent.
+- **Resource card**: host, status chip, CPU/memory/disk as thin bars that change colour at thresholds.

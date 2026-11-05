@@ -25,3 +25,12 @@ __pycache__/
 
 # Skill eval suites (dev-only, not distributed)
 skills/*/evals/
+
+# Generated preview images (rebuild with skills/ux-ui-principles/scripts/build_previews.js)
+skills/*/assets/*/previews/
+
+# Node dependencies (playwright dev-dep for render/preview scripts)
+node_modules/
+
+# Design-inspector output (screenshots, report.json)
+.taste-skill/

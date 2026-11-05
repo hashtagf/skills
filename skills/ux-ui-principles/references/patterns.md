@@ -17,6 +17,7 @@ valid international names/addresses rather than imposing arbitrary ASCII rules.
 Keep input on validation failure. Avoid validating untouched fields while typing;
 choose timing that supports recovery without interrupting legitimate partial input.
 [S18; timing outside GOV.UK is a project decision]
+Full rules (required/optional marking, placeholders, validation timing): [forms.md](forms.md).
 
 Explain the specific problem and the correction using the field's terminology.
 Separate user-correctable validation from service outages or ineligibility. [S19]
@@ -76,11 +77,8 @@ trigger accidentally merely to reduce clicks.
 
 ## Speed and stability
 
-Google's dated guidance defines good field thresholds as LCP ≤2.5s, INP ≤200ms
-and CLS ≤0.1 at the 75th percentile, evaluating mobile and desktop segments.
-Recheck the original before current claims. A Lighthouse load run does not
-measure real-user INP; TBT is a lab proxy. Lab checks and field data complement
-each other. [S22]
+Performance targets, field thresholds and the lab-versus-field caveat are owned by
+[i18n and performance](i18n-performance.md); do not restate numbers here. [S22]
 
 Project actions: acknowledge input promptly, avoid duplicate submissions, reserve
 media space, prioritize task-critical content, and test slow networks/failures.

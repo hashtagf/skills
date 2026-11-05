@@ -24,7 +24,7 @@ existing design system; within those, it is part of the job.
    modes can hold theme, language or device values [S59]. Token structure is in
    [design-foundations.md](design-foundations.md).
 
-## One focal point per view
+## One focal point per screen
 
 Decide the single most important thing on each screen (the decision, the
 amount, the next action) and give it the strongest contrast of size, weight or
@@ -60,10 +60,11 @@ an approval; the exception list for an operator dashboard.
 - Two families at most (display/heading + body), plus a monospace or tabular
   face for IDs and numbers if useful. For Thai, choose fonts with good Thai
   glyph design and test real copy (see [visual.md](visual.md)).
-- A small type scale (e.g. 5–6 steps) used consistently. Large size jumps for
+- A small type scale used consistently (step count and sizes:
+  [design-foundations.md](design-foundations.md)). Large size jumps for
   the focal element, small steps elsewhere.
 - Labels quieter than values in data displays; numbers in tabular figures.
-- Keep reading text near 60–75 characters per line for Latin scripts; test
+- Line length: measure in [design-foundations.md](design-foundations.md); test
   Thai with real paragraphs.
 
 ## Space and alignment
@@ -106,9 +107,8 @@ indicators remain visible on every surface.
 
 ## Motion
 
-Use motion to explain change (where something went, what updated), keep it
-short, and respect reduced-motion preferences. [S16] Avoid decorative motion
-on operational screens.
+Use motion to explain change, avoid decorative motion on operational screens;
+durations, reduced motion and all other rules: [motion.md](motion.md). [S16]
 
 ## Avoid the generic look
 
@@ -168,3 +168,21 @@ right direction is unclear, offer 2–3 complete variants side by side
 | Reserve the accent for action and selection. | Color every icon, border and heading with the brand color. |
 | Use real content and production-like data volume. | Judge a layout with three placeholder rows. |
 | Build from tokens and record new ones. | Introduce one-off colors and spacings per screen. |
+
+## Bans vs refusals, and finish details
+
+**Reflex rules** (waivable on the record, see [gate-tiers.md](gate-tiers.md) §1;
+the device list is owned by [design-quality.md](design-quality.md) §2): eyebrow/kicker
+above a heading; coloured `border-left/right` over 1px on cards or alerts;
+gradient text; hard offset shadows (outside neobrutalism); emoji or Unicode
+glyphs as icons; hero-metric template, 01/02/03 section numbers, sparkline
+or progress-ring filler, monospace as "technical" costume. The Floor is
+only what gate-tiers lists as Floor.
+
+**Finish details:** concentric radius (outer = inner + padding); `tabular-nums` on
+dynamic numbers; extend hit areas with a pseudo-element; `text-wrap: balance` on
+headings and `pretty` on body; image outlines at 10% black/white; theme the
+surfaces you did not draw (`::selection`, `caret-color`, `scrollbar-color`,
+`accent-color`, focus rings, `text-underline-offset`) from the palette. Type
+scale ratio about 1.2 for dense UI, 1.25 general, 1.33 expressive; build text
+levels from weight and opacity at one size.
