@@ -1,5 +1,5 @@
 {
-  "_doc": "Sixteen back-office looks. Differences: nav (side | rail | top), tbl (zebra | lines | cards | plain), chip (pill | square | dot), edge (tone | line | strong), density (rowH, fs, pad), radius, font, colour. Used by scripts/backoffice_preview.js. Shape fields: cr (card radius), br (button radius, 999 = pill), fr (field and search radius), nr (nav item radius), av (avatar radius), cb (checkbox radius).",
+  "_doc": "Seventeen back-office looks. Differences: nav (side | rail | top), tbl (zebra | lines | cards | plain), chip (pill | square | dot), edge (tone | line | strong), density (rowH, fs, pad), radius, font, colour. Used by scripts/backoffice_preview.js. Shape fields: cr (card radius), br (button radius, 999 = pill), fr (field and search radius), nr (nav item radius), av (avatar radius), cb (checkbox radius).",
   "styles": [
     {
       "id": "calm",
@@ -687,6 +687,49 @@
       "fr": 8,
       "nr": 8,
       "av": "10px",
+      "cb": 4
+    },
+    {
+      "id": "canopy",
+      "name": "Canopy",
+      "note": "Deep forest-green primary on warm off-white, light sidebar with pale-green active item; Manrope display over DM Sans. From the Canopy MongoDB-MCP dashboard.",
+      "dark": false,
+      "ground": "#f8f9f6",
+      "surface": "#ffffff",
+      "side": "#ffffff",
+      "ink": "#253a33",
+      "muted": "#5a6660",
+      "line": "#e5e9e2",
+      "accent": "#214f3e",
+      "accentInk": "#ffffff",
+      "accentSoft": "#edf3e9",
+      "ok": [
+        "#14663a",
+        "#dcf2e4"
+      ],
+      "warn": [
+        "#7a4b00",
+        "#fbecc8"
+      ],
+      "bad": [
+        "#a12a22",
+        "#fbe0de"
+      ],
+      "font": "DM Sans",
+      "radius": 8,
+      "rowH": 44,
+      "fs": 13,
+      "pad": 24,
+      "edge": "line",
+      "sideDark": false,
+      "nav": "side",
+      "tbl": "lines",
+      "chip": "pill",
+      "cr": 12,
+      "br": 8,
+      "fr": 8,
+      "nr": 10,
+      "av": "50%",
       "cb": 4
     }
   ]
