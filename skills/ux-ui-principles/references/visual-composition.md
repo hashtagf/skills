@@ -57,6 +57,26 @@ Keep reading order and keyboard order coherent after reflow. Test sticky headers
 footers, dialogs, and mobile keyboards for overlap with controls and messages.
 Do not remove required information or recovery actions to make the layout fit.
 
+## Mobile web composition (≤ 480px) — design it, don't shrink it
+
+| Area | Rule |
+|---|---|
+| Gutters | 16–20px side padding; nothing touches the edge except full-bleed images |
+| Header | Logo + one primary action or a menu button; ≤ 56–64px tall; menu opens as a full-height sheet with large targets, not a squeezed desktop bar |
+| Hero | Headline `clamp()` ≈ 32–40px (Thai 28–36px, line-height per [design-foundations.md](design-foundations.md)), ≤ 2 lines at every width ([marketing-copy.md](marketing-copy.md)); supporting line ≤ 3 lines; primary CTA visible in the first screen, full-width or ≥ 48px tall; the visual goes **after** the text or is cropped to a purposeful detail |
+| Type | Body ≥ 16px (inputs ≥ 16px or iOS zooms), meta ≥ 13px (minimum text size: [design-foundations.md](design-foundations.md)); display sizes scale down, body does not |
+| Sections | Vertical padding 48–72px (desktop 96–160px); one column; neighbouring sections still vary (image/text order, full-bleed band) |
+| Grids | 3–4 card rows → stacked list or a horizontal scroller with a visible peek of the next card; never 2 tiny columns of text |
+| Tables / comparison | Becomes cards per row or a scroll container with the first column sticky; pricing tiers stack with the recommended one first |
+| Targets | Project default for web mobile: tap targets ≥ 44×44px with ≥ 8px between neighbours (WCAG AA floor is 24×24, see [accessibility.md](accessibility.md); form controls 48px); links in text have generous line-height |
+| Sticky | At most one sticky element (header or a bottom CTA bar), never covering inputs when the keyboard is open |
+| Imagery | Art-directed crops (`<picture>`/`object-position`), not desktop images scaled to 30% |
+| Hover-only | Anything shown on hover is visible or tap-reachable |
+
+Check at 390px and 320px (`render_check.js --zoom`), then look at the phone
+screenshot as its own design: one focal point per screen, clear reading order,
+the action reachable with the thumb.
+
 ## Charts and evidence
 
 Choose a chart from the question: trend, category comparison, distribution, or
@@ -70,10 +90,8 @@ business data. Color should support comparison, not be its only carrier.
 
 ## Motion and layout stability
 
-Use motion to connect cause and effect or preserve location during a change.
-Avoid motion that delays repeated work, competes with reading, or prevents
-completion under reduced-motion settings. Reserve space for asynchronously
-loaded media and avoid moving a target just as the user activates it.
+Motion rules live in [motion.md](motion.md). Layout stability: reserve space for
+asynchronously loaded media and avoid moving a target just as the user activates it.
 
 ## Review questions
 

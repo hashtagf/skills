@@ -8,14 +8,19 @@ description: >-
   research, page or flow design, admin/back-office and customer UI, forms,
   icon usage, native mobile (permissions, notifications, offline), charts and
   dashboards, color palettes and contrast, UX writing, page design specs,
-  usability audits, rendered-UI verification, design QA and success metrics;
+  usability audits, rendered-UI verification, design QA and success metrics,
+  page-pattern and visual-style selection, a library of named visual directions
+  with previews, Thai font pairing and two-language pages, DESIGN.md design memory,
+  refinement verbs (critique, polish, bolder, quieter, distill) and quality gates;
+  runs as a phased design workflow (inspect → understand → architect →
+  explore → design → implement → critique → verify → deliver) with explicit
+  points for asking the user versus proceeding on labelled assumptions;
   includes Thai-language guidance, 43 layout blueprints, a 16-row page spec with
   rigor tiers, render/contrast check scripts and a shared design-context
   template. Triggers include "UX UI principles", "review usability", "audit
   UX", "design spec", "back office", "form design", "information architecture",
   "หลักการ UX/UI", "ตรวจ UX", "ออกแบบ user flow", "ออกแบบหน้า admin",
-  "ออกแบบฟอร์ม", "ใช้ component ไหน". Self-contained: covers design
-  foundations, component choice, states and prototypes without other skills.
+  "ออกแบบฟอร์ม", "ใช้ component ไหน", "ทำให้สวยขึ้น".
 ---
 
 # UX/UI Principles
@@ -25,39 +30,125 @@ language; use Thai for Thai requests while keeping technical identifiers intact.
 Default scope is web and mobile interaction design. For native products, consult
 the current platform guidance before prescribing platform dimensions or behavior.
 
-## Place the request first
+## Design workflow
 
-Read [the framework](references/framework.md) when the request is larger than a
-single screen decision. It separates six disciplines (product, UX, UI,
-interaction, design engineering, validation) and six levels (strategy &
-research → experience architecture → page & interaction → visual & design
-system → quality & engineering → validation & improvement). Identify the level
-the request belongs to, load only that level's references, and name missing
-upstream inputs as assumptions rather than inventing them.
+Every design request runs through these phases. Run only the phases the mode
+needs (next table), carry one **design context card**
+([design context](assets/design-context.md)) through them, and read only the
+references listed for the active phase. Per-phase steps, ask points and exit
+criteria: [design workflow](references/design-workflow.md).
 
-Set a **rigor tier** from the worst plausible consequence of a design error:
-**Light** (read-only, low risk), **Standard** (main flows, customer UI),
-**Critical** (money, approvals, permissions, irreversible or legal actions).
-The tier decides which rows of the [page spec](assets/page-spec.md) are
-required and how much verification is needed. State the tier in the answer.
+| Phase | Do | Use | Ask the user when |
+|---|---|---|---|
+| 0 Inspect | Read artifacts, `DESIGN.md`, `PRODUCT.md`, tokens, component library, existing screens, available tools | [design memory](references/design-memory.md) §1–2 | Docs and code disagree on a value the task changes system-wide |
+| 1 Understand | Context card: roles, primary job, device, data, risk → **rigor tier**, success metric + guardrail | [product discovery](references/product-discovery.md), [framework](references/framework.md) | Primary role/job unknown (Standard+); business rules on Critical work (approvers, limits, fees, reversibility, legal text, data visibility) |
+| 2 Architect | Journey with a failure path; IA, pages, permissions; **page pattern** by the role's primary question | [experience architecture](references/experience-architecture.md), [navigation grouping](references/navigation-grouping.md), [design direction](references/design-direction.md) §1–2 | Scope changes (pages, roles, permissions); two patterns equally plausible with different builds |
+| 3 Explore | ≥ 2 compositions for complex pages; user words → style via keywords; dials incl. motion level; interview + 2–3 named directions for a new look | [design direction](references/design-direction.md) §3–9, [design quality](references/design-quality.md), [layout library](assets/layouts/index.md) | Direction interview (≤ 3 choices: feel, references, energy) when present; choosing among proposed directions; conflict with DESIGN.md |
+| 4 Design | [Page spec](assets/page-spec.md) rows for the tier: content, real copy, components, all states, keyboard, responsive, recovery; any form → [forms](references/forms.md) rules, placeholders, messages; moving page → [motion](references/motion.md) spec | Per decision — [design workflow](references/design-workflow.md) phase 4 list, [advanced components](references/advanced-components.md) for grids, drag, pickers, rich text, tours, autosave forms, recovery | Real content that must not be invented (prices, legal, claims, proof); new design-system values on an approved system |
+| 5 Implement | Only when asked to build; reuse components and tokens; forms meet the [forms](references/forms.md) §6b contract | [design memory](references/design-memory.md) §6, [prototyping](references/prototyping.md), [tokens to code](references/tokens-export.md) (`export_tokens.py`) | Before scope expansion, new dependencies, system-wide token changes, writing project docs |
+| 6 Critique | Review the render as a reviewer; `slop_check.py`; findings by severity | [review loop](references/review-loop.md) (final score; caps in [scoring caps](references/scoring-caps.md)), [gate tiers](references/gate-tiers.md), [design quality](references/design-quality.md) §5 | Never — fix within scope, report taste notes |
+| 7 Verify | `render_check.js` (`--doctor` first; `--reduced-motion` on animated pages; no browser → *not tested*, never install mid-task), critical journey + one failure path, `contrast.py --css`, design QA list, **hard gates** | [render verification](references/render-verification.md), [accessibility verification](references/accessibility-verification.md), [measurement](references/measurement.md), [tablet, RTL and dark](references/tablet-rtl-dark.md) | A hard gate fails and can't be fixed in scope; access needed (login, data, device) |
+| 8 Deliver | Fix ≤ 3 rounds; report outcome, decisions, tested vs not, decisions to confirm, metric | [validation](references/validation.md), [output templates](assets/templates.md) | Approving decisions that become system rules (tokens, DESIGN.md draft → approved) |
 
-If the project has a shared [design context](assets/design-context.md) file,
-read it before deciding and reuse its roles, vocabulary, status names, tokens
-and chosen patterns.
+**Rigor tier** (set in phase 1, stated in the answer) from the worst plausible
+consequence of a design error: **Light** (read-only, low risk), **Standard**
+(main flows, customer UI), **Critical** (money, approvals, permissions,
+irreversible or legal actions). It decides the required page-spec rows, which
+ask points apply and how deep phase 7 goes.
 
-## Choose the task
+**Precedence** when sources disagree: [design memory](references/design-memory.md) §2
+(user request and safety → product goal and the role's job → approved DESIGN.md →
+existing code → specialist skills → creative defaults). Report docs-vs-code
+conflicts; do not silently rewrite either. Use a specialist skill only if it is
+actually available; never report running a tool or skill that was not run. Decide top-down: page pattern before
+composition before visual style — a style never changes the page pattern.
 
-| Mode | Input | Deliverable |
-|---|---|---|
-| RESEARCH | Topic or unfamiliar interaction | Source-backed synthesis, limitations, application rules |
-| DISCOVER | Feature idea, vague brief, new product area | Problem statement with evidence labels, role profiles, success metric + guardrail, constraints, assumptions to test |
-| ARCHITECT | Multi-page feature, navigation or IA problem, multi-role system | Journey/flows, IA map, page inventory with page types, URL and permission model |
-| DESIGN | Product brief or requested flow | Journey, screen priorities, page spec at the chosen tier, behavior/state specification, validation plan |
-| AUDIT | URL, screenshots, prototype, code | Evidence-based findings, prioritized fixes, verification steps; design QA against a spec when one exists |
-| IMPROVE | Existing UI plus requested change | Scoped changes and verification, when implementation is authorized |
+## Terms used across the skill
 
-For a small question, answer directly with the relevant principle and example.
+- **Direction**: a named visual system for customer pages (`assets/directions/directions.json`). **Back-office look**: a style in `assets/backoffice/styles.json`.
+- **Page**: a URL/route. **Screen**: a state of a page, or the phone/app shell.
+- **Rigor tier** (Light / Standard / Critical) sets how much to specify and verify. **Rule classes** (Floor / Reflex / Finish) set how strict a rule is ([gate tiers](references/gate-tiers.md)). **Phase 0-8** is the workflow; framework.md's steps are **Stages**.
+
+## Route by mode
+
+| Mode | Input | Phases | Deliverable |
+|---|---|---|---|
+| ANSWER | A single question | — | The principle, an example and its exception, directly |
+| RESEARCH | Topic or unfamiliar interaction | Sources + evidence discipline | Source-backed synthesis, limitations, application rules |
+| DISCOVER | Feature idea, vague brief | 0–1 | Problem statement with evidence labels, roles, metric + guardrail, assumptions to test |
+| ARCHITECT | Multi-page feature, IA or navigation problem, multi-role system | 0–2 | Journey/flows, IA map, page inventory with page patterns, URL and permission model |
+| DESIGN | Brief or requested flow | 0–4 (3 only for a new look or complex layout) | Context card, flow, page spec at the tier, states, validation plan |
+| BUILD | Design + implementation requested | 0–8 | Working UI, verification results, decisions to confirm |
+| AUDIT | URL, screenshots, prototype, code | 0, 1 (brief), 6, 7, 8 | Evidence-based findings ranked, fixes, verification steps; no changes |
+| IMPROVE | Existing UI plus a requested change | 0, then 4–8 scoped to the change; copy the files first | Scoped change, re-verified, previous version kept |
+| REFINE | A verb (critique, polish, bolder, quieter, distill, typeset, layout, colorize, animate, harden, adapt, optimize, clarify) or "ทำให้สวยขึ้น / ดูรก / อ่านยาก" | 0, 6 → that verb → 7–8 | Only that verb's change, re-rendered — [review loop](references/review-loop.md) |
+
 Do not produce a full audit for a single label correction.
+
+## Defaults that must not be skipped
+
+For any **public page, website, landing, new look or redesign** (DESIGN, BUILD,
+IMPROVE of customer-facing UI), these happen in order unless the user or an
+approved DESIGN.md already decides them. Skipping one is a defect.
+
+1. **Interview before any code** — if there is no DESIGN.md and no stated
+   direction, ask the direction interview ([design direction](references/design-direction.md)
+   §9: feel words, references, energy — ≤ 3 multiple-choice questions with a
+   recommended option, using the host's question tool). Then shortlist 2–3 named
+   directions (§7) in the first round and let the user pick, showing a picture of each
+   ([direction library](references/direction-library.md)); on request show the
+   next 2–3 instead of repeating.
+2. **Palette** from the chosen keyword: start from a starter palette or the
+   OKLCH recipe ([color palette](references/color-palette.md) "Making it look good"),
+   tinted neutrals, one accent, ≤ 2 saturated hues, light and dark.
+3. **Motion baseline** for the page type ([motion](references/motion.md) §1: dial 4–6 for
+   marketing) with a motion spec and a reduced-motion branch. A low-motion direction
+   still ships hero entrance + once-only section reveal; "no motion" or dropping
+   these needs a reason stated on the context card.
+4. **Mobile composition** designed for 390px ([visual composition](references/visual-composition.md)
+   "Mobile web composition"), not the desktop shrunk.
+5. **Render and look** at 1440 and 390 (light and dark) before saying done;
+   fix what the screenshots show.
+
+## When to ask, when to proceed
+
+Rules live in [design workflow](references/design-workflow.md) "Asking well" (the owner).
+In short:
+
+- **Ask** at the ask points above, only for what changes the design and cannot be
+  read from artifacts, the repo or convention: one batch per checkpoint, at most
+  3 questions, each with a recommended default. **Never ask** for reversible
+  choices or anything you could inspect; decide and label it *assumed*. **Always
+  ask** before guessing Critical business rules, inventing content that must be
+  true, expanding scope, changing approved system values, or writing unrequested
+  project documents.
+- **The user is away only if they said so** ("I'm away", "use defaults"); a
+  background session is not a reason to skip questions. Then never stop: take the
+  recommended option at every ask point, mark it *assumed*, and end with
+  "Decisions to confirm". Assumed directions must still match the feel the user
+  already chose (e.g. "premium + playful" means soft or mixed shapes, not a sharp
+  print look) and mix at least two shape treatments (for example round buttons,
+  rounded cards, one free-form shape); an all-square page needs a stated reason
+  in the context card.
+
+## Working with other design skills
+
+The user may name other skills ("use Taste Skill, Impeccable, Hallmark, Interface
+Design, shadcn"). Use only what is installed and applicable, never report a skill
+as used when it was not run, and resolve conflicts with this table.
+
+| Skill | Use it for | Do not use it for |
+|---|---|---|
+| This skill | Decisions, page spec, verification, Thai and bilingual pages, quality gates | — |
+| Hallmark | A named direction or a redesign of a public page: material, type, a stamped CSS header, its `sloplint`, direction previews | App screens; changing a design that is not a Hallmark run |
+| Taste Skill | Art direction for pages, its `draw`/`inspect`/`lint` scripts, critique | Pages whose direction needs shadows, hairlines or gradients (see below) |
+| Impeccable | Refinement verbs (polish, bolder, quieter, typeset, layout) and design critique, after its context step | Skipping its context step; do not run its edits without it |
+| Interface Design | Product UI: dashboards, admin, settings, tools | Marketing or landing pages |
+| shadcn/ui | Projects with a `components.json` | Static pages or projects without it |
+
+**Conflicts.** House rules differ (Taste Skill bans resting shadows, hairlines and
+gradients; some Hallmark directions require them). Order and the "state the rules
+the direction overrides" practice: [design memory](references/design-memory.md) §2 and §5.
 
 ## Do / Don't — UX decisions
 
@@ -82,177 +173,112 @@ Read [Do / Don't examples](references/do-and-dont.md) when producing design guid
 or reviewing misuse. Include relevant paired examples, their reason and an observable
 check; scale the detail to the request rather than attaching the whole list to every answer.
 
-## Load only the relevant references
+## Reference catalog
 
-By framework level (details in [framework.md](references/framework.md)):
+Grouped by framework level ([framework.md](references/framework.md)); the
+phase table says which to open; the full file → phase map is the index at the
+end of [design workflow](references/design-workflow.md). Read one or two files for the active
+decision, not the whole level. Each file is listed once.
 
-| Level | References |
-|---|---|
-| 1 Strategy & research | [product-discovery](references/product-discovery.md), [validation](references/validation.md) |
-| 2 Experience architecture | [experience-architecture](references/experience-architecture.md), [back-office](references/back-office.md) |
-| 2 (channels) | [notifications](references/notifications.md), [mobile-native](references/mobile-native.md) |
-| 3 Page & interaction | [back-office](references/back-office.md), [customer-ui](references/customer-ui.md), [ai-features](references/ai-features.md), [forms](references/forms.md), [patterns](references/patterns.md), [experience-patterns](references/experience-patterns.md), [content-design](references/content-design.md), [data-visualization](references/data-visualization.md), [layout library](assets/layouts/index.md) |
-| 4 Visual & design system | [visual](references/visual.md), [visual-composition](references/visual-composition.md), [visual-craft](references/visual-craft.md), [iconography](references/iconography.md), [color-palette](references/color-palette.md), [design-quality](references/design-quality.md), [design-foundations](references/design-foundations.md), [components-usage](references/components-usage.md), [component-states](references/component-states.md), [prototyping](references/prototyping.md) |
-| 5 Quality & engineering | [accessibility](references/accessibility.md), [accessibility-verification](references/accessibility-verification.md), [i18n-performance](references/i18n-performance.md), [trust-security-privacy](references/trust-security-privacy.md), [mobile-native](references/mobile-native.md), [render-verification](references/render-verification.md) |
-| 6 Validation & improvement | [validation](references/validation.md), [measurement](references/measurement.md) |
+**1 · Strategy and research**
+- [Design workflow](references/design-workflow.md): phases 0–8 in detail — steps, references, ask points, exit criteria, asking well.
+- [Framework](references/framework.md): disciplines, levels, rigor tiers, process. Anything beyond one screen.
+- [Product discovery](references/product-discovery.md): problem framing, roles, evidence labels, success metrics.
+- [Sources](references/sources.md): source register (S-IDs), dates, authority. RESEARCH or source-sensitive claims.
+- [Design memory](references/design-memory.md): Phase 0 inspection, source-of-truth precedence,
+  DESIGN.md template with rationale and anti-patterns, decision log, brand extraction (§3b),
+  specialist-skill routing, reuse before invent.
+- [Design direction](references/design-direction.md): eight dimensions, page pattern by user question,
+  layout compositions, visual styles and mixing rule, direction dials with presets,
+  2–3 named directions (§7), user keywords → style (§8), direction interview (§9).
+- [Direction library](references/direction-library.md): every direction in `assets/directions/directions.json` with fit, risk and
+  rendered previews (`assets/directions/previews/`, regenerate with `scripts/direction_preview.js`);
+  show pictures, filter by subject, choose for company marketing.
+- [Preview coverage](references/preview-coverage.md): which of the 43 layout blueprints, landing sections and
+  components have a rendered preview (`assets/site/previews/`, `scripts/site_preview.js`), and what is not covered.
+- [Motion](references/motion.md): motion level per dial, ten motion types, website choreography,
+  reduced motion, performance, tooling, motion spec, checks.
 
-New in the end-to-end set:
+**2 · Experience architecture**
+- [Experience architecture](references/experience-architecture.md): journeys, IA, navigation, URLs, permission flows.
+- [Navigation grouping](references/navigation-grouping.md): grouping, ordering and labelling menus,
+  settings pages, mega menus, mobile tabs, before/after examples; evidence in [nav study](assets/nav-study.md).
+- [Interaction principles](references/interaction.md): mental models, heuristics, cognition, tradeoffs.
+- [Notifications](references/notifications.md): channel choice, message anatomy, frequency, lifecycle.
+- [Native mobile](references/mobile-native.md): iOS/Android conventions, permissions, push, offline, gestures.
 
-- [Framework](references/framework.md): disciplines, levels, iterative process,
-  rigor tiers, shared design context. Read for anything beyond one screen.
-- [Product discovery](references/product-discovery.md): problem framing, role
-  profiles, evidence labels, success metrics, constraints.
-- [Experience architecture](references/experience-architecture.md): journeys,
-  IA, navigation, breadcrumbs, URLs, cross-page flows, permission flows.
-- [Back office](references/back-office.md): eight page dimensions, 12-type page
-  taxonomy, pattern-fit table, role-based layout, 10-item page review.
-- [Content design](references/content-design.md): UX writing for buttons,
-  errors, empty states, confirmations, status vocabulary, Thai register.
-- [Trust, security and privacy](references/trust-security-privacy.md):
-  consequential actions, transaction confirmation, masking, sessions,
-  permissions, auditability, privacy by design.
-- [Localization and performance](references/i18n-performance.md): i18n rules,
-  Thai calendar/currency, text expansion, Core Web Vitals, perceived speed.
-- [Visual craft](references/visual-craft.md): focal point, containers by role,
-  color roles, density, avoiding a generic or wireframe-like result.
-- [Measurement](references/measurement.md): success metrics, instrumentation
-  spec, experiments, design QA, post-launch review.
-- [Customer UI](references/customer-ui.md): customer page taxonomy, how it
-  differs from back office, onboarding, trust, brand tone, metrics.
-- [AI features](references/ai-features.md): when AI fits, expectations, human
-  control by consequence, AI output states, input design, feedback.
-- [Forms](references/forms.md): what to ask, structure, labels, control choice,
-  Thai address/phone/ID fields, validation timing, mobile and back-office forms.
-- [Iconography](references/iconography.md): when icons need labels, one family
-  and meaning per glyph, sizing, hit targets, accessible names.
-- [Native mobile](references/mobile-native.md): iOS/Android conventions,
-  permissions in context, push, deep links, offline, lifecycle, gestures.
-- [Notifications](references/notifications.md): email/SMS/push/in-app channel
-  choice, message anatomy, security, frequency control, lifecycle mapping.
-- [Data visualization](references/data-visualization.md): chart choice by
-  question, readability, chart color, data states, accessible alternatives.
-- [Color palette](references/color-palette.md): roles before hues, fixed
-  semantic colors, contrast pairs, dark theme, comparing palette options.
-- [Design foundations](references/design-foundations.md): token layers, type,
-  spacing, sizing, radius, elevation, motion, breakpoints, density, focus, theming.
-- [Components usage](references/components-usage.md): choosing between similar
-  components and per-component use / avoid / must-have rules for ~60 components.
-- [Component states](references/component-states.md): state checklist,
-  interaction-color strategy, keyboard contracts, touch, component spec template.
-- [Prototyping](references/prototyping.md): choose deliverables, text
-  wireframes, HTML prototypes with states and variants, hand-off package.
-- [Design quality](references/design-quality.md): avoid the generic look —
-  plan-then-review with subject inventory, idea sentence and competitor test,
-  template devices to avoid, substance over restraint, frame and rhythm, and a
-  screenshot critique loop. Read for any landing, marketing or product page,
-  or when someone says a design looks templated or "not beautiful".
-- [Visual craft](references/visual-craft.md) also holds the **signal budget**
-  and a **feedback diagnosis** table ("ดูยาก", "สีดูยาก", "รก", "ไม่สวย") — read it
-  whenever someone says a screen is hard to read or unattractive.
-- [Render verification](references/render-verification.md): procedure and
-  scripts (`scripts/render_check.js`, `scripts/contrast.py`) to check built UI.
-- [Page spec](assets/page-spec.md) and [design context](assets/design-context.md):
-  templates for a complete page specification and a shared project context.
-- [Back-office worked examples](assets/layouts/worked-examples-back-office.md):
-  four PayOps pages with tiers, decisions, metrics and defects found.
+**3 · Page and interaction**
+- [Back office](references/back-office.md): admin page taxonomy, pattern fit, role layout, page review;
+  previews of the desktop screens (pages plus component, advanced and page-states sheets) and a phone set in every back-office look from `styles.json` to choose density, structure and tone (`assets/backoffice/previews/`).
+- [Customer UI](references/customer-ui.md): customer page types, onboarding, trust, brand tone.
+- [Forms](references/forms.md): fields, structure, Thai address/phone/ID, validation timing.
+- [Patterns](references/patterns.md): states, dialogs, dashboards, performance, ethical decisions.
+- [Experience patterns](references/experience-patterns.md): navigation continuity, recovery, unknown outcomes, bulk scope.
+- [AI features](references/ai-features.md): when AI fits, human control, AI output states.
+- [Content design](references/content-design.md): UX writing, errors, empty states, Thai register.
+- [Marketing copy](references/marketing-copy.md): headline, subheadline, CTA, proof, section copy,
+  Thai marketing register, filler → specific; evidence in [copy study](assets/copy-study.md).
+- [Data visualization](references/data-visualization.md): chart choice, readability, data states;
+  displaying values (empty vs zero, numbers, deltas, dates, truncation, detail pages).
+- [Do / Don't](references/do-and-dont.md): paired examples with reasons and checks.
+- [Layout library](assets/layouts/index.md): 43 blueprints in eight categories; load one category plus
+  [specification](assets/layouts/specification.md). Depth: [worked examples](assets/layouts/worked-examples.md),
+  [back-office worked examples](assets/layouts/worked-examples-back-office.md). External:
+  [OpenDesign references](assets/layouts/opendesign.md) (verify before importing tokens).
 
-Existing topic references:
+**4 · Visual and design system**
+- [Design foundations](references/design-foundations.md): token layers, type, spacing, radius, elevation, motion, density.
+- [Color palette](references/color-palette.md): roles, semantic colors, contrast pairs, dark theme.
+- [Components usage](references/components-usage.md): choosing components; use / avoid / must-have for ~60.
+- [Component states](references/component-states.md): state checklist, interaction color, keyboard, spec template.
+- [Iconography](references/iconography.md): labels, one family, sizing, accessible names.
+- [Prototyping](references/prototyping.md): deliverables, wireframes, HTML prototypes, hand-off.
+- [Build recipes](references/build-recipes.md): surface modes, no-JS live demo, hero grid placement,
+  honest placeholders, mailto contact, headless verification, back-office mock before code.
+- [Gate tiers](references/gate-tiers.md): Floor / Reflex / Finish rule classes, pre-emit critique, fresh-context reviews, verification budget, refine vs redesign.
+- [Page anatomy by job](references/page-anatomy-by-job.md): job → sections, signature, mirror test, screen budget, page failure checks.
+- [Scoring and caps](references/scoring-caps.md): calibration and caps for the review-loop score, report format, headline arithmetic.
+- [App-screen rules](references/app-screen-rules.md): one question per screen, quiet chrome numbers, grid arithmetic, data honesty.
+- [shadcn rules](references/shadcn-rules.md): critical rules, presets, control heights, design-system page.
+- Visual files — choose by the question:
 
-- [Research and source register](references/sources.md): provenance, authority,
-  verification dates, and source IDs. Read for RESEARCH or source-sensitive claims.
-- [Interaction principles](references/interaction.md): mental models, heuristics,
-  cognition, navigation and principle tradeoffs. Read for flows and audits.
-- [Visual design](references/visual.md): hierarchy, typography, grouping,
-  responsive behavior, localization. Read for screen-level decisions.
-- [Accessibility](references/accessibility.md): WCAG criteria, exceptions,
-  keyboard behavior, and limits of evidence. Read for any accessibility claim.
-- [Patterns](references/patterns.md): forms, states, dialogs, dashboards,
-  performance and ethical decisions. Read for relevant interactions.
-- [Do / Don't examples](references/do-and-dont.md): paired flow/screen examples,
-  context, consequences and acceptance checks. Read when writing usage guidance
-  or explaining a proposed improvement.
-- [Validation](references/validation.md): research methods, issue severity,
-  metrics and report structure. Read before evaluating or claiming success.
-- [Output templates](assets/templates.md): use the section appropriate to the task.
-- [Layout library](assets/layouts/index.md): 43 task-based blueprints across
-  eight categories. Read the index when selecting a screen structure or the user
-  asks for layout templates/examples; load only the relevant category and
-  [shared specification](assets/layouts/specification.md). Use
-  [worked examples](assets/layouts/worked-examples.md) for handoff depth.
-- [OpenDesign references](assets/layouts/opendesign.md): curated external site
-  and template references mapped to local layout IDs. Read when the user asks
-  for OpenDesign or real-world examples; distinguish reviewed page text from
-  catalog-only candidates and verify selected pack contents before importing tokens.
+  | Question | Read |
+  |---|---|
+  | Is the hierarchy, grouping and Thai text right? | [visual](references/visual.md) |
+  | Does the layout follow the task and survive reflow? | [visual-composition](references/visual-composition.md) |
+  | Focal point, containers, signal budget; "ดูยาก / รก / ไม่สวย" diagnosis | [visual-craft](references/visual-craft.md) |
+  | Will it look templated? Idea sentence, template devices, render critique | [design-quality](references/design-quality.md) |
+  | No photos or assets — what visuals, icons, fragments, diagrams, open-collection photographs go in each section? | [visual-assets](references/visual-assets.md) |
+  | Thai display and body faces for a Latin direction; two-language pages | [design foundations](references/design-foundations.md) "Thai with Latin display faces", [i18n](references/i18n-performance.md) |
+  | How do editable grids, drag reorder, color pickers, rich text, mentions, notification centres, tours, autosave forms and password recovery behave, and what are the five interaction states? | [Advanced components](references/advanced-components.md) |
+  | Tablet layouts, right-to-left, dark mode for light directions? | [Tablet, RTL and dark](references/tablet-rtl-dark.md) |
+  | How do I regenerate the preview pictures (directions, customer pages, back office, mobile, tablet, RTL, dark)? | [Preview coverage](references/preview-coverage.md) (`scripts/build_previews.js`) |
+  | How do I turn the chosen direction into CSS, Tailwind or shadcn tokens with contrast checked? | [Tokens to code](references/tokens-export.md) (`scripts/export_tokens.py`) |
+  | What do the strongest gallery pieces do that a template does not? (imagery, type over image, hero compositions, depth) | [21st.dev study](assets/21st-study.md) |
+  | Which dashboard widget patterns do gallery pieces use (stat tiles, uptime strips, donuts, tables)? | [21st.dev dashboard study](assets/21st-dashboard-study.md) |
+  | Which exact values make it look polished? (type, tone, spacing, radius, motion, presets, craft pass) | [visual-benchmarks](references/visual-benchmarks.md); evidence in [site measurements](assets/site-measurements.md), [gallery study](assets/gallery-study.md) |
 
-## Focused task guides
+  For "make it beautiful / ทำให้สวยขึ้น" and every public page: design-quality
+  first (what to avoid), visual-assets (what to show in each section), then
+  visual-benchmarks (values), then visual-craft's critique. Inspect the
+  screenshots before calling the page done.
 
-For a compact task-specific review, select the relevant guide:
+**5 · Quality and engineering**
+- [Accessibility](references/accessibility.md): WCAG criteria, exceptions, keyboard, limits of evidence.
+- [Accessibility verification](references/accessibility-verification.md): focused checks; what each evidence surface proves.
+- [Localization and performance](references/i18n-performance.md): Thai calendar/currency, expansion, Core Web Vitals.
+- [Trust, security and privacy](references/trust-security-privacy.md): confirmation, masking, sessions, auditability.
+- [Render verification](references/render-verification.md): `scripts/render_check.js`, `scripts/contrast.py`,
+  `scripts/slop_check.py` (template-look heuristics), `scripts/design_md_check.py` (DESIGN.md validator).
+- [Review loop](references/review-loop.md): refinement verbs, critique format, visual and UX
+  scorecards, hard gates that block delivery, state coverage, critique → fix → re-render loop.
 
-- [Experience patterns](references/experience-patterns.md): navigation continuity,
-  form recovery, partial/unknown operation outcomes, and bulk-action scope.
-- [Visual composition](references/visual-composition.md): task-led hierarchy,
-  real content, Thai glyphs, responsive transformations, and data interpretation.
-- [Accessibility and verification](references/accessibility-verification.md):
-  focused web checks, criterion exceptions, and what each evidence surface proves.
+**6 · Validation and improvement**
+- [Validation](references/validation.md): research methods, severity, report structure. Before claiming success.
+- [Measurement](references/measurement.md): metrics, instrumentation, experiments, design QA.
 
-Use these for the active decision; the research register and topic references
-above remain the source for deeper research and the existing layout workflow.
-Do not preload both sets for an incidental UI change.
-
-## Workflow
-
-1. **Establish the task.** Identify users, their objective, entry context,
-   expertise, device/input method, language, key constraints, and consequence
-   of failure. Read supplied artifacts and repository conventions first.
-   Ask only for missing information that changes the decision. Continue with
-   explicit assumptions for reversible work; do not invent user research.
-   Place the work on the framework level, set the rigor tier, and read the
-   project's design context if one exists.
-2. **Inspect evidence.** Record the artifact, location, viewport, state, and
-   observed behavior. A screenshot supports visual observations, not keyboard,
-   screen-reader, server, or conversion claims. A prototype supports only the
-   interactions it actually implements. Label everything else unverified.
-3. **Map the journey.** Trace entry → understand → act → feedback → recover →
-   finish. Identify user decisions and required information at each step.
-   Include at least one plausible failure/recovery path for the critical task.
-   For multi-page work, check entry points, handoffs between roles, return
-   paths, deep links and permissions across pages
-   ([experience architecture](references/experience-architecture.md)).
-4. **Apply principles selectively.** Choose the few that explain a concrete
-   problem or decision. Connect evidence → affected task → principle → proposed
-   behavior → verification. Avoid a list of laws disconnected from the UI.
-5. **Specify the result.** State content priority, labels, controls, applicable
-   states, keyboard/focus behavior, responsive behavior, and error recovery.
-   Use the project's design tokens. New spacing scales, fonts, or aesthetics
-   require a reason; they are design choices, not universal UX requirements.
-   For layout work, select a relevant library ID, explain the fit/tradeoff,
-   and adapt it to actual content, states, permissions and responsive behavior.
-   The examples are original proposals, not validated layouts or mandatory shells.
-   If using an external reference, name its source and inspected surface/state,
-   retain attribution, and identify which aspects are adapted. Do not infer a
-   private app layout from its public landing page or an error/verification capture.
-   For admin pages, classify the page type first ([back office](references/back-office.md)).
-   Answer the [page spec](assets/page-spec.md) rows required by the tier, including
-   copy ([content design](references/content-design.md)), security/privacy for
-   Critical work, and a visual pass for focal point, containers, density and
-   color roles ([visual craft](references/visual-craft.md)).
-6. **Verify at the available depth.** Inspect rendered states and execute the
-   critical journey when tools permit. Check keyboard, zoom/reflow, contrast,
-   and assistive technology as relevant. Record actual results separately
-   from proposed tests. If implementation is requested, perform the scoped
-   changes and existing appropriate checks before reporting completion.
-   For built UI, follow [render verification](references/render-verification.md):
-   run `node scripts/render_check.js <page> --zoom`, inspect the screenshots,
-   drive the critical journey plus one failure path, and check token contrast
-   with `python3 scripts/contrast.py --css <page>` (checks role pairs in every
-   theme block). Then run the design QA list in
-   [measurement](references/measurement.md):
-   content, layout, tokens, states, interaction, responsive, accessibility,
-   performance and analytics — each passed, failed or not tested.
-7. **Report decisions.** Lead with the user outcome. Rank findings by task
-   impact and consequence; separate severity, confidence, frequency evidence,
-   and implementation effort. State tradeoffs and unresolved evidence gaps.
-   Name the success metric, guardrail and when to review it after release.
+**Templates:** [page spec](assets/page-spec.md), [design context](assets/design-context.md),
+[output templates](assets/templates.md).
 
 ## Evidence discipline
 
@@ -278,7 +304,8 @@ Do not preload both sets for an incidental UI change.
 
 For the requested scope, deliver actionable decisions with rationale and a way
 to verify them. Required page-spec rows for the stated tier are answered or
-marked N/A with a reason. Include relevant Do / Don't examples when explaining intended usage
+marked N/A with a reason. No hard gate in the [review loop](references/review-loop.md)
+is failing or untested on built UI without saying so. Include relevant Do / Don't examples when explaining intended usage
 or likely misuse; state contextual exceptions. Cover relevant failure and recovery states. Disclose untested
 behavior and assumptions. Use the user's requested output location; otherwise
 answer in conversation rather than creating unsolicited project documents.

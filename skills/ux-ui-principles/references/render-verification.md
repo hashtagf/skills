@@ -11,11 +11,33 @@ passed, failed or not tested.
 
 | Script | Checks | Run from the skill root |
 |---|---|---|
-| `scripts/render_check.js` | Renders at 1440/768/390 px (+320 px with `--zoom`) in light and dark; reports JS/console errors, failed requests, horizontal page overflow with the offending elements, images without alt, unnamed buttons/links, unlabeled fields; saves full-page screenshots | `node scripts/render_check.js <url-or-file> --out <dir> [--zoom]` |
-| `scripts/contrast.py` | WCAG contrast ratio for color pairs with per-pair minimums; `--css` reads token blocks (light, dark, palettes) from a page and checks role pairs automatically | `python3 scripts/contrast.py --css page.html` or `python3 scripts/contrast.py pairs.json` |
+| `scripts/render_check.js` | Renders at 1440/768/390 px (+320 px with `--zoom`) in light and dark; reports JS/console errors, failed requests, horizontal page overflow with the offending elements, images without alt, unnamed buttons/links, unlabeled fields, form controls with different heights, fields in one row not top-aligned, invalid fields styled like valid ones, spaces or over-wide glyphs before punctuation, text left at opacity 0 on the first screen, **images that failed to load** (lazy images are forced eager first), **text touching the viewport edge** (no gutter), phone tap targets, and a NOTE when an h1/h2 wraps to 3+ lines; `--reduced-motion` adds animations still moving and content never revealed; `--toggle "<selector>"` clicks a language or theme switch after the first pass and repeats every viewport (screenshots prefixed `alt-`); saves full-page screenshots | `node scripts/render_check.js <url-or-file> --out <dir> [--zoom]`; while iterating `--fast` (1440 + 390, light, viewport shots) |
+| `scripts/direction_preview.js` | Renders one-screen previews of the directions in `assets/directions/directions.json` (and `--sheet`, `--thai`, `--brief`) so a look can be chosen from pictures; not a verification of a built page | `node scripts/direction_preview.js [--ids a,b] [--group company] [--sheet]` |
+| `scripts/site_preview.js` | Renders the customer-facing pages listed in [preview coverage](preview-coverage.md), every landing section and a customer component sheet in six directions (`--all` for every direction in `assets/directions/directions.json`), with `--pages`, `--ids`, `--sheet`, `--thai`; not a verification of a built page | `node scripts/site_preview.js [--ids dose,editorial] [--pages home,checkout] [--sheet]` |
+| `scripts/backoffice_preview.js` | Renders previews of the back-office screens (pages plus component, advanced and page-states sheets) in every back-office look from `assets/backoffice/styles.json`, with `--mobile` (390 x 844 phone set), `--thai`, `--sheet`, `--style-sheets` and `--singles`, so density and tone can be chosen from pictures; not a verification of a built screen | `node scripts/backoffice_preview.js [--styles a,b] [--screens records,approval] [--sheet]` |
+| `scripts/slop_check.py` | Template-look and slop heuristics in HTML + local CSS: eyebrow labels, accent-word headlines, gradient text, identical icon-card rows, >2 typefaces, >4 raw radii, raw hex count, filler copy, generic CTAs, inert forms, forms without validation or own error messages, format fields without example/hint, removed focus, motion without reduced-motion; flag vs note | `python3 scripts/slop_check.py page.html [--json]` |
+| `scripts/design_md_check.py` | DESIGN.md structure: required sections, reasons, color roles + dark values, anti-patterns, dials 1–10, status line, Thai line-height, placeholders | `python3 scripts/design_md_check.py DESIGN.md` |
+| `scripts/export_tokens.py` | Direction → `tokens.css`, Tailwind v4 theme, shadcn variables; derives dark, checks AA, prints notes where it bent a color (see [tokens to code](tokens-export.md)) |
+| `scripts/contrast.py` | WCAG contrast ratio for color pairs with per-pair minimums; `--css` reads token blocks (light, dark, palettes) from a page and checks role pairs automatically | `python3 scripts/contrast.py --css page.html` (or a `.css` file) or `python3 scripts/contrast.py pairs.json`; follows local `@import` and `<link>` stylesheets and resolves `#hex`, `rgb()`, `hsl()`, `oklch()` and `var()`; understands `--color-ink`/`--color-paper` style names and `--X`/`--X-ink`/`--on-X` pairs |
 
-`render_check.js` needs Playwright. It is a smoke check: it does not prove
+**Setup budget — never stall on tooling.** Run `node scripts/render_check.js --doctor`
+once. It finds a Playwright module (project, NODE_PATH, global, `PW_MODULE`)
+and any installed Chromium/headless shell or system Chrome, whatever the
+version. Exit 3 means none is available: record the render check as
+**not tested**, run the static checks (`slop_check.py`, `contrast.py --css`)
+and continue. Do not download browsers, install packages, or sleep/poll for
+a download mid-task; give the user the one-time setup command instead. Use
+`--timeout` rather than a shell `timeout` (absent on macOS). Fragments
+(no doctype/html) are wrapped automatically.
+
+`render_check.js` needs Playwright. It loads the page once and switches widths
+and color schemes in place; full-page screenshots are the slow part on long
+pages — use `--viewport-shots` or `--fast` while iterating and the full run
+(with `--zoom`) once before delivery. Load errors and failed requests are
+reported once, at the first viewport. It is a smoke check: it does not prove
 keyboard operability, screen-reader behavior, task success or WCAG conformance.
+`slop_check.py` and `design_md_check.py` use the standard library only; their
+hits are prompts to inspect, not verdicts on taste.
 
 ## Procedure
 
@@ -70,6 +92,10 @@ const { chromium } = require('playwright');
 
 | Symptom | Usual cause | Fix |
 |---|---|---|
+| Text touches the screen edge at every width | A later shorthand (`.section{padding:96px 0}`) overrides the container's side padding | Use `padding-block` for vertical section spacing; keep the gutter on `.container` |
+| Empty image slots in a full-page screenshot | `loading="lazy"` images never entered the viewport, or the URL failed | Load the first-screen pictures eagerly; confirm URLs resolve; `render_check.js` reports failures |
+| Thai heading breaks mid-word | No spaces in Thai; the heading column is narrow | Wrap phrases in `display:inline-block` chunks ([design foundations](design-foundations.md)) |
+| English headline wraps to 3 lines on phones while Thai fits | Latin display faces are wider per character than the Thai text implies | Check both languages (`--toggle`); shorten the English line or lower its size at 390 px |
 | Page scrolls sideways on phone | Grid track sized by content (`grid` without `minmax(0,1fr)`), long unbroken strings, fixed widths | `grid-template-columns: minmax(0,1fr)`; `min-width:0` on flex/grid children; `overflow-wrap:anywhere` for IDs; tables in their own `overflow-x:auto` |
 | Hidden element still visible | Component sets `display:grid/flex`, overriding `[hidden]` | Global `[hidden]{display:none !important}` |
 | Big gaps inside a list or card | `align-items: stretch` with grid rows | `align-content:start` / `align-self:start` |
@@ -86,7 +112,7 @@ const { chromium } = require('playwright');
 
 | Check | Result | Evidence |
 |---|---|---|
-| render_check (8 viewports) | passed / failed (n issues) | output + screenshot paths |
+| render_check (8 viewports; ×2 with `--toggle` on bilingual pages) | passed / failed (n issues) | output + screenshot paths |
 | Visual review | issues found and fixed | before/after screenshots |
 | Critical journey + failure path | passed / failed | script name or steps |
 | Keyboard | passed / not tested | notes |

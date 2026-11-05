@@ -19,15 +19,15 @@ An agent asked to "design a page" usually works in UI and interaction design.
 Name upstream gaps (no evidence about users, no success metric, unclear IA) as
 assumptions instead of silently inventing product strategy.
 
-## Six levels of scope
+## Six levels of scope ("framework level N")
 
 | Level | Covers | Done when | Load |
 |---|---|---|---|
 | 1. Product strategy & research | Business goal, users/roles, problem evidence, constraints, success metrics | Problem, audience, measurable outcome and riskiest assumptions are written down | product-discovery, validation |
-| 2. Experience architecture | Journeys, flows, IA, navigation, URLs, cross-page relationships, permission flows | Every page has a known entry, exit, parent and owner role; no orphan or dead-end flow | experience-architecture, back-office |
+| 2. Experience architecture | Journeys, flows, IA, navigation, URLs, cross-page relationships, permission flows | Every page has a known entry, exit, parent and owner role; no orphan or dead-end flow | experience-architecture, navigation-grouping, back-office |
 | 3. Page & interaction | Page type, layout, hierarchy, actions, forms, search, states, recovery | Page spec covers the applicable rows of [page-spec.md](../assets/page-spec.md) | back-office, patterns, layouts |
 | 4. Visual & design system | Type, grid, spacing, color roles, components, tokens, motion, brand | Screens use project tokens/components; exceptions are justified | design-foundations, color-palette, components-usage, component-states, iconography, visual, visual-craft |
-| 5. Quality & engineering | Responsive, accessibility, localization, performance, privacy, security | Applicable checks are executed or explicitly listed as untested | accessibility, i18n-performance, trust-security-privacy |
+| 5. Quality & engineering | Responsive, accessibility, localization, performance, privacy, security | Applicable checks are executed or explicitly listed as untested | accessibility, accessibility-verification, render-verification, i18n-performance, trust-security-privacy, tablet-rtl-dark, mobile-native (native products) |
 | 6. Validation & improvement | Usability testing, analytics, experiments, design QA, iteration | Success measure is instrumented and a review point is scheduled | validation, measurement |
 
 ## Process — iterative, not linear
@@ -35,18 +35,25 @@ assumptions instead of silently inventing product strategy.
 ISO 9241-210 sets requirements and recommendations for human-centred design
 principles and activities across the life cycle of interactive systems. [S37,
 public abstract only] Research guidance likewise treats assumptions as
-hypotheses and plans research iteratively. [S33, S34] The six phases below are
-this skill's operational loop; return to an earlier phase when evidence
-contradicts an assumption.
+hypotheses and plans research iteratively. [S33, S34] The six stages below are
+this skill's operational loop; return to an earlier stage when evidence
+contradicts an assumption. ("Phase N" is reserved for the numbered phases of
+[design workflow](design-workflow.md).)
 
-| Phase | Activity | Output | Return when |
+| Stage | Activity | Output | Return when |
 |---|---|---|---|
-| 1. Discover | Learn users, roles, context, current workarounds, existing data | Evidence log, assumptions list | — |
-| 2. Define | Agree problem, scope, constraints, success metric | Problem statement, metric definition, non-goals | Discovery shows the wrong user or problem |
-| 3. Structure | Map journeys, IA, navigation and page inventory | Flow diagram, IA map, page list with page types | A flow cannot complete or a role has no path |
-| 4. Design | Page specs, wireframes, interaction contracts, visual UI | Page specs, prototype or implemented UI | Structure forces a broken page |
-| 5. Verify | Prototype tests, accessibility/responsive/performance checks, design QA | Findings with severity and evidence | Users fail a critical task |
-| 6. Improve | Production metrics, feedback, support data, iteration | Change log and next hypotheses | Metrics or feedback contradict the design |
+| Stage 1. Discover | Learn users, roles, context, current workarounds, existing data | Evidence log, assumptions list | — |
+| Stage 2. Define | Agree problem, scope, constraints, success metric | Problem statement, metric definition, non-goals | Discovery shows the wrong user or problem |
+| Stage 3. Structure | Map journeys, IA, navigation and page inventory | Flow diagram, IA map, page list with page types | A flow cannot complete or a role has no path |
+| Stage 4. Design | Page specs, wireframes, interaction contracts, visual UI | Page specs, prototype or implemented UI | Structure forces a broken page |
+| Stage 5. Verify | Prototype tests, accessibility/responsive/performance checks, design QA | Findings with severity and evidence | Users fail a critical task |
+| Stage 6. Improve | Production metrics, feedback, support data, iteration | Change log and next hypotheses | Metrics or feedback contradict the design |
+
+The working phases in [design workflow](design-workflow.md) run inside this
+loop for one request: Stages 1–2 (Discover/Define) ≈ Phases 0–1, Stage 3 ≈
+Phase 2, Stage 4 ≈ Phases 3–5, Stage 5 ≈ Phases 6–7, Stage 6 ≈ Phase 8 plus
+post-release measurement. The design
+workflow also says where to stop and ask the user.
 
 ## Rigor tiers — scale effort by consequence
 
@@ -55,9 +62,9 @@ plausible consequence of a design error; state the tier in the page spec.
 
 | Tier | Typical pages | Required page-spec rows | Required verification |
 |---|---|---|---|
-| **Light** | Read-only info, low-traffic settings, internal tools for few expert users | 1–3, 5, 8–9, 11 | Rendered review at supported widths, keyboard pass on new controls |
-| **Standard** | Main list/detail/forms, customer-facing flows, dashboards | Rows 1–13, 16 | Light + state fixtures, accessibility checks on changed components, one task walkthrough per primary task |
-| **Critical** | Money movement, approvals, permissions, irreversible deletion, legal/consent, health or safety data | All 16 rows | Standard + security/privacy review, error-prevention review [S48], failure/unknown-outcome fixtures, usability session with representative users before launch, post-launch metric review |
+| **Light** | Read-only info, low-traffic settings, internal tools for few expert users | see [page spec](../assets/page-spec.md) | Rendered review at supported widths, keyboard pass on new controls |
+| **Standard** | Main list/detail/forms, customer-facing flows, dashboards | see [page spec](../assets/page-spec.md) | Light + state fixtures, accessibility checks on changed components, one task walkthrough per primary task |
+| **Critical** | Money movement, approvals, permissions, irreversible deletion, legal/consent, health or safety data | see [page spec](../assets/page-spec.md) | Standard + security/privacy review, error-prevention review [S48], failure/unknown-outcome fixtures, usability session with representative users before launch, post-launch metric review |
 
 Raise the tier when a page combines high frequency with high consequence.
 Lowering a tier needs a stated reason.
@@ -88,4 +95,4 @@ the answer.
 | Identify which discipline and level the request belongs to before producing artifacts. | Answer a product-strategy question with a screen layout. |
 | Record assumptions where upstream levels are missing and state their risk. | Invent personas, research findings or metrics to make a design look justified. |
 | Choose the rigor tier from consequence and state it. | Apply a heavyweight process to a label change, or a lightweight one to a payout approval. |
-| Loop back when evidence contradicts an earlier decision. | Treat the phases as a waterfall that cannot be revisited. |
+| Loop back when evidence contradicts an earlier decision. | Treat the stages as a waterfall that cannot be revisited. |

@@ -77,7 +77,7 @@ Assumptions / open questions:
 | 8 | Select row → detail + focus on heading; Approve… → check-answers → Confirm → pending → success toast + next item; Reject requires note |
 | 9 | Loading list/detail; empty queue; no filter matches; save failed (retry, note kept); above-limit (escalate instead of approve); stale item (already decided by someone else) |
 | 10 | Rejection reason required; duplicate submit blocked while pending; "already decided" conflict explains who/when and moves on |
-| 11 | ≥1100px two panes; below, list then detail with "back to queue"; tables do not scroll horizontally |
+| 11 | ≥1024px two panes; below, list then detail with "back to queue"; tables do not scroll horizontally |
 | 12 | Focal point: amount + decision panel; compact density; SLA as colored bar + text |
 | 13 | Rows are buttons in a list; decision buttons named with verb; live region announces result; Thai labels tested at 200% zoom |
 | 14 | Account masked to last 4; decision recorded with actor, reason; confirmation repeats amount and destination [S53]; reversible/checked/confirmed [S48] |

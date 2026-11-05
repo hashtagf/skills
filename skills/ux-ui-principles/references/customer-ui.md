@@ -37,6 +37,9 @@ this skill's synthesis (project recommendations); source IDs resolve in
 | Help / support | Solve a problem | Search help → top tasks → contact with context | M05, E02 |
 | Status / tracking | Know what is happening | Current state → timeline → next step → contact | B02 |
 
+Copy for these pages — headline, CTA, proof placement — is in
+[marketing-copy.md](marketing-copy.md).
+
 ## Principles for customer pages
 
 1. **Answer the visitor's questions in order:** what is it, is it for me,

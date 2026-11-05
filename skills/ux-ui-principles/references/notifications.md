@@ -56,10 +56,10 @@ the outcome is this skill's recommendation.
 
 | Pattern | Use | Rules |
 |---|---|---|
-| Toast | Confirmation of the user's own action | Short, not the only record of important outcomes; don't auto-dismiss errors; announce via live region [S13] |
+| Toast | Confirmation of the user's own action | Short, optional single action (e.g. undo); auto-dismiss only success/info, never errors; not the only record of important outcomes; live region, never steals focus; pause on hover/focus; not covering primary actions [S13] |
 | Inline message | Result tied to a specific field or section | Stays until resolved |
 | Banner | Page or system-wide state (maintenance, degraded service, pending approval) | Persistent while true; explains impact and action |
-| Badge / count | Unread or pending items | Clears when items are handled, not just viewed; cap display (99+) |
+| Badge / count | Unread or pending items | Clears when items are handled, not just viewed; cap display (99+, per [components-usage.md](components-usage.md)) |
 | Notification center | History of events | Each item links to the object; mark read/unread |
 
 ## Lifecycle mapping

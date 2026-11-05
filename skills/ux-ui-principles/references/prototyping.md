@@ -27,7 +27,7 @@ content examples and note responsive changes.
 │ ▸ WD-2041 ฿210,000 เกิน SLA  │ หลักฐาน: KYC ✓ · ความเสี่ยง กลาง (2 เหตุผล) │
 │   WD-2047 ฿48,000            │ [ปฏิเสธ…]                    [อนุมัติ…] │
 └──────────────────────────────┴────────────────────────────────────────┘
-Compact (<1100px): list only → select → detail with "← กลับไปที่คิว"
+Compact (below 1024px): list only → select → detail with "← กลับไปที่คิว"
 ```
 
 ## HTML prototypes

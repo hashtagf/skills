@@ -32,6 +32,31 @@ Decide supported locales at level 1, not after build.
 - Show each language in its own name ("ไทย", "English").
 - Keep the user on the same page after switching.
 
+### Two-language pages (static, one file)
+
+A single-page site that offers Thai and English with a toggle:
+
+- Mark each string pair as `<span lang="th">…</span><span lang="en">…</span>`
+  and hide the inactive one with CSS from a `data-lang` attribute on `<html>`
+  (`html[data-lang=en] [lang=th]{display:none}`), so the page reads correctly
+  with scripting off and the default language needs no script.
+- The toggle button sets `data-lang` and `<html lang>`, updates `document.title`
+  and the `alt` text of images, stores the choice in `localStorage` (in a
+  try/catch), and its label names the other language in that language's own
+  script ("EN" on the Thai page, "TH" on the English page). Give it an
+  `aria-label` in both languages.
+- Switch the **font family per language**, not only the text
+  ([design foundations](design-foundations.md) "Thai with Latin display
+  faces"), and set line-height and tracking per language.
+- Select options and other text that live in attributes or form controls need
+  script to translate; keep the keys in one object and set them in `setLang()`.
+- Expect different line counts: Thai headings are shorter in characters but wider
+  per character, and English headlines of 40 characters wrap to three lines at
+  390 px. Check both languages at every width; `render_check.js --toggle "<selector>"`
+  repeats the whole matrix after clicking the switch.
+- The accent-word and eyebrow heuristics of `slop_check.py` ignore
+  `<span lang>` variants; count each language's headline once.
+
 ## Performance as user experience
 
 Slow loading and slow response to input are usability failures. Core Web
@@ -53,7 +78,7 @@ thresholds at the source before quoting them as requirements.
 
 ### Performance budget in the page spec
 
-For Standard and Critical tiers, write a target in the page spec, for example:
+For Critical tier, or Standard where speed is the risk, write a target in the page spec (row 15, required only at Critical per [page-spec.md](../assets/page-spec.md)), for example:
 "LCP ≤ 2.5 s and INP ≤ 200 ms at p75 on mid-range Android over 4G for the
 withdrawal queue; list of 50 rows renders without visible jank." Name the
 measurement source (field data, lab test) and state when it has not been measured.

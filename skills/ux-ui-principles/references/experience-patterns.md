@@ -20,6 +20,7 @@ with fewer items can still be worse if it hides the operator's main work.
 - Ask only for information the task needs; reuse already-provided data when safe.
 - Use persistent labels and explicit formats. A placeholder is an example, not
   the only field name. Avoid prematurely validating an untouched field.
+- Details (required/optional, placeholders, validation timing): [forms.md](forms.md).
 - Identify each invalid field and a correction. Use a summary for long forms
   when it helps navigation; connect summary links to the affected fields.
 - Preserve valid input after server rejection or connection failure. Explain

@@ -17,6 +17,11 @@ Benefits grouped by task | How it works
 Pricing or next step | FAQ | Footer
 ```
 
+**Visual anchors:** Hero = composed product scene; benefits = bento with one
+large working fragment and icon tiles; how it works = SVG process diagram with
+icon nodes; next step = interactive estimate or pricing fragment; FAQ and form
+may be text-led. See [visual-assets](../../references/visual-assets.md) §4.
+
 **Compact behavior:** Stack promise/action before media; keep evidence readable.
 
 **Applicable states:** Loading media; unavailable offer; form error; submission result.

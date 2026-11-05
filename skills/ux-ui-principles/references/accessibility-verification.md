@@ -23,18 +23,11 @@ unverified until the actual assistive interaction is checked.
 
 ## Web thresholds and exceptions
 
-| Concern | Working check | Source |
-|---|---|---|
-| Text contrast | At least 4.5:1 for ordinary text; 3:1 for large text, with the criterion's definitions and exceptions | [SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) |
-| Non-text contrast | Required visual information identifying controls/states and graphical objects needs 3:1 against adjacent colors, subject to exceptions | [SC 1.4.11](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html) |
-| Pointer targets | At least 24 × 24 CSS pixels, or a valid spacing/equivalent/inline/user-agent/essential exception | [SC 2.5.8](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html) |
-| Reflow | Ordinary vertically scrolling content remains usable at a width equivalent to 320 CSS pixels without two-dimensional scrolling, except content requiring a two-dimensional layout | [SC 1.4.10](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) |
-
-For the target-spacing exception, assess a 24 CSS pixel diameter circle centered
-on each undersized target; it must not intersect another target or another such
-circle. An arbitrary gap between icons is not evidence that the exception holds.
-Larger touch targets can improve comfort; distinguish a project preference from
-the AA minimum. Measure the actual hit area, not only the visible glyph.
+Criteria (1.4.3 contrast, 1.4.11 non-text contrast, 1.4.10 reflow, 2.5.8 target size
+including the 24px-circle spacing test) live in the table in
+[accessibility.md](accessibility.md#visual-and-input-checks). Evidence: measure the
+actual hit area, not only the visible glyph, and do not accept an arbitrary gap
+between icons as proof of the spacing exception.
 
 Large-text and inactive-control exceptions need their actual conditions checked.
 Do not use those exceptions to make essential help unreadable. Reflow exceptions

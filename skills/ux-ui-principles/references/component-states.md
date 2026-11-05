@@ -26,6 +26,7 @@ Rules:
 - Disabled wins over hover/pressed; a disabled control shows no hover.
 - Every state change that matters to the user is perceivable without color and,
   when it happens without focus moving, announced (status messages). [S13]
+- Focus ring: 3px, at least 3:1 against what it sits on, on every control, never removed. Hover is a hint, never the only way to see something; pressed is darker or shifts 1px; touch has no hover, so the same information must be reachable by tap.
 - State must survive forced-colors/high-contrast modes (borders and outlines,
   not only background tints).
 
@@ -61,11 +62,11 @@ native HTML elements, which provide these behaviors already.
 | Tooltip | Appears on hover and focus; Escape dismisses; never holds interactive content (APG pattern is still provisional; rely on WCAG 1.4.13) |
 | Popover (non-modal) | Opens on click/Enter; Escape closes; focus returns to trigger |
 | Slider | Arrows step; Page Up/Down larger steps; Home/End min/max; value exposed |
-| Data grid | Arrows move between cells; Home/End row edges; Enter/F2 edits a cell; Escape cancels edit |
+| Data grid | Arrows move between cells; Home/End row edges; edit and commit keys: [advanced-components.md](advanced-components.md#editable-grid-cell) |
 | Tree view | Up/Down move; Right expands/enters; Left collapses/goes to parent |
 | Toolbar | One Tab stop; arrows move between controls |
 | Carousel | Rotation pauses on focus/hover and has a pause control; previous/next are buttons [S92] |
-| Toast / status | Never steals focus; announced via a live region; actions remain reachable |
+| Toast / status | See [notifications.md](notifications.md#in-app-notifications) (no focus steal, live region, reachable actions) |
 
 Content that appears on hover or focus (tooltips, hover cards) must be
 dismissible without moving the pointer or focus, hoverable, and persistent until

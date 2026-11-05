@@ -25,7 +25,7 @@ patterns. [S14, S93] Source IDs resolve in [sources.md](sources.md).
 
 | Need | Use |
 |---|---|
-| Result of the user's own action, low importance ("บันทึกแล้ว") | **Toast** — auto-dismiss only for success/info; never the only record of important outcomes |
+| Result of the user's own action, low importance ("บันทึกแล้ว") | **Toast** — rules in [notifications.md](notifications.md#in-app-notifications) |
 | Error tied to a field or section | **Inline message** next to it |
 | Page- or system-level state (offline, maintenance, pending approval) | **Banner** — persistent while true |
 | Must decide before continuing | **Dialog** |
@@ -188,7 +188,7 @@ Each entry: **Use when · Avoid when · Must have · Notes**.
 
 **Alert / banner** — Must have: severity icon + text, title stating the issue, action, dismiss only if the condition is informational.
 
-**Toast / snackbar** — Must have: short message, optional single action (e.g. "เลิกทำ"), announced via live region, enough time to read and reach the action (pause on hover/focus), not covering primary actions. Errors that need action are not toasts. [S13]
+**Toast / snackbar** — Rules in [notifications.md](notifications.md#in-app-notifications). Errors that need action are not toasts.
 
 **Progress bar / circle** — Determinate when progress is known; show what is happening and estimated time for long jobs.
 
