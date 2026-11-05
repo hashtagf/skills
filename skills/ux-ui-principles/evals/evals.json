@@ -1970,6 +1970,405 @@
         "direction-library"
       ],
       "fixture": "evals/fixtures/thai-form"
+    },
+    {
+      "id": 101,
+      "field": "greenfield",
+      "category": "search",
+      "prompt": "ออกแบบช่องค้นหาและตัวกรองหน้ารายการออเดอร์ในระบบหลังบ้าน ค้นได้ทั้งเลขออเดอร์ ชื่อลูกค้า และเบอร์โทร ผู้ใช้พิมพ์ภาษาไทยปนอังกฤษ",
+      "expected_reads": [
+        [
+          "search-filter"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 102,
+      "field": "greenfield",
+      "category": "search",
+      "prompt": "Our e-commerce catalog search returns zero results for a lot of Thai queries and the mobile filter UI feels clunky. How should we fix the query handling, facets and no-results page?",
+      "expected_reads": [
+        [
+          "search-filter"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ]
+    },
+    {
+      "id": 103,
+      "field": "greenfield",
+      "category": "search",
+      "prompt": "Should our admin user list use infinite scroll or pagination, and how do we keep filters when the user clicks into a record and presses Back?",
+      "expected_reads": [
+        [
+          "search-filter"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 104,
+      "field": "greenfield",
+      "category": "collaboration",
+      "prompt": "แอดมินสองคนเปิดแก้ข้อมูลลูกค้าคนเดียวกันพร้อมกันแล้วข้อมูลหาย ควรออกแบบ UI ล็อกหรือแจ้งเตือนความขัดแย้งยังไงดี",
+      "expected_reads": [
+        [
+          "collaboration"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 105,
+      "field": "greenfield",
+      "category": "collaboration",
+      "prompt": "Design the share dialog, comment threads with @mentions, and version history for our collaborative contract editor.",
+      "expected_reads": [
+        [
+          "collaboration"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ]
+    },
+    {
+      "id": 106,
+      "field": "greenfield",
+      "category": "collaboration",
+      "prompt": "Our field-sales app works offline. How should we show pending, synced, failed and conflict states, and announce teammates' live edits to screen-reader users?",
+      "expected_reads": [
+        [
+          "collaboration"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 107,
+      "field": "greenfield",
+      "category": "email",
+      "prompt": "Build the HTML order-receipt email for our shop; it has to look right in Outlook and Gmail",
+      "expected_reads": [
+        [
+          "email-design"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 108,
+      "field": "greenfield",
+      "category": "email",
+      "prompt": "อีเมลยืนยันการจองของเราใน Gmail ฟอนต์ไทยเพี้ยน และพอเปิด dark mode โลโก้หายไปเลย ช่วยแก้ template ให้หน่อย",
+      "expected_reads": [
+        [
+          "email-design"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ]
+    },
+    {
+      "id": 109,
+      "field": "greenfield",
+      "category": "email",
+      "prompt": "Design a password-reset and OTP email template that stays readable with images turned off and passes accessibility checks",
+      "expected_reads": [
+        [
+          "email-design"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "data-visualization"
+      ]
+    },
+    {
+      "id": 110,
+      "field": "greenfield",
+      "category": "print",
+      "prompt": "ทำหน้าพิมพ์ใบเสร็จรับเงิน/ใบกำกับภาษีขนาด A4 จากระบบ ต้องมียอดเงินเป็นตัวอักษร วันที่เป็น พ.ศ. และ QR พร้อมเพย์",
+      "expected_reads": [
+        [
+          "print-documents"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ]
+    },
+    {
+      "id": 111,
+      "field": "greenfield",
+      "category": "print",
+      "prompt": "Our server-generated invoice PDFs show Thai tone marks overlapping and lines overflowing — which PDF approach should we switch to?",
+      "expected_reads": [
+        [
+          "print-documents"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "motion"
+      ]
+    },
+    {
+      "id": 112,
+      "field": "greenfield",
+      "category": "print",
+      "prompt": "Add a 'Download PDF' button for monthly reports: long tables must repeat headers across pages, and we need preview and loading states",
+      "expected_reads": [
+        [
+          "print-documents"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library",
+        "marketing-copy"
+      ]
+    },
+    {
+      "id": 113,
+      "field": "greenfield",
+      "category": "platforms",
+      "prompt": "ออกแบบหน้าจอ self-order kiosk สำหรับร้านชาบู จ่ายด้วย PromptPay QR และมีเครื่องพิมพ์ใบเสร็จ",
+      "expected_reads": [
+        [
+          "other-platforms"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 114,
+      "field": "greenfield",
+      "category": "platforms",
+      "prompt": "We're building an Electron desktop app for macOS and Windows. How should menus, shortcuts, title bar and auto-update work?",
+      "expected_reads": [
+        [
+          "other-platforms"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 115,
+      "field": "greenfield",
+      "category": "platforms",
+      "prompt": "Design the remote-control navigation and focus states for our Android TV streaming app",
+      "expected_reads": [
+        [
+          "other-platforms"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 116,
+      "field": "greenfield",
+      "category": "engagement",
+      "prompt": "อยากเพิ่มระบบสะสมแต้มและ tier สมาชิกในแอปร้านกาแฟ ควรออกแบบยังไงให้ลูกค้าเชื่อถือ",
+      "expected_reads": [
+        [
+          "engagement"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 117,
+      "field": "greenfield",
+      "category": "engagement",
+      "prompt": "Should we add daily streaks and a leaderboard to our language-learning app? How do we avoid streak anxiety?",
+      "expected_reads": [
+        [
+          "engagement"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 118,
+      "field": "greenfield",
+      "category": "engagement",
+      "prompt": "Our free trial converts to paid automatically and cancel is phone-only. Review this retention flow.",
+      "expected_reads": [
+        [
+          "engagement"
+        ],
+        [
+          "trust-security-privacy"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 119,
+      "field": "greenfield",
+      "category": "research",
+      "prompt": "ช่วยเขียน interview guide สัมภาษณ์พนักงานหลังบ้านที่อนุมัติการถอนเงิน และต้องขอ consent อัดเสียงตาม PDPA ยังไง",
+      "expected_reads": [
+        [
+          "research-methods"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 120,
+      "field": "greenfield",
+      "category": "research",
+      "prompt": "Which research method and how many participants should I use to learn how often customers top up their wallet?",
+      "expected_reads": [
+        [
+          "research-methods"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 121,
+      "field": "greenfield",
+      "category": "research",
+      "prompt": "Make a service blueprint template for our branch + app + call-center loan application",
+      "expected_reads": [
+        [
+          "research-methods"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 122,
+      "field": "greenfield",
+      "category": "theming",
+      "prompt": "Our SaaS is white-label: each tenant uploads a logo and brand color, with dark mode. How do we structure tokens and stop tenants breaking contrast or error colors?",
+      "expected_reads": [
+        [
+          "tokens-export"
+        ]
+      ],
+      "must_not_read": [
+        "direction-library"
+      ]
+    },
+    {
+      "id": 123,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "ทำเว็บขายเมล็ดกาแฟให้ร้านคั่วกาแฟ ใช้สไตล์ Loom จาก preview",
+      "expected_output": "Interview still asks the shape question; plan names 3–5 subject objects (bean, cup, bag, stamp) and takes rounded shapes from them instead of Loom's radius 0; recipe radius treated as a default.",
+      "files": [],
+      "assertions": [
+        "Asks or records the shape question even though the direction was picked from a preview",
+        "The plan lists physical objects from the coffee subject and derives corner/button/crop shapes from them",
+        "Does not apply Loom's radius 0 / 'no radius above 2px' as a hard rule for a café"
+      ],
+      "expected_reads": [
+        [
+          "design-quality"
+        ],
+        [
+          "direction-library"
+        ],
+        [
+          "design-direction"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 124,
+      "field": "greenfield",
+      "category": "landing",
+      "prompt": "Build the page for our real roastery but we don't have the facts yet, use placeholders for everything and build it anyway.",
+      "expected_output": "Placeholder mode: facts as visible .ph placeholders, proof left out (no reviews/ratings/counts), placeholders listed with placeholders.py in the hand-off; CTA checked above the 390×844 fold.",
+      "files": [],
+      "assertions": [
+        "Renders facts as marked placeholders rather than invented values",
+        "Leaves reviews, ratings, customer counts and awards off the page",
+        "Lists the placeholders for the hand-off (placeholders.py or equivalent)",
+        "Checks the primary action is above the 390×844 fold (fold_check.js or measured)"
+      ],
+      "expected_reads": [
+        [
+          "marketing-copy"
+        ],
+        [
+          "design-quality"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 125,
+      "field": "greenfield",
+      "category": "back-office",
+      "prompt": "ทำหน้าหลังบ้านร้านคั่วกาแฟ ดูว่ารอบนี้ต้องคั่วอะไรบ้าง มีออเดอร์ติดปัญหาไหม ใช้ look canopy",
+      "expected_output": "Title row answers in one sentence; KPIs and chart computed from the same records; blocked primary action disabled with visible reason and the fix one click away; blockers above charts on phones; demo state switcher; aria-busy/submitting markers.",
+      "files": [],
+      "assertions": [
+        "Every KPI, headline figure and chart value is derived from the same order records (no figure typed twice)",
+        "A blocked primary action shows its reason visibly and offers the fix nearby",
+        "On phones the needs-attention block comes before charts",
+        "Covers loading, first-run empty, filtered empty, error with retry, submitting and success with undo"
+      ],
+      "expected_reads": [
+        [
+          "back-office"
+        ],
+        [
+          "app-screen-rules"
+        ],
+        [
+          "page-spec"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "direction-library"
+      ]
     }
   ]
 }

@@ -58,9 +58,9 @@ deviating from it is a process defect, like skipping a check.
 
 | Step | Run | Scope | Count |
 |---|---|---|---|
-| A. Baseline | `python3 scripts/check.py <page> --render` on every page/route (script, slop, contrast, states, then `render_check --fast`; without a browser the static checks still run and render says NOT RUN), look at the shots | All pages | Once |
+| A. Baseline | `python3 scripts/check.py <page> --render` on every page/route (script, slop, contrast, states, public-page metadata, then `render_check --fast` and `fold_check.js`; without a browser the static checks still run and render says NOT RUN), look at the shots | All pages | Once |
 | B. Batch fix | Collect **every** finding from A (render, screenshots, slop, contrast) into one list, then fix them all | — | No checks between fixes |
-| C. Confirm | `--fast` only on pages the batch touched; journey script (happy + failure path) once | Changed pages | Once per fix round |
+| C. Confirm | `--fast` only on pages the batch touched; journey script (`flow_check.js steps.json`, happy + failure path) once | Changed pages | Once per fix round |
 | D. Final | `render_check.js --zoom` (full) + `--reduced-motion` if animated; journey script; contrast | Each page once | Once, before delivery |
 
 - **Budget:** fix rounds (B→C) ≤ 3 ([gate tiers](gate-tiers.md) §4); the full run
@@ -72,7 +72,7 @@ deviating from it is a process defect, like skipping a check.
   field alignment across grid rows, text at the edge of a deliberate scroll
   region, in-table sticky cells), decide in round A, record why, and do not
   re-run to chase it.
-- **Journey script:** write it once, run it in C and D only. Re-run between
+- **Journey script:** write it once as `steps.json` for `scripts/flow_check.js`, run it in C and D only. Re-run between
   only if behavior (not styling) changed.
 - **After D:** a further fix re-runs D only for the page it touched.
 - **Report the count** in delivery: "fast runs N, full runs N, journey runs N".

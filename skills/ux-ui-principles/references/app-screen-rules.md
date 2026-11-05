@@ -54,7 +54,7 @@ destructive confirm, a required decision). Otherwise inline, a sheet or a page.
 Source: Codex `webapp-ui-skill`, kept where it adds to the rules above.
 
 - **Scan, compare, repeat.** Optimize for scanning rows, comparing values and
-  repeating an action; not for composition. Open on the task, never on a hero.
+  repeating an action; not for composition. Open on the task; a hero only as the first-run exception in §8.
 - **Stable geometry.** Buttons, controls, table columns and row heights keep
   their size on hover, loading and selection; a spinner replaces the icon, not
   the width. Filters and sticky headers never move the data under the cursor.
@@ -81,3 +81,42 @@ Source: Codex `webapp-ui-skill`, kept where it adds to the rules above.
   hit is not proof the state is reachable, so label it Manual.
 - **Checks:** `slop_check.py` flags `viewport-scaled-font`, `nested-cards`,
   `hero-in-app`; `render_check.js` covers overflow and tap targets.
+
+## 8. Character without noise (the signature element)
+
+Plain chrome is not an anonymous product. Every from-scratch console gets, on top of §7:
+
+- **Fonts:** the chosen look's display + body pair, actually loaded. System fonts
+  only when the product is explicitly native-styled.
+- **Brand mark:** a drawn mark (not a letter in a square) beside the name; the same
+  green/ink as the primary action.
+- **One signature element**, chosen from the product's story: a first-run hero that
+  draws the system the user is connecting (A → B → C), a status story banner, or a
+  live-state strip. Exactly one per screen.
+- **Hero exception to §7:** allowed on the overview **only** in first-run/empty state,
+  with one primary action, and it gives way to the data once there is data.
+- **Voice:** empty, loading and success copy says what is happening and what to do,
+  in the product's tone ("Your first request will bring this chart to life").
+- **Surfaces:** a tinted ground, white panels, a pale brand tint for the active nav
+  item, selected rows and tags. Reference: `assets/references/canopy-dashboard.jpg`.
+
+## 9. Proving the states and the numbers (learned on a roaster back office)
+
+- **Numbers from one source.** Compute every KPI, headline sentence, chart's last bar and stock table
+  from the same records the table shows; never type a figure twice. After any action (defer, pack,
+  undo) re-render all of them, so a duplicate can't drift (§4).
+- **The title row is a sentence with the answer:** "ต้องคั่ว 7.6 กก. จาก 9 ออเดอร์ รวม 5 ครั้ง" beats a
+  heading plus four tiles; the tiles then support it.
+- **Blocked primary action:** keep it disabled with the reason visible next to it (not a tooltip),
+  and put the fix one click away in the "needs attention" block; the action unlocks when the fix lands.
+- **On phones, blockers come before the plan and charts** (`order` on the attention block); an operator
+  opens the screen to clear exceptions.
+- **A demo state switcher in prototypes.** A small, labelled "check screen states (demo)" control
+  (data state: ready / loading / first-run / error; "simulate save failure") lets reviewers and
+  `flow_check.js` reach every cell of the state matrix. Remove it, or hide it behind a flag, in production.
+- **Marker names the checkers understand:** in-flight buttons get `aria-busy="true"` and a
+  `submitting` class; success uses `role="status"`. `state_check.py` and Codex `webapp-ui-skill`'s
+  `check_state_coverage.ts` both look for these words.
+- **Admin pages are not public:** add `<meta name="robots" content="noindex">` (or keep them under
+  `/admin/`); `check.py` then skips the public-page metadata line.
+

@@ -63,6 +63,14 @@ tier เป็นตัวกำหนดว่าต้องตอบข้อ
 | การใช้ icon: เมื่อไรต้องมี label, ชุดเดียว ความหมายเดียว, ขนาด, พื้นที่กด, accessible name | [Iconography](references/iconography.md) |
 | Native mobile: iOS/Android, ขอสิทธิ์ในจังหวะที่ใช้, push, deep link, offline, gesture | [Mobile native](references/mobile-native.md) |
 | การสื่อสารข้ามช่องทาง: email/SMS/push/in-app | [Notifications](references/notifications.md) |
+| ค้นหาและฟิลเตอร์: ช่องค้นหา, คำค้นภาษาไทย, ผลลัพธ์, facet, sort, URL state, saved view, ไม่พบผลลัพธ์ | [Search & filter](references/search-filter.md) |
+| ทำงานร่วมกันแบบ realtime: presence, แก้พร้อมกัน/conflict, comment, แชร์สิทธิ์, version history, offline sync | [Collaboration](references/collaboration.md) |
+| HTML email: layout, ข้อจำกัดของ client, dark mode, ฟอนต์ไทย, template ตามประเภท, การทดสอบ | [Email design](references/email-design.md) |
+| เอกสารพิมพ์/PDF: ใบเสร็จ ใบกำกับภาษี ใบเสนอราคา รายงาน ป้าย, print CSS, ฟอนต์ไทยใน PDF, จำนวนเงินเป็นตัวหนังสือ | [Print documents](references/print-documents.md) |
+| แพลตฟอร์มอื่น: kiosk/POS, desktop app, smartwatch, TV, voice, in-car, XR | [Other platforms](references/other-platforms.md) |
+| Engagement/gamification: habit loop, streak, แต้ม/loyalty, เมื่อไรควรใช้, ข้อห้าม dark pattern | [Engagement](references/engagement.md) |
+| วิธีวิจัย: เลือก method, interview guide, survey, persona/JTBD, journey map, diary, recruit + PDPA consent | [Research methods](references/research-methods.md) |
+| Multi-brand / white-label theme ต่อ tenant | [Tokens to code](references/tokens-export.md) |
 | Data visualization: เลือกกราฟจากคำถาม, สีในกราฟ, state ของข้อมูล | [Data visualization](references/data-visualization.md) |
 | การสร้างและตรวจชุดสี: role ก่อนค่าสี, สีสถานะคงที่, contrast สองโหมด | [Color palette](references/color-palette.md) |
 | การตรวจหน้าที่ render จริง + script `render_check.js` และ `contrast.py` (`--css` ตรวจ token ทุกธีมจากไฟล์หน้าเว็บอัตโนมัติ) | [Render verification](references/render-verification.md) |

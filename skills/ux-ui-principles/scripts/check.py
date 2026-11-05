@@ -9,13 +9,16 @@ Runs, per page:
   slop     python3 scripts/slop_check.py  template devices, inert forms, removed focus, motion without reduced motion
   contrast python3 scripts/contrast.py --css  role colour pairs in :root token blocks (light and dark)
   states   python3 scripts/state_check.py  markers of loading / empty / error / disabled / focus … in the page's folder
+  meta     built in                         public pages: title, description, canonical, og:title/description/image,
+                                            twitter:card, exactly one h1 (N/A for /admin/ paths, noindex or data-surface="app")
   render   node scripts/render_check.js --fast (with --render; --full drops --fast)  overflow, JS errors, targets, shots
+  fold     node scripts/fold_check.js (with --render)  primary action above the 390x844 / 1440x900 fold, next section hinted (N/A on app pages)
 
 Prints one line per check (PASS / FLAG / FAIL / ERROR / N/A / MANUAL / NOT RUN) and the first lines of anything that is not a pass.
 A check that cannot run (no node, no browser) says NOT RUN; never report it as passed. Exit 1 when any check
 fails or flags. Standard library only.
 """
-import os, shutil, subprocess, sys
+import os, re, shutil, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,6 +31,36 @@ def run(cmd):
         return None, "not installed"
     except subprocess.TimeoutExpired:
         return 1, "timed out"
+
+
+def is_app_page(page, html):
+    """Admin / app / noindex pages: no public metadata, no marketing fold rule."""
+    return bool("/admin/" in page.replace(os.sep, "/") or re.search(r"<meta[^>]+name=[\"']robots[\"'][^>]+noindex", html, re.I)
+                or re.search(r"<html[^>]+data-surface=[\"']app", html, re.I))
+
+
+def meta_check(page):
+    """Return (status, lines) for the public-page metadata check."""
+    with open(page, encoding="utf-8", errors="replace") as f:
+        html = f.read()
+    if is_app_page(page, html):
+        return "N/A", ["app or noindex page: metadata not required"]
+    def has(pat):
+        return re.search(pat, html, re.I | re.S) is not None
+    need = {
+        "title": r"<title>\s*[^<\s][^<]*</title>",
+        "meta description": r"<meta[^>]+name=[\"']description[\"'][^>]+content=[\"'][^\"']+",
+        "canonical": r"<link[^>]+rel=[\"']canonical[\"']",
+        "og:title": r"property=[\"']og:title[\"']",
+        "og:description": r"property=[\"']og:description[\"']",
+        "og:image": r"property=[\"']og:image[\"']",
+        "twitter:card": r"name=[\"']twitter:card[\"']",
+    }
+    missing = [k for k, pat in need.items() if not has(pat)]
+    h1 = len(re.findall(r"<h1[\s>]", html, re.I))
+    if h1 != 1:
+        missing.append(f"exactly one h1 (found {h1})")
+    return ("PASS", []) if not missing else ("FLAG", ["missing: " + ", ".join(missing)])
 
 
 def main(argv):
@@ -47,9 +80,26 @@ def main(argv):
         ]
         if "--render" in argv or "--full" in argv:
             checks.append(("render", [node, os.path.join(HERE, "render_check.js"), page] + ([] if "--full" in argv else ["--fast"]) if node else None))
+            fold = os.path.join(HERE, "fold_check.js")
+            with open(page, encoding="utf-8", errors="replace") as f:
+                app = is_app_page(page, f.read())
+            if app:
+                checks.append(("fold", "n/a"))
+            else:
+                checks.append(("fold", ([node, fold, page] if os.path.isfile(fold) else "missing") if node else None))
+        status, lines = meta_check(page)
+        if status == "FLAG":
+            worst = 1
+        print(f"  {status:<8} meta")
+        for line in lines if status == "FLAG" else []:
+            print(f"           {line}")
         for name, cmd in checks:
             if cmd is None:
                 print(f"  NOT RUN  {name:<8} (node not found)"); continue
+            if cmd == "n/a":
+                print(f"  N/A      {name:<8} (app or noindex page: marketing fold rule does not apply)"); continue
+            if cmd == "missing":
+                print(f"  NOT RUN  {name:<8} (scripts/{name}_check.js not found)"); continue
             code, out = run(cmd)
             if code is None:
                 print(f"  NOT RUN  {name:<8} ({out})"); continue

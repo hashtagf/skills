@@ -52,4 +52,56 @@ own density variables.
    [design memory](design-memory.md).
 
 Limits: tints are decorative, not text colors; shadows are one preset per surface rule;
-no multi-brand or density tokens; check the dark theme by eye, it is derived, not designed.
+one brand per run (multi-brand: see "Multi-brand and white-label theming" below), no density tokens; check the dark theme by eye, it is derived, not designed.
+
+## Multi-brand and white-label theming
+
+`export_tokens.py` emits one brand per run; this section is the guidance for serving many tenants
+from one product (this skill's recommendation unless cited). Token naming and tiers follow the
+Design Tokens Format [S58]; Figma modes map to tenants and themes [S59].
+
+| Tier | Example | Who owns it |
+|---|---|---|
+| Core (raw) | `--blue-600`, `--space-4`, `--radius-2` | Design system |
+| Semantic | `--color-accent`, `--color-bad`, `--color-surface` | Design system; components use only these |
+| Brand override | `[data-brand="acme"] { --color-accent: … }` | Tenant config, validated |
+
+| Tenants may change | Locked |
+|---|---|
+| Accent fill + its generated text/ink steps (after contrast check) | Status meanings and hues: error, warning, success, info |
+| Logo (light + dark versions), favicon, app name | Type scale, spacing, focus ring visibility |
+| Display font from an approved list (must cover Thai) | Body font fallback to Noto Sans Thai |
+| Radius preset (sharp / default / round) | Component structure, layout, density |
+| Email/PDF header color and sender name | Legal footer, security copy, PDPA notices |
+
+**Validation per tenant.** Run every brand × theme through the same rules as the script: accent
+text ≥ 4.5:1 on paper and surface, accent fill vs its ink ≥ 4.5:1, focus ring ≥ 3:1 [S03, S04].
+Reject or auto-adjust lightness on upload and show the tenant admin the adjusted swatch and why
+("ปรับสีให้อ่านได้ตามมาตรฐาน WCAG"). Block an accent too close to `--color-bad` so brand buttons
+don't read as errors.
+
+**Runtime.** One stylesheet; tenants switch with attributes on `<html>`:
+`<html data-brand="acme" data-theme="dark">`. Overrides touch semantic variables only; no tenant
+CSS files with selectors. Load the brand block server-side to avoid a flash of default brand; cache
+per tenant.
+
+**Dark mode × brand.** Each tenant supplies or derives a dark accent; the matrix is
+brands × {light, dark} × {high-contrast if supported}. A tenant without dark-mode approval still
+gets a derived, validated dark theme, never the light accent on dark ground.
+
+**Logo slots.**
+
+| Slot | Size (CSS px) | Format |
+|---|---|---|
+| Header / sidebar | max height 32, max width 160 | SVG preferred; light + dark versions |
+| Collapsed nav / app icon | 32×32 square mark | SVG / PNG 2× |
+| Login / splash | max height 64 | SVG |
+| Email header | width 160–200, hosted PNG 2× | PNG (many mail clients block SVG) |
+| PDF / receipt | vector, monochrome fallback for thermal printers | SVG / PDF |
+
+**Propagation.** Emails, PDFs, receipts, push icons and LINE OA rich messages read the same tenant
+token JSON at render time; don't hand-copy hex values into templates.
+
+**Testing the matrix.** Keep a fixture list of real tenants plus two stress brands (very light
+yellow accent, very dark navy accent). Screenshot key screens for every brand × theme in CI, run
+`contrast.py --css` on each, and fail the build on any pair below AA.

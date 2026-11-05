@@ -2,18 +2,18 @@
 name: ux-ui-principles
 description: >-
   Load before any UX/UI answer, even a one-line fact (WCAG target size,
-  contrast ratio) or a question about the user's own component, page or code
-  (how its empty/loading/error states, layout or copy should work). Holds rules
-  general knowledge gets wrong: WCAG exceptions, Thai typography, money and
-  approval flows, form validation, component choice, required states. Use to
-  design, build, redesign, review, audit, score or improve any screen, page or
-  flow (incl. a usability review ranking problems): landing pages for any
-  business, checkout, sign-up, onboarding, admin, forms, dashboards, charts,
-  navigation and IA, mobile apps; to pick a component; for visual direction;
-  to write DESIGN.md or extract one from an existing codebase; and to verify
-  rendered UI. Thai: "ออกแบบหน้า", "ตรวจ UX", "ตรวจ UX หน้าสมัครสมาชิก",
-  "ทำ landing page", "ทำเว็บให้ร้าน", "ดูหรู มี animation", "เลือกกราฟ",
-  "ทำให้สวยขึ้น", "ใช้ component ไหน", "จัดเมนู", "ฟอร์ม", "หลังบ้าน",
+  contrast) or a question about the user's own component, page or code
+  (states, layout, copy). Holds rules general knowledge gets wrong: WCAG
+  exceptions, Thai typography, money and approval flows, validation, component
+  choice, required states. Use to design, build, redesign, review, audit or
+  score any screen or flow: landing pages, checkout, sign-up, onboarding,
+  admin, forms, search and filters, dashboards, charts, navigation and IA,
+  mobile app tabs, HTML email, invoices/PDF, kiosk/POS, desktop, watch, TV,
+  collaboration, gamification; UX research methods and myths ("is there
+  research for X"); picking a component; visual direction; DESIGN.md;
+  verifying rendered UI. Thai: "ออกแบบหน้า", "ตรวจ UX", "ทำ landing page",
+  "ทำเว็บให้ร้าน", "เลือกกราฟ", "ทำให้สวยขึ้น", "ใช้ component ไหน",
+  "จัดเมนู", "ฟอร์ม", "หลังบ้าน", "ค้นหา/ฟิลเตอร์", "ใบเสร็จ", "ตู้ kiosk",
   "ถอด DESIGN.md จากโค้ด". Not for backend-only.
 ---
 
@@ -29,16 +29,28 @@ them. A request often matches two or more rows (a landing page *and* its back of
 a page type *and* a review): open the bold files of **every** matching row before the
 first reply, even when that reply is only the interview questions. An answer written from this file alone misses the required states, gates
 and values — that is a defect, not a shortcut. Read one or two files per decision,
-not whole folders.
+not whole folders. Listing or globbing `references/` is not opening a file: open the
+named file itself, even for a one-line ANSWER question. When there is nothing to
+inspect (empty directory, no page attached), still open the routed files and work
+from the brief; never stop at "nothing to finish".
+
+**Cross-cutting rules (apply on top of the table):**
+- A stack is named or visible (React, Tailwind, shadcn / `components.json`, React
+  Native, Flutter, Swift) → open its rule file too: [tailwind](references/tailwind.md),
+  [shadcn rules](references/shadcn-rules.md), [build recipes](references/build-recipes.md),
+  **[mobile native](references/mobile-native.md)** for any phone-app code.
+- Changing an existing built page (add a section, fix a state, restyle) → **[design memory](references/design-memory.md)**
+  (respect its DESIGN.md) and **[build recipes](references/build-recipes.md)**, plus the
+  row for what is being added.
 
 ## 1. Route the request (open these first)
 
 | The request is about | Open |
 |---|---|
 | Admin / back-office / internal tool page (records, approval, audit, access, settings) | **[back office](references/back-office.md)**, **[page spec](assets/page-spec.md)**, blueprints in [admin layouts](assets/layouts/admin.md); money, approvals, permissions or deletion → [trust, security, privacy](references/trust-security-privacy.md) |
-| Customer-facing app screen (account, checkout, booking, onboarding) | **[customer UI](references/customer-ui.md)**, **[page spec](assets/page-spec.md)**, blueprints in [accounts](assets/layouts/accounts.md) / [commerce](assets/layouts/commerce.md), [app-screen rules](references/app-screen-rules.md) |
+| Customer-facing app screen (account, checkout, booking, onboarding) | **[customer UI](references/customer-ui.md)**, **[page spec](assets/page-spec.md)**, blueprints in [accounts](assets/layouts/accounts.md) / [commerce](assets/layouts/commerce.md), [app-screen rules](references/app-screen-rules.md); checkout or sign-up fields, consent boxes, fees → **[forms](references/forms.md)**; pending / processing payment → **[patterns](references/patterns.md)**; on a phone → **[mobile native](references/mobile-native.md)** |
 | States (loading, empty, error, success), async outcomes, dialogs, bulk actions, dashboards behavior | **[patterns](references/patterns.md)**; dashboard / admin / CRM screens → **[app-screen rules](references/app-screen-rules.md)** §7 (doctrine + state matrix) |
-| Landing / marketing / public page (any business: clinic, café, SaaS …), new look, redesign, "ทำให้สวยขึ้น" | Before the first reply, even the interview: **[design direction](references/design-direction.md)** §9, **[direction library](references/direction-library.md)** (the interview shows its previews) and **[marketing copy](references/marketing-copy.md)** (Round A asks for the offer and proof it needs). Before building: **`python3 scripts/look.py <kind>`** (open every image it lists), **[design quality](references/design-quality.md)**, **[visual system](references/visual-system.md)**, **[visual assets](references/visual-assets.md)**, [direction recipes](references/direction-recipes.md), [marketing layouts](assets/layouts/marketing.md); after the interview also [color palette](references/color-palette.md) and [motion](references/motion.md) |
+| Landing / marketing / public page (any business: clinic, café, SaaS …), new look, redesign, "ทำให้สวยขึ้น" | Before the first reply, even the interview: **[design quality](references/design-quality.md)** §2 (what reads as generated — name the devices you see), **[design direction](references/design-direction.md)** §9, **[direction library](references/direction-library.md)** (the interview shows its previews) and **[marketing copy](references/marketing-copy.md)** (Round A asks for the offer and proof it needs). Before building: **`python3 scripts/look.py <kind>`** (open every image it lists), **[design quality](references/design-quality.md)**, **[visual system](references/visual-system.md)**, **[visual assets](references/visual-assets.md)**, [direction recipes](references/direction-recipes.md), [marketing layouts](assets/layouts/marketing.md); after the interview also [color palette](references/color-palette.md) and [motion](references/motion.md) |
 | Switch the look / theme / direction ("from the previews") of an existing page | **[direction library](references/direction-library.md)** (the previews are in this skill: `assets/directions/previews/`), [direction recipes](references/direction-recipes.md), [tokens to code](references/tokens-export.md) |
 | Colors, palette, contrast, dark mode | [color palette](references/color-palette.md) |
 | Animation / motion | [motion](references/motion.md) |
@@ -47,20 +59,28 @@ not whole folders.
 | Layout, hierarchy, mobile web composition, which sections a page needs | **[layout index](assets/layouts/index.md)** (page anatomy by job, then one category file), [visual system](references/visual-system.md) Part B |
 | "ดูยาก / รก / ไม่สวย", focal point, signal budget | [design quality](references/design-quality.md) §7 |
 | Forms (fields, validation, multi-step and review step, Thai address / phone / ID) | **[forms](references/forms.md)** |
-| Which component; component states and keyboard | [components usage](references/components-usage.md), [component states](references/component-states.md); grids, drag, pickers, rich text, tours → [advanced components](references/advanced-components.md) |
-| Navigation, menus, settings-page structure, IA, journeys, permissions model | [experience architecture](references/experience-architecture.md), [navigation grouping](references/navigation-grouping.md) |
+| Which component (modal vs drawer vs page, select vs radio, toast vs banner …); component states and keyboard | **[components usage](references/components-usage.md)**, [component states](references/component-states.md); grids, drag, pickers, rich text, tours → [advanced components](references/advanced-components.md) |
+| Navigation, menus, tab bars, settings-page structure, IA, journeys, permissions model | **[navigation grouping](references/navigation-grouping.md)**, [experience architecture](references/experience-architecture.md); phone-app tabs or nav → also **[mobile native](references/mobile-native.md)** |
+| Search, filters, sort, faceted catalog, saved views, command palette | **[search & filter](references/search-filter.md)**; list screens → also [back office](references/back-office.md) |
+| Realtime / multi-user: presence, co-editing, conflicts, comments, sharing, version history, offline sync | **[collaboration](references/collaboration.md)** |
+| HTML email (receipt, OTP, newsletter template) | **[email design](references/email-design.md)**; message wording and channel → [notifications](references/notifications.md) |
+| Printable documents and PDF export (invoice, ใบเสร็จ / ใบกำกับภาษี, report, label, thermal receipt) | **[print documents](references/print-documents.md)** |
+| Kiosk, POS, desktop app, smartwatch, TV, voice, in-car, XR | **[other platforms](references/other-platforms.md)** |
+| Engagement, gamification, streaks, points, loyalty, retention | **[engagement](references/engagement.md)**; dark-pattern limits → [trust, security, privacy](references/trust-security-privacy.md) |
+| Multi-brand, white-label, per-tenant theme | **[tokens to code](references/tokens-export.md)** "Multi-brand and white-label theming" |
 | Charts (which chart, how to color it), KPIs, tables of values, heatmaps, live data | **[data visualization](references/data-visualization.md)**, blueprints in [dashboard layouts](assets/layouts/dashboards.md) |
-| Any phone app screen or flow (onboarding, permissions, push, offline, gestures), even when it is also a customer screen | **[mobile native](references/mobile-native.md)**, [notifications](references/notifications.md) |
+| Any phone app screen or flow (onboarding, tab bar, permissions, push, offline, gestures, React Native / Flutter / Swift code), even when it is also a customer screen | **[mobile native](references/mobile-native.md)**, [notifications](references/notifications.md); "confirm it passes accessibility" → also **[accessibility](references/accessibility.md)** |
 | AI features (agents, chat, tool calls, generated output) | **[AI features](references/ai-features.md)** |
 | UX writing, errors, empty states | [content design](references/content-design.md) |
-| Accessibility / WCAG question or check | **[accessibility](references/accessibility.md)**; "confirm it passes" on built UI → also **[render verification](references/render-verification.md)** (no browser → report *not tested*) |
+| Accessibility / WCAG question or check (focus ring, target size, contrast, screen reader) | **[accessibility](references/accessibility.md)**; focus-ring style → also [component states](references/component-states.md); "confirm it passes" on built UI → also **[render verification](references/render-verification.md)** (no browser → report *not tested*) |
 | Thai / bilingual pages, localization, performance | [i18n & performance](references/i18n-performance.md), [visual system](references/visual-system.md) Part A "Thai with Latin display faces" |
 | Review, critique, score, usability audit, "rank the problems", refinement verb (polish, bolder, quieter, distill …) | **[review loop](references/review-loop.md)** (scorecards, hard gates) first, then [scoring caps](references/scoring-caps.md); "looks generic / like a template", bolder → [design quality](references/design-quality.md) |
 | DESIGN.md, design memory, conflicts between docs, code and other skills | [design memory](references/design-memory.md) |
 | Existing product without DESIGN.md (brownfield) | [brownfield](references/brownfield.md) (`scripts/code_extract.py`, `scripts/design_md.py --from-code`) |
 | Building UI (HTML, React, Tailwind, shadcn) | [build recipes](references/build-recipes.md), [prototyping](references/prototyping.md); [tailwind](references/tailwind.md) · [shadcn rules](references/shadcn-rules.md) · [tokens to code](references/tokens-export.md) as the stack needs |
 | Verifying rendered UI | **[render verification](references/render-verification.md)** "Run order" |
-| Discovery, metrics, research, evidence | [product discovery](references/product-discovery.md), [measurement](references/measurement.md), [validation](references/validation.md), [sources](references/sources.md) |
+| "Is there research for X?", UX myths and rules of thumb (3-click rule, 7±2, fold) | **[sources](references/sources.md)** "Evidence discipline", [validation](references/validation.md); navigation myths → [navigation grouping](references/navigation-grouping.md) |
+| Discovery, metrics, research methods (interviews, surveys, personas, journey maps, diary, card sort) | **[research methods](references/research-methods.md)**, [product discovery](references/product-discovery.md), [measurement](references/measurement.md), [validation](references/validation.md), [sources](references/sources.md) |
 
 Every file, script and the phases that use them: [design workflow](references/design-workflow.md)
 "Reference → phase index".
@@ -96,7 +116,8 @@ the page pattern. Precedence when sources disagree: [design memory](references/d
 
 ## 3. Defaults that must not be skipped
 
-For any **public page, website, landing, new look or redesign**, in order, unless
+For any **public page, website, landing, new look or redesign**, and for **product UI
+(dashboard, admin, console) when it is built from scratch**, in order, unless
 the user or an approved DESIGN.md already decides them. Correct is not the bar; the
 page must look designed, and this skill holds the examples that show how:
 
@@ -104,15 +125,25 @@ page must look designed, and this skill holds the examples that show how:
    [design direction](references/design-direction.md) §9 (Round A business, B taste
    with pictures, C confirm), then `scripts/design_md.py … --wire`. An existing
    product without DESIGN.md runs ONBOARD instead. Away: pick by subject and say so.
+   The **shape** question is never skipped, even when rounds are merged or a direction
+   is picked from the previews: a direction fixes palette and type, not shape.
 2. **Look before you build.** Run `python3 scripts/look.py <kind> [--direction <id>]`
    (kind: landing, cafe, saas, dashboard, deck, mobile, portfolio …) and open **every**
    image it lists: real designed pages of your kind, then the direction's preview and its
    product UI. Name in the answer which you looked at and the one move you take from
-   them. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components) and
+   them. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components; its
+   radius is a **default** to check against the subject, not a rule) and
    start from the composition it names in `scripts/compositions.js`. Never default to
    warm cream + serif + terracotta or near-black + one neon accent ([design quality](references/design-quality.md) §2).
+   **Product UI adds four musts.** (a) Pick a look from `assets/backoffice/styles.json`
+   (or the direction's product UI) and say which; never invent a palette from "green
+   brand". (b) Load that look's real fonts (`<link>` or `@font-face`, with a fallback
+   stack); `system-ui` alone is the generic look. (c) A brand mark plus **one
+   signature element** (see [app-screen rules](references/app-screen-rules.md) §8).
+   (d) Empty and first-run states with a voice and a next action, not "No data".
 3. **Write the plan** ([design quality](references/design-quality.md) §1): idea
-   sentence, competitor test, one live thing, **one decisive move**; values from
+   sentence, competitor test, **subject shapes** (3–5 objects from the client's world →
+   corners, buttons, crops, signature), one live thing, **one decisive move**; values from
    [visual system](references/visual-system.md) Part C §1–§6 (display size, tracking,
    section rhythm), not from habit.
 4. **Pictures:** real photographs ([visual assets](references/visual-assets.md) §2b)
@@ -124,7 +155,10 @@ page must look designed, and this skill holds the examples that show how:
 6. **Check before delivery (any built page, back office included):**
    `python3 scripts/check.py <page>` runs every static check in one go (script syntax
    and globals that clash with `window`, template devices, contrast pairs, state markers)
-   and, with `--render`, the 1440/390 light/dark render. Fix each failure or waive it in
+   and, with `--render`, the 1440/390 light/dark render plus `fold_check.js` (CTA above the
+   390×844 fold); public pages also get a metadata line (title, description, canonical, OG).
+   Run the live thing or main task once with `flow_check.js steps.json`, including a failure
+   path. With placeholders, list them with `placeholders.py`. Fix each failure or waive it in
    one sentence. Without a shell, walk [design quality](references/design-quality.md) §2
    row by row, wrap page scripts in an IIFE, and list each device as absent or waived.
 7. **Look at the render** beside the pictures from step 2 and run the
@@ -154,6 +188,20 @@ as run when it was not. Hallmark: named public-page directions. Taste Skill: art
 direction and its inspector. Impeccable: refinement verbs after its context step.
 Interface Design: product UI. shadcn: projects with `components.json`. House-rule
 conflicts: [design memory](references/design-memory.md) §2 and §5.
+
+**Codex skills** (`~/.codex/skills`, when present) work as a second opinion and as
+extra checkers, under this skill's rules: `senior-ui-ux-orchestrator` routes
+(dashboard → `webapp-ui-skill`, public page → `marketing-site-skill`, critique →
+`design-critic-skill`); `webapp-ui-skill`'s doctrine is already in
+[app-screen rules](references/app-screen-rules.md) §7 and its
+`scripts/check_state_coverage.ts` can run beside `state_check.py`;
+`marketing-site-skill`'s first-viewport and metadata rules are in `fold_check.js` and
+`check.py`; `design-critic-skill`'s repeated-media and text-overlap findings are in
+[design quality](references/design-quality.md) §2. Their smoke script needs a browser
+driver; when it has none, report it *Skipped*. Conflicts resolve to this skill: e.g.
+`frontend-design`'s gradients, textures and dramatic shadows lose to the bans in
+[design quality](references/design-quality.md) §2; `marketing-site-skill`'s "no hero text
+in a card" yields to a direction that requires the panel (record the tradeoff in DESIGN.md).
 
 ## 6. Evidence and completion
 

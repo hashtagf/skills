@@ -67,6 +67,23 @@ primary action are all visible, with the slot not above the headline.
   addresses and add a visible "Sample data for illustration" line.
 - **No customers, logos, quotes or case studies?** Leave those sections out and
   say so in the hand-off; offer to add them when the client supplies real ones.
+- **No facts yet, user asked for placeholders:** placeholder mode in
+  [marketing copy](marketing-copy.md) (`.ph` spans, `scripts/placeholders.py` for the list).
+
+### Base CSS every page starts with
+
+Three bugs only the render showed in one session; put these lines in the reset of
+every page:
+
+```css
+img { display: block; max-width: 100%; height: auto; } /* the height attribute otherwise stretches the image */
+[hidden] { display: none !important; }                  /* a component's display:flex otherwise shows hidden parts ("฿0" in an empty bag) */
+.nw { white-space: nowrap; }                             /* Thai number + word ("2 ออเดอร์"): ICU splits loanwords mid-word */
+```
+
+And a cascade trap: a utility that hides an element (`.menu-btn { display: none }`)
+loses to a later component rule of equal weight (`.icon-btn { display: grid }`).
+Scope the hide (`.top .menu-btn`) or put it after the component rule.
 
 ## 5. Contact without a backend
 
@@ -82,14 +99,18 @@ State in the hand-off that the address is a placeholder and what replaces it
 
 ## 6. Verify with what is installed
 
-1. `python3 scripts/slop_check.py page.html` and `contrast.py --css` first.
+1. `python3 scripts/check.py page.html --render` runs every static check plus the render, the public-page
+   metadata line and `fold_check.js` (CTA above the 390×844 and 1440×900 fold, offer on the first screen).
 2. Use `render_check.js` (`--doctor` first). Only when it reports exit 3, fall back to a headless
    browser screenshot, no new installs. macOS example:
    `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --screenshot=/tmp/p.png --window-size=1280,800 --virtual-time-budget=4000 file://$PWD/index.html`
    Run at 1440 and 390 wide (fold and a tall capture), matching SKILL.md "Render and look".
 3. **Look at the PNG.** A linter said "0 FAIL" on a page whose hero was broken
    by the grid bug in §3; only the render showed it.
-4. If `render_check.js --doctor` exits 3 (no Playwright browser) and no fallback runs, report
+4. The page's one live thing or main task: write its steps once as JSON and run
+   `node scripts/flow_check.js page.html steps.json` (click, fill, expect text/disabled/hidden; fails on
+   console errors). Include one failure path. Visually hidden inputs are clicked with a force fallback.
+5. If `render_check.js --doctor` exits 3 (no Playwright browser) and no fallback runs, report
    *render step not run*; do not claim it passed.
 
 Warnings seen on first builds from external linters such as Hallmark sloplint
@@ -129,5 +150,7 @@ current build uses (or that it is custom).
 - [ ] Hero rows/columns named; 1280×800 screenshot read
 - [ ] Every placeholder is neutral, labelled and honest; no invented proof
 - [ ] Contact path is real (`mailto:` or wired form) and the placeholder is reported
+- [ ] Base CSS lines present (`img{height:auto}`, `[hidden]`, `.nw`)
+- [ ] `fold_check.js` passes at 390×844; `flow_check.js` passes for the live thing incl. one failure path
 - [ ] A render was *looked at*, not only linted; skipped tiers reported
 - [ ] Back-office mock approved before back-office code

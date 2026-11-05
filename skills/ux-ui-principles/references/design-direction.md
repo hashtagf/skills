@@ -235,7 +235,7 @@ only where marked.
 Show pictures of 2–3 directions at a time (one picture sheet holds at most 6), at least one soft or round and
 at least one square ([direction library](direction-library.md) step 2), never names alone.
 5. **Feel**: up to 3 words (trustworthy, premium, playful, bold, techy, natural, warm, calm).
-6. **Shape**: *Soft and round* · *Mixed (round buttons, sharp cards)* · *Sharp and printed*. Do not infer shape from the feel words: "premium + playful" is not "sharp".
+6. **Shape**: *Soft and round* · *Mixed (round buttons, sharp cards)* · *Sharp and printed*. Do not infer shape from the feel words: "premium + playful" is not "sharp". **Never skip this question**, even when the rounds are compressed into one batch or the user picks a direction straight from the previews: the direction fixes palette and type, not shape. Offer the subject-led option first ("Round like the bean, cup and bag" for a café; see [design quality](design-quality.md) §1 Subject shapes) and record the answer as `shape` and `shape_from_subject` in `interview.json`.
 7. **References**: one site or app you like and why, one you dislike and why (free text, optional). Extract principles, not layouts ([design memory](design-memory.md) §3b).
 8. **Energy**: *Calm and spacious* (V3 M2 D3) · *Balanced* (V5 M4 D4) · *Expressive* (V7 M6 D3) · *Dense and fast* (V2 M1 D8).
 

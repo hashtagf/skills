@@ -12,7 +12,7 @@ answer which ones you looked at and the one move you are taking from them.
 
 Kinds: landing, pricing, campaign, editorial, report, deck, product, mobile, portfolio, destination, nonprofit,
 game, document (synonyms: dashboard/admin/back office -> product, blog/article/magazine -> editorial,
-slides/presentation -> deck, app -> mobile, hotel/restaurant/cafe/travel -> destination + landing, waitlist -> landing).
+slides/presentation -> deck, app -> mobile, cafe/coffee/roastery/bakery/shop -> cafe + landing, hotel/restaurant/travel -> destination + landing, waitlist -> landing).
 Standard library only.
 """
 import json, os, re, sys
@@ -23,7 +23,7 @@ SYN = {
     "dashboard": ["product", "report"], "admin": ["product"], "backoffice": ["product"], "back-office": ["product"],
     "blog": ["editorial"], "article": ["editorial"], "magazine": ["editorial"], "docs": ["editorial", "landing"],
     "slides": ["deck"], "presentation": ["deck"], "app": ["mobile", "product"], "onboarding": ["mobile"],
-    "hotel": ["destination", "landing"], "restaurant": ["destination", "landing"], "cafe": ["destination", "landing"],
+    "hotel": ["destination", "landing"], "restaurant": ["destination", "landing"], "cafe": ["cafe", "landing"], "coffee": ["cafe", "landing"], "roastery": ["cafe", "landing"], "bakery": ["cafe", "landing"], "shop": ["cafe", "landing"],
     "travel": ["destination", "landing"], "waitlist": ["landing"], "saas": ["landing", "pricing"],
     "agency": ["portfolio", "landing"], "studio": ["portfolio", "landing"], "invoice": ["document"], "resume": ["document"],
     "cover": ["deck", "report"], "event": ["campaign", "landing"],

@@ -57,10 +57,7 @@ def recipe(d):
     bans = ["pure #000 or #fff as text or ground", "a display face other than %s" % d["display"], "gradient text",
             "emoji as feature icons", "three equal icon-heading-text cards in a row", "invented metrics, logos or testimonials",
             "AI cliche copy (Elevate, Seamless, Unleash, Next-Gen)"] + surf_bans
-    if square:
-        bans.append("any border-radius above 2px")
-    else:
-        bans.append("all-square corners (this direction is %s)" % ("round" if r >= 12 or btn == "pill" else "soft"))
+    # Radius is a default, never a ban: the subject's own objects decide (design-quality.md §1).
     motion = ("hero entrance plus once-only section reveal; transform and opacity only; no linear or ease-in-out; reduced-motion path"
               if d.get("group") != "atmospheric" else "one slow ambient layer (24s or longer) plus hero entrance; transform and opacity only; reduced-motion path")
     L = []
@@ -72,7 +69,7 @@ def recipe(d):
     A("- **One accent** `%s` with `%s` text on it. The solid accent fill (primary CTA) appears once per view; a nav CTA is outlined or is the same action; other uses are small (eyebrow, link, focus). Links and small accent text use the derived `accent-text` step (`scripts/export_tokens.py`)." % (d["accent"], d["accentInk"]))
     A("- **Tints** %s for fills only, never for text." % ", ".join("`%s`" % t for t in d["tints"]))
     A("- **Type**: display %s %s, tracking %s%s; body %s. One pair per language; Thai uses Noto Sans Thai, body line-height 1.55-1.7." % (d["display"], d["dw"], d["track"], ", uppercase" if d.get("case") == "upper" else "", d["body"]))
-    A("- **Shape**: radius %dpx on cards, buttons %s, corner treatment `%s`." % (r, shape, d.get("corner", "even")))
+    A("- **Shape (default, check against the subject)**: radius %dpx on cards, buttons %s, corner treatment `%s`. List 3-5 objects from the client's world first; keep this default only if they agree (a bean, cup or bag is round; a ledger, ticket or poster is square)." % (r, shape, d.get("corner", "even")))
     A("- **Depth**: %s." % surf_rule)
     A("- Section padding 96px or more on desktop; display scale clamp(2.75rem, 5vw + 1rem, 5.25rem).")
     A("\n## Banned")
@@ -88,7 +85,8 @@ def recipe(d):
     for c in ["Ground, ink and accent come from the tokens; no raw hex outside the token block",
               "Solid accent fill once per view (nav CTA outlined); accent text uses `accent-text`",
               "Display and body faces are exactly the two named above; Thai pair set per language",
-              "All button radii are %s; card radius is %dpx everywhere" % (shape, r),
+              "Shape checked against 3-5 objects from the client's world (design-quality §1); recipe radius kept only if they agree",
+              "One radius per component class, from tokens (default: buttons %s, cards %dpx)" % (shape, r),
               "Depth follows `%s` only" % d.get("surf"),
               "No banned device appears (see list)",
               "Hero matches `%s`; first screen reads in five seconds" % d.get("hero"),

@@ -220,6 +220,20 @@ When there are no clients, numbers or testimonials, do not fill the proof slot. 
 work runs (three steps), what you get and by when, who will do it, an honest "first project" offer, or a plain fact
 strip (length of the first call, price of the first step, languages). Say so in the hand-off; add real proof when it exists.
 
+## Placeholder mode (the user asks to build with placeholders)
+
+When the user says "use placeholders for everything" (a real business whose facts are not in yet), the page
+renders its **facts** as visible placeholders, which overrides "never rendered" in §0 for facts only:
+
+- Mark each one `<span class="ph">[ชื่อร้าน]</span>`: a tint, no other styling, so the page still reads as designed
+  and every slot is easy to find. Short Thai labels in square brackets; numbers that drive behaviour (prices in
+  a picker) stay numeric in `data-*` and visible inside `.ph`.
+- **Proof is never a placeholder.** Reviews, ratings, customer counts, awards and logos stay off the page until
+  real ("Pages with no proof yet").
+- List them for the hand-off: `python3 scripts/placeholders.py page.html --md README.md` writes the list with
+  counts and warns about anything that looks like proof.
+- `slop_check.py` ignores `.ph` for the accent-word rule; in the hand-off say how many placeholders remain.
+
 ## Waitlist and pre-launch pages
 
 One path only: a single email form. No countdown, no invented scarcity, no fake social proof, no emoji. The email

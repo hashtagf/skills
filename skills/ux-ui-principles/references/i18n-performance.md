@@ -25,6 +25,7 @@ Decide supported locales at level 1, not after build.
 | Sorting and search | Locale-aware collation; Thai sorting and search ignoring tone-mark variants if users expect it | Test with Thai and mixed-script data |
 | Direction | Support right-to-left if any target locale needs it; use logical CSS properties (`margin-inline-start`) | Mirror layout in an RTL locale |
 | Icons and imagery | Avoid culture-specific gestures, text inside images, flags as language selectors | Language selector shows language names in their own script |
+| Thai line breaks | Browsers break Thai with a dictionary that misses loanwords and brand words ("ออเดอร์" split as "ออเด/อร์"); keep number + unit and short loanword phrases together with `white-space: nowrap` (`.nw`), never `word-break: break-all` | `render_check.js` notes Thai words split across lines (uses `Intl.Segmenter`); read the 390px shot |
 | Input | Support IME, non-Latin keyboards and paste; don't restrict characters unnecessarily | Type and paste Thai, Chinese and emoji into name fields |
 
 ### Language switching

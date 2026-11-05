@@ -45,6 +45,7 @@ TEMPLATE = {
     "feel": ["premium", "friendly", "warm"],
     "energy": "balanced",
     "shape": "soft",
+    "shape_from_subject": ["bean", "cup", "kraft bag", "rubber date stamp"],
     "likes": ["site or app they like and why"],
     "dislikes": ["site or app they dislike and why"],
     "competitors": ["name"],
@@ -76,6 +77,18 @@ def load_direction(did):
         if d["id"] == did:
             return d
     sys.exit("unknown direction: %s" % did)
+
+
+def shape_words(r, btn, corner):
+    """One description of the shape language, built from the same values the Shapes section prints."""
+    btn_w = {"pill": "pill buttons", "round": "rounded buttons", "square": "square buttons"}.get(btn, "%s buttons" % btn)
+    if r == 0 and btn == "square":
+        label = "sharp"
+    elif r == 0 or btn == "square":
+        label = "mixed"
+    else:
+        label = "soft"
+    return label, "%dpx cards, %s, %s corners" % (r, btn_w, corner)
 
 
 def bullet(items):
@@ -136,18 +149,31 @@ def build(d, iv, approved):
         light_t, dark_t = ex.light_theme(d), ex.derive_dark(d)
     light_t, dark_t = ex.roles(light_t, False, "light"), ex.roles(dark_t, True, "dark")
     r, btn = ex.radii(d)
+    subject = [x for x in iv.get("shape_from_subject", []) if x]
+    corner = d.get("corner", "even")
+    btn_kind = d.get("btn", "round")
+    replaced = False
+    if subject and iv.get("shape") != "square" and r == 0:
+        r, btn, btn_kind, replaced = 24, "999px", "pill", True   # the recipe default (0) loses to a round subject
+    shape, shape_desc = shape_words(r, btn_kind, corner)
     v, m, den = DIALS.get(iv.get("energy", "balanced"), DIALS["balanced"])
     feel = ", ".join(iv.get("feel", []))
-    shape = iv.get("shape", "mixed")
     langs = " and ".join(iv.get("languages", ["en"]))
     thai = "th" in iv.get("languages", [])
     never = list(iv.get("never", [])) + [
-        "all-square corners on a brief that asked for friendly" if shape != "square" else "rounded pills on a sharp, print-led brief",
+        ("square corners where the subject is round (%s)" % ", ".join(subject)) if subject and shape != "sharp"
+        else ("all-square corners; this brief is %s" % shape) if shape != "sharp"
+        else "rounded pills on a sharp, print-led brief",
         "more than two typefaces per language",
         "hiding content until a script reveals it (must be visible without JS and under reduced motion)",
         "text on the primary fill that is not `on-primary`; accent text that is not `primary-text`"]
     status = "approved" if approved else "draft"
-    fm = front_matter(d, iv, light_t, dark_t, r, btn, thai)
+    fm = front_matter(dict(d, btn=btn_kind), iv, light_t, dark_t, r, btn, thai)
+    shape_lines = ["Radius %dpx on cards (`rounded.lg`), buttons `%s` (%s), corner treatment `%s`; %s overall." % (r, btn_kind, btn, corner, shape)]
+    if subject:
+        shape_lines.append("Shapes come from the subject: %s. Check every new component against these objects before using a recipe default." % ", ".join(subject))
+    if replaced:
+        shape_lines.append("The direction's default radius 0 was replaced because the subject's objects are round.")
     out = f"""{fm}
 
 # DESIGN.md: {iv.get('brand', d['name'])}
@@ -162,7 +188,7 @@ Philosophy, ranked:
 1. Serve the one goal: {iv.get('goal', 'state the one action that counts')}.
 2. Say only what can be proved: {iv.get('differentiator', 'state the differentiator')}.
 3. Audience first: {iv.get('audience', 'state the audience')}.
-4. Shape language is {shape}: {"mixed radii, round buttons, one free-form shape per page" if shape != "square" else "square corners, rules and offsets, no soft shadows"}.
+4. Shape language is {shape}: {shape_desc}{" (from the subject: " + ", ".join(subject) + ")" if subject else ""}.
 
 ## Colors
 Values live in the front matter. `primary` is for fills and buttons with `on-primary` text; `primary-text` is the
@@ -184,7 +210,7 @@ darker or lighter step for links and small accent text (4.5:1 checked). `muted` 
 - One depth strategy only: surface rule `{d['surf']}`. Dark theme steps up in lightness instead of using shadows.
 
 ## Shapes
-- Radius {r}px on cards (`rounded.lg`), buttons `{btn}`, corner treatment `{d['corner']}`; {shape} overall.
+{bullet(shape_lines)}
 
 ## Components
 - Primary button: `primary` fill (hover darkens it about 8%), `on-primary` text, 44px minimum height, one per view. Cards: `surface` on `canvas`. Inputs 48px, visible label, own error message.

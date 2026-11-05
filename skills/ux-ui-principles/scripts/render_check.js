@@ -22,7 +22,11 @@
  * prefers-reduced-motion and also reports animations still moving and any
  * content never revealed. Also reported: images that failed to load (lazy images
  * are forced eager first, so full-page shots are not blank), text touching the
- * viewport edge (no gutter), text overlapping other text, and h1/h2 wrapping to 3+ lines (a NOTE, not a failure).
+ * viewport edge (no gutter), text overlapping other text, decoration (absolutely positioned badge or stamp)
+ * covering text, images drawn at the wrong aspect ratio, h1/h2 wrapping to 3+ lines and Thai words split
+ * across lines (NOTEs, not failures). Visually hidden radios/checkboxes are measured by their label; closed
+ * <details>, off-screen drawers and sticky table headers are skipped; sticky/fixed elements are left out of
+ * the text-overlap check (full-page shots stack them mid-page).
  * --toggle "<selector>" clicks a language/theme switch after the first pass and
  * repeats every viewport (screenshots prefixed alt-), so both states are checked.
  * --zoom also renders at 320px width (approximates 400% zoom reflow
@@ -110,8 +114,8 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
   const reveal = async () => {
     await page.evaluate(async () => {
       const h = document.documentElement.scrollHeight, step = Math.max(300, innerHeight * 0.5);
-      for (let y = 0; y < h; y += step) { scrollTo(0, y); await new Promise(r => setTimeout(r, 300)); }
-      scrollTo(0, 0); await new Promise(r => setTimeout(r, 400));
+      for (let y = 0; y < h; y += step) { scrollTo({ top: y, behavior: 'instant' }); await new Promise(r => setTimeout(r, 300)); }
+      scrollTo({ top: 0, behavior: 'instant' }); await new Promise(r => setTimeout(r, 400));
     });
   };
   const settle = async () => { await reveal(); await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); };
@@ -141,6 +145,16 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
           }
         }
         const visible = e => { const b = e.getBoundingClientRect(); if (!b.width) return false; const s = getComputedStyle(e); return s.display !== 'none' && s.visibility !== 'hidden'; };
+        // Visible to the user: not inside a closed <details> (except its summary), not pushed off-screen (closed drawer, skip link)
+        const shown = e => {
+          if (!visible(e)) return false;
+          const d = e.closest('details'); if (d && !d.open && !e.closest('summary')) return false;
+          const b = e.getBoundingClientRect(); return !(b.right <= 0 || b.left >= vw);
+        };
+        const pinned = e => { for (let p = e; p && p !== document.body; p = p.parentElement) { const ps = getComputedStyle(p).position; if (ps === 'sticky' || ps === 'fixed') return true; } return false; };
+        // A visually hidden input (tiny, opacity 0 or clipped) is operated through its label: measure the label
+        const hiddenInput = e => { if (e.tagName !== 'INPUT') return false; const b = e.getBoundingClientRect(), st = getComputedStyle(e); return b.width <= 2 || b.height <= 2 || st.opacity === '0' || /rect\(0/.test(st.clip) || st.clipPath === 'inset(50%)'; };
+        const targetRect = e => { if (hiddenInput(e)) { const l = (e.labels && e.labels[0]) || e.closest('label'); if (l) return l.getBoundingClientRect(); } return e.getBoundingClientRect(); };
         const name = e => (e.getAttribute('aria-label') || e.getAttribute('title') || e.textContent || '').trim() || (e.getAttribute('aria-labelledby') ? 'x' : '');
         const noAlt = [...document.images].filter(i => !i.hasAttribute('alt') && visible(i)).length;
         const noName = [...document.querySelectorAll('button,a[href],[role=button]')].filter(e => !name(e) && !e.querySelector('img[alt]:not([alt=""])') && visible(e)).map(e => e.outerHTML.slice(0, 80));
@@ -201,13 +215,13 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
         const mobile = [];
         if (vw <= 480) {
           const small = [...document.querySelectorAll('a[href],button,[role=button],input:not([type=hidden]),select,summary')]
-            .filter(visible).filter(e => { const r = e.getBoundingClientRect(); const inText = e.tagName === 'A' && e.closest('p,li') && getComputedStyle(e).display === 'inline'; return !inText && (r.height < 44 || r.width < 44); });
-          if (small.length) mobile.push(`${small.length} tap target(s) under 44px (project default; WCAG floor is 24px), e.g. ${small.slice(0, 3).map(e => `${e.tagName.toLowerCase()} "${(e.innerText || e.value || e.getAttribute('aria-label') || '').trim().slice(0, 15)}" ${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`).join(', ')}`);
+            .filter(e => shown(e) || (hiddenInput(e) && e.labels && e.labels[0] && shown(e.labels[0]))).filter(e => { const r = targetRect(e); const inText = e.tagName === 'A' && e.closest('p,li') && getComputedStyle(e).display === 'inline'; return !inText && (r.height < 44 || r.width < 44); });
+          if (small.length) mobile.push(`${small.length} tap target(s) under 44px (project default; WCAG floor is 24px), e.g. ${small.slice(0, 3).map(e => `${e.tagName.toLowerCase()} "${(e.innerText || e.value || e.getAttribute('aria-label') || '').trim().slice(0, 15)}" ${Math.round(targetRect(e).width)}x${Math.round(targetRect(e).height)}`).join(', ')}`);
           const zoomy = [...document.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select,textarea')].filter(visible).filter(e => parseFloat(getComputedStyle(e).fontSize) < 16);
           if (zoomy.length) mobile.push(`${zoomy.length} field(s) with font-size < 16px (iOS zooms on focus)`);
           const tiny = [...document.querySelectorAll('p,li,td,dd')].filter(visible).filter(e => (e.innerText || '').trim().length > 40 && parseFloat(getComputedStyle(e).fontSize) < 14);
           if (tiny.length) mobile.push(`${tiny.length} text block(s) under 14px`);
-          const stuck = [...document.querySelectorAll('body *')].filter(e => /fixed|sticky/.test(getComputedStyle(e).position) && visible(e) && e.getBoundingClientRect().height > 30);
+          const stuck = [...document.querySelectorAll('body *')].filter(e => /fixed|sticky/.test(getComputedStyle(e).position) && !e.closest('thead,th,tr') && shown(e) && e.getBoundingClientRect().height > 30);
           if (stuck.length > 1) mobile.push(`${stuck.length} fixed/sticky elements; keep one`);
         }
         // Images that failed to load (blank slot), text with no gutter, 3+ line headings
@@ -225,7 +239,8 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
         // Text colliding with other text or with a card/image block (headline over a panel, etc.)
         const overlap = [];
         const boxes = [...document.querySelectorAll('h1,h2,h3,h4,p,li,a,button,label,summary,figcaption,dt,dd')].filter(e => {
-          if (e.closest('[aria-hidden="true"],[hidden]') || !visible(e)) return false;
+          if (e.closest('[aria-hidden="true"],[hidden]') || !shown(e) || pinned(e)) return false; // sticky/fixed: full-page shot artefact
+          if (!(e.innerText || '').trim()) return false;
           return [...e.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim().length > 1);
         }).map(e => ({ e, r: e.getBoundingClientRect() })).filter(x => x.r.width > 8 && x.r.height > 8 && x.r.bottom > 0 && x.r.top < innerHeight * 12);
         for (let i = 0; i < boxes.length && overlap.length < 3; i++) {
@@ -243,13 +258,62 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
           if (!visible(h) || h.closest('[aria-hidden="true"]')) continue;
           const cs = getComputedStyle(h); const fs = parseFloat(cs.fontSize);
           const lh = parseFloat(cs.lineHeight) || fs * 1.2;
-          const lines = Math.round(h.getBoundingClientRect().height / lh);
+          const rg = document.createRange(); rg.selectNodeContents(h);
+          const tops = [...rg.getClientRects()].filter(x => x.width > 1).map(x => x.top).sort((a, b) => a - b);
+          let lines = 0, last = -1e9; for (const t of tops) { if (t - last > lh / 2) { lines++; last = t; } }
           const limit = /^th/i.test(h.closest('[lang]')?.getAttribute('lang') || document.documentElement.lang || '') ? 3 : 2; // Thai wraps by characters
           if (lines > limit) notes.push(`${h.tagName.toLowerCase()} wraps to ${lines} lines: "${h.innerText.trim().slice(0, 36)}"`);
         }
-        return { overflow, wide, noAlt, noName, noLabel, formIssues: [...new Set(formIssues)], punct, hidden, moving, reduce, mobile, broken, edge, overlap, notes, lang: document.documentElement.lang };
+        // Images drawn at a different aspect ratio than the file (e.g. height attribute without CSS height:auto)
+        const distorted = [...document.images].filter(i => visible(i) && i.naturalWidth && i.naturalHeight).filter(i => {
+          const fit = getComputedStyle(i).objectFit; if (fit && fit !== 'fill') return false;
+          const b = i.getBoundingClientRect(); if (b.width < 24 || b.height < 24) return false;
+          return Math.abs((b.width / b.height) / (i.naturalWidth / i.naturalHeight) - 1) > 0.03;
+        }).slice(0, 3).map(i => `${(i.currentSrc || i.src).split('/').pop().slice(0, 40)} drawn ${Math.round(i.getBoundingClientRect().width)}x${Math.round(i.getBoundingClientRect().height)}, file ${i.naturalWidth}x${i.naturalHeight}`);
+        // Decoration (badge, stamp, ornament: an absolutely positioned box) covering a line of text
+        const sel = e => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${e.className && typeof e.className === 'string' && e.className.trim() ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}`;
+        const decoOver = [];
+        const area = innerWidth * innerHeight;
+        const decos = [...document.querySelectorAll('body *')].filter(e => { const st = getComputedStyle(e); if (!/absolute|fixed/.test(st.position) || st.opacity === '0' || !shown(e)) return false; const b = e.getBoundingClientRect(); return b.width > 4 && b.height > 4 && b.width * b.height < area * 0.25; });
+        if (decos.length) {
+          const texts = [...document.querySelectorAll('h1,h2,h3,p,button,a')].filter(t => shown(t) && (t.innerText || '').trim());
+          for (const d of decos) {
+            if (decoOver.length >= 3) break;
+            const db = d.getBoundingClientRect();
+            for (const t of texts) {
+              if (t.contains(d) || d.contains(t)) continue;
+              const rg = document.createRange(); rg.selectNodeContents(t);
+              const hit = [...rg.getClientRects()].some(x => x.width > 2 && Math.min(x.right, db.right) - Math.max(x.left, db.left) > 2 && Math.min(x.bottom, db.bottom) - Math.max(x.top, db.top) > 2);
+              if (hit) { decoOver.push(`${sel(d)} covers ${sel(t)} "${t.innerText.trim().slice(0, 24)}"`); break; }
+            }
+          }
+        }
+        // Thai words split across two lines (loanwords like ออเดอร์ the line breaker does not know)
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+          const seg = new Intl.Segmenter('th', { granularity: 'word' }); const split = [];
+          for (const el of document.querySelectorAll('h1,h2,p')) {
+            if (split.length >= 3 || !shown(el)) continue;
+            const lang = el.closest('[lang]')?.getAttribute('lang') || '';
+            if (!/^th/i.test(lang) || !/[\u0E00-\u0E7F]/.test(el.textContent)) continue;
+            const lh = parseFloat(getComputedStyle(el).lineHeight) || parseFloat(getComputedStyle(el).fontSize) * 1.5;
+            const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n;
+            while ((n = tw.nextNode()) && split.length < 3) {
+              for (const w of seg.segment(n.nodeValue)) {
+                if (!w.isWordLike || w.segment.length < 3 || !/[\u0E00-\u0E7F]/.test(w.segment)) continue;
+                const a = document.createRange(); a.setStart(n, w.index); a.setEnd(n, w.index + 1);
+                const z = document.createRange(); z.setStart(n, w.index + w.segment.length - 1); z.setEnd(n, w.index + w.segment.length);
+                const ra = a.getClientRects()[0], rz = z.getClientRects()[0];
+                if (ra && rz && rz.top - ra.top > lh / 2) { split.push(`"${w.segment}" in ${el.tagName.toLowerCase()} "${el.innerText.trim().slice(0, 30)}"`); break; }
+              }
+            }
+          }
+          if (split.length) notes.push(`Thai word split across lines: ${split.join(' | ')}; keep number + unit or loanword phrases together with white-space: nowrap`);
+        }
+        return { distorted, decoOver, overflow, wide, noAlt, noName, noLabel, formIssues: [...new Set(formIssues)], punct, hidden, moving, reduce, mobile, broken, edge, overlap, notes, lang: document.documentElement.lang };
       });
       const file = path.join(out, `${prefix}${scheme}-${w}.png`);
+      // Viewport shots are the first screen: scroll to top instantly (smooth scroll would still be moving).
+      if (!fullPage) await page.evaluate(() => new Promise(r => { scrollTo({ top: 0, behavior: 'instant' }); requestAnimationFrame(() => requestAnimationFrame(r)); }));
       await page.screenshot({ path: file, fullPage });
       const issues = [];
       const fresh = (arr, k) => { const n = arr.slice(reported[k]); reported[k] = arr.length; return n; };
@@ -267,6 +331,8 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
       r.mobile.forEach(x => issues.push(`phone: ${x}`));
       if (r.broken.length) issues.push(`image(s) failed to load: ${[...new Set(r.broken)].slice(0, 3).join(', ')}`);
       if (r.overlap && r.overlap.length) issues.push(`text overlaps other text: ${r.overlap.join(' | ')}`);
+      if (r.decoOver && r.decoOver.length) issues.push(`decoration covers text: ${r.decoOver.join(' | ')}`);
+      if (r.distorted && r.distorted.length) issues.push(`image drawn at the wrong aspect ratio (add height:auto or object-fit): ${r.distorted.join(' | ')}`);
       if (r.edge.length) issues.push(`text touches the viewport edge (no gutter): ${r.edge.join(' | ')}`);
       if (r.moving) issues.push(`${r.moving} animation(s) still moving under prefers-reduced-motion`);
       problems += issues.length;

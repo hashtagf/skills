@@ -96,6 +96,24 @@ def css_rules(css):
         yield m.group(1).strip(), m.group(2)
 
 
+def sharp_intent(t, html, base):
+    """True when the page or its DESIGN.md says the direction is sharp/print on purpose."""
+    for n in t.root.walk():
+        if n.tag in ("html", "body") and n.attrs.get("data-shape", "").lower() in ("sharp", "square", "print"):
+            return True
+    if re.search(r"<meta[^>]+name=[\"']shape[\"'][^>]+content=[\"'](sharp|square|print)", html, re.I):
+        return True
+    for d in (base, os.path.dirname(base)):
+        p = os.path.join(d, "DESIGN.md")
+        if os.path.isfile(p):
+            with open(p, encoding="utf-8", errors="replace") as f:
+                m = re.search(r"^## Shapes\s*\n(.*?)(?=^## |\Z)", f.read(), re.S | re.M)
+            if m and re.search(r"\b(sharp|square)\b", m.group(1), re.I) and not re.search(r"\bno square\b|square corners anywhere", m.group(1), re.I):
+                return True
+            break
+    return False
+
+
 def check(path):
     with open(path, encoding="utf-8", errors="replace") as f:
         html = f.read()
@@ -136,16 +154,19 @@ def check(path):
 
     # Language variants (<span lang="th">…</span><span lang="en">…</span>) are one headline in
     # two languages, not a styled word; nested non-lang spans inside a variant still count.
+    def is_placeholder(c):
+        return "ph" in c.cls() or "data-placeholder" in c.attrs
+
     def styled_child(h):
         kids = [c for c in h.children if not (c.tag == "span" and "lang" in c.attrs)]
         kids += [g for c in h.children if c.tag == "span" and "lang" in c.attrs for g in c.children]
         return any(c.tag in ("span", "em", "i", "mark", "strong", "b") and "lang" not in c.attrs
-                   and "nb" not in c.cls() for c in kids)
+                   and "nb" not in c.cls() and not is_placeholder(c) for c in kids)
     accent = [n.all_text() for n in nodes if n.tag in ("h1", "h2") and styled_child(n)]
     if accent:
         # Roman + italic emphasis (em/i, at most one headline per page) is a recipe device, not slop: note, not flag.
         def italic_only(n):
-            return all(c.tag in ("em", "i") for c in n.children if c.tag in ("span", "em", "i", "mark", "strong", "b") and "lang" not in c.attrs)
+            return all(c.tag in ("em", "i") for c in n.children if c.tag in ("span", "em", "i", "mark", "strong", "b") and "lang" not in c.attrs and not is_placeholder(c))
         hs = [n for n in nodes if n.tag in ("h1", "h2") and styled_child(n)]
         if len(hs) <= 1 and all(italic_only(n) for n in hs):
             add("note", "italic-emphasis", "one headline uses italic emphasis (allowed by the recipes once per page; waive in the context card)", accent)
@@ -180,8 +201,8 @@ def check(path):
 
     radii = [m for m in re.findall(r"border-radius\s*:\s*([^;}]+)", css) if not re.fullmatch(r"\s*0(px)?\s*", m)]
     rounded = [m for m in radii if not re.fullmatch(r"\s*(50%|999\w*|9999\w*)\s*", m)]
-    if len(css) > 800 and not rounded:
-        add("note", "all-square", "no rounded corners anywhere; fine for a print or brutalist direction, otherwise mix shapes (SKILL.md, user away rule)")
+    if len(css) > 800 and not rounded and not sharp_intent(t, html, base):
+        add("flag", "all-square", "no rounded corners anywhere: check shape against what the subject sells (design-quality §1 subject shapes); waive with data-shape=\"sharp\" when the direction is print")
     if re.search(r"\.js\s+[^{]*\{[^}]*opacity\s*:\s*0", css) and "prefers-reduced-motion" not in css:
         add("flag", "reveal-hides-content", "content is hidden until scripted reveal and no reduced-motion fallback; plain screenshots and print show blanks (motion.md)")
 
@@ -271,13 +292,21 @@ def check(path):
                   and d.attrs.get("type") not in ("submit", "button", "hidden", "reset")]
         if not fields:
             continue
+        typed = [d for d in fields if d.tag == "textarea" or (d.tag == "input" and d.attrs.get("type", "text") not in ("radio", "checkbox", "range", "color"))]
+        groups = {}
+        for d in fields:
+            if d.tag == "input" and d.attrs.get("type") == "radio":
+                groups.setdefault(d.attrs.get("name", ""), []).append("checked" in d.attrs)
+        choice_only = not typed and all(any(g) for g in groups.values())
         has_handler = n.attrs.get("action") or n.attrs.get("method") == "dialog" or n.attrs.get("onsubmit") or re.search(r"submit|addEventListener|onSubmit|FormData", js)
         if not has_handler:
             add("flag", "inert-form", "form with no action and no submit handling; specify submit, validation, error and success behavior")
         has_rules = any(any(k in d.attrs for k in ("required", "pattern", "min", "max", "minlength", "maxlength"))
                     or d.attrs.get("type") in ("email", "url", "number", "tel", "date") for d in fields)
         messages = re.search(r"aria-invalid|field-error|error-message|role=\"alert\"", html) or VAL_JS.search(js)
-        if not has_rules and not messages:
+        if choice_only:
+            pass  # only choices with defaults: nothing the user types can be invalid
+        elif not has_rules and not messages:
             add("flag", "form-without-validation", f"form with {len(fields)} field(s) but no rules (required/type/pattern) and no error messages; see forms.md §6b")
         elif not messages:
             add("flag", "form-without-messages", "fields have rules but no own error messages / aria-invalid / error summary; browser bubbles only (forms.md §6b)")
@@ -310,14 +339,36 @@ def check(path):
           if re.search(r"\d\s*vw\b", m) and not re.search(r"clamp\(|min\(|max\(", m)]
     if vw:
         add("flag", "viewport-scaled-font", f"{len(vw)} rule(s) size type in raw vw units (no clamp); text jumps with window width (app-screen-rules.md §7)", vw)
-    cardish = lambda n: any(re.search(r"(^|-)(card|panel|tile)($|-)", k) for k in n.cls()) and not any(k.endswith(("-title", "-body", "-header", "-footer", "-label", "-value")) for k in n.cls())
+    # A framed box is a class token that IS card/panel/tile/box or ends with -card/-panel/-tile
+    # (hero-panel, plan-card). Sub-parts (card-h, card-body, panel-head, box-head) start with the word
+    # and never count. Where the page CSS styles the token, it must give it a frame (background,
+    # border, radius or shadow); a token with no CSS at all still counts.
+    framed_css = {}
+    for sel, body in rules:
+        frame = bool(re.search(r"(^|[;\s])(background(-color)?|border(-radius)?|box-shadow)\s*:", body))
+        for k in re.findall(r"\.([\w-]+)", sel):
+            framed_css[k] = framed_css.get(k, False) or frame
+    def frame_token(k):
+        return re.fullmatch(r"card|panel|tile|box", k) or re.search(r"-(card|panel|tile)$", k)
+    cardish = lambda n: any(frame_token(k) and framed_css.get(k, True) for k in n.cls())
     nested = [c.cls() for n in nodes if cardish(n) for c in n.walk() if c is not n and cardish(c)]
     if nested:
         add("flag", "nested-cards", f"{len(nested)} card/panel inside another card/panel; one framed level, use spacing or dividers inside (app-screen-rules.md §7)", [" ".join(sorted(x)) for x in nested])
+    srcs = Counter()
+    skip = re.compile(r"favicon|logo|sprite|\.svg$|^data:", re.I)
+    for n in nodes:
+        if n.tag == "img" and n.attrs.get("src"):
+            srcs[n.attrs["src"].split("?")[0].split("#")[0]] += 1
+    for _, b in rules:
+        for u in re.findall(r"url\(\s*['\"]?([^'\")]+)", b):
+            srcs[u.split("?")[0].split("#")[0]] += 1
+    dupes = [f"{k} x{v}" for k, v in srcs.items() if v >= 2 and not skip.search(k)]
+    if dupes:
+        add("flag", "duplicate-image", f"{len(dupes)} image(s) used twice; each section needs its own picture, a repeat reads as filler (design-quality.md §2)", dupes)
     shell = any(n.tag == "aside" or "sidebar" in n.cls() for n in nodes)
     hero = [n.cls() for n in nodes if any(k in ("hero", "jumbotron", "banner-hero") for k in n.cls())]
     if shell and hero:
-        add("flag", "hero-in-app", "decorative hero inside an app shell (sidebar present); an operational screen opens on its task (app-screen-rules.md §7)", [" ".join(sorted(x)) for x in hero])
+        add("flag", "hero-in-app", "decorative hero inside an app shell (sidebar present); an operational screen opens on its task; a hero is allowed only as the first-run state (app-screen-rules.md §8)", [" ".join(sorted(x)) for x in hero])
     return out
 
 

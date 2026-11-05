@@ -30,6 +30,7 @@ similar brief. Change every part that would come out the same.
 | Subject inventory | 8–12 things that belong to this client and no competitor: name and its meaning, place, numbers, constraints, materials, rituals, printed artefacts of its world |
 | The idea | "On this page, **[something from the inventory]** becomes **[the main visual device]**." |
 | Competitor test | Put the nearest competitor's name in the sentence. If it still works, the idea is the category, not the client; strengthen it or record that the brief lacks the information |
+| Subject shapes | Name 3–5 physical objects from the client's world (a coffee roaster: bean, cup, kraft bag, rubber roast stamp, cupping bowl) and their shapes. Buttons, cards, photo crops and the one signature element take their shape from these objects. A direction recipe's radius is a default: keep it only when the objects agree (print, poster, architecture and data subjects often are square). A user who says "เหลี่ยมอีกแล้ว" is telling you this step was skipped |
 | One live thing | One thing the visitor can do with real content (pick their problem and operate a fragment, choose an option and see the result), works on a phone and without script |
 | Tokens | Ground, ink, one accent (plus at most one field colour); one typeface, two at most (plus an optional mono for code/data); 3–5 type sizes used ([visual-system.md](visual-system.md)) with a decisive jump from body to headline |
 | Section argument | One line per section: the claim and its proof. Delete sections with no claim; don't default to hero → logos → three features → testimonial → pricing → CTA |
@@ -60,6 +61,8 @@ a visual anchor from [visual-assets.md](visual-assets.md), not by empty space.
 | Warm cream background with serif display and terracotta accent | Same: choose from the subject |
 | Middle-dot meta strings ("A · B · C") and "→" appended to links | Plain sentences and labels |
 | Fake interfaces made of grey bars, browser/laptop frames | Real, working interface fragments with real labels and numbers, composed into a scene; a simple phone outline is fine on app pages ([visual-assets.md](visual-assets.md) §5) |
+| The same photograph used twice on one page (hero and a later section), even recropped | One picture per job; with only one usable photo, use type, a fragment or a marked slot (`[รูปหน้าร้าน]`) for the second section (`slop_check.py` duplicate-image) |
+| A badge, stamp or ornament overlapping a headline or button text | Move the decoration onto the picture or the panel edge; text stays clear at every width (`render_check.js` reports decoration-over-text) |
 | Headlines of three or more lines | Cut words to fit two lines at every width (roughly 25–35 Thai/Latin characters at display size); Thai limits in [visual-system.md](visual-system.md) "Headline length" |
 
 ## 2b. Structural slop — beyond surface devices
@@ -128,12 +131,13 @@ Use screenshots at desktop and phone width, not the code. Make each pass on its 
 5. Space: accidental holes, empty half-widths, sections that look the same?
 6. Type: decisive headline jump, ≤5 sizes, headlines ≤2 lines (Thai ≤3 at 1440, ≤4 at 390: [visual-system.md](visual-system.md) "Headline length"), no orphan word?
    No gap before punctuation ("address .") from letter-spacing or a fallback font?
-7. Colour: where is the accent? Only on the action and perhaps one detail?
-8. Pictures: real and doing a job, or decoration and placeholders? Does every
+7. Shape: do corners, buttons and crops come from the subject's objects (§1 Subject shapes), or from the recipe by habit?
+8. Colour: where is the accent? Only on the action and perhaps one detail?
+9. Pictures: real and doing a job, or decoration and placeholders? Does every
    content section have a visual anchor? More than a third text-only fails
    ([visual-assets.md](visual-assets.md) §1).
-9. Phone: its own composition, or the desktop squeezed?
-10. Template devices from §2 still visible?
+10. Phone: its own composition, or the desktop squeezed? Is the primary action above the 390×844 fold and the offer on the first screen (`scripts/fold_check.js`)?
+11. Template devices from §2 still visible?
 
 Score with the visual and UX scorecards in [review-loop.md](review-loop.md) (the final visual and UX scores); fix the top three
 problems; look again. Three rounds at most. Report what still falls short.

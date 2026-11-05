@@ -206,6 +206,12 @@ When the user says "company", "corporate" or "marketing company" without more:
 - Map the chosen direction to tokens before writing markup: ground, ink, one
   accent, type pair (Latin + Thai), radius camp, surface rule (tone steps,
   hairlines or shadows), motion level.
+- **Check the shape against the subject before using the recipe's radius.** The
+  recipe (`direction_recipe.py`) gives a default radius camp; list 3–5 objects from
+  the client's world ([design quality](design-quality.md) §1 Subject shapes) and keep
+  the recipe's corners only when they agree. Loom is square because its material is
+  print; a café drawn in Loom keeps Loom's paper, ink and serif but takes round
+  shapes from the bean, cup and bag. Record the decision in DESIGN.md Shapes.
 - Write the rules the direction forbids on the context card (for example
   "no soft shadows on controls", "red is never a warning").
 - External skills may carry the same directions with stricter rules; follow the

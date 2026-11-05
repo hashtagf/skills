@@ -373,6 +373,7 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [design workflow](design-workflow.md) | Phases 0–8: steps, ask points, exit criteria, scope and completion (phase 8), asking well, this index | all |
 | [framework](framework.md) | Disciplines, levels, rigor tiers, stages; anything beyond one screen | 1 |
 | [product discovery](product-discovery.md) | Problem framing, roles, evidence labels, success metrics | 1 |
+| [research methods](research-methods.md) | Method chooser, interview guide, survey design, personas vs JTBD, journey maps, diary, recruiting and consent, synthesis | 1, RESEARCH |
 | [sources](sources.md) | Source register (S-IDs), dates, authority, evidence discipline (claim labels, browsing, no universal rules, user control) | 1, RESEARCH, any external claim |
 | [design memory](design-memory.md) | Phase 0 inspection, precedence, DESIGN.md format and generation, brand extraction (§3b), specialist-skill routing (§5), reuse | 0 (§1–2), 3 (§3b), 5 (§6), 8 (§3) |
 | [brownfield](brownfield.md) | Existing product without DESIGN.md: inventory, extract, drift, baseline audit | ONBOARD, IMPROVE |
@@ -386,6 +387,8 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [interaction](interaction.md) | Heuristics, mental models, cognition, competing principles | 2 |
 | [notifications](notifications.md) | Channel choice, message anatomy, frequency, lifecycle | 2 |
 | [mobile native](mobile-native.md) | iOS/Android conventions, permissions, push, offline, gestures | 2 |
+| [other platforms](other-platforms.md) | Kiosk/POS, desktop apps, smartwatch, TV, voice, in-car, XR | 2 |
+| [collaboration](collaboration.md) | Presence, co-editing and conflicts, comments, sharing, version history, offline sync | 2, 4 |
 | **Page and interaction** | | |
 | [back office](back-office.md) | Admin page taxonomy, pattern fit, role layout, page review, back-office looks and previews | 1, 2, 6 |
 | [customer UI](customer-ui.md) | Customer page types, onboarding, trust, brand tone | 1, 2 |
@@ -394,6 +397,10 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [forms](forms.md) | Fields, structure, Thai address/phone/ID, validation timing, §6b build contract | 4, 5 |
 | [content design](content-design.md) | UX writing, errors, empty states, Thai register | 4 |
 | [marketing copy](marketing-copy.md) | Headline, CTA, proof, section copy, no-proof and waitlist pages | 4 |
+| [search & filter](search-filter.md) | Search box, Thai query handling, results, facets, sort, URL state, saved views, no-results | 4 |
+| [email design](email-design.md) | HTML email layout, client limits, dark mode, Thai fonts, templates per type, testing | 4, 5 |
+| [print documents](print-documents.md) | Invoices/receipts/tax invoices, page sizes, print CSS, PDF generation, Thai fonts and baht text | 4, 5 |
+| [engagement](engagement.md) | Habit loops, progress, streaks, points/loyalty, gamification fit test, ethical guardrails | 2, 4 |
 | [data visualization](data-visualization.md) | Chart choice, values display, heatmaps, widgets, live data | 4 |
 | [AI features](ai-features.md) | When AI fits, human control, AI output states | 4 |
 | [trust, security, privacy](trust-security-privacy.md) | Confirmation, masking, sessions, auditability | 4 |
@@ -443,8 +450,11 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | `scripts/design_md_check.py` | 3 (after brand extraction), 8 (after editing DESIGN.md) |
 | `scripts/slop_check.py` | 6 |
 | `scripts/render_check.js`, `scripts/contrast.py` | 7 |
-| `scripts/check.py` | 6, 7: one command for every delivery check (runs script_check.js, slop_check.py, contrast.py, state_check.py, and render_check.js with `--render`) |
+| `scripts/check.py` | 6, 7: one command for every delivery check (runs script_check.js, slop_check.py, contrast.py, state_check.py, the public-page metadata line, and render_check.js + fold_check.js with `--render`) |
 | `scripts/script_check.js` | called by check.py: syntax and globals that clash with `window`; no browser needed |
+| `scripts/fold_check.js` | 7: primary action above the 390×844 / 1440×900 fold, offer on the first screen, next section hinted |
+| `scripts/flow_check.js` | 7, 8: JSON-driven journey (the live thing, happy + failure path); fails on console errors |
+| `scripts/placeholders.py` | 5, 8: lists `.ph` / `[…]` placeholders with counts into the hand-off README; warns on proof-like placeholders |
 | `scripts/direction_preview.js`, `scripts/build_previews.js` | 3 (pictures of directions; build_previews regenerates all preview sets) |
 | `scripts/export_tokens.py` | 5 (direction to CSS, Tailwind, shadcn tokens) |
 | `scripts/backoffice_preview.js` | 3 (pictures of back-office density and tone) |
