@@ -143,7 +143,14 @@ def check(path):
                    and "nb" not in c.cls() for c in kids)
     accent = [n.all_text() for n in nodes if n.tag in ("h1", "h2") and styled_child(n)]
     if accent:
-        add("flag", "accent-word-headline", f"{len(accent)} headline(s) style one word differently", accent)
+        # Roman + italic emphasis (em/i, at most one headline per page) is a recipe device, not slop: note, not flag.
+        def italic_only(n):
+            return all(c.tag in ("em", "i") for c in n.children if c.tag in ("span", "em", "i", "mark", "strong", "b") and "lang" not in c.attrs)
+        hs = [n for n in nodes if n.tag in ("h1", "h2") and styled_child(n)]
+        if len(hs) <= 1 and all(italic_only(n) for n in hs):
+            add("note", "italic-emphasis", "one headline uses italic emphasis (allowed by the recipes once per page; waive in the context card)", accent)
+        else:
+            add("flag", "accent-word-headline", f"{len(accent)} headline(s) style one word differently", accent)
 
     if re.search(r"(-webkit-)?background-clip\s*:\s*text", css):
         add("flag", "gradient-text", "gradient-filled text")
@@ -178,6 +185,9 @@ def check(path):
     if re.search(r"\.js\s+[^{]*\{[^}]*opacity\s*:\s*0", css) and "prefers-reduced-motion" not in css:
         add("flag", "reveal-hides-content", "content is hidden until scripted reveal and no reduced-motion fallback; plain screenshots and print show blanks (motion.md)")
 
+    tw_arb = re.findall(r"\b(?:bg|text|border|ring|fill|stroke|from|to|via|outline|shadow)-\[(?:#|rgb|hsl|oklch)[^\]]*\]", html)
+    if tw_arb:
+        add("note", "tailwind-arbitrary-color", f"{len(tw_arb)} Tailwind arbitrary color classes; use theme tokens (tailwind.md)", sorted(set(tw_arb))[:5])
     grads = len(re.findall(r"(linear|radial|conic)-gradient\(", css))
     if grads > 3:
         add("note", "decorative-gradients", f"{grads} gradients; keep them for one deliberate use")
@@ -195,10 +205,10 @@ def check(path):
             continue  # per-language families (Thai pair) are counted by the base rule, not again
         for m in re.finditer(r"font-family\s*:\s*([^;]+)", b):
             first = m.group(1).split(",")[0].strip().strip("'\"").lower()
-            if not first.startswith("var(") and first not in ("inherit", "monospace", "sans-serif", "serif", "system-ui"):
+            if not first.startswith("var(") and "mono" not in first and first not in ("inherit", "sans-serif", "serif", "system-ui"):
                 fams[first] += 1
     if len(fams) > 2:
-        add("flag", "too-many-typefaces", f"{len(fams)} typefaces; one, two at most", fams.keys())
+        add("flag", "too-many-typefaces", f"{len(fams)} typefaces; one, two at most (mono not counted)", fams.keys())
     mono_sel = [s for s, b in rules if re.search(r"font-family\s*:[^;]*mono", b, re.I)
                 and not re.search(r"\b(code|pre|kbd|samp)\b", s)]
     if mono_sel:
@@ -261,7 +271,7 @@ def check(path):
                   and d.attrs.get("type") not in ("submit", "button", "hidden", "reset")]
         if not fields:
             continue
-        has_handler = n.attrs.get("action") or n.attrs.get("onsubmit") or re.search(r"submit|addEventListener|onSubmit|FormData", js)
+        has_handler = n.attrs.get("action") or n.attrs.get("method") == "dialog" or n.attrs.get("onsubmit") or re.search(r"submit|addEventListener|onSubmit|FormData", js)
         if not has_handler:
             add("flag", "inert-form", "form with no action and no submit handling; specify submit, validation, error and success behavior")
         rules = any(any(k in d.attrs for k in ("required", "pattern", "min", "max", "minlength", "maxlength"))
@@ -280,6 +290,34 @@ def check(path):
                   and not d.attrs.get("placeholder") and not d.attrs.get("aria-describedby")]
         if nohint:
             add("note", "format-field-without-example", f"{len(nohint)} format field(s) with neither an example placeholder nor a hint (forms.md §3)", nohint)
+    # App navigation items without icons (iconography.md: navigation = icon + label). Applies to product UI:
+    # a sidebar / aside, or a nav of 7+ items. A public page's short text menu (3-6 links) is a convention, not slop.
+    navs = [n for n in nodes if n.tag in ("aside", "nav") or any(k in ("sidebar", "side", "nav-list", "menu") for k in n.cls())]
+    for nv in navs[:1]:
+        links = [a for a in nv.walk() if a.tag == "a"]
+        app_nav = nv.tag == "aside" or any(k in ("sidebar", "side") for k in nv.cls()) or len(links) >= 7
+        if app_nav and len(links) >= 4:
+            with_icon = [a for a in links if any(d.tag in ("svg", "img", "i", "use") or any("icon" in k or k in ("ic", "fa") for k in d.cls())
+                                                 for d in a.walk() if d is not a)]
+            if len(with_icon) < len(links) / 2:
+                add("flag", "nav-without-icons", f"{len(links) - len(with_icon)} of {len(links)} navigation items have no icon; use icon + label from one family (iconography.md)",
+                    [a.all_text() for a in links if a not in with_icon])
+    if re.search(r"[\u25B2\u25BC\u2191\u2193]", html + js):
+        add("note", "glyph-as-icon", "text arrows (up/down triangles) used as trend icons; use an icon from the set plus visually hidden text (iconography.md)")
+    # Product-UI doctrine (app-screen-rules.md §7): viewport-scaled type, cards nested in cards, hero in an app shell.
+    vw = [sel for sel, body in rules
+          for m in re.findall(r"font-size\s*:\s*([^;}]+)", body)
+          if re.search(r"\d\s*vw\b", m) and not re.search(r"clamp\(|min\(|max\(", m)]
+    if vw:
+        add("flag", "viewport-scaled-font", f"{len(vw)} rule(s) size type in raw vw units (no clamp); text jumps with window width (app-screen-rules.md §7)", vw)
+    cardish = lambda n: any(re.search(r"(^|-)(card|panel|tile)($|-)", k) for k in n.cls()) and not any(k.endswith(("-title", "-body", "-header", "-footer", "-label", "-value")) for k in n.cls())
+    nested = [c.cls() for n in nodes if cardish(n) for c in n.walk() if c is not n and cardish(c)]
+    if nested:
+        add("flag", "nested-cards", f"{len(nested)} card/panel inside another card/panel; one framed level, use spacing or dividers inside (app-screen-rules.md §7)", [" ".join(sorted(x)) for x in nested])
+    shell = any(n.tag == "aside" or "sidebar" in n.cls() for n in nodes)
+    hero = [n.cls() for n in nodes if any(k in ("hero", "jumbotron", "banner-hero") for k in n.cls())]
+    if shell and hero:
+        add("flag", "hero-in-app", "decorative hero inside an app shell (sidebar present); an operational screen opens on its task (app-screen-rules.md §7)", [" ".join(sorted(x)) for x in hero])
     return out
 
 

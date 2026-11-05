@@ -22,7 +22,7 @@
  * prefers-reduced-motion and also reports animations still moving and any
  * content never revealed. Also reported: images that failed to load (lazy images
  * are forced eager first, so full-page shots are not blank), text touching the
- * viewport edge (no gutter), and h1/h2 wrapping to 3+ lines (a NOTE, not a failure).
+ * viewport edge (no gutter), text overlapping other text, and h1/h2 wrapping to 3+ lines (a NOTE, not a failure).
  * --toggle "<selector>" clicks a language/theme switch after the first pass and
  * repeats every viewport (screenshots prefixed alt-), so both states are checked.
  * --zoom also renders at 320px width (approximates 400% zoom reflow
@@ -79,7 +79,8 @@ if (!/^[a-z]+:\/\//i.test(target)) {
     target = 'file://' + wrapped;
   } else target = 'file://' + file;
 }
-const out = opt('--out', 'render-check');
+// Default output sits next to a local page (not the current directory, which may be the skill's own folder).
+const out = opt('--out', /^[a-z]+:\/\//i.test(args[0]) ? 'render-check' : path.join(path.dirname(path.resolve(args[0])), 'render-check'));
 const fast = args.includes('--fast');
 const widths = opt('--widths', fast ? '1440,390' : '1440,768,390').split(',').map(Number);
 if (args.includes('--zoom')) widths.push(320);
@@ -221,15 +222,32 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
           if (b.right < 0 || b.left > vw) continue; // off-screen (skip links)
           if (b.left < 6 || b.right > vw - 6) edge.push(`${e.tagName.toLowerCase()} "${e.innerText.trim().slice(0, 24)}" left=${Math.round(b.left)} right=${Math.round(vw - b.right)}`);
         }
+        // Text colliding with other text or with a card/image block (headline over a panel, etc.)
+        const overlap = [];
+        const boxes = [...document.querySelectorAll('h1,h2,h3,h4,p,li,a,button,label,summary,figcaption,dt,dd')].filter(e => {
+          if (e.closest('[aria-hidden="true"],[hidden]') || !visible(e)) return false;
+          return [...e.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim().length > 1);
+        }).map(e => ({ e, r: e.getBoundingClientRect() })).filter(x => x.r.width > 8 && x.r.height > 8 && x.r.bottom > 0 && x.r.top < innerHeight * 12);
+        for (let i = 0; i < boxes.length && overlap.length < 3; i++) {
+          for (let j = i + 1; j < boxes.length && overlap.length < 3; j++) {
+            const a = boxes[i], b = boxes[j];
+            if (a.e.contains(b.e) || b.e.contains(a.e)) continue;
+            const w = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left), h = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+            if (w <= 0 || h <= 0) continue;
+            const small = Math.min(a.r.width * a.r.height, b.r.width * b.r.height);
+            if ((w * h) / small > 0.25) overlap.push(`"${a.e.innerText.trim().slice(0, 20)}" over "${b.e.innerText.trim().slice(0, 20)}"`);
+          }
+        }
         const notes = [];
         for (const h of document.querySelectorAll('h1,h2')) {
           if (!visible(h) || h.closest('[aria-hidden="true"]')) continue;
           const cs = getComputedStyle(h); const fs = parseFloat(cs.fontSize);
           const lh = parseFloat(cs.lineHeight) || fs * 1.2;
           const lines = Math.round(h.getBoundingClientRect().height / lh);
-          if (lines > 2) notes.push(`${h.tagName.toLowerCase()} wraps to ${lines} lines: "${h.innerText.trim().slice(0, 36)}"`);
+          const limit = /^th/i.test(h.closest('[lang]')?.getAttribute('lang') || document.documentElement.lang || '') ? 3 : 2; // Thai wraps by characters
+          if (lines > limit) notes.push(`${h.tagName.toLowerCase()} wraps to ${lines} lines: "${h.innerText.trim().slice(0, 36)}"`);
         }
-        return { overflow, wide, noAlt, noName, noLabel, formIssues: [...new Set(formIssues)], punct, hidden, moving, reduce, mobile, broken, edge, notes, lang: document.documentElement.lang };
+        return { overflow, wide, noAlt, noName, noLabel, formIssues: [...new Set(formIssues)], punct, hidden, moving, reduce, mobile, broken, edge, overlap, notes, lang: document.documentElement.lang };
       });
       const file = path.join(out, `${prefix}${scheme}-${w}.png`);
       await page.screenshot({ path: file, fullPage });
@@ -248,6 +266,7 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
       if (r.hidden.length) issues.push(`content invisible after load (opacity 0${r.reduce ? ', reduced motion' : ', first screen'}): ${r.hidden.join(' | ')}`);
       r.mobile.forEach(x => issues.push(`phone: ${x}`));
       if (r.broken.length) issues.push(`image(s) failed to load: ${[...new Set(r.broken)].slice(0, 3).join(', ')}`);
+      if (r.overlap && r.overlap.length) issues.push(`text overlaps other text: ${r.overlap.join(' | ')}`);
       if (r.edge.length) issues.push(`text touches the viewport edge (no gutter): ${r.edge.join(' | ')}`);
       if (r.moving) issues.push(`${r.moving} animation(s) still moving under prefers-reduced-motion`);
       problems += issues.length;
