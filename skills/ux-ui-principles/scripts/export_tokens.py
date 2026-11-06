@@ -7,7 +7,8 @@ Usage:
   python3 export_tokens.py --list
   python3 export_tokens.py <direction-id> --print-dark     # derived dark theme as JSON (used by previews)
 
-Writes into DIR (default ./tokens-<id>/):
+Without --out it writes nothing: it prints tokens.css to stdout (redirect it, or pass --out) and the contrast
+report to stderr, so running it from the skill folder never leaves files behind. With --out DIR it writes:
   tokens.css          plain CSS custom properties: color roles (light + dark), type, space,
                       radius, shadow, motion. Works in any stack.
   tailwind-theme.css  Tailwind v4: @theme inline mapping onto tokens.css
@@ -358,7 +359,7 @@ def load(args):
 def main():
     args = sys.argv[1:]
     d = load(args)
-    out = args[args.index("--out") + 1] if "--out" in args else "tokens-%s" % d["id"]
+    out = args[args.index("--out") + 1] if "--out" in args else None
     only = (args[args.index("--only") + 1] if "--only" in args else "css,tailwind,shadcn").split(",")
     dark_is_default = lum(d["ground"]) < 0.2
     if dark_is_default:
@@ -371,23 +372,29 @@ def main():
         print(json.dumps(dict(ground=u["ground"], surface=u["surface"], ink=u["ink"], muted=u["muted"],
                               accent=u["accent"], accentInk=u["accent_ink"], tints=u["tints"], dark=True)))
         return
-    os.makedirs(out, exist_ok=True)
     files = {"css": ("tokens.css", emit_css(d, light_t, dark_t, dark_is_default)),
              "tailwind": ("tailwind-theme.css", emit_tailwind(d)),
              "shadcn": ("shadcn-globals.css", emit_shadcn(d, light_t, dark_t))}
-    for k in only:
-        name, body = files[k]
-        open(os.path.join(out, name), "w").write(body)
-        print("wrote", os.path.join(out, name))
+    report = sys.stdout
+    if out:
+        os.makedirs(out, exist_ok=True)
+        for k in only:
+            name, body = files[k]
+            open(os.path.join(out, name), "w").write(body)
+            print("wrote", os.path.join(out, name))
+    else:
+        report = sys.stderr  # stdout carries the CSS only, so `> tokens.css` stays clean
+        sys.stdout.write(files["css"][1])
+        print("(printed tokens.css; nothing written. Pass --out DIR to write %s)" % ", ".join(files[k][0] for k in only), file=report)
     fails = 0
     for name, t in (("light", light_t), ("dark", dark_t)):
         for n, label, r, need, passed in checks(name, t):
             if not passed:
                 fails += 1
-                print("FAIL  %-5s %-26s %.2f:1 need %.1f:1" % (n, label, r, need))
+                print("FAIL  %-5s %-26s %.2f:1 need %.1f:1" % (n, label, r, need), file=report)
     for n in NOTES:
-        print("note  " + n)
-    print("contrast: %s" % ("all pairs pass" if not fails else "%d pair(s) fail; adjust the direction's colors" % fails))
+        print("note  " + n, file=report)
+    print("contrast: %s" % ("all pairs pass" if not fails else "%d pair(s) fail; adjust the direction's colors" % fails), file=report)
     sys.exit(1 if fails else 0)
 
 

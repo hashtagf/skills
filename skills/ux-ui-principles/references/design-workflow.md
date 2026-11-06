@@ -416,7 +416,9 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [visual system](visual-system.md) Part C | Measured values: type, tone, spacing, radius, motion, presets, craft pass | 4 |
 | [reference library](../assets/references/README.md) | 30 rendered pages that look designed (landing, editorial, report, product, mobile), each mapped to a composition | 3, 4, 6 (compare the render) |
 | [showcase catalog](../assets/showcase/README.md), `scripts/showcase_fetch.py` | 98 Open Design showcase entries as 65 distinct captures, each marked template / study / skip with a composition; pictures fetched locally | 3, 4, 6 |
-| `scripts/look.py` | Lists the pictures to open before building a page of a kind (references, showcase, direction and product previews) | 3, 5 |
+| `scripts/look.py` | Lists the pictures to open before building a page of a kind (references, showcase, market study, direction and product previews) | 3, 5 |
+| [market studies](../assets/market/README.md), `scripts/market_fetch.js` | Per kind of business: category look, design-led moves, three gaps, checked facts, screenshots of local and design-led sites (local only) | 3 |
+| `scripts/photo_search.py` | Open-licensed photographs of the subject's world (Commons, Openverse), licence-filtered, downloads with credits | 4, 5 |
 | `scripts/compositions.js`, [content packs](../assets/directions/content-packs.json), [photos](../assets/photos/README.md) | Fourteen first-screen compositions; sample content per kind of business; licensed stand-in photographs | 3, 5 |
 | `scripts/brand.js` | One direction → public pages and product UI on one token set (`backoffice_preview.js --direction`) | 3, 5 |
 | [design system guides](../assets/design-systems/index.md) | all 126 study guides (14 curated with sector and reading notes) | 2, 4 |

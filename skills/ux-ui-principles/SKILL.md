@@ -123,17 +123,21 @@ page must look designed, and this skill holds the examples that show how:
 
 1. **Interview before code** when there is no DESIGN.md and no stated direction:
    [design direction](references/design-direction.md) §9 (Round A business, B taste
-   with pictures, C confirm), then `scripts/design_md.py … --wire`. An existing
+   with pictures on the client's subject in different layouts, C confirm), then `scripts/design_md.py … --wire`. An existing
    product without DESIGN.md runs ONBOARD instead. Away: pick by subject and say so.
    The **shape** question is never skipped, even when rounds are merged or a direction
    is picked from the previews: a direction fixes palette and type, not shape.
+   Round B always offers **"research the market first"**: what local sites of the kind
+   converge on, what design-led ones do, three gaps (§9 "Market research",
+   `assets/market/`, `scripts/market_fetch.js`). Recommend it when `look.py <kind>`
+   prints no market study.
 2. **Look before you build.** Run `python3 scripts/look.py <kind> [--direction <id>]`
-   (kind: landing, cafe, saas, dashboard, deck, mobile, portfolio …) and open **every**
-   image it lists: real designed pages of your kind, then the direction's preview and its
-   product UI. Name in the answer which you looked at and the one move you take from
-   them. When it lists fewer than three pages of your kind, screenshot 8–12 design-led
-   sites of the category yourself (first screen plus one scroll at 1440) and name one
-   move from each; take three to five. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components; its
+   (kind: landing, cafe, clinic/dental, saas, dashboard, deck, mobile, portfolio …) and open **every**
+   image it lists: real designed pages of your kind, the market study's sites and facts when
+   one exists, then the direction's preview and its product UI. Name in the answer which you looked at and the one move you take from
+   them. When it lists fewer than three pages of your kind and no market study, run the
+   market research (§9) with `scripts/market_fetch.js` and record it, so the next page of
+   that kind starts from it; name one move from each design-led site, take three to five. Then `scripts/direction_recipe.py <id>` (tokens, bans, required components; its
    radius is a **default** to check against the subject, not a rule) and
    start from the composition it names in `scripts/compositions.js`. Never default to
    warm cream + serif + terracotta or near-black + one neon accent ([design quality](references/design-quality.md) §2).

@@ -110,10 +110,12 @@
 | `direction_preview.js` | ภาพ preview ของ direction | ภาพสำหรับ interview | build_previews.js |
 | `direction_recipe.py` | token/ข้อห้าม/component ที่ต้องมีของ direction | แปลง direction เป็นกติกา | §3 ข้อ 2 |
 | `ds_lookup.py` | ค้นคู่มือ 126 design system | หาตัวอย่างจริงก่อนตั้งค่า | design-system-benchmarks.md |
-| `export_tokens.py` | direction → token ในโค้ด (`--print-dark`) | ส่งต่อให้โค้ดโดยไม่พิมพ์มือ | tokens-export.md |
+| `export_tokens.py` | direction → token ในโค้ด (`--out DIR`; ไม่ใส่ = พิมพ์ออก stdout ไม่เขียนไฟล์; `--print-dark`) | ส่งต่อให้โค้ดโดยไม่พิมพ์มือ | tokens-export.md |
 | `flow_check.js` | เดิน journey จาก steps.json รวม failure path | ตรวจว่างานหลักทำได้จริง | §3 ข้อ 6 |
 | `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |
-| `look.py` | รายการภาพอ้างอิงตามประเภทหน้า | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
+| `look.py` | รายการภาพอ้างอิงตามประเภทหน้า + market study ถ้ามี | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
+| `market_fetch.js` | แคปเว็บคู่แข่งในตลาด + เว็บที่ออกแบบดี ตามประเภทธุรกิจ | research ตลาดก่อนเลือก direction | interview Round B |
+| `photo_search.py` | ค้นรูปไลเซนส์เปิด (Commons/Openverse) พร้อม credit | ได้รูปจริงโดยไม่ละเมิดลิขสิทธิ์ | ก่อนสร้างหน้า |
 | `placeholders.py` | หา placeholder ที่เหลือ | ห้ามส่งของปลอมเป็นของจริง | §3 ข้อ 6 |
 | `halftone.py` | ทำรูปฮาล์ฟโทนหมึกเดียวจริงจากรูปถ่าย | สไตล์งานพิมพ์ต้องดูพิมพ์จริง ไม่ใช่ลายจุดโปะทับ | §3 ข้อ 4, visual-assets §2b |
 | `render_check.js` | render หลายขนาด light/dark, overflow, JS error, ชื่อปุ่ม | smoke check ทั่วไปของทุกหน้า | ผ่าน `check.py --render` |
@@ -136,7 +138,7 @@
 | `assets/backoffice/styles.json` | 17 look ของหลังบ้าน: สี, 5 status tone, density ปกติ + compact, รูปทรง | **template UI หลังบ้าน**: ค่าเดียวที่ preview และ `design_md.py --backoffice` ใช้ | back-office.md |
 | `assets/directions/` | direction ของหน้า public (`directions.json`, content packs) | หน้าตาที่ไม่ซ้ำแบบ default | direction-library.md |
 | `assets/design-systems/` | คู่มือ 126 design system (Apache-2.0, S102) | ข้อมูลดิบของ benchmarks | `ds_lookup.py` |
-| `assets/photos/, assets/references/, assets/showcase/` | ภาพจริงพร้อม credit | ภาพอ้างอิง/ใช้งานที่มีที่มา | `look.py` |
+| `assets/photos/, assets/references/, assets/showcase/, assets/market/` | ภาพจริงพร้อม credit, market study ต่อประเภทธุรกิจ | ภาพอ้างอิง/ใช้งานที่มีที่มา | `look.py` |
 | `evals/` | สถานการณ์ทดสอบ routing/trigger/A-B + `index_check.py` | วัดว่า skill เปิดไฟล์ถูกและ README ไม่ตกหล่น | ก่อน release |
 
 ## หลักสำคัญที่แปลงเป็นกติกาใน skill

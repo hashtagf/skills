@@ -41,3 +41,6 @@ node_modules/
 # Open Design showcase study pictures (rights cover the plugin, not every depicted asset); rebuild with scripts/showcase_fetch.py
 skills/*/assets/showcase/img/
 skills/*/assets/showcase/items.json
+
+# Market study screenshots of real businesses' sites (their copyright); rebuild with scripts/market_fetch.js
+skills/*/assets/market/img/

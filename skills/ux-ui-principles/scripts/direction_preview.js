@@ -6,6 +6,11 @@
  * Usage:
  *   node scripts/direction_preview.js [--ids dose,riso] [--group company|premium|playful|atmospheric]
  *        [--out dir] [--width 1440] [--height 1240] [--sheet] [--brief "Headline|Sentence|Button"] [--comp c1..c14] [--subject <pack>]
+ *        [--same-comp]
+ *
+ * A shortlist (--ids) must differ in layout, not only colour: when two listed directions share a composition,
+ * the later ones are drawn in the next unused composition and the script says so (--same-comp keeps them).
+ * For a client, add --subject <their kind> (e.g. dental) so every option shows their world.
  *
  * Each direction is drawn in its own composition (scripts/compositions.js: editorial, collage, full-bleed
  * photo, Swiss, soft product, poster, question, centred, magazine, board) on content from a real kind
@@ -40,7 +45,21 @@ const photos = {};
 if (fs.existsSync(photoDir)) for (const f of fs.readdirSync(photoDir)) if (/\.jpe?g$/i.test(f)) photos[f.replace(/\.jpe?g$/i, '')] = 'data:image/jpeg;base64,' + fs.readFileSync(path.join(photoDir, f)).toString('base64');
 // --brief "Headline|Sentence|Button" replaces the pack's headline, sentence and action with the user's copy
 const withBrief = (p) => (brief[0] ? Object.assign({}, p, { h1: [brief[0], '', ''], sub: brief[1] || p.sub, cta: brief[2] || p.cta }) : p);
-const pageFor = (d) => comps.render(d, opt('--comp', d.comp), withBrief(packs[opt('--subject', d.subject)] || packs.cafe), photos, { width: W, height: H, photoFilter: d.photoFilter, subject: opt('--subject', d.subject) });
+// shortlist: give directions that share a composition different ones, so the user compares layouts, not swatches
+const ORDER = ['c5', 'c1', 'c2', 'c3', 'c8', 'c13', 'c12', 'c14', 'c4', 'c6', 'c9', 'c7', 'c10', 'c11'];
+const compOf = {};
+if (opt('--ids') && !opt('--comp') && !has('--same-comp')) {
+  const used = new Set();
+  for (const d of list) {
+    let c = d.comp;
+    if (used.has(c)) {
+      const alt = ORDER.find(x => !used.has(x) && x !== d.comp);
+      if (alt) { console.log(`${d.id} shares ${c} with an earlier pick; drawn in ${alt} so the shortlist differs in layout (--same-comp to keep ${c})`); c = alt; }
+    }
+    used.add(c); compOf[d.id] = c;
+  }
+}
+const pageFor = (d) => comps.render(d, opt('--comp', compOf[d.id] || d.comp), withBrief(packs[opt('--subject', d.subject)] || packs.cafe), photos, { width: W, height: H, photoFilter: d.photoFilter, subject: opt('--subject', d.subject) });
 const brief = (opt('--brief', '') || '').split('|');
 
 (async () => {

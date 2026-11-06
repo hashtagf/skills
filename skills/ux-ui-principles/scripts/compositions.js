@@ -70,7 +70,7 @@ const photoOf = (photos, key) => (key && photos[key]) ? `background-image:url('$
 
 // A second section under every first screen: the subject's real list (menu, works, schedule, jobs),
 // so a preview shows rhythm between sections instead of an empty lower half.
-const MORE_TITLE = { cafe: 'This week at the bar', architecture: 'Selected work', saas: 'Jobs running now', clinic: 'Treatments and prices',
+const MORE_TITLE = { cafe: 'This week at the bar', architecture: 'Selected work', saas: 'Jobs running now', clinic: 'Treatments and prices', dental: 'Prices before the chair',
   consultancy: 'Recent decisions', publisher: 'In this issue', festival: 'The weekend', streetfood: 'The five stalls', ceramics: 'From firing 41',
   fintech: 'This month', data: 'By region', school: 'Courses this term', retreat: 'Cabins and meals', bar: 'Tonight on the turntable' };
 const MORE_CSS = `

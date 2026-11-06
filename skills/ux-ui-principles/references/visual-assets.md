@@ -42,8 +42,8 @@ never the delivered UI.
 
 ### 2b. Open-collection photographs
 
-`assets/photos/` holds 14 already-licensed stand-ins (coffee roasting, concrete, stage
-light, street food, misty forest, a potter's hands, type cases, a wet street at night …)
+`assets/photos/` holds 15 already-licensed stand-ins (coffee roasting, concrete, stage
+light, street food, misty forest, a potter's hands, type cases, a wet street at night, a daylit dental room …)
 with credits in `credits.json`; use one when the subject matches and web search is not
 available, credit it, and list it in the hand-off as a picture to replace.
 
@@ -55,8 +55,11 @@ it more than any amount of drawing. Do this when the client has none:
 1. **Search the subject's world, not the category**: the craft, the tool, the
    room, the material (for an agency: a print studio, hands sketching, a desk in
    daylight), not "business team". Prefer a documented library when the host
-   offers one; otherwise search Wikimedia Commons or Openverse by hand and open
-   each candidate before choosing.
+   offers one; otherwise `python3 scripts/photo_search.py "<the room>" "<the tool>"`
+   (Commons, `--source both` adds Openverse; licences already filtered) and
+   `--download <project>/img --pick 2,5 --name a,b`, which writes `credits.json`.
+   Open each candidate before choosing: reject clutter, staged stock, and people who
+   could pass for the client's staff or patients.
 2. **Licence**: allow CC0, public domain, CC BY and CC BY-SA; reject
    non-commercial and no-derivatives licences for a commercial page. Record
    title, creator, licence and page URL for each.

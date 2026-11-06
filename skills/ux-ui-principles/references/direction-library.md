@@ -37,7 +37,11 @@ material, type voice and surface; it never changes the page pattern
    it, not a palette swatch. The same direction as product UI (same tokens, admin
    structure) is in `previews/product/<id>-overview.jpg` and `-records.jpg`. Try another
    arrangement or subject, or the user's own copy:
-   `node scripts/direction_preview.js --ids dose,riso [--comp c3] [--subject cafe] [--brief "Headline|Sentence|Button"] [--sheet]`;
+   `node scripts/direction_preview.js --ids dose,riso [--comp c3] [--subject cafe] [--brief "Headline|Sentence|Button"] [--sheet]`.
+   **A shortlist differs in layout, not only colour.** Several directions share a composition (Dose, Cobalt,
+   Coral and Fjord are all `c5`), so their stored previews are the same page in other colours. Render the shortlist
+   with `--ids` (the script gives later picks the next unused composition and says so; `--same-comp` keeps them)
+   and with `--subject <client kind>` (packs include `dental`, `clinic`, `cafe` …) so every option shows the client's world;
    Without a preview, render a one-screen sketch yourself; never describe looks in words only.
 3. **Say what each costs**: one line on risk for this subject, and which one you
    recommend and why. Lead with the recommendation.

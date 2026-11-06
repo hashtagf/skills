@@ -195,6 +195,19 @@
       "rows": [["Tonight", "Thai 60s → city pop"], ["Seats left", "5"], ["Cover", "None"], ["Last order", "00:30"]],
       "list": [["Suraphon Sombatcharoen", "1968 · Thai luk thung", "21:00"], ["Tatsuro Yamashita", "1982 · city pop", "22:00"], ["William Onyeabor", "1978 · Lagos funk", "23:00"], ["Carabao", "1984 · Thai rock", "23:45"], ["Mariya Takeuchi", "1984 · city pop", "00:15"]],
       "photo": "wet-street", "photo2": "stage-lights"
+    },
+    "dental": {
+      "brand": "Baan Fun Dental", "reg": ["Ari, Bangkok", "Open 7 days", "Social security accepted", "Book online"],
+      "kicker": "Family dentistry, one booking for the whole house",
+      "h1": ["Book the whole family ", "into one", " visit."],
+      "sub": "Pick who is coming, the treatment and a time with a free chair for everyone. We confirm on LINE within 30 minutes.",
+      "cta": "Choose a time", "cta2": "Prices and coverage",
+      "pillars": [["Price before the chair", "The dentist explains the plan and the price before any work starts."], ["Kids next to you", "Children are seen in the same slot as a parent, not after a long wait."], ["Coverage, no paperwork", "Social-security patients use the yearly dental allowance without paying first."]],
+      "figs": [["4", "chairs, side by side"], ["45 min", "checkup and scaling"], ["฿900", "yearly social-security allowance"]],
+      "big": "4", "q": "When should a child first see the dentist?", "answer": "When the first tooth appears, and before the first birthday.",
+      "rows": [["Checkup and scaling", "45 min · ฿1,200"], ["Child checkup + fluoride", "30 min · ฿700"], ["Coverage", "Social security, up to ฿900 a year"], ["Hours", "10:00–20:00 daily"]],
+      "list": [["Checkup and scaling", "45 min", "฿1,200"], ["Filling, one surface", "30 min", "฿900"], ["Child checkup + fluoride", "30 min", "฿700"], ["Extraction", "30 min", "฿1,000"], ["Orthodontic consultation", "30 min", "฿500"]],
+      "photo": "dental-room", "photo2": "quiet-office"
     }
   }
 }

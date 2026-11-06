@@ -239,13 +239,29 @@ only where marked.
 
 **Round B: the taste (show pictures first, then ask; one batch, up to 4 questions)**
 Show pictures of 2–3 directions at a time (one picture sheet holds at most 6), at least one soft or round and
-at least one square ([direction library](direction-library.md) step 2), never names alone.
+at least one square ([direction library](direction-library.md) step 2), never names alone. Render them on the
+client's subject and in different layouts (`node scripts/direction_preview.js --ids a,b,c --subject <kind> --sheet`);
+three previews that differ only in colour cannot be compared. The direction question always offers **"Research the
+market first"** as an option, and it is the recommended one when `look.py <kind>` lists no market study.
+
+**Market research (when chosen, or before Round C when no study exists for the kind).** Run it before proposing
+directions, never after the build has started:
+1. `python3 scripts/look.py <kind>`: if a study exists in `assets/market/catalog.json`, open its pictures and use it;
+   re-shoot stale pictures with `node scripts/market_fetch.js --kind <kind>`.
+2. Otherwise build one (a subagent suits it): about 6 local sites of the category and 6 design-led sites abroad (award
+   galleries), `node scripts/market_fetch.js --kind <kind> --urls urls.txt`, open every picture.
+3. Report in three parts: the **category look** (what local sites converge on), the **designed moves** (what the
+   design-led ones do differently), and **three gaps** this client could own, each naming the closest local site.
+   Facts of the market (subsidies, licences, regulations) go in only with a source and a check date.
+4. Record it in `assets/market/catalog.json` (the script prints a stub) so the next brief of that kind starts there.
+5. Use it: drop any direction that matches the category look (competitor test, [design quality](design-quality.md)
+   §1), and lead Round C with the direction that fills a gap.
 5. **Feel**: up to 3 words (trustworthy, premium, playful, bold, techy, natural, warm, calm).
 6. **Shape**: *Soft and round* · *Mixed (round buttons, sharp cards)* · *Sharp and printed*. Do not infer shape from the feel words: "premium + playful" is not "sharp". **Never skip this question**, even when the rounds are compressed into one batch or the user picks a direction straight from the previews: the direction fixes palette and type, not shape. Offer the subject-led option first ("Round like the bean, cup and bag" for a café; see [design quality](design-quality.md) §1 Subject shapes) and record the answer as `shape` and `shape_from_subject` in `interview.json`.
 7. **References**: one site or app you like and why, one you dislike and why (free text, optional). Extract principles, not layouts ([design memory](design-memory.md) §3b).
 8. **Energy**: *Calm and spacious* (V3 M2 D3) · *Balanced* (V5 M4 D4) · *Expressive* (V7 M6 D3) · *Dense and fast* (V2 M1 D8).
 
-**Round C: confirm.** Propose 2-3 named directions built from the answers (§7), each shown as a picture,
+**Round C: confirm.** Propose 2-3 named directions built from the answers and the market study (§7), each shown as a picture,
 lead with the recommendation, state what each trades away, and let the user pick. Then play the choice back in
 three lines (goal, feel+shape, what you will not do) and ask "right?" once.
 

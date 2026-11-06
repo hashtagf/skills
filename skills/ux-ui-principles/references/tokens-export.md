@@ -10,7 +10,7 @@ python3 scripts/export_tokens.py --json my-brand.json     # same keys as a direc
 python3 scripts/export_tokens.py <direction-id> --only css,tailwind,shadcn   # subset of files
 ```
 
-Default output directory is `./tokens-<id>/` when `--out` is omitted. Exit codes: 1 when a
+Without `--out` nothing is written: `tokens.css` goes to stdout (the contrast report to stderr), so a run from the skill folder leaves no files. Exit codes: 1 when a
 color pair cannot pass, 2 for an unknown direction.
 
 | File | For | Notes |
@@ -28,7 +28,7 @@ ground for long sessions) and borrows only structure and density (navigation, ta
 row height) from the closest look in `assets/backoffice/styles.json` (`product.base` in the
 direction overrides the choice). Picture it with
 `node scripts/backoffice_preview.js --direction <id> --screens overview,records`. Export
-the tokens once with `export_tokens.py <id>`; the admin uses the same `tokens.css` with its
+the tokens once with `export_tokens.py <id> --out <project styles dir>`; the admin uses the same `tokens.css` with its
 own density variables.
 
 ## Rules the script applies
