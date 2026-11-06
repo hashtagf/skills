@@ -6,7 +6,7 @@
  *   node render_check.js --doctor | -h
  *   node render_check.js <url-or-file> [--out dir] [--widths 1440,768,390] [--schemes light,dark]
  *                         [--zoom] [--fast] [--viewport-shots] [--reduced-motion] [--wait 800] [--timeout 30000]
- *                         [--toggle "<selector>"]
+ *                         [--toggle "<selector>"] [--json]
  *
  * The page is loaded once; widths and color schemes are switched in place
  * (viewport resize + prefers-color-scheme emulation), so each extra viewport
@@ -57,12 +57,17 @@
  * transitions are given up to 3s to finish, so entrance effects do not skew the checks or shots.
  * This is a smoke check, not an accessibility audit: it does not test keyboard
  * flows, screen readers, contrast or task success.
+ * --json: one JSON document on stdout (README "Script contract"), log lines on stderr, same exit codes. Each
+ * problem above is a fail finding (rule = its label: overflow, unnamed-control, phone, composition, …), each
+ * NOTE a note finding; "viewports" lists scheme, width, result and screenshot per pass.
  */
 const path = require('path');
 const fs = require('fs');
 const A = require('./_args');
+const R = require('./_report');
 const a = A.parse(process.argv.slice(2), {
   file: __filename,
+  report: 'render_check',
   values: ['--out', '--widths', '--schemes', '--wait', '--timeout', '--toggle'],
   flags: ['--zoom', '--fast', '--viewport-shots', '--reduced-motion', '--doctor'],
   positional: process.argv.includes('--doctor') ? [0, 1, '<url-or-file>'] : [1, 1, '<url-or-file> (node render_check.js page.html, or --doctor)'],
@@ -79,6 +84,7 @@ const exe = mod ? pw.findBrowser(mod.chromium) : undefined;
 if (doctor) {
   console.log(`playwright module: ${mod ? mod.from : 'NOT FOUND'}`);
   console.log(`browser: ${exe === null ? "Playwright's bundled build" : exe || 'NOT FOUND'}`);
+  R.set('doctor', { playwright_module: mod ? mod.from : null, browser: exe === null ? 'bundled' : exe || null });
   if (!mod || exe === undefined) pw.need(arg0, 'render check');
   process.exit(0);
 }
@@ -92,6 +98,7 @@ if (!A.isUrl(arg0)) {
     fs.writeFileSync(wrapped, '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>\n' + fs.readFileSync(file, 'utf8') + '\n</body></html>');
     process.on('exit', () => { try { fs.unlinkSync(wrapped); } catch (e) {} });
     console.log(`note: ${path.basename(file)} is a fragment; rendered inside a doctype wrapper`);
+    R.add('note', 'fragment', `${path.basename(file)} is a fragment; rendered inside a doctype wrapper`, null);
     target = pw.target(wrapped);
   }
 }
@@ -106,6 +113,8 @@ const wait = a.num('--wait', 800, { min: 0 });
 const timeout = a.num('--timeout', 30000, { min: 1 });
 const fullPage = !(fast || a.has('--viewport-shots'));
 if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
+R.setArtifact('out', out);
+const viewports = []; R.set('widths', widths); R.set('schemes', schemes); R.set('viewports', viewports);
 
 A.main(async () => {
   fs.mkdirSync(out, { recursive: true });
@@ -141,7 +150,7 @@ A.main(async () => {
   // Dev server: the final gate runs on the shipped build (render-verification.md)
   if (/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)/.test(target)) {
     const dev = await page.evaluate(() => !!document.querySelector('script[src*="@vite/client"],script[src*="webpack-hmr"],script[src*="_next/static/webpack"],script[id="__NEXT_DATA__"][data-dev]') || typeof window.__vite_plugin_react_preamble_installed__ !== 'undefined');
-    if (dev) console.log('NOTE  dev server detected (HMR client); run the final gate on the production build');
+    if (dev) { console.log('NOTE  dev server detected (HMR client); run the final gate on the production build'); R.add('note', 'dev-server', 'dev server detected (HMR client); run the final gate on the production build', target); }
   }
   async function matrix(prefix) {
   for (const scheme of schemes) {
@@ -337,33 +346,40 @@ A.main(async () => {
       if (w >= 1024 || w <= 480) await page.evaluate(color.inject);
       const comp = (w >= 1024 || w <= 480) ? await page.evaluate(composition, { w, first: compFirst && w >= 1024 }) : { fails: [], notes: [] };
       if (w >= 1024) compFirst = false;
+      const ownNotes = r.notes.length;
       r.notes.push(...comp.notes);
       const file = path.join(out, `${prefix}${scheme}-${w}.png`);
       // Viewport shots are the first screen: scroll to top instantly (smooth scroll would still be moving).
       if (!fullPage) await page.evaluate(() => new Promise(r => { scrollTo({ top: 0, behavior: 'instant' }); requestAnimationFrame(() => requestAnimationFrame(r)); }));
       await page.screenshot({ path: file, fullPage });
-      const issues = [];
+      const issues = [], rules = [];
+      const push = (rule, msg) => { issues.push(msg); rules.push(rule); };
       const fresh = (arr, k) => { const n = arr.slice(reported[k]); reported[k] = arr.length; return n; };
       const e1 = fresh(errs, 'errs'), c1 = fresh(cons, 'cons'), f1 = fresh(fails, 'fails');
-      if (e1.length) issues.push(`JS errors: ${e1.slice(0, 3).join(' | ')}`);
-      if (c1.length) issues.push(`console errors: ${c1.slice(0, 3).join(' | ')}`);
-      if (f1.length) issues.push(`failed requests: ${f1.slice(0, 3).join(' | ')}`);
-      if (r.overflow) issues.push(`horizontal page overflow; widest: ${r.wide.join(', ') || 'unknown'}`);
-      if (r.noAlt) issues.push(`${r.noAlt} visible image(s) without alt`);
-      if (r.noName.length) issues.push(`unnamed controls: ${r.noName.slice(0, 3).join(' | ')}`);
-      if (r.noLabel.length) issues.push(`unlabeled fields: ${r.noLabel.slice(0, 3).join(' | ')}`);
-      r.formIssues.slice(0, 4).forEach(x => issues.push(`form: ${x}`));
-      r.punct.forEach(x => issues.push(`text: ${x}`));
-      if (r.hidden.length) issues.push(`content invisible after load (opacity 0${r.reduce ? ', reduced motion' : ', first screen'}): ${r.hidden.join(' | ')}`);
-      r.mobile.forEach(x => issues.push(`phone: ${x}`));
-      if (r.broken.length) issues.push(`image(s) failed to load: ${[...new Set(r.broken)].slice(0, 3).join(', ')}`);
-      if (r.overlap && r.overlap.length) issues.push(`text overlaps other text: ${r.overlap.join(' | ')}`);
-      if (r.decoOver && r.decoOver.length) issues.push(`decoration covers text: ${r.decoOver.join(' | ')}`);
-      if (r.distorted && r.distorted.length) issues.push(`image drawn at the wrong aspect ratio (add height:auto or object-fit): ${r.distorted.join(' | ')}`);
-      if (r.edge.length) issues.push(`text touches the viewport edge (no gutter): ${r.edge.join(' | ')}`);
-      if (r.moving) issues.push(`${r.moving} animation(s) still moving under prefers-reduced-motion`);
-      comp.fails.forEach(x => issues.push(`composition: ${x}`));
+      if (e1.length) push('js-errors', `JS errors: ${e1.slice(0, 3).join(' | ')}`);
+      if (c1.length) push('console-errors', `console errors: ${c1.slice(0, 3).join(' | ')}`);
+      if (f1.length) push('failed-requests', `failed requests: ${f1.slice(0, 3).join(' | ')}`);
+      if (r.overflow) push('overflow', `horizontal page overflow; widest: ${r.wide.join(', ') || 'unknown'}`);
+      if (r.noAlt) push('img-alt', `${r.noAlt} visible image(s) without alt`);
+      if (r.noName.length) push('unnamed-control', `unnamed controls: ${r.noName.slice(0, 3).join(' | ')}`);
+      if (r.noLabel.length) push('unlabeled-field', `unlabeled fields: ${r.noLabel.slice(0, 3).join(' | ')}`);
+      r.formIssues.slice(0, 4).forEach(x => push('form', `form: ${x}`));
+      r.punct.forEach(x => push('text-punctuation', `text: ${x}`));
+      if (r.hidden.length) push('invisible-content', `content invisible after load (opacity 0${r.reduce ? ', reduced motion' : ', first screen'}): ${r.hidden.join(' | ')}`);
+      r.mobile.forEach(x => push('phone', `phone: ${x}`));
+      if (r.broken.length) push('image-broken', `image(s) failed to load: ${[...new Set(r.broken)].slice(0, 3).join(', ')}`);
+      if (r.overlap && r.overlap.length) push('text-overlap', `text overlaps other text: ${r.overlap.join(' | ')}`);
+      if (r.decoOver && r.decoOver.length) push('decoration-covers-text', `decoration covers text: ${r.decoOver.join(' | ')}`);
+      if (r.distorted && r.distorted.length) push('image-aspect', `image drawn at the wrong aspect ratio (add height:auto or object-fit): ${r.distorted.join(' | ')}`);
+      if (r.edge.length) push('edge-gutter', `text touches the viewport edge (no gutter): ${r.edge.join(' | ')}`);
+      if (r.moving) push('reduced-motion', `${r.moving} animation(s) still moving under prefers-reduced-motion`);
+      comp.fails.forEach(x => push('composition', `composition: ${x}`));
       problems += issues.length;
+      const where = `${prefix}${scheme} ${w}px`;
+      issues.forEach((m, k) => R.add('fail', rules[k], m, where));
+      r.notes.forEach((m, k) => R.add('note', k >= ownNotes ? 'composition' : /^Thai word split/.test(m) ? 'thai-word-split' : 'heading-wrap', m, where));
+      R.artifact('screenshots', file);
+      viewports.push({ pass: prefix ? 'alt' : 'default', scheme, width: w, lang: r.lang || null, result: issues.length ? 'FAIL' : 'PASS', problems: issues.length, notes: r.notes.length, screenshot: file });
       console.log(`${issues.length ? 'FAIL' : 'PASS'}  ${prefix}${scheme} ${w}px${r.lang ? ' [' + r.lang + ']' : ''}  → ${file}`);
       issues.forEach(i => console.log('   - ' + i));
       r.notes.forEach(i => console.log('   · note: ' + i));
@@ -374,10 +390,11 @@ A.main(async () => {
   const toggle = a.get('--toggle', '');
   if (toggle) {
     try { await page.click(toggle, { timeout: 5000 }); await page.waitForTimeout(wait); }
-    catch (e) { console.log(`WARN  --toggle ${toggle} could not be clicked: ${e.message.split('\n')[0]}`); }
+    catch (e) { console.log(`WARN  --toggle ${toggle} could not be clicked: ${e.message.split('\n')[0]}`); R.add('warn', 'toggle', `--toggle ${toggle} could not be clicked: ${e.message.split('\n')[0]}`, toggle); }
     await matrix('alt-');
   }
   await browser.close();
   console.log(problems ? `\n${problems} problem(s). Look at the screenshots too: overlap, clipping and hierarchy need human review.` : '\nNo automated problems. Review the screenshots for overlap, clipping and hierarchy.');
+  R.set('problems', problems);
   process.exit(problems ? 1 : 0);
 });

@@ -10,6 +10,7 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const R = require('./_report');
 
 function findModule(startPath) {
   const dirs = [process.env.PW_MODULE, path.join(process.cwd(), 'node_modules')];
@@ -69,6 +70,7 @@ function need(startPath, what) {
   const mod = findModule(startPath);
   const exe = mod ? findBrowser(mod.chromium) : undefined;
   if (!mod || exe === undefined) {
+    R.error(`${what || 'browser step'} skipped (no Playwright module or browser)`);
     console.log(`NOT RUN: ${what || 'browser step'} skipped (no Playwright module or browser). One-time setup: npm i -D playwright && npx playwright install chromium`);
     process.exit(3);
   }
@@ -81,6 +83,7 @@ function target(arg) {
   if (isUrl(arg)) return arg;
   const file = path.resolve(arg);
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
+    R.error(`file not found: ${file}`);
     console.error(`error: file not found: ${file} (check the path, or pass a URL)`);
     process.exit(2);
   }
@@ -91,7 +94,8 @@ async function goto(page, url, { timeout = 30000, waitUntil = 'load', browser } 
   try { await page.goto(url, { waitUntil, timeout }); return true; }
   catch (e) {
     // A timeout leaves a partly rendered page worth checking; a refused / missing target leaves nothing.
-    if (e && e.name === 'TimeoutError') { console.log(`WARN  load did not finish in ${timeout}ms; checking what rendered`); return false; }
+    if (e && e.name === 'TimeoutError') { R.add('warn', 'load-timeout', `load did not finish in ${timeout}ms; checking what rendered`, url); console.log(`WARN  load did not finish in ${timeout}ms; checking what rendered`); return false; }
+    R.error(`could not load ${url}: ${String(e && e.message || e).split('\n')[0]}`);
     console.log(`ERROR could not load ${url}: ${String(e && e.message || e).split('\n')[0]}`);
     if (browser) await browser.close().catch(() => {});
     process.exit(1);

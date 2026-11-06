@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Regression cases for the Node scripts' shared contract (_args.js, _pw.js, _color.js) and level-2/3 fixes:
 help and usage errors, temp output for URL targets, oklch colours in admin_check, market_fetch exit codes,
-flow_check steps validation, script_check destructuring, build_previews library paths.
+flow_check steps validation, script_check destructuring, build_previews library paths, --json of the five checkers
+(_report.js: one document on stdout, exit code unchanged, usage error / NOT RUN / navigation ERROR as JSON).
 
 Usage: python3 evals/regress/test_node.py      (any cwd; writes only to temp folders)
 
@@ -45,6 +46,29 @@ def js(script, *a, cwd, env=None, timeout=180):
 
 def traced(err):
     return "Traceback" in err or "\n    at " in err or "UnhandledPromiseRejection" in err
+
+
+SHAPE = ("script", "target", "result", "exit", "findings", "artifacts")
+LEVELS = ("fail", "flag", "warn", "note", "pass")
+
+
+def jdoc(out):
+    """The single JSON object on stdout, or None (json.loads rejects anything before or after it)."""
+    try:
+        d = json.loads(out)
+    except ValueError:
+        return None
+    return d if isinstance(d, dict) else None
+
+
+def shape_ok(d, script, rc):
+    return bool(d) and all(k in d for k in SHAPE) and d["script"] == script[:-3] and d["exit"] == rc \
+        and isinstance(d["findings"], list) and isinstance(d["artifacts"], dict) \
+        and all({"level", "rule", "message", "where"} <= set(f) and f["level"] in LEVELS for f in d["findings"])
+
+
+def has_finding(d, rule, levels=("fail", "flag")):
+    return any(f["rule"] == rule and f["level"] in levels for f in d["findings"])
 
 
 def assets_status():
@@ -119,6 +143,40 @@ def main():
         check("script_check: {top: t1}, inner-function {top} and block-scoped parent not flagged",
               "line 11" not in out and "'parent'" not in out, out)
 
+        # 8. --json without a browser: usage errors and script_check
+        jbad = {"render_check.js": [f("page.html"), "--bogus"], "fold_check.js": [f("page.html"), "--sizes", "wide"],
+                "admin_check.js": [f("page.html"), "--type", "nope"], "flow_check.js": [f("page.html")], "script_check.js": []}
+        for s, a in jbad.items():
+            for label, args in (("usage error", a), ("missing file", [f("nofile.html")] + (["x.json"] if s == "flow_check.js" else []))):
+                rc, out, err = js(s, *args, "--json", cwd=empty, timeout=30)
+                d = jdoc(out)
+                check(f"{s} --json {label} -> exit 2, JSON ERROR document only",
+                      rc == 2 and shape_ok(d, s, 2) and d["result"] == "ERROR" and d.get("error") and err.startswith("error: ") and not traced(err),
+                      f"rc={rc} out={out[-300:]} err={err[-200:]}")
+        rc, out, err = js("script_check.js", f("destructure.html"), "--json", cwd=empty, timeout=30)
+        d = jdoc(out)
+        check("script_check --json failing page: exit 1 = JSON exit, global-clash fail findings, pages summary",
+              rc == 1 and shape_ok(d, "script_check.js", 1) and d["result"] == "FAIL" and has_finding(d, "global-clash")
+              and d["pages"][0]["scripts"] and "FAIL" in err, f"rc={rc} {out[-300:]} {err[-200:]}")
+        rc, out, err = js("script_check.js", f("page.html"), f("admin-oklch.html"), "--json", cwd=empty, timeout=30)
+        d = jdoc(out)
+        check("script_check --json passing pages: exit 0 PASS, target lists both pages",
+              rc == 0 and shape_ok(d, "script_check.js", 0) and d["result"] == "PASS" and isinstance(d["target"], list) and len(d["target"]) == 2,
+              f"rc={rc} {out[-300:]}")
+        # NOT RUN: a copy of scripts/ with no node_modules above it, empty NODE_PATH and no npm on PATH
+        scr = os.path.join(tmp, "scr", "scripts"); shutil.copytree(SCRIPTS, scr)
+        nenv = {k: v for k, v in os.environ.items() if k not in ("NODE_PATH", "PW_MODULE", "PW_CHROMIUM")}
+        nenv.update(PATH="/usr/bin:/bin", NODE_PATH="")
+        for s, a in (("render_check.js", [f("page.html")]), ("fold_check.js", [f("page.html")]), ("admin_check.js", [f("page.html")]),
+                     ("flow_check.js", [f("page.html"), f("steps-mixed.json")])):
+            r = subprocess.run([NODE, os.path.join(scr, s), *a, "--json"], cwd=empty, capture_output=True, text=True, env=nenv, timeout=60)
+            d = jdoc(r.stdout)
+            if r.returncode != 3 and "NOT RUN" not in r.stderr and d and d.get("result") != "NOT RUN":
+                report("NOT RUN", f"{s} --json without Playwright -> NOT RUN document", "Playwright still found from the copied scripts")
+                continue
+            check(f"{s} --json without Playwright -> exit 3, JSON NOT RUN document only",
+                  r.returncode == 3 and shape_ok(d, s, 3) and d["result"] == "NOT RUN" and "NOT RUN" in r.stderr, f"rc={r.returncode} {r.stdout[-300:]} {r.stderr[-200:]}")
+
         # 5. market_fetch --only nosuch
         rc, out, err = js("market_fetch.js", "--kind", "clinic", "--only", "nosuch", cwd=empty, timeout=30)
         check("market_fetch --only nosuch -> exit 2 listing the valid slugs", rc == 2 and "nosuch" in err and "choose from" in err and not traced(err), f"rc={rc} {err[-200:]}")
@@ -168,6 +226,28 @@ def main():
             check("market_fetch: a skipped site -> exit 1 (WARN skip line)", rc == 1 and "WARN  skip dead" in out and "PASS  good" in out, f"rc={rc} {out[-300:]}")
             rc, out, err = js("market_fetch.js", "--kind", "testkind", "--urls", urls, "--only", "good", "--out", os.path.join(tmp, "mk"), cwd=empty)
             check("market_fetch: every site shot -> exit 0", rc == 0 and "1 shot, 0 skipped" in out, f"rc={rc} {out[-300:]}")
+            # --json in the browser checkers: one document, exit code = "exit", failing cases report a fail finding
+            jo = os.path.join(tmp, "jsonout")
+            for s, a, rule, want in (
+                    ("render_check.js", [f("page.html"), "--fast", "--viewport-shots"], "phone", 1),
+                    ("fold_check.js", [f("admin-oklch.html"), "--cta", "#none"], "cta-missing", 1),
+                    ("fold_check.js", [f("page.html")], None, 0),
+                    ("admin_check.js", [f("admin-oklch.html"), "--type", "form"], "one-primary", 1),
+                    ("flow_check.js", [f("page.html"), f("steps-mixed.json")], "step", 1)):
+                rc, out, err = js(s, *a, "--out", jo, "--json", cwd=empty) if s != "flow_check.js" else js(s, *a, "--json", cwd=empty)
+                d = jdoc(out)
+                extra = {"render_check.js": "viewports", "fold_check.js": "sizes", "admin_check.js": "checks", "flow_check.js": "steps"}[s]
+                ok = rc == want and shape_ok(d, s, rc) and extra in d and (has_finding(d, rule) if rule else d["result"] == "PASS") and err.strip()
+                if s == "render_check.js" and ok:
+                    ok = all(os.path.exists(p) for p in d["artifacts"].get("screenshots", [])) and len(d["viewports"]) == 2
+                if s == "flow_check.js" and ok:
+                    ok = [x["result"] for x in d["steps"]] == ["PASS", "PASS", "FAIL", "FAIL"]
+                check(f"{s} --json {rule or 'passing'} case: exit {want} = JSON exit, stdout is only the document",
+                      ok, f"rc={rc} {out[-400:]} {err[-200:]}")
+            rc, out, err = js("render_check.js", f"http://127.0.0.1:{closed_port()}/", "--out", jo, "--json", cwd=empty, timeout=60)
+            d = jdoc(out)
+            check("render_check --json unreachable URL -> exit 1, JSON ERROR document with the reason",
+                  rc == 1 and shape_ok(d, "render_check.js", 1) and d["result"] == "ERROR" and "could not load" in d.get("error", ""), f"rc={rc} {out[-300:]} {err[-200:]}")
             check("browser cases left the cwd empty", not os.listdir(empty), str(os.listdir(empty)))
     finally:
         if srv:

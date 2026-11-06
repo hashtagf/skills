@@ -99,6 +99,7 @@
 | `_pw.js` | ตัวช่วยหา Playwright/browser (ไม่ดาวน์โหลดเอง) | ให้ทุกสคริปต์ render ใช้วิธีหาเดียวกัน | ภายใน: ใช้โดย render/fold/flow/admin/preview scripts |
 | `_args.js` | ตัวอ่าน argument กลางของสคริปต์ Node (`--help`, `error:` + exit 2, path ของ output/temp) | ทุกสคริปต์ Node ทำตาม [Script contract](#script-contract) เหมือนกัน | ภายใน: ใช้โดย render/fold/flow/admin/script/market/preview scripts |
 | `_color.js` | สูตรสีกลางฝั่ง Node: อ่านสี, luminance, contrast (และโค้ดที่ฉีดเข้าหน้าเว็บ) | ให้สคริปต์ Node และตัวตรวจในหน้าเว็บคำนวณสีตรงกัน | ภายใน: ใช้โดย brand, compositions, render_check, admin_check |
+| `_report.js` | ตัวสร้างผล `--json` กลางของตัวตรวจ Node (render/fold/admin/flow/script_check) | ทั้งห้าตัวพิมพ์ JSON รูปแบบเดียวกัน, exit code เดิม | ภายใน: ใช้ผ่าน `_args.js` |
 | `_net.py` | ตัวช่วยดึงข้อมูลเน็ตกลาง (ใช้ curl, cache เขียนแบบ atomic) | ไม่มีเน็ต/curl = exit 3 (NOT RUN) เหมือนกันทุกสคริปต์ | ภายใน: ใช้โดย icons, photo_search, showcase_fetch |
 | `admin_check.js` | ตรวจหน้า admin ที่ render แล้วตามประเภทหน้า + เปิดทุก `?state=` | จับคอลัมน์เงินชิดซ้าย, ปุ่ม disabled ไม่มีเหตุผล, sticky ที่ไม่ sticky, state ที่ยังไม่ได้สร้าง | `check.py <page> --admin list` |
 | `backoffice_preview.js` | render ภาพหน้าหลังบ้านทุก look (`--density compact`, `--thai`, `--mobile`) | ให้ทีมเลือก look จากภาพ | back-office.md 'Choosing density and tone' |
@@ -138,6 +139,9 @@
 JSON เสีย, id ไม่รู้จัก) · **3** ไม่ได้รัน (ไม่มี browser/เน็ต/dependency) — ห้ามรายงาน 3 ว่าผ่าน
 คำผลลัพธ์: PASS, FLAG, FAIL, NOTE, WARN, ERROR, N/A, NOT RUN (`check.py` มี MANUAL เพิ่ม)
 ตัวตรวจ Python ทุกตัว (และ `check.py`) มี `--json`; ใช้ผิดจะพิมพ์บรรทัด `error:` ไม่มี traceback
+ตัวตรวจ Node (`render_check`, `fold_check`, `admin_check`, `flow_check`, `script_check`) มี `--json` ด้วย: stdout มี JSON
+เอกสารเดียว (log ไป stderr), exit code เดิม, ใช้ผิด / NOT RUN / ERROR ก็ได้ JSON — รูปแบบ
+`{script, target, result, exit, error?, findings: [{level, rule, message, where, details?}], artifacts, …สรุปของแต่ละสคริปต์}`
 `check.py` เอาผลแต่ละข้อจาก exit code ของสคริปต์ย่อย และ exit 3 เมื่อไม่มีอะไรตกแต่มีข้อที่ไม่ได้รัน
 
 ### assets/ และ evals/

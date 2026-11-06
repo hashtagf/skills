@@ -11,15 +11,19 @@
  * "error: <what> (<how to fix>)" to stderr and exits 2. "--flag=value" is accepted for value flags.
  * Paths: userPath() resolves a user-given path against the current directory; libPath() resolves an
  * internal library path against the skill root; tempOut() is os.tmpdir()/ux-ui-<script>/<host>-<timestamp>.
+ * spec.report = '<script name>' also accepts --json and starts the shared JSON report (_report.js); usage errors
+ * and main() errors are then recorded in it as well.
  */
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const R = require('./_report');
 
 const ROOT = path.resolve(__dirname, '..');
 const isUrl = (s) => /^[a-z][a-z0-9+.-]*:\/\//i.test(String(s || ''));
 
 function usageError(what, how = 'see --help') {
+  R.error(what);
   console.error(`error: ${what} (${how})`);
   process.exit(2);
 }
@@ -32,6 +36,7 @@ function helpText(file) {
 function parse(argv, spec = {}) {
   const values = new Set(spec.values || []), flags = new Set(spec.flags || []);
   if (argv.includes('-h') || argv.includes('--help')) { console.log(helpText(spec.file || require.main.filename)); process.exit(0); }
+  if (spec.report) { flags.add('--json'); R.start(spec.report, argv.includes('--json')); }
   const got = new Map(), pos = [];
   for (let i = 0; i < argv.length; i++) {
     let a = argv[i], inline;
@@ -45,6 +50,7 @@ function parse(argv, spec = {}) {
     else if (/^-(-.|[A-Za-z])/.test(a)) usageError(`unknown option ${JSON.stringify(argv[i])}`);
     else pos.push(a);
   }
+  R.target(pos.length ? pos[0] : null);
   for (const r of spec.required || []) if (!got.has(r)) usageError(`${r} is required`);
   const [min = 0, max = Infinity, name = 'argument'] = spec.positional || [0, 0];
   if (pos.length < min) usageError(`missing ${name}`);
@@ -89,8 +95,8 @@ function outFor({ given, target, script, folder }) {
 
 // Runs an async main; an unexpected error prints one ERROR line (no stack) and exits 1.
 function main(fn) {
-  process.on('unhandledRejection', (e) => { console.log(`ERROR ${String(e && e.message || e).split('\n')[0]}`); process.exit(1); });
-  Promise.resolve().then(fn).catch((e) => { console.log(`ERROR ${String(e && e.message || e).split('\n')[0]}`); process.exit(1); });
+  process.on('unhandledRejection', (e) => { R.error(String(e && e.message || e).split('\n')[0]); console.log(`ERROR ${String(e && e.message || e).split('\n')[0]}`); process.exit(1); });
+  Promise.resolve().then(fn).catch((e) => { R.error(String(e && e.message || e).split('\n')[0]); console.log(`ERROR ${String(e && e.message || e).split('\n')[0]}`); process.exit(1); });
 }
 
 module.exports = { parse, usageError, helpText, userPath, libPath, tempOut, outFor, isUrl, main, ROOT, stamp };

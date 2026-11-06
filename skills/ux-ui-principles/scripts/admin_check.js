@@ -7,7 +7,7 @@
  * Why:   render_check.js is a generic smoke check (overflow, errors, names); nothing else
  *        catches a left-aligned money column, a sticky save bar that cannot stick, or a
  *        disabled button with no reason.
- * How:   node admin_check.js <url-or-file> --type list|detail|form|dashboard [--states] [--out dir] [--timeout ms] [-h|--help]
+ * How:   node admin_check.js <url-or-file> --type list|detail|form|dashboard [--states] [--out dir] [--timeout ms] [--json] [-h|--help]
  *        (also run by `python3 scripts/check.py <page> --admin <type>`).
  *
  * Rules (FAIL unless marked note):
@@ -27,13 +27,16 @@
  * Exit 1 on any FAIL; 3 when no Playwright/browser (NOT RUN). A refused / unreachable URL prints
  * "ERROR <reason>" and exits 1 (a slow load only WARNs); a missing file or a bad option prints "error: …", exit 2.
  * one-primary reads button colours through a canvas, so oklch()/oklab()/color-mix() accents count.
+ * --json: one JSON document on stdout (README "Script contract"), log lines on stderr, same exit codes; findings use
+ * the rule ids above (plus state-not-built, js-errors); "page_type", "checks" {rule: PASS|FAIL|NOTE}, "states".
  */
 const path = require('path');
 const fs = require('fs');
 const A = require('./_args');
 const pw = require('./_pw');
 const color = require('./_color');
-const a = A.parse(process.argv.slice(2), { file: __filename, values: ['--type', '--out', '--timeout'], flags: ['--states'], positional: [1, 1, '<url-or-file>'] });
+const R = require('./_report');
+const a = A.parse(process.argv.slice(2), { file: __filename, report: 'admin_check', values: ['--type', '--out', '--timeout'], flags: ['--states'], positional: [1, 1, '<url-or-file>'] });
 const TYPES = ['list', 'detail', 'form', 'dashboard'];
 const type = a.get('--type', 'list');
 if (!TYPES.includes(type)) A.usageError(`unknown --type ${type}`, `choose from ${TYPES.join(', ')}`);
@@ -43,6 +46,8 @@ const timeout = a.num('--timeout', 30000, { min: 1 });
 const env = pw.need(arg0, 'admin check');
 const out = A.outFor({ given: a.get('--out'), target: arg0, script: 'admin-check', folder: 'admin-check' });
 if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
+R.setArtifact('out', out);
+R.set('page_type', type);
 const STATES = ['loading', 'empty', 'nomatch', 'error', 'denied', 'partial'];
 const withState = (u, s) => { const [a, h = ''] = u.split('#'); return a + (a.includes('?') ? '&' : '?') + 'state=' + s + (h ? '#' + h : ''); };
 
@@ -113,6 +118,16 @@ A.main(async () => {
   await page.screenshot({ path: path.join(out, `admin-${type}-default.png`) });
   console.log(`${r.fails.length ? 'FAIL' : 'PASS'}  admin ${type} 1440x900  → ${path.join(out, `admin-${type}-default.png`)}`);
   r.fails.forEach(f => console.log('   - ' + f)); r.notes.forEach(n => console.log('   · note: ' + n));
+  R.artifact('screenshots', path.join(out, `admin-${type}-default.png`));
+  const rid = t => { const i = t.indexOf(': '); return i > 0 ? [t.slice(0, i), t.slice(i + 2)] : ['admin', t]; };
+  r.fails.forEach(f => { const [k, m] = rid(f); R.add('fail', k, m, `${type} 1440x900`); });
+  r.notes.forEach(n => { const [k, m] = rid(n); R.add('note', k, m, `${type} 1440x900`); });
+  const RULES = ['numeric-align', 'tabular-nums', 'disabled-reason', 'sticky-inert', 'one-primary', 'row-height', 'uppercase-text']
+    .concat(type === 'list' ? ['table-above-fold'] : [], type === 'detail' ? ['readonly-input'] : []);
+  const checks = {};
+  RULES.forEach(k => { checks[k] = r.fails.some(f => rid(f)[0] === k) ? 'FAIL' : r.notes.some(n => rid(n)[0] === k) ? 'NOTE' : 'PASS'; });
+  R.set('checks', checks);
+  const stateRes = {};
   failed += r.fails.length;
   if (a.has('--states')) {
     for (const s of STATES) {
@@ -122,11 +137,16 @@ A.main(async () => {
       await page.screenshot({ path: shot });
       const same = t === r.text;
       if (same) failed++;
+      stateRes[s] = { result: same ? 'FAIL' : 'PASS', screenshot: shot };
+      R.artifact('screenshots', shot);
+      if (same) R.add('fail', 'state-not-built', 'page identical to default: state not built', `?state=${s}`);
       console.log(`${same ? 'FAIL' : 'PASS'}  ?state=${s}${same ? '  page identical to default: state not built' : ''}  → ${shot}`);
     }
+    R.set('states', stateRes);
   }
-  if (errs.length) { failed += errs.length; console.log('FAIL  JS errors: ' + [...new Set(errs)].slice(0, 3).join(' | ')); }
+  if (errs.length) { R.add('fail', 'js-errors', 'JS errors: ' + [...new Set(errs)].slice(0, 3).join(' | '), `${type} 1440x900`, { count: errs.length }); failed += errs.length; console.log('FAIL  JS errors: ' + [...new Set(errs)].slice(0, 3).join(' | ')); }
   await browser.close();
   console.log(failed ? `\n${failed} problem(s).` : '\nNo admin rule failures. Notes are judgment calls; look at the screenshots.');
+  R.set('problems', failed);
   process.exit(failed ? 1 : 0);
 });

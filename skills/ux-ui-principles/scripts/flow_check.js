@@ -3,7 +3,7 @@
  * Click through a page's main task from a JSON list of steps and check each result.
  *
  * Usage:
- *   node flow_check.js <url-or-file> <steps.json> [--width 1440] [--height 900] [--wait 600] [--timeout 30000] [-h|--help]
+ *   node flow_check.js <url-or-file> <steps.json> [--width 1440] [--height 900] [--wait 600] [--timeout 30000] [--json] [-h|--help]
  *
  * steps.json is an array. Action steps: {"do": "click"|"fill"|"check"|"uncheck"|"select"|"press"|"wait", "sel": "...", "value": "..."}
  *   click  sel may be a CSS selector or "text=..." (Playwright text selector); falls back to a forced click
@@ -25,11 +25,14 @@
  * Prints PASS/FAIL per step, then any page errors and console errors. Exit 1 on any failure or error,
  * 3 when no browser is available (NOT RUN). A missing page or steps file, malformed JSON, a steps file that is
  * not an array or a step with no known "do"/"expect" prints "error: …" and exits 2 before any browser starts.
+ * --json: one JSON document on stdout (README "Script contract"), log lines on stderr, same exit codes; findings
+ * step / page-errors / console-errors (fail); "steps" lists each step's result.
  */
 const fs = require('fs');
 const A = require('./_args');
 const pw = require('./_pw');
-const a = A.parse(process.argv.slice(2), { file: __filename, values: ['--width', '--height', '--wait', '--timeout'], positional: [2, 2, '<url-or-file> <steps.json>'] });
+const R = require('./_report');
+const a = A.parse(process.argv.slice(2), { file: __filename, report: 'flow_check', values: ['--width', '--height', '--wait', '--timeout'], positional: [2, 2, '<url-or-file> <steps.json>'] });
 const [arg0, stepsFile] = a._;
 const target = pw.target(arg0);
 if (!fs.existsSync(stepsFile)) A.usageError(`steps file not found: ${stepsFile}`, 'pass a JSON array of steps');
@@ -56,6 +59,7 @@ A.main(async () => {
   await pw.goto(page, target, { timeout, browser });
   await page.waitForTimeout(wait);
   let failed = 0;
+  const stepRes = []; R.set('steps', stepRes); R.set('steps_file', stepsFile);
   const T = { timeout: 5000 };
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
   for (const [i, s] of steps.entries()) {
@@ -81,15 +85,20 @@ A.main(async () => {
       else throw new Error('unknown step');
       if (s.do && s.do !== 'wait') await page.waitForTimeout(120);
       console.log(`PASS  ${label}`);
+      stepRes.push({ n: i + 1, step: s, label: label.trim(), result: 'PASS' });
     } catch (e) {
       failed++;
       console.log(`FAIL  ${label}  → ${e.message.split('\n')[0].slice(0, 140)}`);
+      const why = e.message.split('\n')[0].slice(0, 140);
+      stepRes.push({ n: i + 1, step: s, label: label.trim(), result: 'FAIL', error: why });
+      R.add('fail', 'step', `${label.trim()}  → ${why}`, `step ${i + 1}`, { step: s });
     }
   }
-  if (errs.length) console.log(`FAIL  page errors: ${errs.slice(0, 3).join(' | ')}`);
-  if (cons.length) console.log(`FAIL  console errors: ${cons.slice(0, 3).join(' | ')}`);
+  if (errs.length) { console.log(`FAIL  page errors: ${errs.slice(0, 3).join(' | ')}`); R.add('fail', 'page-errors', `page errors: ${errs.slice(0, 3).join(' | ')}`, null, { count: errs.length }); }
+  if (cons.length) { console.log(`FAIL  console errors: ${cons.slice(0, 3).join(' | ')}`); R.add('fail', 'console-errors', `console errors: ${cons.slice(0, 3).join(' | ')}`, null, { count: cons.length }); }
   await browser.close();
   const bad = failed + (errs.length ? 1 : 0) + (cons.length ? 1 : 0);
   console.log(bad ? `\n${bad} failure(s).` : `\nAll ${steps.length} steps passed.`);
+  R.set('failures', bad);
   process.exit(bad ? 1 : 0);
 });

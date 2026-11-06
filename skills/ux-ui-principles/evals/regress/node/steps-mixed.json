@@ -1,0 +1,1 @@
+[{"do":"click","sel":"a.btn"},{"expect":"text","sel":"h1","value":"Hello"},{"expect":"text","sel":"h1","value":"Nope"},{"expect":"visible","sel":"#missing"}]

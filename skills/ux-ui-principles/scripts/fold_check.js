@@ -5,7 +5,7 @@
  *
  * Usage:
  *   node fold_check.js <url-or-file> [--cta ".selector"] [--offer ".selector"] [--next ".selector"]
- *                      [--sizes 1440x900,390x844] [--out dir] [--wait 800] [--timeout 30000] [-h|--help]
+ *                      [--sizes 1440x900,390x844] [--out dir] [--wait 800] [--timeout 30000] [--json] [-h|--help]
  *
  * Defaults: --cta is the first a.btn-primary / button.btn-primary / [data-cta] inside the first
  * <section>, <header> or the first child of <main>; failing that, the first visible a.btn / button-class
@@ -16,13 +16,16 @@
  * temp folder <os temp>/ux-ui-fold-check/<host>-<time>, printed).
  * Exit 1 on any FAIL, 3 when no browser is available (NOT RUN). A refused / unreachable URL prints
  * "ERROR <reason>" and exits 1; a slow load only WARNs. A missing file or a bad option prints "error: …" and exits 2.
+ * --json: one JSON document on stdout (README "Script contract"), log lines on stderr, same exit codes; findings
+ * cta-missing / cta-below-fold (fail), next-not-hinted / no-offer (note); "sizes": per viewport cta, above_fold, offer.
  */
 const path = require('path');
 const fs = require('fs');
 const A = require('./_args');
 const pw = require('./_pw');
+const R = require('./_report');
 const a = A.parse(process.argv.slice(2), {
-  file: __filename, values: ['--cta', '--offer', '--next', '--sizes', '--out', '--wait', '--timeout'], positional: [1, 1, '<url-or-file>'],
+  file: __filename, report: 'fold_check', values: ['--cta', '--offer', '--next', '--sizes', '--out', '--wait', '--timeout'], positional: [1, 1, '<url-or-file>'],
 });
 const arg0 = a._[0];
 const target = pw.target(arg0);
@@ -33,6 +36,8 @@ const timeout = a.num('--timeout', 30000, { min: 1 });
 const sel = { cta: a.get('--cta', ''), offer: a.get('--offer', ''), next: a.get('--next', '') };
 const env = pw.need(arg0, 'fold check');
 const out = A.outFor({ given: a.get('--out'), target: arg0, script: 'fold-check', folder: 'render-check' });
+R.setArtifact('out', out);
+const bySize = []; R.set('sizes', bySize);
 if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
 
 A.main(async () => {
@@ -93,6 +98,15 @@ A.main(async () => {
     lines.push(hinted ? `  next section hinted (hero ends ${r.heroBottom}px, next heading at ${r.nextTop}px)` : `· note: next section not hinted: hero ends ${r.heroBottom}px, next heading at ${r.nextTop}px`);
     lines.push(r.offer ? `  offer on first screen: "${r.offer}"` : '· note: no offer or price on the first screen' + (sel.offer ? ` (${sel.offer})` : ''));
     if (fail) fails++;
+    const where = `${w}x${h}`;
+    if (r.ctaBottom == null) R.add('fail', 'cta-missing', lines[0].slice(2), where);
+    else if (r.ctaBottom > r.fold) R.add('fail', 'cta-below-fold', lines[0].slice(2), where, { cta: r.cta, cta_bottom: r.ctaBottom, fold: r.fold });
+    if (!hinted) R.add('note', 'next-not-hinted', lines[1].replace('· note: ', ''), where, { hero_bottom: r.heroBottom, next_top: r.nextTop });
+    if (!r.offer) R.add('note', 'no-offer', lines[2].replace('· note: ', ''), where);
+    R.artifact('screenshots', file);
+    bySize.push({ viewport: where, width: w, height: h, result: fail ? 'FAIL' : 'PASS', fold: r.fold, cta: r.cta, cta_found: r.ctaBottom != null,
+      cta_bottom: r.ctaBottom, above_fold: r.ctaBottom != null && r.ctaBottom <= r.fold, hero_bottom: r.heroBottom, next_top: r.nextTop,
+      next_hinted: hinted, offer: r.offer, screenshot: file });
     console.log(`${fail ? 'FAIL' : 'PASS'}  ${w}x${h}  → ${file}`);
     lines.forEach(l => console.log('   ' + l));
     await page.close();

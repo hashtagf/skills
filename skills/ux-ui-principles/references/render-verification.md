@@ -49,6 +49,9 @@ a download mid-task; give the user the one-time setup command instead. Use
 prints one `error:` line and exits 2 before a browser starts; a refused or unreachable
 URL prints `ERROR` and exits 1; a load that times out is checked as far as it rendered (WARN).
 Exit codes and result words of every script follow the README "Script contract".
+`--json` on `render_check.js`, `fold_check.js`, `admin_check.js`, `flow_check.js` and `script_check.js` prints one JSON
+document on stdout (log lines go to stderr) with the same exit code: `script`, `target`, `result`, `exit`, `error` (usage
+error, NOT RUN, could not load), `findings` (`level`, `rule`, `message`, `where`), `artifacts` (screenshots) and a per-script summary.
 
 `check.py` takes each check's result from that script's exit code (0 PASS, 1 FAIL/FLAG,
 2 ERROR, 3 NOT RUN) and itself exits 3 when nothing failed but a check did not run. Its

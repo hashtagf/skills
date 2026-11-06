@@ -2,7 +2,7 @@
 /*
  * Static script check for built pages, no browser needed (Node only).
  *
- * Usage: node script_check.js page.html [more.html ...] [-h|--help]
+ * Usage: node script_check.js page.html [more.html ...] [--json] [-h|--help]
  *
  * For each page: every inline <script> (except JSON / templates) and every local <script src>
  * is compiled with Node's parser (syntax errors fail), and top-level declarations are checked
@@ -15,6 +15,8 @@
  * nested or renamed {x: top}) is caught like a simple name.
  * Exit code 1 when any problem is found; 2 for a missing file or a bad option. Use render_check.js as well when a browser is available:
  * it catches runtime errors this static check cannot see.
+ * --json: one JSON document on stdout (README "Script contract"; "target" is a list when several pages are given),
+ * same exit codes; findings syntax-error / missing-script / global-clash (fail); "pages" lists each script's result.
  */
 const fs = require('fs');
 const path = require('path');
@@ -63,26 +65,33 @@ function globalClashes(code) {
 }
 
 const A = require('./_args');
-const a = A.parse(process.argv.slice(2), { file: __filename, positional: [1, Infinity, 'page.html (one or more)'] });
+const R = require('./_report');
+const a = A.parse(process.argv.slice(2), { file: __filename, report: 'script_check', positional: [1, Infinity, 'page.html (one or more)'] });
 for (const f of a._) if (!fs.existsSync(f) || !fs.statSync(f).isFile()) A.usageError(`file not found: ${path.resolve(f)}`, 'check the path');
+if (a._.length > 1) R.target(a._);
 let problems = 0;
+const pages = []; R.set('pages', pages);
 for (const file of a._) {
   const scripts = scriptsOf(file);
   const issues = [];
+  const res = [];
+  const add = (rule, msg, where, item) => { issues.push(msg); R.add('fail', rule, msg, where, { page: file }); if (item) res.push(item); };
   for (const s of scripts) {
-    if (s.missing) { issues.push(`missing local script ${s.where}`); continue; }
+    if (s.missing) { add('missing-script', `missing local script ${s.where}`, s.where, { where: s.where, syntax: 'missing', clashes: [] }); continue; }
     try {
       // modules: drop import/export lines and compile the body as a function (syntax only)
       new vm.Script(s.module ? `(async()=>{\n${s.code.replace(/^\s*(import|export)\b.*$/gm, '')}\n})` : s.code, {filename: s.where});
     } catch (e) {
-      issues.push(`syntax error in ${s.where}: ${e.message}`);
+      add('syntax-error', `syntax error in ${s.where}: ${e.message}`, s.where, { where: s.where, module: !!s.module, syntax: 'error', error: e.message, clashes: [] });
       continue;
     }
+    const clash = s.module ? [] : globalClashes(s.code);
+    res.push({ where: s.where, module: !!s.module, syntax: 'ok', clashes: clash });
     if (!s.module) {
-      const clash = globalClashes(s.code);
-      if (clash.length) issues.push(`${s.where} declares global ${clash.map((n) => `'${n}'`).join(', ')}, which clash${clash.length > 1 ? '' : 'es'} with window.${clash[0]}: wrap the script in an IIFE or rename`);
+      if (clash.length) add('global-clash', `${s.where} declares global ${clash.map((n) => `'${n}'`).join(', ')}, which clash${clash.length > 1 ? '' : 'es'} with window.${clash[0]}: wrap the script in an IIFE or rename`, s.where);
     }
   }
+  pages.push({ page: file, result: issues.length ? 'FAIL' : 'PASS', scripts: res });
   if (issues.length) { problems += issues.length; console.log(`FAIL  ${file}`); issues.forEach((i) => console.log(`   - ${i}`)); }
   else console.log(`PASS  ${file} (${scripts.length} script${scripts.length === 1 ? '' : 's'})`);
 }
