@@ -11,29 +11,25 @@ For every item on the showcase index: title, type, attribution and licence lines
 Pictures are a STUDY SET, not assets: each item's licence covers the plugin, "not every depicted asset", so the
 pictures stay local (git-ignored) and are never copied into client work. Re-run to refresh.
 Pictures are found from the item page's own <img src/srcset> (and og:image), so a change of image host does
-not break the run; exits 1 when no picture was fetched, 3 when Pillow is missing.
-Network: curl --fail (system certificates). Pillow resizes the pictures. Be polite: one request per --delay seconds.
+not break the run. Exit 0 ok, 1 no picture fetched (or the index failed), 2 usage error, 3 not run (Pillow
+missing or no network). The default --out is the skill's git-ignored study folder (assets/showcase).
+Network: curl --fail (system certificates, scripts/_net.py). Pillow resizes the pictures. Be polite: one request
+per --delay seconds.
 """
-import html, io, json, os, re, subprocess, sys, time, urllib.parse
+import argparse, html, io, json, os, re, sys, time, urllib.parse
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _net  # noqa: E402
 
 BASE = "https://open-design.ai"
 UA = "Mozilla/5.0 (design study; ux-ui-principles skill)"
 
 
-def arg(name, default=None):
-    a = sys.argv
-    return a[a.index(name) + 1] if name in a else default
-
-
-class FetchError(RuntimeError):
-    pass
+FetchError = _net.NetError  # kept for callers and tests: _net.NotRun (offline) is a FetchError too
 
 
 def get_bytes(url):
-    r = subprocess.run(["curl", "-sSL", "--fail", "--max-time", "60", "-A", UA, url], capture_output=True)
-    if r.returncode or not r.stdout:
-        raise FetchError(f"{url}: {r.stderr.decode('utf-8', 'replace').strip() or f'curl exit {r.returncode}, empty body'}")
-    return r.stdout
+    return _net.get(url, ua=UA)
 
 
 def get(url):
@@ -126,18 +122,37 @@ def item_images(page, base_url, view_w=1440, full_w=960):
     return view_url, (pick(full, full_w) if full else None)
 
 
-def main():
-    out = os.path.abspath(arg("--out", os.path.join(os.path.dirname(__file__), "..", "assets", "showcase")))
-    limit, delay = int(arg("--limit", "100")), float(arg("--delay", "1.0"))
-    os.makedirs(os.path.join(out, "img"), exist_ok=True)
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write("error: %s (run with --help)\n" % message)
+        sys.exit(2)
+
+
+def main(argv=None):
+    ap = Parser(prog="showcase_fetch.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "showcase"))
+    ap.add_argument("--limit", type=int, default=100)
+    ap.add_argument("--delay", type=float, default=1.0)
+    a = ap.parse_args(sys.argv[1:] if argv is None else argv)
+    if a.limit < 1:
+        ap.error("--limit must be 1 or more")
+    if a.delay < 0:
+        ap.error("--delay must be 0 or more seconds")
+    out, limit, delay = os.path.abspath(a.out), a.limit, a.delay
     try:
         from PIL import Image
     except ImportError:
         print("NOT RUN: Pillow is needed to resize the pictures (pip install pillow)"); return 3
     try:
         index = get(BASE + "/showcase/?type=all")
+    except _net.NotRun as e:
+        print(f"NOT RUN: {e}"); return _net.EXIT_NOT_RUN
     except FetchError as e:
         print(f"index fetch failed: {e}"); return 1
+    try:
+        os.makedirs(os.path.join(out, "img"), exist_ok=True)
+    except OSError as e:
+        print(f"error: cannot create {out} ({e})", file=sys.stderr); return 2
     slugs = sorted(set(re.findall(r'href="/showcase/([a-z0-9-]+)/"', index)))[:limit]
     if not slugs:
         print("no showcase items found on the index page (layout changed?)"); return 1
@@ -171,14 +186,16 @@ def main():
                 im = im.resize((w, round(im.height * w / im.width)))
             im = im.crop((0, 0, im.width, min(im.height, cap)))
             name = f"img/{slug}{'' if key == 'img' else '-full'}.jpg"
-            im.save(os.path.join(out, name), "JPEG", quality=72, optimize=True)
+            buf = io.BytesIO()
+            im.save(buf, "JPEG", quality=72, optimize=True)
+            _net.write_atomic(os.path.join(out, name), buf.getvalue())
             item[key] = name
         att = [x["text"] for x in item["sections"] if x["h"].lower().startswith("source and attribution")]
         item["attribution"] = att[0] if att else ""
         items.append(item)
         fetched += bool(item.get("img"))
         print(f"[{n}/{len(slugs)}] {slug} {'img' if item.get('img') else 'NO IMAGE'}{' +full' if item.get('img_full') else ''}", flush=True)
-        json.dump(items, open(os.path.join(out, "items.json"), "w"), ensure_ascii=False, indent=1)
+        _net.write_atomic(os.path.join(out, "items.json"), json.dumps(items, ensure_ascii=False, indent=1))
         time.sleep(delay)
     print("saved", len(items), "items,", fetched, "with pictures, to", out)
     if not fetched:

@@ -245,7 +245,9 @@ renders its **facts** as visible placeholders, which overrides "never rendered" 
 - **Proof is never a placeholder.** Reviews, ratings, customer counts, awards and logos stay off the page until
   real ("Pages with no proof yet").
 - List them for the hand-off: `python3 scripts/placeholders.py page.html --md README.md` writes the list with
-  counts and warns about anything that looks like proof.
+  counts and warns about anything that looks like proof. It also lists attribute placeholders (`[…]` / `{{…}}` in
+  `<meta>` og:* / description, `title`, `alt`, `aria-label`, `placeholder`); `--json` gives
+  `{placeholder, count, kind: text|attribute, where}` per entry.
 - `slop_check.py` ignores `.ph` for the accent-word rule; in the hand-off say how many placeholders remain.
 
 ## Waitlist and pre-launch pages

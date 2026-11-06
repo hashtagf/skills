@@ -92,7 +92,7 @@ def main():
         code, out = py("contrast.py", "--css", f("html-tokens.css"), cwd=tmp)
         case("contrast: html{} tokens read", code == 0 and "[html]" in out and "1/1 pairs pass" in out, out)
         code, out = py("contrast.py", "--css", f("no-pairs.css"), cwd=tmp)
-        case("contrast: zero checkable pairs -> exit 2, no '0/0 pass'", code == 2 and "0/0" not in out, out)
+        case("contrast: zero checkable pairs -> N/A, exit 0, no '0/0 pass'", code == 0 and out.startswith("N/A") and "0/0" not in out, out)
         code, out = py("check.py", f("no-pairs.html"), cwd=tmp)
         case("check.py: contrast with zero pairs -> N/A", "N/A      contrast" in out, out)
         code, out = py("contrast.py", "--css", f("html-junk.css"), cwd=tmp)
@@ -112,7 +112,7 @@ def main():
         if NODE:
             for s in ("render_check.js", "admin_check.js", "fold_check.js"):
                 code, out = js(s, f("nofile.html"), cwd=tmp)
-                case(f"{s}: missing file -> ERROR, exit 1", code == 1 and "ERROR file not found" in out and "PASS" not in out, out)
+                case(f"{s}: missing file -> error, exit 2", code == 2 and "error: file not found" in out and "PASS" not in out and "Traceback" not in out, out)
         else:
             not_run("missing-file cases", "node not found")
 

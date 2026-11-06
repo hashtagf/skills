@@ -3,6 +3,7 @@
  * Render a page at several widths and color schemes, report problems, save screenshots.
  *
  * Usage:
+ *   node render_check.js --doctor | -h
  *   node render_check.js <url-or-file> [--out dir] [--widths 1440,768,390] [--schemes light,dark]
  *                         [--zoom] [--fast] [--viewport-shots] [--reduced-motion] [--wait 800] [--timeout 30000]
  *                         [--toggle "<selector>"]
@@ -38,8 +39,8 @@
  * of a 1280px window). Exit code 1 when any problem is found.
  *
  * Setup is automatic and never downloads anything:
- *   - Playwright module: ./node_modules, the page's project, NODE_PATH, the global
- *     npm root, then playwright-core. Set PW_MODULE=/path/to/node_modules to force one.
+ *   - Playwright module: ./node_modules, the page's project, NODE_PATH, playwright /
+ *     playwright-core on the require path, then the global npm root (looked up once, last). Set PW_MODULE=/path/to/node_modules to force one.
  *   - Browser: PW_CHROMIUM, then Playwright's own build, then any cached
  *     chromium / headless shell build (any version), then installed Chrome / Edge.
  *   - A file without <!doctype>/<html> (a fragment) is wrapped in a doctype +
@@ -49,76 +50,73 @@
  * on; do not install browsers mid-task (`npx playwright install chromium` is a
  * one-time setup the user can run).
  * --timeout bounds the page load (no shell `timeout` needed; macOS lacks it). A load that times out is
- * checked as far as it rendered (WARN); a missing file or a refused / unreachable URL prints
- * "ERROR <reason>" and exits 1. Before each viewport is measured, finite CSS/JS animations and
+ * checked as far as it rendered (WARN); a refused / unreachable URL prints "ERROR <reason>" and exits 1;
+ * a missing file or a bad option prints "error: …" and exits 2 before any browser starts.
+ * Screenshots go to render-check/ next to a local page, or for a URL to a new temp folder
+ * (<os temp>/ux-ui-render-check/<host>-<time>, printed), never the current directory; --out overrides. Before each viewport is measured, finite CSS/JS animations and
  * transitions are given up to 3s to finish, so entrance effects do not skew the checks or shots.
  * This is a smoke check, not an accessibility audit: it does not test keyboard
  * flows, screen readers, contrast or task success.
  */
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
-const args = process.argv.slice(2);
-const doctor = args.includes('--doctor');
-if (!doctor && (!args[0] || args[0].startsWith('--'))) { console.error('usage: node render_check.js <url-or-file> [--out dir] [--widths 1440,768,390] [--schemes light,dark] [--zoom] [--fast] [--viewport-shots] [--toggle selector] [--timeout ms] | --doctor'); process.exit(2); }
-const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-if (!doctor && !/^[a-z]+:\/\//i.test(args[0]) && !fs.existsSync(path.resolve(args[0]))) { console.log(`ERROR file not found: ${path.resolve(args[0])}`); process.exit(1); }
-
-const { findModule: findModuleFrom, findBrowser } = require('./_pw');
+const A = require('./_args');
+const a = A.parse(process.argv.slice(2), {
+  file: __filename,
+  values: ['--out', '--widths', '--schemes', '--wait', '--timeout', '--toggle'],
+  flags: ['--zoom', '--fast', '--viewport-shots', '--reduced-motion', '--doctor'],
+  positional: process.argv.includes('--doctor') ? [0, 1, '<url-or-file>'] : [1, 1, '<url-or-file> (node render_check.js page.html, or --doctor)'],
+});
+const doctor = a.has('--doctor');
+const pw = require('./_pw');
 const composition = require('./_composition');
-const findModule = () => findModuleFrom(args[0]);
+const color = require('./_color');
+const arg0 = a._[0];
+let target = doctor ? null : pw.target(arg0);
 
-const mod = findModule();
-const exe = mod ? findBrowser(mod.chromium) : undefined;
-if (doctor || !mod || exe === undefined) {
+const mod = pw.findModule(arg0);
+const exe = mod ? pw.findBrowser(mod.chromium) : undefined;
+if (doctor) {
   console.log(`playwright module: ${mod ? mod.from : 'NOT FOUND'}`);
   console.log(`browser: ${exe === null ? "Playwright's bundled build" : exe || 'NOT FOUND'}`);
-  if (!mod || exe === undefined) {
-    console.log('NOT TESTED: render check skipped (no Playwright module or browser). One-time setup: npm i -D playwright && npx playwright install chromium');
-    process.exit(3);
-  }
+  if (!mod || exe === undefined) pw.need(arg0, 'render check');
   process.exit(0);
 }
-const chromium = mod.chromium;
+const env = pw.need(arg0, 'render check');
 
-let target = args[0];
-if (!/^[a-z]+:\/\//i.test(target)) {
-  const file = path.resolve(target);
+if (!A.isUrl(arg0)) {
+  const file = path.resolve(arg0);
   const head = fs.readFileSync(file, 'utf8').slice(0, 2000);
   if (!/<!doctype|<html[\s>]/i.test(head)) {
     const wrapped = path.join(path.dirname(file), `.render-check-${path.basename(file, path.extname(file))}.html`);
     fs.writeFileSync(wrapped, '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>\n' + fs.readFileSync(file, 'utf8') + '\n</body></html>');
     process.on('exit', () => { try { fs.unlinkSync(wrapped); } catch (e) {} });
     console.log(`note: ${path.basename(file)} is a fragment; rendered inside a doctype wrapper`);
-    target = 'file://' + wrapped;
-  } else target = 'file://' + file;
+    target = pw.target(wrapped);
+  }
 }
-// Default output sits next to a local page (not the current directory, which may be the skill's own folder).
-const out = opt('--out', /^[a-z]+:\/\//i.test(args[0]) ? 'render-check' : path.join(path.dirname(path.resolve(args[0])), 'render-check'));
-const fast = args.includes('--fast');
-const widths = opt('--widths', fast ? '1440,390' : '1440,768,390').split(',').map(Number);
-if (args.includes('--zoom')) widths.push(320);
-const schemes = opt('--schemes', fast ? 'light' : 'light,dark').split(',');
-const wait = Number(opt('--wait', '800'));
-const timeout = Number(opt('--timeout', '30000'));
-const fullPage = !(fast || args.includes('--viewport-shots'));
+// Default output: render-check/ next to a local page; a temp folder for a URL (never the current directory).
+const out = A.outFor({ given: a.get('--out'), target: arg0, script: 'render-check', folder: 'render-check' });
+const fast = a.has('--fast');
+const widths = a.list('--widths', null, fast ? ['1440', '390'] : ['1440', '768', '390']).map(Number);
+if (widths.some(w => !Number.isInteger(w) || w < 200 || w > 4000)) A.usageError(`--widths ${a.get('--widths')} must be whole pixel widths`, 'e.g. --widths 1440,768,390');
+if (a.has('--zoom')) widths.push(320);
+const schemes = a.list('--schemes', ['light', 'dark'], fast ? ['light'] : ['light', 'dark']);
+const wait = a.num('--wait', 800, { min: 0 });
+const timeout = a.num('--timeout', 30000, { min: 1 });
+const fullPage = !(fast || a.has('--viewport-shots'));
+if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
 
-(async () => {
+A.main(async () => {
   fs.mkdirSync(out, { recursive: true });
-  const launch = exe ? { executablePath: exe } : {};
-  const browser = await chromium.launch(launch);
-  const reduced = args.includes('--reduced-motion');
+  const browser = await pw.launch(env);
+  const reduced = a.has('--reduced-motion');
   const page = await browser.newPage({ viewport: { width: widths[0], height: 900 }, colorScheme: schemes[0], reducedMotion: reduced ? 'reduce' : 'no-preference' });
   const errs = [], cons = [], fails = [];
   page.on('pageerror', e => errs.push(e.message));
   page.on('console', m => { if (m.type() === 'error') cons.push(m.text()); });
   page.on('requestfailed', r => fails.push(r.url()));
-  try { await page.goto(target, { waitUntil: 'load', timeout }); }
-  catch (e) {
-    // A timeout leaves a partly rendered page worth checking; a refused / missing target leaves nothing.
-    if (e && e.name === 'TimeoutError') console.log(`WARN  load did not finish in ${timeout}ms; checking what rendered`);
-    else { console.log(`ERROR could not load ${target}: ${String(e && e.message || e).split('\n')[0]}`); await browser.close(); process.exit(1); }
-  }
+  await pw.goto(page, target, { timeout, browser });
   await page.waitForTimeout(wait);
   await page.evaluate(async () => {
     document.querySelectorAll('img[loading=lazy]').forEach(i => { i.loading = 'eager'; });
@@ -336,6 +334,7 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
         }
         return { distorted, decoOver, overflow, wide, noAlt, noName, noLabel, formIssues: [...new Set(formIssues)], punct, hidden, moving, reduce, mobile, broken, edge, overlap, notes, lang: document.documentElement.lang };
       });
+      if (w >= 1024 || w <= 480) await page.evaluate(color.inject);
       const comp = (w >= 1024 || w <= 480) ? await page.evaluate(composition, { w, first: compFirst && w >= 1024 }) : { fails: [], notes: [] };
       if (w >= 1024) compFirst = false;
       r.notes.push(...comp.notes);
@@ -372,7 +371,7 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
   }
   }
   await matrix('');
-  const toggle = opt('--toggle', '');
+  const toggle = a.get('--toggle', '');
   if (toggle) {
     try { await page.click(toggle, { timeout: 5000 }); await page.waitForTimeout(wait); }
     catch (e) { console.log(`WARN  --toggle ${toggle} could not be clicked: ${e.message.split('\n')[0]}`); }
@@ -381,4 +380,4 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
   await browser.close();
   console.log(problems ? `\n${problems} problem(s). Look at the screenshots too: overlap, clipping and hierarchy need human review.` : '\nNo automated problems. Review the screenshots for overlap, clipping and hierarchy.');
   process.exit(problems ? 1 : 0);
-})();
+});

@@ -18,41 +18,26 @@ layered over the first plain dark block (approximating the cascade for palette v
 other than :root ones are labelled "(light theme)" / "(dark theme)". Values resolved: #hex, rgb(), hsl(), oklch()
 and var(--x) references (with fallback). color-mix(), alpha and transparent values are skipped. Local
 @import and <link rel=stylesheet> files are read too. It cannot see colors set outside tokens.
-Exit 2 (check.py: N/A) when no token block or no checkable pair is found.
+Prints "N/A …" and exits 0 (check.py: N/A) when no token block or no checkable pair is found.
 
 `min` defaults to 4.5 (normal text). Use 3 for large text, UI components,
-focus indicators and graphics (WCAG 1.4.3 / 1.4.11). Colors: #rgb or #rrggbb.
-Exit code 1 if any pair fails. Alpha/transparency is not supported: resolve
-colors against their actual background first.
+focus indicators and graphics (WCAG 1.4.3 / 1.4.11). Colors: #rgb, #rgba, #rrggbb or #rrggbbaa
+(alpha is ignored: resolve translucent colors against their actual background first).
+--json prints the results as a JSON list (pairs mode, --css) or object (single pair).
+
+Exit: 0 all pass (or N/A: --css found no token block / no checkable pair, printed as "N/A …"),
+1 a pair fails, 2 usage or input error (missing file, bad color, malformed JSON). Writes nothing.
+Standard library only.
 """
+import argparse
 import json
-import sys
-
-
-def _lin(c):
-    c /= 255
-    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
-
-
-def luminance(hex_color):
-    h = hex_color.strip().lstrip("#")
-    if len(h) == 3:
-        h = "".join(ch * 2 for ch in h)
-    if len(h) != 6:
-        raise ValueError(f"unsupported color: {hex_color}")
-    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
-    return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b)
-
-
-def ratio(fg, bg):
-    a, b = luminance(fg), luminance(bg)
-    hi, lo = max(a, b), min(a, b)
-    return (hi + 0.05) / (lo + 0.05)
-
-
-import re
 import math
 import os
+import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _color import is_hex, lum as luminance, ratio  # noqa: E402,F401  (shared WCAG maths)
 
 
 def _hex(r, g, b):
@@ -108,7 +93,7 @@ def read_css(path, seen=None):
     if path in seen or not os.path.exists(path):
         return ""
     seen.add(path)
-    text = open(path, encoding="utf-8").read()
+    text = open(path, encoding="utf-8", errors="replace").read()
     base = os.path.dirname(path)
     if path.endswith((".html", ".htm")):
         css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", text, flags=re.S))
@@ -184,10 +169,14 @@ def theme_of(label):
     return "dark" if "dark" in label.lower() else "light"
 
 
-def check_css(path):
+def check_css(path, as_json=False):
     blocks = css_blocks(read_css(path))
+    results = []
+    def na(msg):
+        print(json.dumps([{"status": "N/A", "message": msg}]) if as_json else "N/A  " + msg)
+        return 0
     if not blocks:
-        print("no :root custom properties found (no :root, html, .dark, [data-theme] or @theme token block)"); return 2
+        return na("no :root custom properties found (no :root, html, .dark, [data-theme] or @theme token block)")
     base_i = next((i for i, (l, _) in enumerate(blocks) if theme_of(l) == "light"), 0)
     base = blocks[base_i][1]
     dark_base = next((p for i, (l, p) in enumerate(blocks) if i != base_i and "dark" in l and "palette" not in l), {})
@@ -217,34 +206,73 @@ def check_css(path):
             if not (a and b): continue
             r = ratio(a, b); ok = r >= need; total += 1; failed += not ok
             rows.append(f"  {'PASS' if ok else 'FAIL'}  {r:5.2f}:1  need {need}:1  --{fg} on --{bg}  ({a} on {b})")
-        if rows:
+            results.append({"block": label, "theme": theme_of(label), "fg": "--" + fg, "bg": "--" + bg, "fg_value": a, "bg_value": b,
+                            "ratio": round(r, 2), "min": need, "status": "PASS" if ok else "FAIL"})
+        if rows and not as_json:
             print(f"[{label}]" + ("" if ":root" in label or i == base_i else f"  ({theme_of(label)} theme)")); print("\n".join(rows))
     if not total:
-        print("no checkable colour pairs: token blocks found, but no known role pair resolves to plain colours (check pairs by hand)")
-        return 2
-    print(f"\n{total - failed}/{total} pairs pass")
+        return na("no checkable colour pairs: token blocks found, but no known role pair resolves to plain colours (check pairs by hand)")
+    if as_json:
+        print(json.dumps(results, indent=2))
+    else:
+        print(f"\n{total - failed}/{total} pairs pass")
     return 1 if failed else 0
 
 
+def fail(msg):
+    print("error: " + msg, file=sys.stderr)
+    return 2
+
+
 def main(argv):
-    if len(argv) == 3 and argv[1] == "--css":
-        return check_css(argv[2])
-    if len(argv) == 3:
-        print(f"{ratio(argv[1], argv[2]):.2f}:1")
+    ap = argparse.ArgumentParser(prog="contrast.py", description="WCAG 2.x contrast ratios (see the module docstring).")
+    ap.add_argument("args", nargs="*", help="pairs.json, or two colors")
+    ap.add_argument("--css", metavar="FILE", help="page .html or stylesheet .css to read token blocks from")
+    ap.add_argument("--json", action="store_true", help="machine-readable output")
+    a = ap.parse_args(argv[1:])
+    if a.css:
+        if a.args:
+            ap.error("--css takes one file and no other positional arguments")
+        if not os.path.isfile(a.css):
+            return fail(f"file not found: {a.css} (pass a built .html page or a .css file)")
+        return check_css(a.css, a.json)
+    if len(a.args) == 2:
+        bad = [c for c in a.args if not is_hex(c)]
+        if bad:
+            return fail(f"not a hex color: {bad[0]} (use #rgb or #rrggbb, e.g. \"#0f6e64\")")
+        r = ratio(*a.args)
+        print(json.dumps({"fg": a.args[0], "bg": a.args[1], "ratio": round(r, 2)}) if a.json else f"{r:.2f}:1")
         return 0
-    if len(argv) != 2 or argv[1] in ("-h", "--help"):
-        print(__doc__)
-        return 2
-    with open(argv[1], encoding="utf-8") as f:
-        pairs = json.load(f)
-    failed = 0
-    for p in pairs:
-        r = ratio(p["fg"], p["bg"])
-        need = float(p.get("min", 4.5))
+    if len(a.args) != 1:
+        ap.error("pass pairs.json, two colors, or --css FILE")
+    try:
+        with open(a.args[0], encoding="utf-8") as f:
+            pairs = json.load(f)
+    except OSError as e:
+        return fail(f"cannot read {a.args[0]}: {e.strerror} (check the path)")
+    except ValueError as e:
+        return fail(f"malformed JSON in {a.args[0]}: {e} (expected [{{\"name\",\"fg\",\"bg\",\"min\"}}, ...])")
+    if not isinstance(pairs, list) or not all(isinstance(p, dict) for p in pairs):
+        return fail(f"{a.args[0]} must be a JSON list of objects (expected [{{\"name\",\"fg\",\"bg\",\"min\"}}, ...])")
+    rows, failed = [], 0
+    for n, p in enumerate(pairs):
+        fg, bg = p.get("fg"), p.get("bg")
+        if not (is_hex(fg) and is_hex(bg)):
+            return fail(f"pair {n} ({p.get('name', '')}): fg and bg must be hex colors, got {fg!r} / {bg!r}")
+        try:
+            need = float(p.get("min", 4.5))
+        except (TypeError, ValueError):
+            return fail(f"pair {n} ({p.get('name', '')}): min must be a number, got {p.get('min')!r}")
+        r = ratio(fg, bg)
         ok = r >= need
         failed += not ok
-        print(f"{'PASS' if ok else 'FAIL'}  {r:5.2f}:1  need {need}:1  {p.get('name', '')}  {p['fg']} on {p['bg']}")
-    print(f"\n{len(pairs) - failed}/{len(pairs)} pairs pass")
+        rows.append({"name": p.get("name", ""), "fg": fg, "bg": bg, "ratio": round(r, 2), "min": need, "status": "PASS" if ok else "FAIL"})
+    if a.json:
+        print(json.dumps(rows, indent=2, ensure_ascii=False))
+    else:
+        for x in rows:
+            print(f"{x['status']}  {x['ratio']:5.2f}:1  need {x['min']}:1  {x['name']}  {x['fg']} on {x['bg']}")
+        print(f"\n{len(pairs) - failed}/{len(pairs)} pairs pass")
     return 1 if failed else 0
 
 

@@ -29,16 +29,57 @@ The whole file is built before anything is written (temp file + rename), so a fa
 look, bad interview) leaves no DESIGN.md and no new folder. Free-text scalars (name, description) are quoted.
 Radius follows export_tokens.shape_radii(): a round subject turns a 0px direction into 24px cards and pill
 buttons, and the Decision log then says `export_tokens.py <id> --shape soft` so the code tokens match.
-Standard library only.
+Interview list fields (feel, languages, never, ...) also accept one string ("feel": "warm" = ["warm"]).
+Without --out it writes into the current folder, but never into the skill folder itself.
+Exit 0 written, 2 usage or input error (unknown direction or look, missing or malformed interview JSON,
+DESIGN.md already there without --force). Standard library only.
 """
+import argparse
 import json
 import os
 import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+SKILL = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import export_tokens as ex  # noqa: E402
+
+LIST_FIELDS = ("proof_available", "languages", "feel", "shape_from_subject", "likes", "dislikes", "competitors",
+               "constraints", "never")
+
+
+def die(msg):
+    sys.stderr.write("error: %s\n" % msg)
+    sys.exit(2)
+
+
+def load_interview(path):
+    """The interview JSON as a dict; a list field given as one string becomes a one-item list."""
+    if not path:
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            iv = json.load(f)
+    except FileNotFoundError:
+        die("--interview %s: no such file (python3 design_md.py --template-interview > interview.json)" % path)
+    except (OSError, UnicodeDecodeError) as e:
+        die("--interview %s: cannot read (%s)" % (path, e))
+    except ValueError as e:
+        die("--interview %s: not valid JSON (%s)" % (path, e))
+    if not isinstance(iv, dict):
+        die("--interview %s: expected a JSON object like --template-interview prints" % path)
+    for k in LIST_FIELDS:
+        v = iv.get(k)
+        if v is None:
+            continue
+        if isinstance(v, str):
+            iv[k] = [v] if v.strip() else []
+        elif isinstance(v, list):
+            iv[k] = [str(x) for x in v if x is not None]
+        else:
+            die("--interview %s: %s must be a list of strings or one string (got %r)" % (path, k, v))
+    return iv
 
 TEMPLATE = {
     "brand": "Plume",
@@ -82,7 +123,7 @@ def load_direction(did):
     for d in items:
         if d["id"] == did:
             return d
-    sys.exit("unknown direction: %s" % did)
+    die("unknown direction: %s (python3 scripts/export_tokens.py --list)" % did)
 
 
 def shape_words(r, btn, corner):
@@ -147,6 +188,7 @@ def front_matter(d, iv, light_t, dark_t, rx, thai):
     fam_b = '%s, %s' % (d["body"], "Noto Sans Thai" if thai else "sans-serif")
     body_lh = "1.6" if thai else "1.5"
     def ty(n, fam, size, w, lh, ls="0em"):
+        ls = "0em" if re.fullmatch(r"\s*-?0*\.?0*\s*", str(ls)) else ls  # a bare 0 is not a dimension
         return ["  %s:" % n, "    fontFamily: %s" % json.dumps(fam), "    fontSize: %s" % size, "    fontWeight: %s" % w,
                 "    lineHeight: %s" % lh, "    letterSpacing: %s" % ls]
     y.append("typography:")
@@ -310,8 +352,9 @@ def build_from_code(res, iv, src_label):
             fams.append(first)
     body_f = fams[0] if fams else "system-ui"
     disp_f = fams[1] if len(fams) > 1 else body_f
-    thai = "th" in iv.get("languages", []) or any("thai" in f.lower() for f in fams)
-    lh = "1.6" if thai else "1.5"
+    lang = res.get("language") or {}
+    thai = "th" in iv.get("languages", []) or any("thai" in f.lower() for f in fams) or bool(lang.get("thai"))
+    lh = "1.6" if thai else "1.5"  # Thai rule: body line-height 1.55-1.7
     sizes = sorted({px(s) for s in res["font_sizes"] if px(s)} or {14, 16, 20, 28, 40})
     big = sizes[-1] if sizes[-1] >= 24 else 32
     def ty(n, fam, size, w, l):
@@ -321,9 +364,13 @@ def build_from_code(res, iv, src_label):
     y += ty("headline-lg", disp_f, big, 700, "1.2") + ty("body-md", body_f, 16, 400, lh) + ty("label-md", body_f, 14, 600, "1.2")
     rv = res["var_raw"].get("--radius") or res["var_raw"].get("--r")
     r = px(rv) if rv else None
+    r_from = "`--radius: %s`" % rv if rv else None
     if r is None:
-        cand = [px(rv_(k)) for k, _ in res["radii"].most_common(10) if px(rv_(k)) is not None and px(rv_(k)) < 100]
-        r = cand[0] if cand else 8
+        cand = [(px(rv_(k)), k) for k, _ in res["radii"].most_common(10) if px(rv_(k)) is not None and px(rv_(k)) < 100]
+        if cand:
+            r, r_from = cand[0][0], "the most used border-radius, `%s`" % cand[0][1]
+        else:
+            r, r_from = 8, None
     y += ["rounded:", "  sm: %dpx" % max(2, r // 2), "  md: %dpx" % r, "  lg: %dpx" % (r + 4), "  full: 9999px",
           "spacing:", "  xs: 4px", "  sm: 8px", "  md: 16px", "  lg: 24px", "  xl: 40px",
           "components:",
@@ -362,7 +409,7 @@ Values live in the front matter. Evidence per role (found = named CSS variable; 
 ## Typography
 - Body: {body_f}; display: {disp_f}, because these are the most used families in the code (fonts seen: {", ".join("%s ×%d" % kv for kv in res["fonts"].most_common(6)) or "none"}).
 - Font sizes in code: {", ".join("%s ×%d" % kv for kv in res["font_sizes"].most_common(8)) or "none (likely utility classes)"}.
-{"- Thai: body line-height 1.6, never tracked or uppercased." if thai else ""}
+{"- Thai: body line-height 1.6 (Thai rule 1.55-1.7), never tracked or uppercased" + ((" (" + lang["evidence"] + ")") if lang.get("thai") else "") + "." if thai else ""}
 
 ## Layout
 - Not extracted (layout lives in components). Record container width, grid and section spacing from the main pages after the baseline audit.
@@ -371,7 +418,7 @@ Values live in the front matter. Evidence per role (found = named CSS variable; 
 - Not extracted. Record the one depth strategy (borders, shadows or tonal surfaces) seen in the audit.
 
 ## Shapes
-- Base radius {r}px (from {"`--radius: " + rv + "`" if rv else "the most used border-radius"}). Radii in code: {", ".join("%s ×%d" % kv for kv in res["radii"].most_common(6)) or "none in CSS"}.
+- Base radius {r}px ({"from " + r_from if r_from else "a placeholder: no radius found in code; set it from the baseline audit"}). Radii in code: {", ".join("%s ×%d" % kv for kv in res["radii"].most_common(6)) or "none found"}.
 - Tailwind usage (top): {tw}.
 
 ## Components
@@ -432,7 +479,7 @@ def build_backoffice(sid, iv):
     st = next((x for x in (styles if isinstance(styles, list) else styles.values()) if x.get("id") == sid), None)
     if not st:
         ids = [x.get("id") for x in (styles if isinstance(styles, list) else styles.values())]
-        sys.exit("unknown back-office look %r; choose from: %s" % (sid, ", ".join(ids)))
+        die("unknown back-office look %r (choose from: %s)" % (sid, ", ".join(ids)))
     name = iv.get("brand", "Product")
     date = iv.get("date", datetime.date.today().isoformat())
     font = st.get("font", "Public Sans")
@@ -541,55 +588,81 @@ def wire(dirpath):
         print("wired", p)
 
 
-def main():
-    a = sys.argv[1:]
-    if "--template-interview" in a:
-        print(json.dumps(TEMPLATE, ensure_ascii=False, indent=2))
-        return
-    if "--backoffice" in a:
-        sid = a[a.index("--backoffice") + 1] if a.index("--backoffice") + 1 < len(a) else ""
-        iv = json.load(open(a[a.index("--interview") + 1])) if "--interview" in a else {}
-        out = a[a.index("--out") + 1] if "--out" in a else "."
-        path = os.path.join(out, "DESIGN.md")
-        if os.path.exists(path) and "--force" not in a:
-            sys.exit("DESIGN.md already exists in %s (use --force to overwrite)" % out)
-        write_atomic(path, build_backoffice(sid, iv))
-        print("wrote", path)
-        if "--wire" in a:
-            wire(out)
-        return
-    if "--from-code" in a:
-        src = a[a.index("--from-code") + 1] if a.index("--from-code") + 1 < len(a) else ""
-        if not os.path.isdir(src):
-            sys.exit("--from-code needs a directory: %s" % src)
-        import code_extract  # noqa: E402
-        iv = json.load(open(a[a.index("--interview") + 1])) if "--interview" in a else {}
-        out = a[a.index("--out") + 1] if "--out" in a else "."
-        path = os.path.join(out, "DESIGN.md")
-        if os.path.exists(path) and "--force" not in a:
-            sys.exit("DESIGN.md already exists in %s (use --force to overwrite; or compare with code_extract.py SRC first)" % out)
-        if "--approved" in a:
-            print("note: --from-code always writes Status: draft")
-        res = code_extract.extract(src)
-        write_atomic(path, build_from_code(res, iv, src))
-        print("wrote", path)
-        if "--wire" in a:
-            wire(out)
-        return
-    ids = [x for x in a if not x.startswith("--") and x not in (a[a.index("--interview") + 1] if "--interview" in a else "", a[a.index("--out") + 1] if "--out" in a else "")]
-    if not ids or "--interview" not in a:
-        print(__doc__)
-        sys.exit(2)
-    iv = json.load(open(a[a.index("--interview") + 1]))
-    out = a[a.index("--out") + 1] if "--out" in a else "."
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        die("%s (run with --help)" % message)
+
+
+def out_dir(a):
+    """--out, else the current folder; refuse the skill folder itself (the file belongs in the project)."""
+    if a.out:
+        return a.out
+    cwd = os.path.realpath(".")
+    if cwd == os.path.realpath(SKILL) or cwd.startswith(os.path.realpath(SKILL) + os.sep):
+        die("the current folder is inside the skill (%s); run from the project or pass --out DIR" % SKILL)
+    return "."
+
+
+def target(a, out, hint=""):
     path = os.path.join(out, "DESIGN.md")
-    if os.path.exists(path) and "--force" not in a:
-        sys.exit("DESIGN.md already exists in %s (use --force to overwrite)" % out)
-    write_atomic(path, build(load_direction(ids[0]), iv, "--approved" in a))
-    print("wrote", path)
-    if "--wire" in a:
-        wire(out)
+    if os.path.exists(path) and not a.force:
+        die("DESIGN.md already exists in %s (use --force to overwrite%s)" % (out, hint))
+    return path
+
+
+def main(argv=None):
+    ap = Parser(prog="design_md.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("id", nargs="?", help="direction id")
+    ap.add_argument("--interview", metavar="FILE")
+    ap.add_argument("--out", metavar="DIR")
+    ap.add_argument("--wire", action="store_true")
+    ap.add_argument("--approved", action="store_true")
+    ap.add_argument("--force", action="store_true")
+    ap.add_argument("--from-code", metavar="SRC")
+    ap.add_argument("--backoffice", metavar="STYLE")
+    ap.add_argument("--template-interview", action="store_true")
+    a = ap.parse_args(sys.argv[1:] if argv is None else argv)
+    if a.template_interview:
+        print(json.dumps(TEMPLATE, ensure_ascii=False, indent=2))
+        return 0
+    modes = [m for m in ("id", "from_code", "backoffice") if getattr(a, m)]
+    if len(modes) > 1:
+        die("give one of: a direction id, --from-code SRC, --backoffice STYLE")
+    if a.backoffice is not None:
+        iv = load_interview(a.interview)
+        out = out_dir(a)
+        path = target(a, out)
+        write_atomic(path, build_backoffice(a.backoffice, iv))
+        print("wrote", path)
+    elif a.from_code is not None:
+        if not os.path.isdir(a.from_code):
+            die("--from-code needs a folder: %s (pass the codebase root)" % a.from_code)
+        import code_extract  # noqa: E402
+        iv = load_interview(a.interview)
+        out = out_dir(a)
+        path = target(a, out, "; or compare with code_extract.py SRC first")
+        if a.approved:
+            print("note: --from-code always writes Status: draft")
+        res = code_extract.extract(a.from_code)
+        write_atomic(path, build_from_code(res, iv, a.from_code))
+        print("wrote", path)
+    else:
+        if not a.id or not a.interview:
+            print(__doc__)
+            return 2
+        iv = load_interview(a.interview)
+        d = load_direction(a.id)
+        out = out_dir(a)
+        path = target(a, out)
+        write_atomic(path, build(d, iv, a.approved))
+        print("wrote", path)
+    if a.wire:
+        try:
+            wire(out)
+        except OSError as e:
+            die("cannot wire AGENTS.md / CLAUDE.md in %s (%s)" % (out, e))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

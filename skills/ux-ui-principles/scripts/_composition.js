@@ -3,6 +3,7 @@
  * FAIL: unequal outer frame, a blank vertical gap ≥ 0.6 viewport, no h1 on the first
  * screen of a public page. Everything else is a NOTE: a hint to look at the screenshot.
  * Rules: references/design-quality.md §4, review-loop.md §8a, visual-system.md Part C.
+ * Needs scripts/_color.js injected into the page first (render_check.js does page.evaluate(color.inject)).
  */
 module.exports = async function composition({ w, first }) {
   const vw = document.documentElement.clientWidth, vh = innerHeight;
@@ -87,22 +88,11 @@ module.exports = async function composition({ w, first }) {
   }
 
   // Running text
-  // Computed colours may be rgb(), oklab(), oklch(), color(srgb …) etc.: paint each on a 1x1 canvas and read sRGB back.
-  const cv = document.createElement('canvas'); cv.width = cv.height = 1;
-  const cx = cv.getContext('2d', { willReadFrequently: true });
-  const rgbaCache = new Map();
-  const toRGBA = c => {
-    if (rgbaCache.has(c)) return rgbaCache.get(c);
-    let v = null;
-    if (c && c !== 'transparent') {
-      cx.clearRect(0, 0, 1, 1); cx.fillStyle = '#000'; cx.fillStyle = c;
-      cx.fillRect(0, 0, 1, 1); const d = cx.getImageData(0, 0, 1, 1).data;
-      v = [d[0], d[1], d[2], d[3] / 255];
-    } else v = [0, 0, 0, 0];
-    rgbaCache.set(c, v); return v;
-  };
-  const over = (top, under) => { const a = top[3]; return [0, 1, 2].map(i => top[i] * a + under[i] * (1 - a)).concat(1); };
-  const lum = rgb => { const [r, g, b] = rgb.slice(0, 3).map(v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  // Colour maths come from scripts/_color.js, injected by the caller (page.evaluate(color.inject)) as
+  // window.__uxuiColor: canvasRGBA paints rgb(), oklab(), oklch(), color(srgb …) etc. on a 1x1 canvas and reads sRGB back.
+  const C = window.__uxuiColor;
+  if (!C) throw new Error('_composition.js needs _color.js injected first (page.evaluate(require("./_color").inject))');
+  const toRGBA = C.canvasRGBA, over = C.over;
   // Resolved background: semi-transparent layers composited up to the first opaque one (white canvas below); null over an image.
   const bgOf = e => {
     const layers = [];
@@ -119,7 +109,7 @@ module.exports = async function composition({ w, first }) {
     const s = getComputedStyle(p), fs = parseFloat(s.fontSize);
     if (fs < 16) small.push(sel(p));
     const bg = bgOf(p);
-    if (bg) { const a = lum(over(toRGBA(s.color), bg)), b = lum(bg); const cr = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); if (cr < 7) weak.push(`${sel(p)} ${cr.toFixed(1)}:1`); }
+    if (bg) { const cr = C.contrast(over(toRGBA(s.color), bg), bg); if (cr < 7) weak.push(`${sel(p)} ${cr.toFixed(1)}:1`); }
     if (p.getBoundingClientRect().width / (fs * 0.5) > 88) wide.push(sel(p));
   }
   if (small.length) notes.push(`${small.length} paragraph(s) under 16px: ${small.slice(0, 3).join(', ')}`);

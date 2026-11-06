@@ -7,7 +7,7 @@
  * Why:   render_check.js is a generic smoke check (overflow, errors, names); nothing else
  *        catches a left-aligned money column, a sticky save bar that cannot stick, or a
  *        disabled button with no reason.
- * How:   node admin_check.js <url-or-file> --type list|detail|form|dashboard [--states] [--out dir]
+ * How:   node admin_check.js <url-or-file> --type list|detail|form|dashboard [--states] [--out dir] [--timeout ms] [-h|--help]
  *        (also run by `python3 scripts/check.py <page> --admin <type>`).
  *
  * Rules (FAIL unless marked note):
@@ -22,24 +22,27 @@
  *   uppercase-text     uppercase text runs longer than 20 characters (note)
  * --states renders <page>?state=loading|empty|nomatch|error|denied|partial and fails a state whose
  *   visible text is identical to the default page (the state is declared but not built).
- * Exit 1 on any FAIL; 3 when no Playwright/browser (report NOT TESTED). A missing file or a
- * refused / unreachable URL prints "ERROR <reason>" and exits 1 (a slow load only WARNs).
+ * Screenshots: admin-check/ next to a local page; for a URL a new temp folder
+ * (<os temp>/ux-ui-admin-check/<host>-<time>, printed); --out overrides.
+ * Exit 1 on any FAIL; 3 when no Playwright/browser (NOT RUN). A refused / unreachable URL prints
+ * "ERROR <reason>" and exits 1 (a slow load only WARNs); a missing file or a bad option prints "error: …", exit 2.
+ * one-primary reads button colours through a canvas, so oklch()/oklab()/color-mix() accents count.
  */
 const path = require('path');
 const fs = require('fs');
-const args = process.argv.slice(2);
-const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const type = opt('--type', 'list');
-if (!args[0] || args[0].startsWith('--') || !['list', 'detail', 'form', 'dashboard'].includes(type)) {
-  console.error('usage: node admin_check.js <url-or-file> --type list|detail|form|dashboard [--states] [--out dir]'); process.exit(2);
-}
-if (!/^[a-z]+:\/\//i.test(args[0]) && !fs.existsSync(path.resolve(args[0]))) { console.log(`ERROR file not found: ${path.resolve(args[0])}`); process.exit(1); }
-const { findModule, findBrowser } = require('./_pw');
-const mod = findModule(args[0]);
-const exe = mod ? findBrowser(mod.chromium) : undefined;
-if (!mod || exe === undefined) { console.log('NOT TESTED: admin check skipped (no Playwright module or browser)'); process.exit(3); }
-const base = /^[a-z]+:\/\//i.test(args[0]) ? args[0] : 'file://' + path.resolve(args[0]);
-const out = opt('--out', /^[a-z]+:\/\//i.test(args[0]) ? 'admin-check' : path.join(path.dirname(path.resolve(args[0])), 'admin-check'));
+const A = require('./_args');
+const pw = require('./_pw');
+const color = require('./_color');
+const a = A.parse(process.argv.slice(2), { file: __filename, values: ['--type', '--out', '--timeout'], flags: ['--states'], positional: [1, 1, '<url-or-file>'] });
+const TYPES = ['list', 'detail', 'form', 'dashboard'];
+const type = a.get('--type', 'list');
+if (!TYPES.includes(type)) A.usageError(`unknown --type ${type}`, `choose from ${TYPES.join(', ')}`);
+const arg0 = a._[0];
+const base = pw.target(arg0);
+const timeout = a.num('--timeout', 30000, { min: 1 });
+const env = pw.need(arg0, 'admin check');
+const out = A.outFor({ given: a.get('--out'), target: arg0, script: 'admin-check', folder: 'admin-check' });
+if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
 const STATES = ['loading', 'empty', 'nomatch', 'error', 'denied', 'partial'];
 const withState = (u, s) => { const [a, h = ''] = u.split('#'); return a + (a.includes('?') ? '&' : '?') + 'state=' + s + (h ? '#' + h : ''); };
 
@@ -81,7 +84,9 @@ function audit(type) {
     }
   });
   // primary actions in first viewport
-  const sat = c => { const m = c.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/); if (!m || (m[4] !== undefined && +m[4] < 0.5)) return 0; const [r, g, b] = [m[1], m[2], m[3]].map(x => x / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; return mx === mn || l < 0.12 || l > 0.9 ? 0 : (mx - mn) / (1 - Math.abs(2 * l - 1)); };
+  // any computed colour (rgb, oklab, oklch, color-mix…) -> sRGB via the canvas helper from _color.js (injected)
+  const C = window.__uxuiColor;
+  const sat = c => C.sat(C.canvasRGBA(c));
   const prim = [...document.querySelectorAll('button, a[role=button], a.btn, input[type=submit]')].filter(e => vis(e) && e.getBoundingClientRect().top < innerHeight && !e.closest('tbody, nav, [role=tablist], [role=dialog]') && sat(getComputedStyle(e).backgroundColor) > 0.35);
   if (prim.length > 1) (type === 'list' || type === 'dashboard' ? notes : fails).push(`one-primary: ${prim.length} filled accent buttons in the first viewport: ${prim.slice(0, 4).map(name).join(', ')}`);
   // list: table above fold
@@ -92,18 +97,15 @@ function audit(type) {
   return { fails: [...new Set(fails)], notes: [...new Set(notes)].slice(0, 12), text: document.body.innerText.replace(/\s+/g, ' ').trim() };
 }
 
-(async () => {
+A.main(async () => {
   fs.mkdirSync(out, { recursive: true });
-  const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
+  const browser = await pw.launch(env);
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   const load = async u => {
-    try { await page.goto(u, { waitUntil: 'load', timeout: 30000 }); }
-    catch (e) {
-      if (e && e.name === 'TimeoutError') console.log('WARN  load timed out: ' + u);
-      else { console.log(`ERROR could not load ${u}: ${String(e && e.message || e).split('\n')[0]}`); await browser.close(); process.exit(1); }
-    }
+    await pw.goto(page, u, { timeout, browser });
     await page.waitForTimeout(500);
+    await page.evaluate(color.inject);
   };
   let failed = 0;
   await load(base);
@@ -112,7 +114,7 @@ function audit(type) {
   console.log(`${r.fails.length ? 'FAIL' : 'PASS'}  admin ${type} 1440x900  → ${path.join(out, `admin-${type}-default.png`)}`);
   r.fails.forEach(f => console.log('   - ' + f)); r.notes.forEach(n => console.log('   · note: ' + n));
   failed += r.fails.length;
-  if (args.includes('--states')) {
+  if (a.has('--states')) {
     for (const s of STATES) {
       await load(withState(base, s));
       const t = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim());
@@ -127,4 +129,4 @@ function audit(type) {
   await browser.close();
   console.log(failed ? `\n${failed} problem(s).` : '\nNo admin rule failures. Notes are judgment calls; look at the screenshots.');
   process.exit(failed ? 1 : 0);
-})();
+});

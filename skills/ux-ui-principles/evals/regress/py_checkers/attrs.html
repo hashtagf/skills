@@ -1,0 +1,12 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><title>Clinic</title>
+<!-- Regression: placeholders in attributes (og:*, title, alt, aria-label, placeholder) are reported as attribute
+     placeholders; Thai text placeholders with combining marks keep the table aligned by display width. -->
+<meta property="og:title" content="[ชื่อคลินิก]">
+<meta property="og:description" content="{{tagline}}">
+<script>var x = "[not a placeholder]";</script>
+</head><body>
+<img src="a.jpg" alt="[รูปทันตแพทย์]">
+<a href="#" aria-label="[ชื่อคลินิก]" title="[tooltip]">x</a>
+<input placeholder="[เบอร์โทร]">
+<p>โทร <span class="ph">0x-xxx-xxxx</span> เวลา [10:00–20:00] ที่ [ชื่อทันตแพทย์] และ [เปิด/ปิด] [ab]</p>
+</body></html>

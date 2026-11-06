@@ -451,11 +451,11 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | `scripts/slop_check.py` | 6 |
 | `scripts/render_check.js`, `scripts/contrast.py` | 7 |
 | `scripts/check.py` | 6, 7: one command for every delivery check (runs script_check.js, slop_check.py, contrast.py, state_check.py, the public-page metadata line, and render_check.js + fold_check.js with `--render`; admin_check.js with `--admin <type>`) |
-| `scripts/script_check.js` | called by check.py: syntax and globals that clash with `window`; no browser needed |
+| `scripts/script_check.js` | called by check.py: syntax and globals that clash with `window` (destructured ones too: `const {top} = …`); no browser needed |
 | `scripts/admin_check.js` | 7: back-office pages by type (list, detail, form, dashboard): numeric columns, disabled with reason, sticky bars, one primary action, every `?state=` rendered; via `check.py --admin <type>` |
 | `scripts/fold_check.js` | 7: primary action above the 390×844 / 1440×900 fold, offer on the first screen, next section hinted |
-| `scripts/flow_check.js` | 7, 8: JSON-driven journey (the live thing, happy + failure path); fails on console errors |
-| `scripts/placeholders.py` | 5, 8: lists `.ph` / `[…]` placeholders with counts into the hand-off README; warns on proof-like placeholders |
+| `scripts/flow_check.js` | 7, 8: JSON-driven journey (the live thing, happy + failure path); fails on console errors; a malformed steps file (bad JSON, not an array, unknown `do`/`expect`) exits 2 before a browser starts |
+| `scripts/placeholders.py` | 5, 8: lists `.ph` / `[…]` placeholders (text, and attributes: meta og:*, title, alt, aria-label, placeholder) with counts into the hand-off README; warns on proof-like placeholders; `--json` |
 | `scripts/direction_preview.js`, `scripts/build_previews.js` | 3 (pictures of directions; build_previews regenerates all preview sets) |
 | `scripts/export_tokens.py` | 5 (direction to CSS, Tailwind, shadcn tokens) |
 | `scripts/backoffice_preview.js` | 3 (pictures of back-office density and tone) |

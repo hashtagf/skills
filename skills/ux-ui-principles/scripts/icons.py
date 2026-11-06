@@ -17,9 +17,14 @@ brand   prints the brand's single-path SVG with its hex colour (or currentColor 
 
 Versions are pinned (at least two weeks old) so pages stay reproducible; data is cached in the temp folder
 (written only after a successful fetch; an empty or broken cache file is fetched again).
-Network: curl to cdn.jsdelivr.net. Standard library only.
+Exit 0 ok, 1 a name was not found, 2 usage error (bad flag value), 3 not run (network or CDN fetch failed).
+Network: curl to cdn.jsdelivr.net (scripts/_net.py). Standard library only.
 """
-import json, os, re, subprocess, sys, tempfile
+import argparse, json, os, re, sys, tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _net  # noqa: E402
+from _color import ratio  # noqa: E402
 
 LUCIDE_V = "1.58.0"       # lucide-static, ISC, published 2026-10-16
 SIMPLE_V = "16.35.0"      # simple-icons, CC0 project (each brand keeps its trademark), published 2026-10-11
@@ -27,52 +32,17 @@ CDN = "https://cdn.jsdelivr.net/npm"
 CACHE = os.path.join(tempfile.gettempdir(), "ux-ui-icons-cache")
 
 
-def arg(name, default=None):
-    a = sys.argv
-    if name not in a:
-        return default
-    i = a.index(name) + 1
-    return a[i] if i < len(a) else ""
+A = argparse.Namespace(size="20", stroke="2", sprite=None, ground=None, mono=False)
 
 
 def get(url):
-    r = subprocess.run(["curl", "-sSL", "--fail", "--max-time", "60", url], capture_output=True)
-    if r.returncode:
-        raise RuntimeError(f"{url}: {r.stderr.decode('utf-8', 'replace').strip() or 'curl failed'}")
-    return r.stdout.decode("utf-8")
-
-
-def _valid(text, name):
-    if not text.strip():
-        return False
-    if name.endswith(".json"):
-        try:
-            json.loads(text)
-        except ValueError:
-            return False
-    return True
+    return _net.get_text(url)
 
 
 def cached(url, name):
-    """Return the file at url, cached under CACHE. Fetches first and writes atomically, so a failed or
-    interrupted fetch never leaves a file behind; an empty or unreadable cached file is fetched again."""
-    os.makedirs(CACHE, exist_ok=True)
-    p = os.path.join(CACHE, name)
-    if os.path.exists(p):
-        try:
-            text = open(p, encoding="utf-8").read()
-            if _valid(text, name):
-                return text
-        except (OSError, UnicodeDecodeError):
-            pass
-    text = get(url)
-    if not _valid(text, name):
-        raise RuntimeError(f"{url}: empty or invalid response")
-    fd, tmp = tempfile.mkstemp(dir=CACHE, prefix=".part-")
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        f.write(text)
-    os.replace(tmp, p)
-    return text
+    """Return the file at url, cached under CACHE (scripts/_net.py: atomic write after a good fetch; an empty
+    or unreadable cached file is fetched again)."""
+    return _net.cached(url, name, CACHE)
 
 
 def lucide_tags(v):
@@ -82,25 +52,6 @@ def lucide_tags(v):
 def simple_data(v):
     d = json.loads(cached(f"{CDN}/simple-icons@{v}/data/simple-icons.json", f"simple-{v}.json"))
     return d if isinstance(d, list) else d["icons"]
-
-
-def lum(h):
-    h = h.lstrip("#")
-    if len(h) == 3:
-        h = "".join(c * 2 for c in h)
-    c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-    c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
-    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
-
-
-def ratio(a, b):
-    la, lb = sorted((lum(a), lum(b)), reverse=True)
-    return (la + 0.05) / (lb + 0.05)
-
-
-def words(argv):
-    skip = {"--size", "--stroke", "--sprite", "--ground", "--lucide-version", "--simple-version"}
-    return [a for i, a in enumerate(argv) if not a.startswith("--") and argv[i - 1] not in skip]
 
 
 def search(qs, lv, sv):
@@ -136,7 +87,7 @@ def search(qs, lv, sv):
 
 
 def lucide(names, lv):
-    size, stroke, sprite = arg("--size", "20"), arg("--stroke", "2"), arg("--sprite")
+    size, stroke, sprite = A.size, A.stroke, A.sprite
     tags = lucide_tags(lv)
     symbols, bad = [], 0
     for n in names:
@@ -160,8 +111,10 @@ def lucide(names, lv):
     if sprite and symbols:
         body = "".join(f'<symbol id="{n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{stroke}" '
                        f'stroke-linecap="round" stroke-linejoin="round">{inner}</symbol>' for n, inner in symbols)
-        open(sprite, "w", encoding="utf-8").write(
-            f'<!-- Lucide {lv} (ISC License, lucide.dev) --><svg xmlns="http://www.w3.org/2000/svg" style="display:none">{body}</svg>\n')
+        try:
+            _net.write_atomic(sprite, f'<!-- Lucide {lv} (ISC License, lucide.dev) --><svg xmlns="http://www.w3.org/2000/svg" style="display:none">{body}</svg>\n')
+        except OSError as e:
+            print(f"error: cannot write --sprite {sprite} ({e})", file=sys.stderr); return 2
         print(f"wrote {sprite} ({len(symbols)} symbols). Use: <svg class=\"icon\" aria-hidden=\"true\"><use href=\"{os.path.basename(sprite)}#{symbols[0][0]}\"/></svg>")
     print(f"<!-- Lucide {lv}, ISC License (keep the notice with the source: lucide.dev/license). "
           f"Size {size}px, stroke {stroke}: use one stroke width per page. -->")
@@ -169,7 +122,7 @@ def lucide(names, lv):
 
 
 def brand(slugs, sv):
-    size, ground, mono = arg("--size", "20"), arg("--ground"), "--mono" in sys.argv
+    size, ground, mono = A.size, A.ground, A.mono
     data = {i["slug"]: i for i in simple_data(sv)}
     titles = {i["title"].lower(): i for i in data.values()}
     bad = 0
@@ -210,21 +163,51 @@ def brand(slugs, sv):
 HEX = re.compile(r"#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})")
 
 
-def main():
-    a = sys.argv[1:]
-    if not a or a[0] not in ("search", "lucide", "brand"):
-        print(__doc__); return 2
-    g = arg("--ground")
-    if g is not None and not HEX.fullmatch(g):
-        print(f"usage: --ground takes a hex colour, #rgb or #rrggbb (got {g!r})", file=sys.stderr); return 2
-    lv, sv = arg("--lucide-version", LUCIDE_V), arg("--simple-version", SIMPLE_V)
-    w = words(sys.argv)[2:]
-    if not w:
-        print(__doc__); return 2
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write("error: %s (run with --help)\n" % message)
+        sys.exit(2)
+
+
+def usage(msg):
+    print("error: " + msg, file=sys.stderr)
+    return 2
+
+
+def main(argv=None):
+    global A
+    ap = Parser(prog="icons.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("cmd", choices=("search", "lucide", "brand"))
+    ap.add_argument("words", nargs="*")
+    ap.add_argument("--size", default="20")
+    ap.add_argument("--stroke", default="2")
+    ap.add_argument("--sprite")
+    ap.add_argument("--ground")
+    ap.add_argument("--mono", action="store_true")
+    ap.add_argument("--lucide-version", default=LUCIDE_V)
+    ap.add_argument("--simple-version", default=SIMPLE_V)
+    argv = sys.argv[1:] if argv is None else argv
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__); return 0 if argv else 2
+    A = ap.parse_intermixed_args(argv)
+    if A.ground is not None and not HEX.fullmatch(A.ground):
+        return usage(f"--ground takes a hex colour, #rgb or #rrggbb (got {A.ground!r})")
+    if A.ground is not None and not A.ground.startswith("#"):
+        A.ground = "#" + A.ground
+    if not re.fullmatch(r"\d+(\.\d+)?", A.size) or not 8 <= float(A.size) <= 512:
+        return usage(f"--size takes a number of px, 8-512 (got {A.size!r})")
+    if not re.fullmatch(r"\d+(\.\d+)?", A.stroke) or not 0.5 <= float(A.stroke) <= 4:
+        return usage(f"--stroke takes a number, 0.5-4 (got {A.stroke!r}; Lucide's default is 2)")
+    for flag, v in (("--lucide-version", A.lucide_version), ("--simple-version", A.simple_version)):
+        if not re.fullmatch(r"[0-9][\w.+-]*", v):
+            return usage(f"{flag} takes a version like 1.58.0 (got {v!r})")
+    if not A.words:
+        return usage(f"{A.cmd} needs at least one name or word, e.g. icons.py {A.cmd} {'calendar' if A.cmd != 'brand' else 'line'}")
+    lv, sv, w = A.lucide_version, A.simple_version, A.words
     try:
-        return {"search": lambda: search(w, lv, sv), "lucide": lambda: lucide(w, lv), "brand": lambda: brand(w, sv)}[a[0]]()
-    except RuntimeError as e:
-        print(f"NOT RUN: {e}"); return 3
+        return {"search": lambda: search(w, lv, sv), "lucide": lambda: lucide(w, lv), "brand": lambda: brand(w, sv)}[A.cmd]()
+    except _net.NetError as e:
+        print(f"NOT RUN: {e}"); return _net.EXIT_NOT_RUN
 
 
 if __name__ == "__main__":

@@ -128,7 +128,9 @@ format (S101).
 
 Validate before handing it on: `python3 scripts/design_md_check.py DESIGN.md`
 (front matter, token references, value formats, canonical section order, contrast of component pairs,
-dark values, don'ts, dials in range, status line, placeholders). Optionally also run the official linter,
+dark values, don'ts, dials in range, status line, placeholders). `letterSpacing` needs a unit: a bare `0` warns
+(write `0em`), a unitless non-zero value is an error. Thai line-height checks run when the file uses Thai (Thai
+script, `lang="th"` / `lang: th`, or a Thai font name such as Sarabun, Noto Sans Thai, IBM Plex Sans Thai). Optionally also run the official linter,
 `npx @google/design.md lint DESIGN.md` (third-party package; alpha, so it may disagree with us). Then check the built tokens with
 `python3 scripts/contrast.py --css <page>`.
 
@@ -139,8 +141,9 @@ After the interview ([design direction](design-direction.md) §9), write the ans
 (Status: draft; spec front matter with `colors`, `typography`, `rounded`, `spacing`, `components`; the eight canonical
 sections; AA-checked light and `dark-*` colors; dials; the interview as the decision log) and adds a block between `<!-- design-md:start -->` and `<!-- design-md:end -->`
 to `AGENTS.md` and `CLAUDE.md` (creating `AGENTS.md` if neither exists). Running it again replaces the block; it
-never overwrites DESIGN.md without `--force`. Validate with `design_md_check.py`; mark Status: approved only after
-the user confirms.
+never overwrites DESIGN.md without `--force`, and without `--out` it refuses to write into the skill folder itself.
+Interview list fields (`feel`, `languages`, `never`, …) also accept one string (`"feel": "warm"`). Validate with
+`design_md_check.py`; mark Status: approved only after the user confirms.
 
 ### Brownfield: draft DESIGN.md from existing code
 

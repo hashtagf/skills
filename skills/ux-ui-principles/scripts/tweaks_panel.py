@@ -16,16 +16,22 @@ Knobs: accent (curated swatches, no free color picker), text scale, density (set
 0.85 / 1 / 1.2; shown only when the page has one), corners (square / default / round, scales the radius
 variables; shown when found), color mode (sets data-theme light/dark, matching tokens.css from export_tokens.py)
 and motion (off sets data-motion=off and zeroes the duration variables). Choices persist in localStorage per
-page; T hides or shows the panel, R resets. The ink on the accent is the higher-contrast of #ffffff / #111111. For client reviews and
-for finding the last 20% of a look; remove the panel before shipping. Standard library only.
+page; T hides or shows the panel, R resets. Per swatch the colours are worked out here (scripts/_color.py), not
+taken raw: the ink on the accent is the higher-contrast of #ffffff / #111111; accent text (links) and the focus
+ring are the swatch moved in lightness until they reach 4.5:1 and 3:1 on the page's paper and surface (light,
+and dark when the page has a dark block). For client reviews and for finding the last 20% of a look; remove the
+panel before shipping. Writes only the --out file (default: <page>.tweaks.html next to the page).
+Exit 0 written, 2 bad input (missing page, panel already there, bad --presets). Standard library only.
 """
+import argparse
 import json
 import os
 import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from code_extract import css_blocks, is_dark, strip_comments, style_text  # noqa: E402
+from code_extract import css_blocks, is_dark, strip_comments, style_text, to_hex  # noqa: E402
+from _color import best_ink, is_hex, norm_hex, readable  # noqa: E402
 
 PRESETS = "Rust:#c2410c,Cobalt:#2c4d8e,Sage:#4a7a3f,Plum:#7a3f6a,Rose:#b4405f,Graphite:#3a3a3a"
 
@@ -65,10 +71,12 @@ function hx(h){h=String(h||'').replace('#','');if(h.length===3||h.length===4)h=h
 function lum(h){h=hx(h);var c=[0,2,4].map(function(i){var v=parseInt(h.substr(i,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
 function cr(a,b){var x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
 function ink(bg){return cr('#ffffff',bg)>=cr('#111111',bg)?'#ffffff':'#111111'}
+function dk(){return S.mode?S.mode==='dark':(V.hasDark&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
 function apply(){
- var AV=[ACC,V.text,V.focus,V.ink];
- if(S.accent){root.style.setProperty(ACC,S.accent);root.style.setProperty(V.text,S.accent);root.style.setProperty(V.focus,S.accent);
-  root.style.setProperty(V.ink,ink(S.accent))}
+ var AV=[ACC,V.text,V.focus,V.ink],p=PRE.filter(function(x){return x[1]===S.accent})[0];
+ if(S.accent){var d=dk()?1:0;root.style.setProperty(ACC,S.accent);
+  root.style.setProperty(V.text,p?p[3+2*d]:S.accent);root.style.setProperty(V.focus,p?p[4+2*d]:S.accent);
+  root.style.setProperty(V.ink,p?p[2]:ink(S.accent))}
  else{AV.forEach(function(k){root.style.removeProperty(k)})}
  root.style.fontSize=S.scale+'%';document.getElementById('tw-sv').textContent=S.scale+'%';
  if(V.density){root.style.setProperty(V.density,S.density)}
@@ -101,11 +109,11 @@ TEXT = ["-text", "-link"]
 FOCUS = ["--color-focus", "--focus", "--focus-ring", "--color-ring", "--ring"]
 
 
-def root_vars(html):
-    """name -> value of custom properties in the page's light :root / html blocks (its <style> contents)."""
+def root_vars(html, dark=False):
+    """name -> value of custom properties in the page's light (or dark) :root / html blocks (its <style> contents)."""
     out = {}
     for sel, body in css_blocks(strip_comments(style_text(html), ".css")):
-        if is_dark(sel) or not re.search(r":root|\bhtml\b", sel):
+        if is_dark(sel) != dark or not re.search(r":root|\bhtml\b|\.dark\b|\[data-theme", sel):
             continue
         for m in re.finditer(r"(--[\w-]+)\s*:\s*([^;{}]+)", body):
             out.setdefault(m.group(1), m.group(2).strip())
@@ -131,37 +139,110 @@ def detect(vs):
                 dur=dur or ["--dur-fast", "--dur-base", "--dur-slow"], density="--density" if "--density" in vs else None)
 
 
-def main():
-    a = sys.argv[1:]
-    files = [x for x in a if not x.startswith("--") and x not in [a[i + 1] for i, v in enumerate(a[:-1]) if v.startswith("--")]]
-    if not files:
-        print(__doc__)
-        sys.exit(2)
-    src = files[0]
-    opt = lambda k, d: a[a.index(k) + 1] if k in a else d
-    out = opt("--out", os.path.splitext(src)[0] + ".tweaks.html")
-    pre = [p.split(":", 1) for p in opt("--presets", PRESETS).split(",") if ":" in p]
-    html = open(src, encoding="utf-8").read()
+PAPER = ["--color-paper", "--paper", "--color-ground", "--ground", "--color-bg", "--bg", "--color-background",
+         "--background", "--canvas", "--color-canvas", "--page-bg", "--body-bg"]
+SURFACE = ["--color-surface", "--surface", "--color-card", "--card", "--panel"]
+
+
+def page_colors(vs, default):
+    """(paper, surface) hexes from the page's variables (var() chains resolved); default when not found."""
+    def val(names):
+        for n in names:
+            v, seen = vs.get(n), 0
+            while v and seen < 6:
+                m = re.fullmatch(r"\s*var\((--[\w-]+)(?:,[^)]*)?\)\s*", v)
+                if not m:
+                    break
+                v, seen = vs.get(m.group(1)), seen + 1
+            h = to_hex(v) if v else None
+            if h:
+                return h
+        return None
+    paper = val(PAPER) or default
+    return paper, val(SURFACE) or paper
+
+
+def swatch(name, acc, light, dark):
+    """[name, accent, ink on it, text on light, focus on light, text on dark, focus on dark]."""
+    return [name, acc, best_ink(acc, ("#ffffff", "#111111")),
+            readable(acc, light, 4.5), readable(acc, light, 3.0), readable(acc, dark, 4.5), readable(acc, dark, 3.0)]
+
+
+def die(msg):
+    sys.stderr.write("error: %s\n" % msg)
+    sys.exit(2)
+
+
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        die("%s (run with --help)" % message)
+
+
+VALUE_FLAGS = ("--out", "--accent-var", "--ink-var", "--text-var", "--focus-var", "--density-var", "--radius-vars",
+               "--dur-vars", "--presets")
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    # values here are CSS variable names that start with "--": glue them to their flag so argparse keeps them
+    glued, i = [], 0
+    while i < len(argv):
+        if argv[i] in VALUE_FLAGS and i + 1 < len(argv):
+            glued.append(argv[i] + "=" + argv[i + 1]); i += 2
+        else:
+            glued.append(argv[i]); i += 1
+    ap = Parser(prog="tweaks_panel.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("page")
+    for f in VALUE_FLAGS:
+        ap.add_argument(f)
+    a = ap.parse_args(glued)
+    src = a.page
+    if not os.path.isfile(src):
+        die("no page at %s (check the path)" % src)
+    out = a.out or os.path.splitext(src)[0] + ".tweaks.html"
+    pre = []
+    for p in (a.presets or PRESETS).split(","):
+        if not p.strip():
+            continue
+        name, _, hx = p.partition(":")
+        if not name.strip() or not is_hex(hx.strip()):
+            die("--presets entry %r: use Name:#rrggbb, comma-separated (e.g. \"Rust:#c2410c,Sage:#4a7a3f\")" % p)
+        pre.append((name.strip(), norm_hex(hx.strip())))
+    try:
+        html = open(src, encoding="utf-8").read()
+    except (OSError, UnicodeDecodeError) as e:
+        die("cannot read %s (%s)" % (src, e))
     if 'id="tw"' in html:
-        sys.exit("a tweak panel is already present in %s" % src)
-    v = detect(root_vars(html))
-    for flag, key in (("--accent-var", "accent"), ("--ink-var", "ink"), ("--text-var", "text"), ("--focus-var", "focus"), ("--density-var", "density")):
-        if flag in a:
-            v[key] = opt(flag, v[key])
-    if "--radius-vars" in a:
-        vs = root_vars(html)
-        v["radius"] = [[n, float(vs[n][:-2]) if re.fullmatch(r"\d*\.?\d+px", vs.get(n, "")) else None] for n in opt("--radius-vars", "").split(",") if n]
-    if "--dur-vars" in a:
-        v["dur"] = [n for n in opt("--dur-vars", "").split(",") if n]
-    panel = PANEL.replace("__VARS__", json.dumps(v)).replace("__PRE__", json.dumps(pre))
+        die("a tweak panel is already present in %s (start from the page without it)" % src)
+    vs = root_vars(html)
+    vd = root_vars(html, dark=True)
+    v = detect(vs)
+    for flag, key in (("accent_var", "accent"), ("ink_var", "ink"), ("text_var", "text"), ("focus_var", "focus"), ("density_var", "density")):
+        if getattr(a, flag):
+            v[key] = getattr(a, flag)
+    if a.radius_vars is not None:
+        v["radius"] = [[n, float(vs[n][:-2]) if re.fullmatch(r"\d*\.?\d+px", vs.get(n, "")) else None] for n in a.radius_vars.split(",") if n]
+    if a.dur_vars is not None:
+        v["dur"] = [n for n in a.dur_vars.split(",") if n]
+    light = list(dict.fromkeys(page_colors(vs, "#ffffff")))
+    dark = list(dict.fromkeys(page_colors(dict(vs, **vd), "#121212"))) if vd else ["#121212"]
+    v["hasDark"] = bool(vd)
+    swatches = [swatch(n, h, light, dark) for n, h in pre]
+    panel = PANEL.replace("__VARS__", json.dumps(v)).replace("__PRE__", json.dumps(swatches))
     i = html.lower().rfind("</body>")
     html = html[:i] + panel + html[i:] if i != -1 else html + panel
-    open(out, "w", encoding="utf-8").write(html)
+    try:
+        with open(out, "w", encoding="utf-8") as f:
+            f.write(html)
+    except OSError as e:
+        die("cannot write %s (%s)" % (out, e))
     print("wrote", out)
     print("variables: accent %s, ink %s, text %s, focus %s, density %s, radius %s, motion %s" % (
         v["accent"], v["ink"], v["text"], v["focus"], v["density"] or "(none; knob hidden)",
         ", ".join(r[0] for r in v["radius"]) or "(none; knob hidden)", ", ".join(v["dur"])))
+    print("accent text / focus checked on paper %s%s" % (" + ".join(light), (" and dark " + " + ".join(dark)) if vd else ""))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

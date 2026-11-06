@@ -15,19 +15,34 @@ image reads as printed; a CSS dot pattern laid over a photo does not.
 
 Pick photos with clear shapes on a light-to-mid ground (beans in a scoop, a cup, hands).
 A dark, busy photo turns to mud in one ink: use it as a one-colour duotone band instead.
+--ink / --paper take hex colours (#rgb or #rrggbb, # optional). Exit 0 written, 2 bad input (unreadable
+picture, bad flag value), 3 Pillow missing.
 Standard library + Pillow.
 """
-import argparse, math
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
+import argparse, math, os, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _color import hex_rgb as _hex01, is_hex  # noqa: E402
+
+
+def die(msg):
+    sys.stderr.write('error: %s\n' % msg)
+    sys.exit(2)
+
+
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write('error: %s (run with --help)\n' % message)
+        sys.exit(2)
 
 
 def hex_rgb(h):
-    h = h.lstrip('#')
-    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+    """'#rgb' / '#rrggbb' -> (r, g, b) 0..255."""
+    return tuple(round(c * 255) for c in _hex01(h))
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = Parser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('src'); ap.add_argument('out')
     ap.add_argument('--size', default='900'); ap.add_argument('--cell', type=float, default=8)
     ap.add_argument('--ink', default='#2a1410'); ap.add_argument('--paper', default='#f8f1d9')
@@ -35,8 +50,35 @@ def main():
     ap.add_argument('--crop-x', type=float, default=0.5); ap.add_argument('--eq', action='store_true')
     ap.add_argument('--quality', type=int, default=80)
     a = ap.parse_args()
-    w, h = (int(v) for v in a.size.split('x')) if 'x' in a.size else (int(a.size),) * 2
-    im = ImageOps.fit(Image.open(a.src).convert('L'), (w, h), centering=(a.crop_x, 0.5))
+    for flag, v in (('--ink', a.ink), ('--paper', a.paper)):
+        if not is_hex(v) or len(v.lstrip('#')) not in (3, 6):
+            die('%s %r is not a hex colour; use #rgb or #rrggbb, e.g. %s "#2a1410"' % (flag, v, flag))
+    try:
+        w, h = (int(v) for v in a.size.lower().split('x')) if 'x' in a.size.lower() else (int(a.size),) * 2
+    except ValueError:
+        die('--size %r: use WxH or one number, e.g. --size 1200x800' % a.size)
+    if not (16 <= w <= 8000 and 16 <= h <= 8000):
+        die('--size %r: each side must be 16-8000 px' % a.size)
+    if not 2 <= a.cell <= 200:
+        die('--cell %g: use a screen pitch of 2-200 px (7-10 reads as print)' % a.cell)
+    if a.bright <= 0:
+        die('--bright %g: must be above 0 (1.5-2.2 suits most photos)' % a.bright)
+    if not 0 <= a.crop_x <= 1:
+        die('--crop-x %g: must be 0-1' % a.crop_x)
+    if not 1 <= a.quality <= 100:
+        die('--quality %d: must be 1-100' % a.quality)
+    if not os.path.isfile(a.src):
+        die('no picture at %s (check the path)' % a.src)
+    try:
+        from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
+    except ImportError:
+        print('NOT RUN: Pillow is needed (pip install pillow)', file=sys.stderr)
+        sys.exit(3)
+    try:
+        src = Image.open(a.src).convert('L')
+    except (OSError, ValueError) as e:
+        die('%s is not a readable picture (%s)' % (a.src, e))
+    im = ImageOps.fit(src, (w, h), centering=(a.crop_x, 0.5))
     if a.eq:
         im = ImageOps.equalize(im)
     im = im.point(lambda v: int(255 * ((v / 255) ** (1 / a.bright))))
@@ -59,7 +101,10 @@ def main():
             r = c * 0.72 * math.sqrt(dark)
             if r > 0.4:
                 d.ellipse((x - r, y - r, x + r, y + r), fill=ink)
-    canvas.resize((w, h), Image.Resampling.LANCZOS).save(a.out, quality=a.quality, optimize=True, progressive=True)
+    try:
+        canvas.resize((w, h), Image.Resampling.LANCZOS).save(a.out, quality=a.quality, optimize=True, progressive=True)
+    except (OSError, ValueError) as e:
+        die('cannot write %s (%s; check the folder and the extension, e.g. .jpg)' % (a.out, e))
     print('wrote %s (%dx%d, cell %g, ink %s on %s)' % (a.out, w, h, a.cell, a.ink, a.paper))
 
 

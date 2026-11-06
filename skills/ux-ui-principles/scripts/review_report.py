@@ -2,7 +2,7 @@
 """Turn review findings into a single self-contained HTML report (radar chart, scores with bands, Keep / Fix / Quick wins).
 
 Usage:
-  python3 review_report.py findings.json [--out review.html]
+  python3 review_report.py findings.json [--out review.html]   # default: review.html next to findings.json
   python3 review_report.py --template        # prints an example findings.json
 
 findings.json:
@@ -12,9 +12,15 @@ findings.json:
 
 Dimensions are the rubric criteria in references/review-loop.md §3-4 (3 to 8 per report, e.g. the 6 visual or 5 UX criteria). Score 0-10; bands: 0-4 Broken,
 5-6 Functional, 7-8 Strong, 9-10 Exceptional. The report never averages: each dimension stands alone, so a
-9 on one and a 4 on another stays visible. Standard library only.
+9 on one and a 4 on another stays visible.
+
+Writes only the report: --out PATH, or review.html in the folder of findings.json (never the current folder).
+Exit 0 written, 2 usage or input error (missing file, malformed JSON, fewer than 3 or more than 8 dimensions,
+a score that is missing, not a number or outside 0-10). Standard library only.
 """
+import argparse
 import html
+import os
 import json
 import math
 import sys
@@ -48,7 +54,7 @@ def radar(dims):
         out.append('<line x1="%d" y1="%d" x2="%.1f" y2="%.1f" stroke="#d6d9de"/>' % (cx, cy, x, y))
         lx, ly = pt(i, 11.8)
         anchor = "middle" if abs(lx - cx) < 12 else ("start" if lx > cx else "end")
-        out.append('<text x="%.1f" y="%.1f" font-size="11" text-anchor="%s" fill="#4a5160">%s</text>' % (lx, ly + 4, anchor, html.escape(d["name"][:22])))
+        out.append('<text x="%.1f" y="%.1f" font-size="11" text-anchor="%s" fill="#4a5160">%s</text>' % (lx, ly + 4, anchor, html.escape(str(d["name"])[:22])))
     out.append('<polygon points="%s" fill="rgba(42,109,244,.18)" stroke="#2a6df4" stroke-width="2"/>' % " ".join("%.1f,%.1f" % pt(i, d["score"]) for i, d in enumerate(dims)))
     for i, d in enumerate(dims):
         x, y = pt(i, d["score"])
@@ -83,26 +89,64 @@ ul{padding-left:18px;margin:8px 0 0}.lists{margin-top:16px;display:grid;grid-tem
         li(d.get("keep", [])), li(d.get("fix", [])), li(d.get("quick", [])))
 
 
-def main():
-    a = sys.argv[1:]
-    if "--template" in a:
-        print(json.dumps(TEMPLATE, indent=2))
-        return
-    files = [x for x in a if not x.startswith("--") and x != (a[a.index("--out") + 1] if "--out" in a else "")]
-    if not files:
-        print(__doc__)
-        sys.exit(2)
-    d = json.load(open(files[0]))
-    dims = d.get("dimensions", [])
+def fail(msg):
+    print("error: " + msg, file=sys.stderr)
+    return 2
+
+
+def validate(d, src):
+    """Error message for a findings object that render() cannot use, else None."""
+    if not isinstance(d, dict):
+        return f"{src} must hold a JSON object (see --template)"
+    dims = d.get("dimensions")
+    if not isinstance(dims, list):
+        return f"{src}: \"dimensions\" must be a list (see --template)"
     if not 3 <= len(dims) <= 8:
-        sys.exit("need 3 to 8 dimensions, got %d" % len(dims))
-    for x in dims:
-        if not 0 <= x["score"] <= 10:
-            sys.exit("score out of range: %s" % x["name"])
-    out = a[a.index("--out") + 1] if "--out" in a else "review.html"
-    open(out, "w", encoding="utf-8").write(render(d))
+        return f"need 3 to 8 dimensions, got {len(dims)} (one per rubric criterion, references/review-loop.md)"
+    for i, x in enumerate(dims):
+        if not isinstance(x, dict) or not isinstance(x.get("name"), str) or not x["name"].strip():
+            return f"dimension {i + 1} needs a \"name\" string"
+        sc = x.get("score")
+        if isinstance(sc, bool) or not isinstance(sc, (int, float)):
+            return f"dimension {x['name']!r}: \"score\" must be a number 0-10, got {sc!r}"
+        if not 0 <= sc <= 10:
+            return f"score out of range (0-10): {x['name']} = {sc}"
+    for k in ("keep", "fix", "quick"):
+        if not isinstance(d.get(k, []), list):
+            return f"{src}: \"{k}\" must be a list"
+    return None
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(prog="review_report.py", description="Review findings -> one self-contained HTML report.")
+    ap.add_argument("findings", nargs="?", help="findings.json")
+    ap.add_argument("--out", help="output .html (default: review.html next to findings.json)")
+    ap.add_argument("--template", action="store_true", help="print an example findings.json")
+    a = ap.parse_args(argv)
+    if a.template:
+        print(json.dumps(TEMPLATE, indent=2))
+        return 0
+    if not a.findings:
+        ap.error("pass findings.json (python3 review_report.py --template prints an example)")
+    try:
+        with open(a.findings, encoding="utf-8") as f:
+            d = json.load(f)
+    except OSError as e:
+        return fail(f"cannot read {a.findings}: {e.strerror} (check the path)")
+    except ValueError as e:
+        return fail(f"malformed JSON in {a.findings}: {e} (python3 review_report.py --template prints an example)")
+    err = validate(d, a.findings)
+    if err:
+        return fail(err)
+    out = a.out or os.path.join(os.path.dirname(os.path.abspath(a.findings)), "review.html")
+    try:
+        with open(out, "w", encoding="utf-8") as f:
+            f.write(render(d))
+    except OSError as e:
+        return fail(f"cannot write {out}: {e.strerror} (pass a writable --out path)")
     print("wrote", out)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -11,9 +11,17 @@ with counts and files, font families, font sizes, radii, Tailwind utility usage,
 colors, too many radii/fonts/sizes, hard-coded colors in component files). Maps variables to the DESIGN.md
 color roles by name (shadcn, MUI-like and common names), with a frequency fallback marked "guessed".
 
+React Native / Expo (react-native or expo in package.json, or StyleSheet.create) is detected as the stack; its
+numeric borderRadius / radius and fontSize values and its theme-object colours (primary: "#ff5a5f") are read.
+Language: lang="th" on a page, or mostly Thai text in markup and string literals, marks the project Thai
+(design_md.py --from-code then proposes body line-height 1.6; the Thai rule is 1.55-1.7).
+On-surface is never guessed from a grey that fails 4.5:1 on canvas: the darkest neutral that passes, or a
+default marked derived with the reason.
+
 It reports what the code does; it never decides what it should do. design_md.py --from-code turns the
-result into a draft DESIGN.md. Standard library only.
+result into a draft DESIGN.md. Exit 0 ok, 2 SRC missing or not a folder. Standard library only.
 """
+import argparse
 import colorsys
 import json
 import os
@@ -24,6 +32,7 @@ from collections import Counter, defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import export_tokens as ex  # noqa: E402
+from _color import norm_hex  # noqa: E402,F401  (one hex parser for all scripts)
 
 SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".next", ".nuxt", ".svelte-kit", "out", "coverage",
              "vendor", ".turbo", ".cache", "storybook-static", ".output", "public", "__pycache__", ".venv", "venv"}
@@ -37,6 +46,12 @@ VAR_RE = re.compile(r"(--[a-zA-Z0-9_-]+)\s*:\s*([^;{}]+?)\s*(?:;|$)", re.M)
 FONT_RE = re.compile(r"font-family\s*:\s*([^;}{]+)", re.I)
 FSIZE_RE = re.compile(r"font-size\s*:\s*([0-9.]+(?:px|rem|em))", re.I)
 RADIUS_RE = re.compile(r"border-radius\s*:\s*([^;}{]+)", re.I)
+RN_RADIUS_RE = re.compile(r"\b(?:border(?:Top|Bottom)?(?:Left|Right|Start|End)?Radius|radius|rounded)\s*:\s*['\"]?(\d+(?:\.\d+)?)(px)?['\"]?\s*[,}\n]")
+RN_FSIZE_RE = re.compile(r"\bfontSize\s*:\s*['\"]?(\d+(?:\.\d+)?)(px)?['\"]?\s*[,}\n]")
+JS_COLOR_RE = re.compile(r"\b([A-Za-z][\w]*)\s*:\s*['\"](#[0-9a-fA-F]{3,8})['\"]")
+THAI_RE = re.compile(r"[\u0e01-\u0e3a\u0e40-\u0e5b]")  # Thai letters and marks; not ฿ (U+0E3F)
+LATIN_RE = re.compile(r"[A-Za-z]")
+LANG_TH = re.compile(r"<html\b[^>]*\blang\s*=\s*['\"]?th\b", re.I)
 NEXT_FONT_RE = re.compile(r"import\s*\{([^}]+)\}\s*from\s*['\"]next/font/(?:google|local)['\"]")
 TW_CLASS_RE = re.compile(r"(?<![\w-])(rounded(?:-[a-z0-9]+)?|text-(?:xs|sm|base|lg|[2-9]?xl)|font-(?:thin|light|normal|medium|semibold|bold|extrabold|black)"
                          r"|(?:bg|text|border|ring)-(?:[a-z]+-\d{2,3}|\[#[0-9a-fA-F]{3,8}\]))(?![\w-])")
@@ -88,13 +103,6 @@ def linked_css(text, base_dir):
 
 
 # ---------- color parsing ----------
-def norm_hex(h):
-    h = h.lstrip("#").lower()
-    if len(h) in (3, 4):
-        h = "".join(c * 2 for c in h[:3])
-    return "#" + h[:6]
-
-
 def hsl_hex(h, s, l):
     r, g, b = colorsys.hls_to_rgb((h % 360) / 360, l / 100, s / 100)
     return "#%02x%02x%02x" % tuple(round(max(0, min(1, x)) * 255) for x in (r, g, b))
@@ -202,7 +210,7 @@ def detect_stack(src):
         try:
             p = json.load(open(pj))
             deps = {**p.get("dependencies", {}), **p.get("devDependencies", {})}
-            for key, label in [("next", "Next.js"), ("nuxt", "Nuxt"), ("react", "React"), ("vue", "Vue"), ("svelte", "Svelte"),
+            for key, label in [("expo", "Expo"), ("react-native", "React Native"), ("next", "Next.js"), ("nuxt", "Nuxt"), ("react", "React"), ("vue", "Vue"), ("svelte", "Svelte"),
                                ("@angular/core", "Angular"), ("astro", "Astro"), ("tailwindcss", "Tailwind"),
                                ("@mui/material", "MUI"), ("@chakra-ui/react", "Chakra"), ("antd", "Ant Design"),
                                ("@radix-ui/react-slot", "Radix"), ("styled-components", "styled-components"),
@@ -213,9 +221,15 @@ def detect_stack(src):
             pass
     if any(os.path.exists(os.path.join(os.path.dirname(pj), "components.json")) for pj in package_jsons(src)):
         out.append("shadcn/ui (components.json)")
-    for n in ("DESIGN.md", "design.md", "docs/DESIGN.md"):
-        if os.path.exists(os.path.join(src, n)):
-            out.append("existing %s" % n)
+    # list real names (a case-insensitive filesystem reports DESIGN.md and design.md for one file)
+    for folder, pre in ((src, ""), (os.path.join(src, "docs"), "docs/")):
+        try:
+            names = sorted(os.listdir(folder))
+        except OSError:
+            continue
+        for n in names:
+            if n.lower() == "design.md" and os.path.isfile(os.path.join(folder, n)) and (pre == "" or n == "DESIGN.md"):
+                out.append("existing %s%s" % (pre, n))
     return out
 
 
@@ -235,6 +249,8 @@ def scan(src):
     hard_in_components = Counter()
     vars_light, vars_dark, var_raw = {}, {}, {}
     fonts, fsizes, radii, tw = Counter(), Counter(), Counter(), Counter()
+    rn_radii, rn_sizes, js_colors = Counter(), Counter(), {}
+    thai_chars, latin_chars, lang_th, stylesheet_create = 0, 0, [], False
     files_scanned = 0
     queue = list(walk(src))
     seen = {os.path.abspath(p) for p, _ in queue}
@@ -283,6 +299,27 @@ def scan(src):
                 fsizes[m.group(1)] += 1
             for m in RADIUS_RE.finditer(text):
                 radii[m.group(1).strip()] += 1
+        if ext in MARKUP_EXT or ext in CODE_EXT:
+            if ext == ".html" and LANG_TH.search(raw):
+                lang_th.append(rel)
+            # words people read: text between tags, readable attributes and string literals
+            visible = re.sub(r"<(script|style)\b[\s\S]*?</\1\s*>", " ", raw, flags=re.I) if ext in MARKUP_EXT else ""
+            words = re.findall(r">([^<>]+)<", visible) + re.findall(r"\b(?:placeholder|title|alt|aria-label|label)\s*=\s*['\"]([^'\"]*)", raw)
+            if ext in CODE_EXT and ext not in MARKUP_EXT:
+                words += [w for w in re.findall(r"['\"`]([^'\"`\n]{2,})['\"`]", text) if not re.match(r"^[\w./@:-]+$", w)]
+                words += re.findall(r">([^<>{}]+)<", text)
+            for w in words:
+                thai_chars += len(THAI_RE.findall(w))
+                latin_chars += len(LATIN_RE.findall(w))
+        if ext in CODE_EXT and ext not in MARKUP_EXT or ext == ".ts":
+            if "StyleSheet.create" in text:
+                stylesheet_create = True
+            for m in RN_RADIUS_RE.finditer(text):
+                rn_radii[m.group(1)] += 1
+            for m in RN_FSIZE_RE.finditer(text):
+                rn_sizes[m.group(1)] += 1
+            for m in JS_COLOR_RE.finditer(text):
+                js_colors.setdefault(m.group(1), Counter())[norm_hex(m.group(2))] += 1
         if ext in CODE_EXT:
             for m in NEXT_FONT_RE.finditer(text):
                 for f in m.group(1).split(","):
@@ -293,14 +330,28 @@ def scan(src):
                 tw[m.group(1)] += 1
             for m in re.finditer(r"fontFamily\s*:\s*\[?\s*['\"]([^'\"]+)['\"]", text):
                 fonts[m.group(1)] += 1
-            for m in re.finditer(r"borderRadius\s*:\s*['\"]?([0-9.]+(?:px|rem)?)", text):
-                radii[m.group(1)] += 1
+            if not RN_RADIUS_RE.search(text):  # web CSS-in-JS: borderRadius: '8px' / '0.5rem'
+                for m in re.finditer(r"borderRadius\s*:\s*['\"]([0-9.]+(?:px|rem))", text):
+                    radii[m.group(1)] += 1
     stack = detect_stack(src)
+    native = any(x.startswith(("React Native", "Expo")) for x in stack)
+    if stylesheet_create and not native:
+        stack.insert(0, "React Native (StyleSheet.create)")
+        native = True
+    if native:  # unitless numbers are dp in React Native
+        for k, n in rn_radii.items():
+            radii[k + "px"] += n
+        for k, n in rn_sizes.items():
+            fsizes[k + "px"] += n
+    thai = bool(lang_th) or (thai_chars >= 20 and thai_chars >= latin_chars)
+    lang = {"thai": thai, "evidence": ('lang="th" in %s' % ", ".join(lang_th[:3]) if lang_th else
+                                       "%d Thai vs %d Latin letters in page text" % (thai_chars, latin_chars))}
     if not any("tailwind" in s.lower() for s in stack):
         tw = Counter()  # utility-like names (rounded-circle, text-sm) also exist in Bootstrap and others; count only in Tailwind projects
     return {"src": src, "files": files_scanned, "stack": stack, "colors": colors,
             "color_files": color_files, "hard_in_components": hard_in_components, "vars_light": vars_light,
-            "vars_dark": vars_dark, "var_raw": var_raw, "fonts": fonts, "font_sizes": fsizes, "radii": radii, "tailwind": tw}
+            "vars_dark": vars_dark, "var_raw": var_raw, "fonts": fonts, "font_sizes": fsizes, "radii": radii, "tailwind": tw,
+            "js_colors": js_colors if native else {}, "native": native, "language": lang}
 
 
 def resolve_var(val, table, depth=0):
@@ -345,10 +396,19 @@ def guess_roles(colors, roles, evidence):
             roles[role], evidence[role] = h, "guessed: " + why
     if neutrals:
         put("canvas", max(neutrals[:8], key=ex.lum), "lightest frequent neutral")
-        put("on-surface", min(neutrals[:8], key=ex.lum), "darkest frequent neutral")
+        canvas = roles.get("canvas")
+        # text must read: the darkest frequent colour that reaches 4.5:1 on canvas, never a failing grey
+        ok = [h for h in neutrals[:12] if ex.ratio(h, canvas) >= 4.5] or [h for h in ranked if ex.ratio(h, canvas) >= 4.5]
+        if ok:
+            put("on-surface", max(ok, key=lambda h: ex.ratio(h, canvas)), "darkest frequent colour that reaches 4.5:1 on canvas")
+        elif "on-surface" not in roles:
+            dk = min(neutrals[:8], key=ex.lum)
+            evidence["on-surface:note"] = "no text colour in code reaches 4.5:1 on canvas %s (darkest neutral %s is %.1f:1)" % (
+                canvas, dk, ex.ratio(dk, canvas))
     if vivid:
         put("primary", vivid[0], "most used saturated color")
-    canvas, ink = roles.get("canvas"), roles.get("on-surface")
+    canvas = roles.get("canvas")
+    ink = roles.get("on-surface") or (canvas and ("#111111" if ex.lum(canvas) > 0.4 else "#f5f5f5"))
     if canvas and ink:
         rest = [h for h in neutrals if h not in (canvas, ink)]
         border = [h for h in rest if 1.1 <= ex.ratio(h, canvas) < 3 and ex.lum(h) <= ex.lum(canvas)]
@@ -366,7 +426,8 @@ def complete(roles, evidence):
     canvas = roles.get("canvas", "#ffffff")
     ink = roles.get("on-surface", "#111111" if ex.lum(canvas) > 0.4 else "#f5f5f5")
     put("canvas", canvas, "default")
-    put("on-surface", ink, "default")
+    put("on-surface", ink, "default" + ("; " + evidence.pop("on-surface:note") if "on-surface:note" in evidence else ""))
+    evidence.pop("on-surface:note", None)
     put("surface", canvas, "same as canvas")
     if "primary" not in roles:
         put("primary", ink, "no brand color found; using text color")
@@ -374,7 +435,7 @@ def complete(roles, evidence):
     put("on-primary", "#ffffff" if ex.ratio("#ffffff", p) >= ex.ratio("#000000", p) else "#000000", "best contrast on primary")
     put("primary-text", p if ex.ratio(p, canvas) >= 4.5 else ink, "primary if it reaches 4.5:1 on canvas, else text color")
     put("muted", ink, "no muted text color found; using text color")
-    put("border", roles.get("muted", ink), "no border color found")
+    put("border", ex.mix(canvas, ink, 0.16), "no border color found; a 16% tint of on-surface over canvas")
     put("focus", p, "primary")
     put("success", "#15803d", "default (not in code)")
     put("warning", "#b45309", "default (not in code)")
@@ -420,6 +481,11 @@ def drift(res):
 def extract(src):
     res = scan(src)
     light, light_ev = map_roles(res["vars_light"])
+    if res.get("js_colors"):  # React Native theme objects: {primary: "#ff5a5f", bg: "#fff", text: "#222"}
+        js, js_ev = map_roles({"--" + k: v for k, v in res["js_colors"].items()})
+        for r, h in js.items():
+            if r not in light:
+                light[r], light_ev[r] = h, "theme object " + js_ev[r].lstrip("-")
     dark, dark_ev = map_roles(res["vars_dark"], res["vars_light"])
     guess_roles(res["colors"], light, light_ev)
     found_roles = sorted(light)
@@ -438,6 +504,8 @@ def report(res):
         return ", ".join("%s ×%d" % x for x in c.most_common(n)) or "none"
     lines = ["Scanned %d files under %s" % (res["files"], res["src"]),
              "Stack: " + (", ".join(res["stack"]) or "unknown"),
+             "Language: " + ("Thai (%s); body line-height 1.6 (Thai rule 1.55-1.7)" % res["language"]["evidence"]
+                             if res.get("language", {}).get("thai") else "not Thai-led (%s)" % res.get("language", {}).get("evidence", "n/a")),
              "Custom properties: %d light, %d dark" % (len(res["vars_light"]), len(res["vars_dark"])),
              "Colors (top): " + kv(res["colors"], 12),
              "Fonts: " + kv(res["fonts"], 6), "Font sizes: " + kv(res["font_sizes"], 8),
@@ -461,13 +529,22 @@ def to_json(res):
     return out
 
 
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write("error: %s (run with --help)\n" % message)
+        sys.exit(2)
+
+
 def main(argv):
-    srcs = [a for a in argv if not a.startswith("--")]
-    if len(srcs) != 1 or not os.path.isdir(srcs[0]):
-        print(__doc__)
+    ap = Parser(prog="code_extract.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("src", help="folder of the codebase")
+    ap.add_argument("--json", action="store_true", help="print JSON instead of the report")
+    a = ap.parse_args(argv)
+    if not os.path.isdir(a.src):
+        sys.stderr.write("error: %s is not a folder (pass the codebase root, e.g. code_extract.py ./my-app)\n" % a.src)
         return 2
-    res = extract(srcs[0])
-    print(json.dumps(to_json(res), ensure_ascii=False, indent=2) if "--json" in argv else report(res))
+    res = extract(a.src)
+    print(json.dumps(to_json(res), ensure_ascii=False, indent=2) if a.json else report(res))
     return 0
 
 

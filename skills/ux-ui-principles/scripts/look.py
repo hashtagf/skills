@@ -10,16 +10,22 @@ it has been fetched locally), what to take from each, and, with --direction, tha
 product UI preview and its composition. Open (Read) every listed image before writing code; then say in the
 answer which ones you looked at and the one move you are taking from them.
 
-Kinds: landing, pricing, campaign, editorial, report, deck, product, mobile, portfolio, destination, nonprofit,
-game, document (synonyms: dashboard/admin/back office -> product, blog/article/magazine -> editorial,
-slides/presentation -> deck, app -> mobile, cafe/coffee/roastery/bakery/shop -> cafe + landing, hotel/restaurant/travel -> destination + landing, waitlist -> landing).
+Kinds (run --kinds for the current list): landing, pricing, campaign, editorial, report, cover, deck, product,
+mobile, portfolio, destination, nonprofit, game, cafe. A word that is a kind always shows that kind; a synonym
+adds kinds to it (cover -> cover + deck + report). Synonyms: dashboard/admin/back office -> product,
+blog/article/magazine -> editorial, slides/presentation -> deck, app -> mobile, cafe/coffee/roastery/bakery/shop
+-> cafe + landing, hotel/restaurant/travel -> destination + landing, waitlist -> landing. Thai words work too:
+คาเฟ่/ร้านกาแฟ/เบเกอรี่, แลนดิ้ง/หน้าแรก, แดชบอร์ด/หลังบ้าน, สไลด์/พรีเซนต์, พอร์ต, โรงแรม/ร้านอาหาร/ท่องเที่ยว,
+รายงาน, ราคา, บทความ, แอป, ปก, เอกสาร.
+document, invoice and resume have no pictures yet: the script says so and shows the nearest kinds (report,
+cover). Exit 0 with pictures or a market study, 2 for an unknown kind, direction or bad flag.
 
 Market studies (assets/market/catalog.json): when the kind or a synonym has a study (clinic: dental, dentist,
 medical, ทันตกรรม ...), it also prints the category look, the gaps, checked facts and the screenshots of
 design-led and category sites. No study yet: run the market research in design-direction.md §9 Round B.
 Standard library only.
 """
-import json, os, re, sys
+import argparse, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -31,12 +37,27 @@ SYN = {
     "travel": ["destination", "landing"], "waitlist": ["landing"], "saas": ["landing", "pricing"],
     "agency": ["portfolio", "landing"], "studio": ["portfolio", "landing"], "invoice": ["document"], "resume": ["document"],
     "cover": ["deck", "report"], "event": ["campaign", "landing"],
+    "document": ["report", "cover"], "back office": ["product"],
+    # Thai
+    "คาเฟ่": ["cafe", "landing"], "ร้านกาแฟ": ["cafe", "landing"], "กาแฟ": ["cafe", "landing"], "เบเกอรี่": ["cafe", "landing"],
+    "แลนดิ้ง": ["landing"], "แลนดิ้งเพจ": ["landing"], "หน้าแรก": ["landing"],
+    "แดชบอร์ด": ["product", "report"], "หลังบ้าน": ["product"], "ระบบหลังบ้าน": ["product"],
+    "สไลด์": ["deck"], "พรีเซนต์": ["deck"], "พรีเซนเทชัน": ["deck"], "พอร์ต": ["portfolio"], "พอร์ตโฟลิโอ": ["portfolio"],
+    "โรงแรม": ["destination", "landing"], "ร้านอาหาร": ["destination", "landing"], "ท่องเที่ยว": ["destination", "landing"],
+    "รายงาน": ["report"], "ราคา": ["pricing"], "แพ็กเกจ": ["pricing"], "บทความ": ["editorial"], "บล็อก": ["editorial"],
+    "แอป": ["mobile", "product"], "ปก": ["cover"], "เอกสาร": ["report", "cover"], "ใบแจ้งหนี้": ["report", "cover"],
+    "เรซูเม่": ["report", "cover"],
 }
+# words with no pictures of their own yet: say so and show the nearest kinds
+NO_PICTURES = {"document": "document", "invoice": "invoice", "resume": "resume", "เอกสาร": "document",
+               "ใบแจ้งหนี้": "invoice", "เรซูเม่": "resume"}
+SYN.update({"invoice": ["report", "cover"], "resume": ["report", "cover"]})
 
 
-def arg(name, default=None):
-    a = sys.argv
-    return a[a.index(name) + 1] if name in a else default
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write("error: %s (run with --help)\n" % message)
+        sys.exit(2)
 
 
 def references():
@@ -60,8 +81,7 @@ def showcase():
         if r.get("verdict") != "template" or not r.get("img"):
             continue
         img = os.path.join(ROOT, "assets", "showcase", r["img"])
-        kind = {"destination": "destination", "nonprofit": "nonprofit", "portfolio": "portfolio", "game": "game"}.get(r["kind"], r["kind"])
-        out.append({"kind": kind, "comp": r.get("comp") or "", "why": r["note"], "src": "showcase " + r["url"], "img": img,
+        out.append({"kind": r["kind"], "comp": r.get("comp") or "", "why": r["note"], "src": "showcase " + r["url"], "img": img,
                     "full": os.path.join(ROOT, "assets", "showcase", r["img_full"]) if r.get("img_full") else ""})
     return out
 
@@ -98,24 +118,38 @@ def print_market(kind, k, n):
         print(f"  pictures missing: node scripts/market_fetch.js --kind {kind}")
 
 
-def main():
+def main(argv=None):
+    ap = Parser(prog="look.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("kind", nargs="*", help="kind of page or a synonym (one or more words)")
+    ap.add_argument("--direction", help="direction id: also print its previews and recipe")
+    ap.add_argument("--n", type=int, default=3, help="pictures per kind (default 3)")
+    ap.add_argument("--kinds", action="store_true", help="list kinds and synonyms")
+    a = ap.parse_args(argv)
+    if a.n < 1:
+        ap.error("--n must be 1 or more")
     rows = references() + showcase()
     kinds = sorted({r["kind"] for r in rows})
-    if "--kinds" in sys.argv or len(sys.argv) < 2 or sys.argv[1].startswith("-"):
+    if a.kinds or not a.kind:
         print("kinds:", ", ".join(kinds)); print("synonyms:", ", ".join(sorted(SYN))); return 0
-    want = sys.argv[1].lower()
+    want = " ".join(a.kind).strip().lower()
+    if want not in SYN and want not in kinds:
+        want = want.replace(" ", "-") if want.replace(" ", "-") in SYN else want
     mkind, mstudy = market(want)
-    targets = SYN.get(want, ["landing"] if mstudy else [want])
-    n = int(arg("--n", "3"))
+    targets = ([want] if want in kinds else []) + [t for t in SYN.get(want, []) if t != want]
+    if not targets and mstudy:
+        targets = ["landing"]
+    n = a.n
     picked = []
     for t in targets:
         pool = [r for r in rows if r["kind"] == t and os.path.exists(r["img"])]
         pool.sort(key=lambda r: (r["src"] != "reference",))  # references first, then showcase
         picked += pool[:n]
     if not picked and not mstudy:
-        print(f"No pictures for '{want}'. Kinds: {', '.join(kinds)}")
-        print("No market study either: run the market research (design-direction.md §9 Round B) and record it with scripts/market_fetch.js.")
-        return 1
+        print(f"error: no pictures for '{want}' (kinds: {', '.join(kinds)}; synonyms: --kinds)", file=sys.stderr)
+        print("No market study either: run the market research (design-direction.md §9 Round B) and record it with scripts/market_fetch.js.", file=sys.stderr)
+        return 2
+    if want in NO_PICTURES:
+        print(f"No pictures for {NO_PICTURES[want]} yet; nearest: {', '.join(targets)}. Take layout and type moves from them, not the page kind.\n")
     print(f"Open every image below before building ({want}). Then name the one move you take from them.\n")
     for r in picked:
         print(f"- {r['img']}\n    {r['kind']} · composition {r['comp'] or '-'} · {r['src']}\n    take: {r['why']}")
@@ -123,12 +157,12 @@ def main():
             print(f"    longer view: {r['full']}")
     if mstudy:
         print_market(mkind, mstudy, n)
-    d = arg("--direction")
+    d = a.direction
     if d:
         data = json.load(open(os.path.join(ROOT, "assets", "directions", "directions.json"), encoding="utf-8"))["directions"]
         x = next((y for y in data if y["id"] == d), None)
         if not x:
-            print(f"\nunknown direction {d}"); return 1
+            print(f"error: unknown direction {d!r} (python3 scripts/export_tokens.py --list)", file=sys.stderr); return 2
         prev = os.path.join(ROOT, "assets", "directions", "previews")
         print(f"\nDirection {x['name']} ({x['group']}): composition {x.get('comp')} on '{x.get('subject')}'")
         for p in (os.path.join(prev, d + ".jpg"), os.path.join(prev, "product", d + "-overview.jpg")):

@@ -3,7 +3,7 @@
  * Click through a page's main task from a JSON list of steps and check each result.
  *
  * Usage:
- *   node flow_check.js <url-or-file> <steps.json> [--width 1440] [--height 900] [--wait 600]
+ *   node flow_check.js <url-or-file> <steps.json> [--width 1440] [--height 900] [--wait 600] [--timeout 30000] [-h|--help]
  *
  * steps.json is an array. Action steps: {"do": "click"|"fill"|"check"|"uncheck"|"select"|"press"|"wait", "sel": "...", "value": "..."}
  *   click  sel may be a CSS selector or "text=..." (Playwright text selector); falls back to a forced click
@@ -23,28 +23,38 @@
  * ]
  *
  * Prints PASS/FAIL per step, then any page errors and console errors. Exit 1 on any failure or error,
- * 3 when no browser is available (report "not tested").
+ * 3 when no browser is available (NOT RUN). A missing page or steps file, malformed JSON, a steps file that is
+ * not an array or a step with no known "do"/"expect" prints "error: …" and exits 2 before any browser starts.
  */
-const path = require('path');
 const fs = require('fs');
-const args = process.argv.slice(2);
-if (args.length < 2 || args[0].startsWith('--')) { console.error('usage: node flow_check.js <url-or-file> <steps.json> [--width 1440] [--height 900]'); process.exit(2); }
-const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const { findModule, findBrowser } = require('./_pw');
-const mod = findModule(args[0]);
-const exe = mod ? findBrowser(mod.chromium) : undefined;
-if (!mod || exe === undefined) { console.log('NOT TESTED: flow check skipped (no Playwright module or browser).'); process.exit(3); }
-const target = /^[a-z]+:\/\//i.test(args[0]) ? args[0] : 'file://' + path.resolve(args[0]);
-const steps = JSON.parse(fs.readFileSync(args[1], 'utf8'));
+const A = require('./_args');
+const pw = require('./_pw');
+const a = A.parse(process.argv.slice(2), { file: __filename, values: ['--width', '--height', '--wait', '--timeout'], positional: [2, 2, '<url-or-file> <steps.json>'] });
+const [arg0, stepsFile] = a._;
+const target = pw.target(arg0);
+if (!fs.existsSync(stepsFile)) A.usageError(`steps file not found: ${stepsFile}`, 'pass a JSON array of steps');
+let steps;
+try { steps = JSON.parse(fs.readFileSync(stepsFile, 'utf8')); }
+catch (e) { A.usageError(`${stepsFile} is not valid JSON: ${e.message.split('\n')[0]}`, 'fix the steps file'); }
+if (!Array.isArray(steps)) A.usageError(`${stepsFile} must hold a JSON array of steps, got ${steps === null ? 'null' : typeof steps}`, 'wrap the steps in [ … ]');
+const DO = ['click', 'fill', 'check', 'uncheck', 'select', 'press', 'wait'], EXPECT = ['text', 'visible', 'hidden', 'disabled', 'enabled', 'attr'];
+steps.forEach((s, i) => {
+  if (!s || typeof s !== 'object' || Array.isArray(s)) A.usageError(`step ${i + 1} is not an object`, 'each step is {"do": …} or {"expect": …}');
+  if (!(DO.includes(s.do) || EXPECT.includes(s.expect))) A.usageError(`step ${i + 1} has no known "do" (${DO.join('|')}) or "expect" (${EXPECT.join('|')})`, 'see --help');
+  if (s.do !== 'wait' && s.do !== 'press' && typeof s.sel !== 'string') A.usageError(`step ${i + 1} needs "sel"`, 'a CSS selector or "text=…"');
+});
+const W = a.num('--width', 1440, { min: 100, int: true }), H = a.num('--height', 900, { min: 100, int: true });
+const wait = a.num('--wait', 600, { min: 0 }), timeout = a.num('--timeout', 30000, { min: 1 });
+const env = pw.need(arg0, 'flow check');
 
-(async () => {
-  const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
-  const page = await browser.newPage({ viewport: { width: Number(opt('--width', '1440')), height: Number(opt('--height', '900')) } });
+A.main(async () => {
+  const browser = await pw.launch(env);
+  const page = await browser.newPage({ viewport: { width: W, height: H } });
   const errs = [], cons = [];
   page.on('pageerror', e => errs.push(e.message));
   page.on('console', m => { if (m.type() === 'error') cons.push(m.text()); });
-  await page.goto(target, { waitUntil: 'load' });
-  await page.waitForTimeout(Number(opt('--wait', '600')));
+  await pw.goto(page, target, { timeout, browser });
+  await page.waitForTimeout(wait);
   let failed = 0;
   const T = { timeout: 5000 };
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
@@ -82,4 +92,4 @@ const steps = JSON.parse(fs.readFileSync(args[1], 'utf8'));
   const bad = failed + (errs.length ? 1 : 0) + (cons.length ? 1 : 0);
   console.log(bad ? `\n${bad} failure(s).` : `\nAll ${steps.length} steps passed.`);
   process.exit(bad ? 1 : 0);
-})();
+});

@@ -9,25 +9,16 @@
  *
  * The base look is chosen from the direction's character unless the direction names one in
  * `product.base`; `product` may also override nav, tbl, density (comfortable | compact).
- * Standard library only.
+ * Colour maths: scripts/_color.js. Standard library only.
  */
 
-// #rgb, #rgba, #rrggbb, #rrggbbaa -> 0xrrggbb (alpha dropped); null when not a hex color
-function hex(h) {
-  const m = /^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(String(h || '').trim()); if (!m) return null;
-  let s = m[1]; if (s.length <= 4) s = s.slice(0, 3).split('').map((c) => c + c).join('');
-  return parseInt(s.slice(0, 6), 16);
-}
-function lum(h) {
-  const n = hex(h); if (n == null) return 1;
-  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
-  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-}
-function mix(a, b, t) { // a*(1-t) + b*t
-  const x = hex(a), y = hex(b); if (x == null || y == null) return a;
-  const ch = (n, s) => (n >> s) & 255;
-  const v = [16, 8, 0].map((s) => Math.round(ch(x, s) * (1 - t) + ch(y, s) * t));
-  return '#' + v.map((n) => n.toString(16).padStart(2, '0')).join('');
+const color = require('./_color');
+
+// luminance of a colour string; 1 (treated as light) when it cannot be parsed
+const lum = (h) => { const v = color.luminance(h); return v == null ? 1 : v; };
+function mix(a, b, t) { // a*(1-t) + b*t, hex out; a unchanged when either is not a colour
+  const x = color.parse(a), y = color.parse(b); if (!x || !y) return a;
+  return color.toHex([0, 1, 2].map((i) => x[i] * (1 - t) + y[i] * t));
 }
 const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 

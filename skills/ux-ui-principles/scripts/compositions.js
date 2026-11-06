@@ -27,12 +27,9 @@
 
 const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-function lum(hex) {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
-  if (!m) return 1;
-  const n = parseInt(m[1], 16), c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
-  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-}
+// luminance of a colour string (scripts/_color.js); 1 (treated as light) when it cannot be parsed
+const { luminance } = require('./_color');
+const lum = (c) => { const v = luminance(c); return v == null ? 1 : v; };
 
 const SERIF = /serif|caslon|bodoni|fraunces|newsreader|vollkorn|prata|yeseva|spectral|zilla|young serif|hedvig|instrument serif|cormorant|playfair|libre|grenze|ultra/i;
 const CONDENSED = /condensed|league gothic|six caps|anton|oswald|big shoulders|bebas|saira|barlow condensed|sofia sans extra/i;

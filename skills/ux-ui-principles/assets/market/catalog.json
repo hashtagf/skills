@@ -21,8 +21,8 @@
         {"fact": "Primary upper teeth erupt at about: central incisor 8-12 months, lateral incisor 9-13, first molar 13-19, canine 16-22, second molar 25-33. Lower teeth usually come slightly earlier (lower second molar 23-31).",
          "source": "American Dental Association, Primary Tooth Development chart (2012), https://www.mouthhealthy.org/all-topics-a-z/eruption-charts", "checked": "2026-11-06",
          "use": "Eruption infographic; label the ages 'approximate' and credit the ADA."},
-        {"fact": "Paediatric dental bodies recommend the first dental visit when the first tooth appears and no later than the first birthday.",
-         "source": "American Academy of Pediatric Dentistry, Perinatal and Infant Oral Health Care policy (widely cited; the policy text itself not fetched)", "checked": "not verified against the source; fetch aapd.org before quoting",
+        {"fact": "The American Academy of Pediatric Dentistry asks parents to establish a dental home (regular dentist) for every child no later than 12 months of age; physicians may refer as early as 6 months. Its periodicity guideline places the first examination at the eruption of the first tooth (that guideline not re-read here).",
+         "source": "AAPD Policy on the Dental Home, https://www.aapd.org/media/policies_guidelines/p_dentalhome.pdf (quote: 'establish a dental home no later than 12 months of age'); periodicity guideline https://www.aapd.org/assets/1/7/G_Periodicity.pdf", "checked": "2026-11-06 (dental home policy text read; periodicity guideline not re-read)",
          "use": "Kids section copy."}
       ],
       "sites": [

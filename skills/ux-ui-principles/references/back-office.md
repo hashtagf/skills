@@ -221,7 +221,8 @@ The skill generates previews of every screen in `SCREENS` (`scripts/backoffice_p
 in every look in `assets/backoffice/styles.json` into
 `assets/backoffice/previews/` (not committed; rebuild with
 `node scripts/build_previews.js --only backoffice,mobile`, or call
-`node scripts/backoffice_preview.js --styles ... --screens ...` directly).
+`node scripts/backoffice_preview.js --styles ... --screens ...` directly; with `--styles`, `--direction` or
+`--screens` and no `--out` it writes to a new temp folder it prints, never over the library previews).
 Terms: a **look** is one `styles.json` entry (the `--styles` flag picks looks);
 a **direction** is a customer-page visual system (`directions.json`).
 

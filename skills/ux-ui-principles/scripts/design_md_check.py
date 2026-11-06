@@ -19,8 +19,14 @@ Contrast pairs that fail WCAG AA are errors: on-surface / muted / primary-text o
 on tint-N (4.5:1) and focus on canvas and surface (3:1), each for light and dark-*. An unquoted name or
 description that YAML would not read as a plain string (starts with [ { & * ! | > % @ ` or contains ": "
 or " #") is an error.
-Exit code 1 on any error, 2 on usage error. Standard library only.
+typography letterSpacing needs a unit: a unitless non-zero value is an error, a bare 0 a warning (write 0em).
+Thai checks (line height) run when the file uses Thai: Thai script in the text, lang="th" / lang: th, or a
+Thai font (Noto Sans Thai, Sarabun, IBM Plex Sans Thai, Anuphan, Kanit, Prompt, …); the word "thai" in a path
+or a file name does not count. Colour maths come from _color.py (WCAG 2.x, sRGB threshold 0.04045).
+--json prints the findings as a list of {"level", "message"}. Writes nothing.
+Exit code 0 no error, 1 on any error, 2 on usage or input error (missing or unreadable file). Standard library only.
 """
+import argparse
 import json
 import os
 import re
@@ -66,6 +72,23 @@ def find(secs, pattern):
             return name, body
     return None, None
 
+
+
+THAI_FONTS = (r"Noto (?:Sans|Serif) Thai(?: Looped)?|IBM Plex Sans Thai(?: Looped)?|Google Sans Thai|LINE Seed Sans TH|TH Sarabun(?: New| PSK)?|"
+              r"Sarabun|Anuphan|Kanit|Mitr|Chakra Petch|Bai Jamjuree|K2D|Niramit|Pridi|Taviraj|Trirong|Athiti|Krub|"
+              r"Itim|Charmonman|Thasadith|Sriracha|Chonburi|Maitree|Kodchasan|KoHo|Fahkwang|Pattaya|Srisakdi|Anakotmai|"
+              r"Leelawadee(?: UI)?|Thonburi|Sukhumvit Set|DB Heavent")
+
+
+def uses_thai(md):
+    """True when the file is for Thai text: Thai script, lang th, or a Thai font named (not the bare word in a path)."""
+    if re.search(r"[\u0E01-\u0E5B]", md):
+        return True
+    if re.search(r"\blang\s*[:=]\s*[\"']?th\b", md, re.I):
+        return True
+    if re.search(r"(?<![\w/.-])(?:" + THAI_FONTS + r")(?![\w/-])", md):     # font names are case-sensitive here
+        return True
+    return bool(re.search(r"^.*font.*(?<![\w/.-])Prompt(?![\w/-])", md, re.I | re.M))   # "Prompt" only on a font line
 
 
 # ---------- Google design.md spec (alpha) ----------
@@ -203,6 +226,14 @@ def check_spec(md, fm_text, body):
         fs = spec.get("fontSize")
         if fs and not DIM.match(fs):
             add("error", f"typography.{n}.fontSize needs px, em or rem: {fs}")
+        ls = spec.get("letterSpacing")
+        if isinstance(ls, str) and ls:
+            if re.match(r"^[-+]?0*(\.0+)?$", ls):
+                add("warn", f"typography.{n}.letterSpacing is a bare {ls}; use 0em so tools read a dimension")
+            elif re.match(r"^[-+]?\d*\.?\d+$", ls):
+                add("error", f"typography.{n}.letterSpacing {ls} has no unit; tracking is relative to size, write {ls}em")
+            elif not DIM.match(ls) and ls.lower() != "normal":
+                add("error", f"typography.{n}.letterSpacing needs em, rem or px: {ls}")
     refs = re.findall(r"\{([a-zA-Z0-9_.-]+)\}", fm_text)
     for r in sorted(set(refs)):
         if resolve(tokens, r) is None:
@@ -268,7 +299,7 @@ def check_spec(md, fm_text, body):
     for m in re.finditer(r"(\d+)\s*/\s*10", md):
         if not 1 <= int(m.group(1)) <= 10:
             add("error", f"dial value out of range: {m.group(0)}")
-    if re.search(r"thai", md, re.I):
+    if uses_thai(md):
         lhs = [float(v.get("lineHeight")) for v in (tokens.get("typography") or {}).values()
                if isinstance(v, dict) and re.match(r"^\d+(\.\d+)?$", str(v.get("lineHeight", "")))]
         body_lh = [float(v["lineHeight"]) for k, v in (tokens.get("typography") or {}).items()
@@ -339,7 +370,7 @@ def check_legacy(md):
         if not 1 <= int(m.group(1)) <= 10:
             add("error", f"dial value out of range: {m.group(0)}")
 
-    if re.search(r"thai", md, re.I):
+    if uses_thai(md):
         lh = [float(x) for x in re.findall(r"line-height[^\n]*?(\d\.\d+)", md, re.I)]
         if not lh:
             add("warn", "Thai is used but no line-height is stated (body 1.55–1.7 recommended)")
@@ -358,13 +389,17 @@ def check_legacy(md):
 
 
 def main(argv):
-    files = [a for a in argv if not a.startswith("--")]
-    if len(files) != 1:
-        print(__doc__)
+    ap = argparse.ArgumentParser(prog="design_md_check.py", description="Validate a DESIGN.md (see the module docstring).")
+    ap.add_argument("file", metavar="DESIGN.md")
+    ap.add_argument("--json", action="store_true", help="machine-readable output")
+    a = ap.parse_args(argv)
+    try:
+        with open(a.file, encoding="utf-8", errors="replace") as f:
+            res = check(f.read())
+    except OSError as e:
+        print(f"error: cannot read {a.file}: {e.strerror} (pass the path to a DESIGN.md)", file=sys.stderr)
         return 2
-    with open(files[0], encoding="utf-8") as f:
-        res = check(f.read())
-    if "--json" in argv:
+    if a.json:
         print(json.dumps(res, ensure_ascii=False, indent=2))
     else:
         for r in res:

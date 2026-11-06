@@ -17,8 +17,9 @@ then prints the command with `--shape soft`), `sharp` forces 0px and square butt
 direction. A `round` button uses the input radius (`max(6px, 0.6 × card)`), so `--radius-button` and DESIGN.md's
 `rounded.md` agree.
 
-Without `--out` nothing is written: `tokens.css` goes to stdout (the contrast report to stderr), so a run from the skill folder leaves no files. Exit codes: 1 when a
-color pair cannot pass, 2 for an unknown direction.
+Without `--out` nothing is written: `tokens.css` goes to stdout (the contrast report to stderr), so a run from the skill folder leaves no files;
+with `--only` it prints each selected file after a `/* ===== name ===== */` line. Exit codes: 1 when a
+color pair cannot pass, 2 for a usage or input error (unknown direction, bad flag value, unreadable `--json`).
 
 | File | For | Notes |
 |---|---|---|

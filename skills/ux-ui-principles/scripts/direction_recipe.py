@@ -7,14 +7,33 @@ Usage:
 
 The recipe is derived from assets/directions/directions.json (palette, type, radius, button shape, corner
 treatment, surface rule, hero composition). It is a checklist to build and review against, in the style of
-the template pre-flights studied in assets/evidence.md. Standard library only.
+the template pre-flights studied in assets/evidence.md. The display clamp is export_tokens.DISPLAY_CLAMP (the
+same value tokens.css ships). Pure #000 / #fff are banned except where the direction's own tokens name them
+(brutal's ink is #000000; many surfaces are #ffffff). Exit 0 ok, 2 unknown direction or bad flag.
+Standard library only.
 """
+import argparse
 import json
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIRS = os.path.join(HERE, "..", "assets", "directions", "directions.json")
+sys.path.insert(0, HERE)
+from export_tokens import DISPLAY_CLAMP  # noqa: E402
+from _color import norm_hex, is_hex  # noqa: E402
+
+PURE = {"#000000": "#000", "#ffffff": "#fff"}
+
+
+def die(msg):
+    sys.stderr.write("error: %s\n" % msg)
+    sys.exit(2)
+
+
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        die("%s (run with --help)" % message)
 
 HERO = {
     "split": "Split hero: headline and actions on one side, one art or product panel on the other; the panel never covers the headline.",
@@ -36,16 +55,21 @@ SURF = {
 }
 
 
+def items():
+    raw = json.load(open(DIRS, encoding="utf-8"))
+    return raw if isinstance(raw, list) else raw["directions"]
+
+
 def load(did):
-    raw = json.load(open(DIRS))
-    items = raw if isinstance(raw, list) else raw["directions"]
-    if did == "--list":
-        print(", ".join(x["id"] for x in items))
-        sys.exit(0)
-    for d in items:
+    for d in items():
         if d["id"] == did:
             return d
-    sys.exit("unknown direction: %s (try --list)" % did)
+    die("unknown direction: %s (try --list)" % did)
+
+
+def pure_roles(d):
+    """{role: '#000'/'#fff'} for the direction's own tokens that are pure black or white."""
+    return {k: PURE[norm_hex(d[k])] for k in ("ground", "surface", "ink", "muted") if is_hex(d.get(k, "")) and norm_hex(d[k]) in PURE}
 
 
 def recipe(d):
@@ -54,7 +78,10 @@ def recipe(d):
     square = r <= 2 and btn == "square"
     surf_rule, surf_bans = SURF.get(d.get("surf"), ("one depth strategy", []))
     shape = {"pill": "full pills (999px)", "round": "rounded (about %dpx)" % max(8, round(r * 0.6)), "square": "square (0)"}[btn]
-    bans = ["pure #000 or #fff as text or ground", "a display face other than %s" % d["display"], "gradient text",
+    pure = pure_roles(d)
+    named = ", ".join("%s %s" % (k, v) for k, v in pure.items())
+    bans = ["pure #000 or #fff as text or ground" if not pure else
+            "pure #000 or #fff anywhere the tokens do not name it (named here: %s)" % named, "a display face other than %s" % d["display"], "gradient text",
             "emoji as feature icons", "three equal icon-heading-text cards in a row", "invented metrics, logos or testimonials",
             "AI cliche copy (Elevate, Seamless, Unleash, Next-Gen)"] + surf_bans
     # Radius is a default, never a ban: the subject's own objects decide (design-quality.md §1).
@@ -65,7 +92,9 @@ def recipe(d):
     A("# Recipe: %s (`%s`, %s)\n" % (d["name"], d["id"], d["group"]))
     A("> %s\n" % d["note"])
     A("## Hard rules")
-    A("- **Ground** `%s`, **surface** `%s`, **ink** `%s`, **muted** `%s` (never pure black or white)." % (d["ground"], d["surface"], d["ink"], d["muted"]))
+    A("- **Ground** `%s`, **surface** `%s`, **ink** `%s`, **muted** `%s` (%s)." % (
+        d["ground"], d["surface"], d["ink"], d["muted"],
+        "never pure black or white" if not pure else "pure %s only where named here: %s" % (" / ".join(sorted(set(pure.values()))), named)))
     A("- **One accent** `%s` with `%s` text on it. The solid accent fill (primary CTA) appears once per view; a nav CTA is outlined or is the same action; other uses are small (eyebrow, link, focus). Links and small accent text use the derived `accent-text` step (`scripts/export_tokens.py`)." % (d["accent"], d["accentInk"]))
     A("- **Tints** %s for fills only, never for text." % ", ".join("`%s`" % t for t in d["tints"]))
     A("- **Type**: display %s %s, tracking %s%s; body %s. One pair per language; Thai uses %s, body line-height 1.55-1.7." % (d["display"], d["dw"], d["track"], ", uppercase" if d.get("case") == "upper" else "", d["body"], d.get("thai", "Noto Sans Thai")))
@@ -73,7 +102,7 @@ def recipe(d):
     A("- **Depth**: %s." % surf_rule)
     if d.get("images"):
         A("- **Images**: %s" % d["images"])
-    A("- Section padding 96px or more on desktop; display scale clamp(2.75rem, 5vw + 1rem, 5.25rem).")
+    A("- Section padding 96px or more on desktop; display scale %s (`--text-display` in tokens.css)." % DISPLAY_CLAMP)
     A("\n## Banned")
     A("\n".join("- %s" % b for b in bans))
     A("\n## Required components")
@@ -99,18 +128,30 @@ def recipe(d):
     return "\n".join(L) + "\n"
 
 
-def main():
-    a = sys.argv[1:]
-    if not a or a[0] in ("-h", "--help"):
+def main(argv=None):
+    ap = Parser(prog="direction_recipe.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("id", nargs="?", help="direction id (see --list)")
+    ap.add_argument("--out", metavar="FILE", help="write the recipe to FILE instead of printing it")
+    ap.add_argument("--list", action="store_true", help="list direction ids")
+    a = ap.parse_args(sys.argv[1:] if argv is None else argv)
+    if a.list:
+        print(", ".join(x["id"] for x in items()))
+        return 0
+    if not a.id:
         print(__doc__)
-        sys.exit(2)
-    out = recipe(load(a[0]))
-    if "--out" in a:
-        open(a[a.index("--out") + 1], "w").write(out)
-        print("wrote", a[a.index("--out") + 1])
+        return 2
+    out = recipe(load(a.id))
+    if a.out:
+        try:
+            with open(a.out, "w", encoding="utf-8") as f:
+                f.write(out)
+        except OSError as e:
+            die("cannot write %s (%s)" % (a.out, e))
+        print("wrote", a.out)
     else:
         print(out)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

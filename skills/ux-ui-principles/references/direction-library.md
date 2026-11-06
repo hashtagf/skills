@@ -66,7 +66,7 @@ a direction the user did not ask about is noise.
 | Set | Script | Folder | Shows |
 |---|---|---|---|
 | directions | `direction_preview.js --sheet` | `assets/directions/previews/` | each direction in its composition on a subject, plus group sheets |
-| brand | `backoffice_preview.js --direction all` | `previews/product/` | the same direction as product UI (overview, records) |
+| brand | `backoffice_preview.js --direction all` | `previews/product/` | the same direction as product UI (overview, records); called directly with `--styles`/`--direction`/`--screens` and no `--out`, it writes to a printed temp folder |
 | backoffice, mobile, tablet, rtl | `backoffice_preview.js` | `assets/backoffice/previews/…` | admin looks, density, phone, 820px tablet, mirrored layout |
 
 Judge a direction on a dense table and a form too, not only a hero: look at its product

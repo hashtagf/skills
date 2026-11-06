@@ -97,10 +97,13 @@
 | ไฟล์ | คืออะไร | มีไว้ทำไม | ใช้เมื่อไร / อย่างไร |
 |---|---|---|---|
 | `_pw.js` | ตัวช่วยหา Playwright/browser (ไม่ดาวน์โหลดเอง) | ให้ทุกสคริปต์ render ใช้วิธีหาเดียวกัน | ภายใน: ใช้โดย render/fold/flow/admin/preview scripts |
+| `_args.js` | ตัวอ่าน argument กลางของสคริปต์ Node (`--help`, `error:` + exit 2, path ของ output/temp) | ทุกสคริปต์ Node ทำตาม [Script contract](#script-contract) เหมือนกัน | ภายใน: ใช้โดย render/fold/flow/admin/script/market/preview scripts |
+| `_color.js` | สูตรสีกลางฝั่ง Node: อ่านสี, luminance, contrast (และโค้ดที่ฉีดเข้าหน้าเว็บ) | ให้สคริปต์ Node และตัวตรวจในหน้าเว็บคำนวณสีตรงกัน | ภายใน: ใช้โดย brand, compositions, render_check, admin_check |
+| `_net.py` | ตัวช่วยดึงข้อมูลเน็ตกลาง (ใช้ curl, cache เขียนแบบ atomic) | ไม่มีเน็ต/curl = exit 3 (NOT RUN) เหมือนกันทุกสคริปต์ | ภายใน: ใช้โดย icons, photo_search, showcase_fetch |
 | `admin_check.js` | ตรวจหน้า admin ที่ render แล้วตามประเภทหน้า + เปิดทุก `?state=` | จับคอลัมน์เงินชิดซ้าย, ปุ่ม disabled ไม่มีเหตุผล, sticky ที่ไม่ sticky, state ที่ยังไม่ได้สร้าง | `check.py <page> --admin list` |
 | `backoffice_preview.js` | render ภาพหน้าหลังบ้านทุก look (`--density compact`, `--thai`, `--mobile`) | ให้ทีมเลือก look จากภาพ | back-office.md 'Choosing density and tone' |
 | `brand.js` | direction เดียว → หน้า public และ product UI ด้วย token ชุดเดียว | กันสองหน้าตาในแบรนด์เดียว | ใช้โดย preview scripts |
-| `build_previews.js` | สร้างภาพ preview ใหม่ทั้งหมด | ภาพไม่ถูก commit (gitignore) | ครั้งแรกหลังติดตั้ง |
+| `build_previews.js` | สร้างภาพ preview ใหม่ทั้งหมด (`--only` ชุดเดียว; `--dry-run` พิมพ์คำสั่งโดยไม่ render) | ภาพไม่ถูก commit (gitignore) | ครั้งแรกหลังติดตั้ง |
 | `check.py` | **ทางเข้าเดียว** ของการตรวจก่อนส่งงาน | ไม่ต้องจำ 7 สคริปต์ | SKILL §3 ข้อ 6 |
 | `code_extract.py` | ถอดภาษาออกแบบจากโค้ดเดิม | หลักฐานสำหรับ DESIGN.md ของ brownfield | brownfield.md |
 | `compositions.js` | layout หน้าแรกสำเร็จรูป | จุดเริ่มที่ไม่ใช่ hero ซ้ำ ๆ | §3 ข้อ 2 |
@@ -115,7 +118,7 @@
 | `export_tokens.py` | direction → token ในโค้ด (`--out DIR`; ไม่ใส่ = พิมพ์ออก stdout ไม่เขียนไฟล์; `--print-dark`) | ส่งต่อให้โค้ดโดยไม่พิมพ์มือ | tokens-export.md |
 | `flow_check.js` | เดิน journey จาก steps.json รวม failure path | ตรวจว่างานหลักทำได้จริง | §3 ข้อ 6 |
 | `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |
-| `look.py` | รายการภาพอ้างอิงตามประเภทหน้า + market study ถ้ามี | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
+| `look.py` | รายการภาพอ้างอิงตามประเภทหน้า (รวม `cover`; คำไทยเช่น คาเฟ่, หลังบ้าน, สไลด์ ใช้ได้; `--kinds` ดูทั้งหมด) + market study ถ้ามี | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
 | `market_fetch.js` | แคปเว็บคู่แข่งในตลาด + เว็บที่ออกแบบดี ตามประเภทธุรกิจ | research ตลาดก่อนเลือก direction | interview Round B |
 | `icons.py` | ค้น/วาง icon จาก Lucide (UI) และ Simple Icons (โลโก้แบรนด์) พร้อมเช็ก contrast และลิขสิทธิ์ | ได้ icon ชุดเดียว ใช้โลโก้แบรนด์ถูกกติกา | iconography.md |
 | `photo_search.py` | ค้นรูปไลเซนส์เปิด (Commons/Openverse) พร้อม credit | ได้รูปจริงโดยไม่ละเมิดลิขสิทธิ์ | ก่อนสร้างหน้า |
@@ -128,6 +131,14 @@
 | `slop_check.py` | สแกนหน้าตา template แบบ static | จับ device ที่ทำให้ดูเป็น AI | ผ่าน `check.py` |
 | `state_check.py` | หา marker ของ state แบบ static | รู้ว่า state ไหนยังไม่ได้ทำ | ผ่าน `check.py` |
 | `tweaks_panel.py` | แผงปรับค่าสดระหว่างรีวิว | ปรับกับผู้ใช้แบบเห็นผลทันที | review session |
+
+### Script contract
+
+ทุกสคริปต์ใช้ exit code ชุดเดียวกัน: **0** ผ่าน · **1** ตรวจไม่ผ่าน · **2** ใช้ผิด/input ผิด (ไม่พบไฟล์, flag ผิด,
+JSON เสีย, id ไม่รู้จัก) · **3** ไม่ได้รัน (ไม่มี browser/เน็ต/dependency) — ห้ามรายงาน 3 ว่าผ่าน
+คำผลลัพธ์: PASS, FLAG, FAIL, NOTE, WARN, ERROR, N/A, NOT RUN (`check.py` มี MANUAL เพิ่ม)
+ตัวตรวจ Python ทุกตัว (และ `check.py`) มี `--json`; ใช้ผิดจะพิมพ์บรรทัด `error:` ไม่มี traceback
+`check.py` เอาผลแต่ละข้อจาก exit code ของสคริปต์ย่อย และ exit 3 เมื่อไม่มีอะไรตกแต่มีข้อที่ไม่ได้รัน
 
 ### assets/ และ evals/
 
@@ -142,7 +153,7 @@
 | `assets/directions/` | direction ของหน้า public (`directions.json`, content packs) | หน้าตาที่ไม่ซ้ำแบบ default | direction-library.md |
 | `assets/design-systems/` | คู่มือ 126 design system (Apache-2.0, S102) | ข้อมูลดิบของ benchmarks | `ds_lookup.py` |
 | `assets/photos/, assets/references/, assets/showcase/, assets/market/` | ภาพจริงพร้อม credit, market study ต่อประเภทธุรกิจ | ภาพอ้างอิง/ใช้งานที่มีที่มา | `look.py` |
-| `evals/` | สถานการณ์ทดสอบ routing/trigger/A-B + `index_check.py` | วัดว่า skill เปิดไฟล์ถูกและ README ไม่ตกหล่น | ก่อน release |
+| `evals/` | สถานการณ์ทดสอบ routing/trigger/A-B + `index_check.py` + regression suite ของสคริปต์ (`evals/regress/run.py [checkers\|design\|node\|preview\|py_checkers\|py_tools]`, เขียนแค่ temp folder) | วัดว่า skill เปิดไฟล์ถูก, README ไม่ตกหล่น และสคริปต์ยังทำตาม contract | ก่อน release และหลังแก้สคริปต์ |
 
 ## หลักสำคัญที่แปลงเป็นกติกาใน skill
 

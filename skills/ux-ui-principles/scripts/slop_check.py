@@ -10,9 +10,11 @@ not "this is wrong": a device is fine when the brief asks for it or you can
 defend it in one sentence (references/design-quality.md §2).
 
 Levels: flag (likely default/defect) and note (worth a look).
-Exit code 1 if any flag is found, 2 on usage error.
+--json prints {file: [{"level","rule","message","examples"}]}.
+Exit: 0 no flag (notes only), 1 any flag found, 2 usage or input error (missing file). Writes nothing.
 Standard library only.
 """
+import argparse
 import json
 import os
 import re
@@ -485,7 +487,7 @@ def finish_checks(add, html, css, js, rules, nodes, text, sharp):
     if dh or tw:
         add("note", "default-palette", "framework default colours; derive the palette from the subject (color-palette.md)", dh + tw)
     if css.strip() and not re.search(r"::selection|caret-color|scrollbar-color|color-scheme", css):
-        add("note", "untheemed-browser-surfaces", "no ::selection, caret-color, scrollbar-color or color-scheme; browser defaults show through")
+        add("note", "unthemed-browser-surfaces", "no ::selection, caret-color, scrollbar-color or color-scheme; browser defaults show through")
     if css.strip() and re.search(r"(^|[\s,}])h[12]\b", css) and "text-wrap" not in css:
         add("note", "headings-without-balance", "h1/h2 styled without text-wrap: balance")
 
@@ -633,11 +635,15 @@ def icon_family_checks(add, html, js, rules, nodes):
 
 
 def main(argv):
-    files = [a for a in argv if not a.startswith("--")]
-    if not files:
-        print(__doc__)
+    ap = argparse.ArgumentParser(prog="slop_check.py", description="Flag template-look patterns (see the module docstring).")
+    ap.add_argument("files", nargs="+", metavar="PAGE", help="built .html page(s)")
+    ap.add_argument("--json", action="store_true", help="machine-readable output")
+    a = ap.parse_args(argv)
+    files, as_json = a.files, a.json
+    gone = [p for p in files if not os.path.isfile(p)]
+    if gone:
+        print(f"error: file not found: {gone[0]} (pass the path to a built .html file)", file=sys.stderr)
         return 2
-    as_json = "--json" in argv
     report, flags = {}, 0
     for p in files:
         res = check(p)

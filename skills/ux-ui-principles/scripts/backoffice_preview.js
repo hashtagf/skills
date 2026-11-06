@@ -38,35 +38,56 @@
  * Single images are kept only for --singles (default records,approval; "all" keeps every one);
  * --sheet writes sheet-<screen>.jpg (all looks side by side; --style-sheets also writes sheet-<style>.jpg).
  * components and states are always kept as full-page singles.
+ * Output: with no selection the library folder assets/backoffice/previews/ (resolved from the skill root); with
+ * --styles, --direction or --screens and no --out, a new temp folder (<os temp>/ux-ui-backoffice/<time>, printed).
+ * A given --out is resolved against the current directory. -h/--help prints this text. Unknown --styles,
+ * --direction, --screens, --singles or --density values, an unknown option or a bad --width/--height exit 2
+ * with the valid choices; exit 3 when Playwright or a browser is missing (NOT RUN).
  */
 const fs = require('fs');
 const path = require('path');
-const { findModule, findBrowser } = require('./_pw');
-const args = process.argv.slice(2);
-const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const has = k => args.includes(k);
-const root = path.resolve(__dirname, '..');
-const styles = JSON.parse(fs.readFileSync(path.join(root, 'assets/backoffice/styles.json'), 'utf8')).styles;
-const out = path.resolve(opt('--out', path.join(root, 'assets/backoffice/previews')));
+const os = require('os');
+const A = require('./_args');
+const pw = require('./_pw');
+const a = A.parse(process.argv.slice(2), {
+  file: __filename,
+  values: ['--styles', '--direction', '--screens', '--out', '--width', '--height', '--singles', '--density'],
+  flags: ['--sheet', '--thai', '--mobile', '--rtl', '--tablet', '--style-sheets'],
+});
+const opt = (k, d) => a.get(k, d);
+const has = k => a.has(k);
+const root = A.ROOT;
+const readJson = (rel) => { const f = path.join(root, rel); try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return A.usageError(`cannot read ${f}: ${e.message.split('\n')[0]}`, 'restore the file'); } };
+const styles = readJson('assets/backoffice/styles.json').styles;
 const mobile = has('--mobile');
-const W = Number(opt('--width', mobile ? '390' : '1440')), H = Number(opt('--height', mobile ? '844' : '900'));
+const W = a.num('--width', mobile ? 390 : 1440, { min: 200, max: 4000, int: true }), H = a.num('--height', mobile ? 844 : 900, { min: 200, max: 6000, int: true });
 const thai = has('--thai');
-const singles = opt('--singles', 'records,approval');
 const SCREENS = mobile ? ['records', 'approval', 'overview', 'inbox', 'detail', 'form', 'menu', 'filter', 'states', 'components'] : ['records', 'approval', 'audit', 'overview', 'access', 'settings', 'detail', 'import', 'finance', 'incidents', 'inbox', 'kanban', 'form', 'analytics', 'compare', 'heatmap', 'status', 'signin', 'denied', 'notfound', 'components', 'advanced', 'states'];
 const TALL = ['components', 'advanced', 'states'];
+const singles = opt('--singles', 'records,approval');
+if (!['all', 'none'].includes(singles)) a.list('--singles', SCREENS);
+if (opt('--density') && opt('--density') !== 'compact' && opt('--density') !== 'comfortable') A.usageError(`unknown --density ${opt('--density')}`, 'choose compact or comfortable');
+if (has('--styles') && has('--direction')) A.usageError('--styles and --direction are alternatives', 'pass one of them');
 // --direction <id,…>: the admin screens of a brand direction (scripts/brand.js), same tokens as its public pages
 const brand = require('./brand');
-const directions = JSON.parse(fs.readFileSync(path.join(root, 'assets/directions/directions.json'), 'utf8')).directions;
-const pickS0 = opt('--direction') ? directions.filter(d => opt('--direction') === 'all' || opt('--direction').split(',').includes(d.id)).map(d => brand.productStyle(d, styles))
-  : opt('--styles') ? styles.filter(s => opt('--styles').split(',').includes(s.id)) : styles;
+const directions = readJson('assets/directions/directions.json').directions;
+const dirIds = opt('--direction') === 'all' ? directions.map(d => d.id) : a.list('--direction', directions.map(d => d.id).concat('all'), null);
+const styleIds = a.list('--styles', styles.map(s => s.id), null);
+const pickS0 = dirIds ? directions.filter(d => dirIds.includes(d.id)).map(d => brand.productStyle(d, styles))
+  : styleIds ? styles.filter(s => styleIds.includes(s.id)) : styles;
 const compact = opt('--density') === 'compact';
 const toneDefaults = s => Object.assign({}, s, {
   info: s.info || s.warn, // looks derived from a direction (brand.js) may lack info/neutral
   neutral: s.neutral || [s.muted, s.dark ? '#2a2f38' : '#eef0f2'],
 }, compact && s.compact ? s.compact : {});
 const pickS = pickS0.map(toneDefaults).map(s => (!mobile && W < 1100 && s.nav === 'side') ? Object.assign({}, s, { nav: 'rail' }) : s); // tablet: side nav collapses to a rail
-const pickC = opt('--screens') ? SCREENS.filter(s => opt('--screens').split(',').includes(s)) : SCREENS;
-if (!pickS.length || !pickC.length) { console.error('nothing matched'); process.exit(2); }
+const screenIds = a.list('--screens', SCREENS, null);
+const pickC = screenIds ? SCREENS.filter(s => screenIds.includes(s)) : SCREENS;
+if (!pickS.length || !pickC.length) A.usageError('nothing matched', 'check --styles / --direction / --screens');
+// a selection (--styles, --direction, --screens) without --out goes to a temp folder, never over the library previews
+const custom = ['--styles', '--direction', '--screens'].some(has);
+const out = has('--out') ? A.userPath(opt('--out')) : custom ? path.join(os.tmpdir(), 'ux-ui-backoffice', A.stamp()) : A.libPath('assets/backoffice/previews');
+if (custom && !has('--out')) console.log(`output: ${out} (temp folder; pass --out to keep them; the library previews are not touched)`);
 
 const L = (en, th) => (thai ? th : en);
 const T = {
@@ -629,12 +650,10 @@ ${blk(L('Bottom sheet, snackbar, pull to refresh', 'ชีตล่าง ป๊
 ${blk(L('Settings rows and dialog', 'แถวตั้งค่าและกล่องยืนยัน'), `<div class="card item" style="gap:14px"><div class="bar"><span style="flex:1">${T.t[0]}</span><span class="tog"></span></div><div class="bar"><span style="flex:1">${T.t[3]}</span><span class="tog off"></span></div></div><div class="card item" style="gap:12px;box-shadow:0 12px 36px rgba(0,0,0,.25)"><b style="font-size:18px">${L('Reject 2 payments?', 'ปฏิเสธ 2 รายการ?')}</b><span class="muted">${L('The requesters will be told. This cannot be undone.', 'ผู้ขอจะได้รับแจ้ง และเลิกทำไม่ได้')}</span><div class="bar"><span class="btn full">${L('Cancel', 'ยกเลิก')}</span><span class="btn full" style="background:${s.bad[0]};color:#fff;border-color:${s.bad[0]}">${L('Reject 2', 'ปฏิเสธ 2 รายการ')}</span></div></div>`)}`;
   return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?${fams}&display=swap" rel="stylesheet"><style>${mcss(s)}body{height:auto;overflow:visible;padding:16px;display:flex;flex-direction:column;gap:22px}.scr{position:static}</style></head><body><div><b style="font-size:20px">${s.name}</b> <span class="muted">${L('mobile components · sample', 'คอมโพเนนต์มือถือ · ตัวอย่าง')}</span></div>${body}</body></html>`; };
 
-(async () => {
-  const mod = findModule(process.cwd());
-  const exe = mod ? findBrowser(mod.chromium) : undefined;
-  if (!mod || exe === undefined) { console.log('NOT RUN: no Playwright module or browser (npm i -D playwright && npx playwright install chromium)'); process.exit(3); }
+A.main(async () => {
+  const env = pw.need(process.cwd(), 'back-office preview');
   fs.mkdirSync(out, { recursive: true });
-  const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
+  const browser = await pw.launch(env);
   const page = await browser.newPage({ viewport: { width: W, height: H } });
   const src = mobile ? mscreens : screens;
   const mp = mobile ? 'm-' : '';
@@ -667,4 +686,4 @@ ${blk(L('Settings rows and dialog', 'แถวตั้งค่าและก�
     for (const st of pickS) for (const sc of pickC) if (!keep.includes(sc)) { try { fs.unlinkSync(file(st.id, sc)); } catch (e) {} }
   }
   await browser.close();
-})();
+});

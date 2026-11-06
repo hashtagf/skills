@@ -250,7 +250,9 @@ directions, never after the build has started:
 1. `python3 scripts/look.py <kind>`: if a study exists in `assets/market/catalog.json`, open its pictures and use it;
    re-shoot stale pictures with `node scripts/market_fetch.js --kind <kind>`.
 2. Otherwise build one (a subagent suits it): about 6 local sites of the category and 6 design-led sites abroad (award
-   galleries), `node scripts/market_fetch.js --kind <kind> --urls urls.txt`, open every picture.
+   galleries), `node scripts/market_fetch.js --kind <kind> --urls urls.txt`, open every picture. Exit 1 means a
+   site was skipped (WARN skip line: refused, unreachable, timed out twice): say which; exit 2 is a usage error
+   (e.g. an `--only` slug not in the study, valid slugs listed).
 3. Report in three parts: the **category look** (what local sites converge on), the **designed moves** (what the
    design-led ones do differently), and **three gaps** this client could own, each naming the closest local site.
    Facts of the market (subsidies, licences, regulations) go in only with a source and a check date.

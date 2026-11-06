@@ -27,7 +27,12 @@ Monorepo: run steps 1 and 3 once per app (`SRC=apps/web`). The extractor reports
 - **found**: a named CSS variable mapped to the role. Trust it, still look at it.
 - **guessed**: picked from color frequency (no variable names). Confirm each one.
 - **derived**: filled in so the file is complete (status colors, focus, primary-text).
-  It is not in the code; treat it as a proposal.
+  It is not in the code; treat it as a proposal. On-surface is never guessed from a grey that
+  fails 4.5:1 on canvas: the darkest passing neutral, or a derived default with the reason.
+- **No radius in code**: the base radius is written as a placeholder; set it from the baseline audit.
+- **React Native / Expo** (`react-native` or `expo` in package.json, or `StyleSheet.create`) is detected as the
+  stack; numeric `borderRadius` / `fontSize` and theme-object colours are read.
+- **Thai project** (`lang="th"` or mostly Thai text): the draft proposes body line-height 1.6 (rule: 1.55–1.7).
 - **Drift**: near-duplicate colors, too many radii/fonts/sizes, hard-coded colors in
   components, Tailwind arbitrary values, conflicting variables. Each line is a
   candidate cleanup, not a mandate; merging values changes shipped screens, so it goes

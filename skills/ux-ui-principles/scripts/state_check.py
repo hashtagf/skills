@@ -17,9 +17,13 @@ state needs a retry path. One mention elsewhere in the project does not count.
 Looks for loading, empty, error, disabled, focus, selected, submitting, success,
 hover, plus offline/permission when asked. A hit means a marker exists somewhere,
 not that the state is reachable or correct; a miss means "unverified, review by
-hand". Report results as Manual, never as "covered". Stdlib only.
+hand". Report results as Manual, never as "covered".
+
+Exit: 0 every needed state has a marker (or no gaps with --per-file; always 0 with --matrix),
+1 a state is missing / a gap found, 2 usage or input error (missing path, unknown state in --need).
+Writes nothing. Stdlib only.
 """
-import json, os, re, sys
+import argparse, json, os, re, sys
 
 STATES = {
     "loading": r"skeleton|spinner|isLoading|loading|aria-busy|pending",
@@ -90,17 +94,27 @@ def per_file(path):
 
 
 def main(argv):
-    args = [a for a in argv if not a.startswith("--")]
+    ap = argparse.ArgumentParser(prog="state_check.py", description="Static state-coverage scan (see the module docstring).")
+    ap.add_argument("paths", nargs="+", metavar="PATH", help="directory or files to scan")
+    ap.add_argument("--json", action="store_true", help="machine-readable output")
+    ap.add_argument("--need", metavar="STATES", help="comma list of states: " + ",".join(STATES))
+    ap.add_argument("--per-file", action="store_true")
+    ap.add_argument("--matrix", action="store_true")
+    a = ap.parse_args(argv)
+    args = a.paths
     need = DEFAULT
-    if "--need" in argv:
-        need = [x for x in argv[argv.index("--need") + 1].split(",") if x in STATES]
-        args = [a for a in args if a != argv[argv.index("--need") + 1]]
-    if not args:
-        print(__doc__)
+    if a.need is not None:
+        need = [x.strip() for x in a.need.split(",") if x.strip()]
+        unknown = [x for x in need if x not in STATES]
+        if unknown or not need:
+            print(f"error: unknown state in --need: {','.join(unknown) or '(empty)'} (known: {','.join(STATES)})", file=sys.stderr)
+            return 2
+    gone = [x for x in args if not os.path.exists(x)]
+    if gone:
+        print(f"error: path not found: {gone[0]} (pass a source directory or file)", file=sys.stderr)
         return 2
-    if "--matrix" in argv:
-        print("| Surface | " + " | ".join(need) + " |")
-        print("|---|" + "---|" * len(need))
+    if a.matrix:
+        rows = []
         for f in files(args[0]):
             if f.endswith(".css"):
                 continue
@@ -109,12 +123,20 @@ def main(argv):
             except OSError:
                 continue
             cells = ["Manual (marker)" if re.search(STATES[s], text, re.I) else "missing" for s in need]
-            print(f"| {os.path.relpath(f, args[0]) if os.path.isdir(args[0]) else os.path.basename(f)} | " + " | ".join(cells) + " |")
-        print("\nMarker present != state verified: render each cell before marking it Ran.")
+            rows.append((os.path.relpath(f, args[0]) if os.path.isdir(args[0]) else os.path.basename(f), cells))
+        note = "Marker present != state verified: render each cell before marking it Ran."
+        if a.json:
+            print(json.dumps({"states": need, "rows": [{"surface": n, **dict(zip(need, c))} for n, c in rows], "note": note}, indent=2, ensure_ascii=False))
+            return 0
+        print("| Surface | " + " | ".join(need) + " |")
+        print("|---|" + "---|" * len(need))
+        for n, cells in rows:
+            print(f"| {n} | " + " | ".join(cells) + " |")
+        print("\n" + note)
         return 0
-    if "--per-file" in argv:
+    if a.per_file:
         gaps = per_file(args[0])
-        if "--json" in argv:
+        if a.json:
             print(json.dumps({"gaps": gaps, "note": "Static markers only; label results Manual."}, indent=2, ensure_ascii=False))
         else:
             for g in gaps:
@@ -139,7 +161,7 @@ def main(argv):
     missing = [s for s in need if not hits[s]]
     rep = {"files": n, "found": {s: len(v) for s, v in hits.items() if v}, "missing": missing,
            "note": "Marker present != state reachable or correct; missing = unverified. Label results Manual."}
-    if "--json" in argv:
+    if a.json:
         print(json.dumps(rep, indent=2))
     else:
         print(f"{n} files scanned")

@@ -19,7 +19,9 @@
  * A subject without photographs (a content pack with no "photo", e.g. saas, data) is only moved to a composition
  * that needs none (photo compositions: c2 c3 c6 c9 c11 c12 c13).
  * For a client, add --subject <their kind> (e.g. dental) so every option shows their world.
- * Unknown --ids entries, --comp or --subject values exit 2 with the valid choices.
+ * Unknown --ids entries, --group, --comp or --subject values, an unknown option or a bad --width/--height exit 2
+ * with the valid choices ("error: …" on stderr). A given --out is resolved against the current directory; the
+ * library folder is resolved from the skill root.
  *
  * Each direction is drawn in its own composition (scripts/compositions.js, c1..c14: editorial, collage, full-bleed
  * photo, Swiss, soft product, poster, question, centred, magazine, board, nocturne, portrait, nature, cover) on
@@ -32,50 +34,36 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { findModule, findBrowser } = require('./_pw');
 const os = require('os');
-const args = process.argv.slice(2);
-const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const has = k => args.includes(k);
-const fail = (msg) => { console.error(msg); process.exit(2); };
+const A = require('./_args');
+const pw = require('./_pw');
+const a = A.parse(process.argv.slice(2), {
+  file: __filename,
+  values: ['--ids', '--group', '--out', '--width', '--height', '--brief', '--comp', '--subject'],
+  flags: ['--sheet', '--same-comp', '--thai'],
+});
+const opt = (k, d) => a.get(k, d);
+const has = k => a.has(k);
+const fail = (what, how) => A.usageError(what, how);
 
-if (has('-h') || has('--help')) {
-  const src = fs.readFileSync(__filename, 'utf8');
-  const m = src.match(/\/\*([\s\S]*?)\*\//);
-  console.log(m ? m[1].split('\n').map(l => l.replace(/^ \* ?/, '').replace(/^ \*$/, '')).join('\n').trim() : 'see the header of scripts/direction_preview.js');
-  process.exit(0);
-}
-
-const VALUED = ['--ids', '--group', '--out', '--width', '--height', '--brief', '--comp', '--subject'];
-const FLAGS = ['--sheet', '--same-comp', '--thai'];
-for (let i = 0; i < args.length; i++) {
-  if (VALUED.includes(args[i])) { i++; continue; }
-  if (!FLAGS.includes(args[i])) fail(`unknown argument ${JSON.stringify(args[i])} (see --help)`);
-}
-
-const root = path.resolve(__dirname, '..');
-const data = JSON.parse(fs.readFileSync(path.join(root, 'assets/directions/directions.json'), 'utf8')).directions;
+const root = A.ROOT;
+const readJson = (rel) => { const f = path.join(root, rel); try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return fail(`cannot read ${f}: ${e.message.split('\n')[0]}`, 'restore the file'); } };
+const data = readJson('assets/directions/directions.json').directions;
 const comps = require('./compositions');
-const packs = JSON.parse(fs.readFileSync(path.join(root, 'assets/directions/content-packs.json'), 'utf8')).packs;
-for (const k of VALUED) {
-  if (has(k) && (opt(k) === undefined || opt(k).startsWith('--'))) fail(`${k} needs a value`);
-}
-if (opt('--comp') && !comps.COMPS[opt('--comp')]) fail(`unknown --comp ${opt('--comp')}; choose one of ${Object.keys(comps.COMPS).join(', ')}`);
-if (opt('--subject') && !packs[opt('--subject')]) fail(`unknown --subject ${opt('--subject')}; choose one of ${Object.keys(packs).join(', ')}`);
+const packs = readJson('assets/directions/content-packs.json').packs;
+if (opt('--comp') && !comps.COMPS[opt('--comp')]) fail(`unknown --comp ${opt('--comp')}`, `choose one of ${Object.keys(comps.COMPS).join(', ')}`);
+if (opt('--subject') && !packs[opt('--subject')]) fail(`unknown --subject ${opt('--subject')}`, `choose one of ${Object.keys(packs).join(', ')}`);
+const GROUPS = [...new Set(data.map(d => d.group))];
+if (opt('--group') && !GROUPS.includes(opt('--group'))) fail(`unknown --group ${opt('--group')}`, `choose one of ${GROUPS.join(', ')}`);
 // a client selection never writes into the library folder unless --out says so
 const custom = ['--ids', '--subject', '--comp', '--brief'].some(has);
-const libraryOut = path.join(root, 'assets/directions/previews');
-const out = path.resolve(opt('--out') || (custom ? path.join(os.tmpdir(), 'ux-ui-previews', new Date().toISOString().replace(/[:.]/g, '-')) : libraryOut));
-const W = Number(opt('--width', '1440')), H = Number(opt('--height', '1240'));
+const libraryOut = A.libPath('assets/directions/previews');
+const out = opt('--out') ? A.userPath(opt('--out')) : custom ? path.join(os.tmpdir(), 'ux-ui-previews', A.stamp()) : libraryOut;
+const W = a.num('--width', 1440, { min: 200, max: 4000, int: true }), H = a.num('--height', 1240, { min: 200, max: 6000, int: true });
 let list = data;
-if (opt('--ids')) {
-  const ids = opt('--ids').split(',').map(x => x.trim()).filter(Boolean);
-  const unknown = ids.filter(id => !data.some(d => d.id === id));
-  if (unknown.length) fail(`unknown --ids ${unknown.join(', ')}; valid ids: ${data.map(d => d.id).join(', ')}`);
-  list = data.filter(d => ids.includes(d.id));
-}
+if (opt('--ids')) { const ids = a.list('--ids', data.map(d => d.id)); list = data.filter(d => ids.includes(d.id)); }
 if (opt('--group')) list = list.filter(d => d.group === opt('--group'));
-if (!list.length) fail('no directions matched');
+if (!list.length) fail('no directions matched', '--ids and --group select no direction together');
 
 const thai = has('--thai');
 if (custom && !opt('--out')) console.log(`output: ${out} (temp folder; pass --out <project>/previews to keep them; the library previews are not touched)`);
@@ -111,12 +99,10 @@ if ((opt('--ids') || opt('--subject')) && !opt('--comp') && !has('--same-comp'))
 const pageFor = (d) => comps.render(d, opt('--comp', compOf[d.id] || d.comp), withBrief(packOf(d)), photos, { width: W, height: H, photoFilter: d.photoFilter, subject: opt('--subject', d.subject) });
 const brief = (opt('--brief', '') || '').split('|');
 
-(async () => {
-  const mod = findModule(process.cwd());
-  const exe = mod ? findBrowser(mod.chromium) : undefined;
-  if (!mod || exe === undefined) { console.log('NOT RUN: no Playwright module or browser (npm i -D playwright && npx playwright install chromium)'); process.exit(3); }
+A.main(async () => {
+  const env = pw.need(process.cwd(), 'direction preview');
   fs.mkdirSync(out, { recursive: true });
-  const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
+  const browser = await pw.launch(env);
   const page = await browser.newPage({ viewport: { width: W, height: H } });
   for (const d of list) {
     await page.setContent(pageFor(d), { waitUntil: 'load', timeout: 30000 }).catch(() => {});
@@ -141,4 +127,4 @@ const brief = (opt('--brief', '') || '').split('|');
     if (!has('--group') && !opt('--ids')) for (const g of [...new Set(list.map(d => d.group))]) await makeSheet(list.filter(d => d.group === g), `sheet-${g}`);
   }
   await browser.close();
-})();
+});

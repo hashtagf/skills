@@ -4,6 +4,8 @@
 Usage:
   python3 export_tokens.py <direction-id> [--out DIR] [--only css,tailwind,shadcn]
   python3 export_tokens.py --json my-tokens.json [--out DIR]     # same keys as a directions.json entry
+                           (needs ground, surface, ink, muted, accent, accentInk, tints[4] as hex; id/name default
+                           to the file name; #rrggbbaa alpha is dropped with a warning; oklch()/rgb() are refused)
   python3 export_tokens.py --list
   python3 export_tokens.py <direction-id> --print-dark     # derived dark theme as JSON (used by previews)
   python3 export_tokens.py <direction-id> --shape soft|mixed|sharp   # shape override, same rule as design_md.py
@@ -12,7 +14,8 @@ Usage:
 round); sharp forces 0px + square buttons; mixed (or no flag) keeps the direction's radius.
 
 Without --out it writes nothing: it prints tokens.css to stdout (redirect it, or pass --out) and the contrast
-report to stderr, so running it from the skill folder never leaves files behind. With --out DIR it writes:
+report to stderr, so running it from the skill folder never leaves files behind; with --only it prints the
+selected files instead, each after a /* ===== name ===== */ line. With --out DIR it writes:
   tokens.css          plain CSS custom properties: color roles (light + dark), type, space,
                       radius, shadow, motion. Works in any stack.
   tailwind-theme.css  Tailwind v4: @theme inline mapping onto tokens.css
@@ -22,11 +25,12 @@ The dark theme is derived, then every text/background pair is checked (WCAG AA) 
 and on cards (surface), and the derived colors are nudged until they pass. Cards of the opposite tone
 (light cards on a dark page) use surface-ink / surface-muted (the direction's cardInk / cardMuted when
 given) plus surface-accent-text / surface-focus, emitted only for such directions. A pair that still fails is printed and exit
-code is 1. Review the output; it is a starting point, not a finished brand.
+code is 1; a usage or input error (unknown id, bad flag value, unreadable --json) exits 2.
+Review the output; it is a starting point, not a finished brand.
 Standard library only.
 """
+import argparse
 import json
-import math
 import os
 import sys
 
@@ -34,37 +38,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DIRS = os.path.join(HERE, "..", "assets", "directions", "directions.json")
 
 
-# ---------- color math (sRGB hex <-> OKLCH) ----------
+# ---------- color math: one source in _color.py (re-exported: code_extract / design_md use ex.lum, ex.reach ...) ----------
 sys.path.insert(0, HERE)
-from _color import hex_rgb, lin, lum, ratio  # noqa: E402,F401  (re-exported: code_extract / design_md use ex.lum etc.)
-
-
-def delin(c):
-    c = max(0.0, min(1.0, c))
-    return 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
-
-
-def to_oklch(h):
-    r, g, b = [lin(x) for x in hex_rgb(h)]
-    l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b
-    m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b
-    s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b
-    l, m, s = l ** (1 / 3), m ** (1 / 3), s ** (1 / 3)
-    L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s
-    a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s
-    bb = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
-    return L, math.hypot(a, bb), math.degrees(math.atan2(bb, a)) % 360
-
-
-def from_oklch(L, C, H):
-    a, b = C * math.cos(math.radians(H)), C * math.sin(math.radians(H))
-    l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
-    m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
-    s = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3
-    r = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
-    g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
-    bl = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
-    return "#" + "".join("%02x" % round(delin(x) * 255) for x in (r, g, bl))
+from _color import (best_ink, delin, from_oklch, has_alpha, hex_rgb, is_hex, lin, lum, mix,  # noqa: E402,F401
+                    norm_hex, ratio, reach, to_oklch)
 
 
 def ok_css(h):
@@ -72,26 +49,8 @@ def ok_css(h):
     return "oklch(%.1f%% %.3f %.0f)" % (L * 100, C, H)
 
 
-def mix(a, b, t):
-    """t of b over a, in linear light."""
-    ra, rb = [lin(x) for x in hex_rgb(a)], [lin(x) for x in hex_rgb(b)]
-    return "#" + "".join("%02x" % round(delin(x * (1 - t) + y * t) * 255) for x, y in zip(ra, rb))
-
-
 def best_on(bg, a, b):
     return a if ratio(bg, a) >= ratio(bg, b) else b
-
-
-def reach(color, bg, need, direction):
-    """Move lightness of color (+1 lighter, -1 darker) until it has `need` contrast on bg (one color or a list)."""
-    bgs = [bg] if isinstance(bg, str) else list(bg)
-    L, C, H = to_oklch(color)
-    for _ in range(60):
-        c = from_oklch(L, C, H)
-        if all(ratio(c, b) >= need for b in bgs):
-            return c
-        L = max(0.0, min(1.0, L + 0.01 * direction))
-    return from_oklch(L, C, H)
 
 
 # ---------- themes ----------
@@ -212,8 +171,10 @@ def checks(name, t):
 
 # ---------- emit ----------
 SPACE = "--space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px;"
+DISPLAY_CLAMP = "clamp(2.25rem, 5vw + 1rem, 5.25rem)"   # one source: direction_recipe.py prints this too
+SECTION_CLAMP = "clamp(2rem, 2.5vw + 1rem, 3.5rem)"
 TEXT = ("--text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;\n"
-        "  --text-display: clamp(2.25rem, 5vw + 1rem, 5.25rem); --text-section: clamp(2rem, 2.5vw + 1rem, 3.5rem);")
+        "  --text-display: %s; --text-section: %s;" % (DISPLAY_CLAMP, SECTION_CLAMP))
 MOTION = ("--ease-out: cubic-bezier(0.22, 1, 0.36, 1); --ease-in: cubic-bezier(0.64, 0, 0.78, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);\n"
           "  --dur-fast: 120ms; --dur-base: 240ms; --dur-slow: 600ms;  /* motion.md: micro 100-150, layout 200-300, reveal 500-800 */")
 
@@ -379,61 +340,154 @@ def emit_shadcn(d, light, dark, shape=None):
 """
 
 
-def load(args):
-    if "--json" in args:
-        return json.load(open(args[args.index("--json") + 1]))
-    raw = json.load(open(DIRS))
-    items = raw if isinstance(raw, list) else raw["directions"]
-    if "--list" in args:
-        print(", ".join(x["id"] for x in items))
-        sys.exit(0)
-    vals = {args[args.index(f) + 1] for f in ("--out", "--only", "--shape") if f in args and args.index(f) + 1 < len(args)}
-    ids = [a for a in args if not a.startswith("--") and a not in vals]
-    if not ids:
-        print(__doc__)
-        sys.exit(2)
-    for x in items:
-        if x["id"] == ids[0]:
-            return x
-    print("unknown direction: %s (try --list)" % ids[0])
+FILES = {"css": "tokens.css", "tailwind": "tailwind-theme.css", "shadcn": "shadcn-globals.css"}
+COLOR_KEYS = ("ground", "surface", "ink", "muted", "accent", "accentInk")
+
+
+def die(msg):
+    sys.stderr.write("error: %s\n" % msg)
     sys.exit(2)
 
 
-def main():
-    args = sys.argv[1:]
-    d = load(args)
-    out = args[args.index("--out") + 1] if "--out" in args else None
-    only = (args[args.index("--only") + 1] if "--only" in args else "css,tailwind,shadcn").split(",")
-    shape = args[args.index("--shape") + 1] if "--shape" in args and args.index("--shape") + 1 < len(args) else None
-    if "--shape" in args and shape not in SHAPES:
-        print("--shape must be one of: %s" % ", ".join(SHAPES))
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        die("%s (run with --help)" % message)
+
+
+def directions():
+    raw = json.load(open(DIRS, encoding="utf-8"))
+    return raw if isinstance(raw, list) else raw["directions"]
+
+
+def check_colors(d, src):
+    """Every colour must be hex. #rgba / #rrggbbaa: the alpha is dropped with a warning (tokens are opaque)."""
+    def one(key, v):
+        if not isinstance(v, str) or not is_hex(v):
+            hint = " (oklch()/rgb()/hsl() are not read here: convert to hex first)" if isinstance(v, str) and "(" in v else ""
+            die("%s: %s is %r, not a hex colour%s; use #rgb or #rrggbb" % (src, key, v, hint))
+        if has_alpha(v):
+            print("warning: %s: %s %s has alpha; tokens are opaque, using %s" % (src, key, v, norm_hex(v)), file=sys.stderr)
+        return norm_hex(v) if len(v.lstrip("#")) in (4, 8) else (v if v.startswith("#") else "#" + v)
+    for k in COLOR_KEYS + ("cardInk", "cardMuted"):
+        if d.get(k) is not None:
+            d[k] = one(k, d[k])
+    d["tints"] = [one("tints[%d]" % i, t) for i, t in enumerate(d["tints"])]
+    return d
+
+
+def load_json(path):
+    """A token file with the keys of a directions.json entry. id / name default to the file name; type keys
+    (display, body, dw, track, radius, btn) default to a plain sans set."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+    except FileNotFoundError:
+        die("--json %s: no such file (check the path)" % path)
+    except (OSError, UnicodeDecodeError) as e:
+        die("--json %s: cannot read (%s)" % (path, e))
+    except ValueError as e:
+        die("--json %s: not valid JSON (%s)" % (path, e))
+    if isinstance(d, dict) and isinstance(d.get("directions"), list) and len(d["directions"]) == 1:
+        d = d["directions"][0]
+    if not isinstance(d, dict):
+        die("--json %s: expected one object with the keys of a directions.json entry" % path)
+    missing = [k for k in COLOR_KEYS + ("tints",) if k not in d]
+    if missing:
+        die("--json %s: missing %s (a token file needs %s, tints: 4 hex fills)" % (path, ", ".join(missing), ", ".join(COLOR_KEYS)))
+    if not isinstance(d["tints"], list) or len(d["tints"]) != 4:
+        die("--json %s: tints must be a list of 4 hex colours" % path)
+    stem = os.path.splitext(os.path.basename(path))[0]
+    d = dict(d)
+    d.setdefault("id", stem)
+    d.setdefault("name", d["id"])
+    for k, v in (("display", "Inter"), ("body", "Inter"), ("dw", 700), ("track", "-0.02em"), ("radius", 8), ("btn", "round")):
+        d.setdefault(k, v)
+    try:
+        int(d["radius"])
+    except (TypeError, ValueError):
+        die("--json %s: radius must be a number of px, got %r" % (path, d["radius"]))
+    return check_colors(d, "--json " + path)
+
+
+def parse(argv):
+    ap = Parser(prog="export_tokens.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("id", nargs="?", help="direction id (see --list)")
+    ap.add_argument("--json", metavar="FILE", help="token file with the keys of a directions.json entry")
+    ap.add_argument("--out", metavar="DIR", help="write the files into DIR (default: print to stdout)")
+    ap.add_argument("--only", metavar="LIST", help="comma list of css,tailwind,shadcn")
+    ap.add_argument("--shape", metavar="SHAPE", help="soft|mixed|sharp")
+    ap.add_argument("--list", action="store_true", help="list direction ids")
+    ap.add_argument("--print-dark", action="store_true", help="print the derived dark theme as JSON")
+    a, extra = ap.parse_known_args(argv)
+    if extra:
+        die("unexpected argument %r (one direction id; flags: --out, --only, --shape, --json, --list, --print-dark)" % extra[0])
+    return a
+
+
+def load(a):
+    if a.list:
+        print(", ".join(x["id"] for x in directions()))
+        sys.exit(0)
+    if a.json:
+        if a.id:
+            die("give a direction id or --json FILE, not both")
+        return load_json(a.json)
+    if not a.id:
+        print(__doc__)
         sys.exit(2)
+    for x in directions():
+        if x["id"] == a.id:
+            return dict(x)
+    die("unknown direction: %s (try --list)" % a.id)
+
+
+def main(argv=None):
+    a = parse(sys.argv[1:] if argv is None else argv)
+    if a.shape is not None and a.shape not in SHAPES:
+        die("--shape must be one of: %s (got %r)" % (", ".join(SHAPES), a.shape))
+    only = None
+    if a.only is not None:
+        only = [k.strip() for k in a.only.split(",") if k.strip()]
+        bad = [k for k in only if k not in FILES]
+        if bad or not only:
+            die("--only %r: choose from %s, comma-separated" % (a.only, ",".join(FILES)))
+    d = load(a)
+    out, shape = a.out, a.shape
     dark_is_default = lum(d["ground"]) < 0.2
     if dark_is_default:
         dark_t, light_t = light_theme(d), derive_light_from_dark(d)
     else:
         light_t, dark_t = light_theme(d), derive_dark(d)
     light_t, dark_t = roles(light_t, False, "light"), roles(dark_t, True, "dark")
-    if "--print-dark" in args:
+    if a.print_dark:
         u = dark_t
         print(json.dumps(dict(ground=u["ground"], surface=u["surface"], ink=u["ink"], muted=u["muted"],
                               accent=u["accent"], accentInk=u["accent_ink"], tints=u["tints"], dark=True)))
-        return
+        return 0
     cards = light_t["cards_opposite"] or dark_t["cards_opposite"]
-    files = {"css": ("tokens.css", emit_css(d, light_t, dark_t, dark_is_default, shape)),
-             "tailwind": ("tailwind-theme.css", emit_tailwind(d, cards)),
-             "shadcn": ("shadcn-globals.css", emit_shadcn(d, light_t, dark_t, shape))}
+    files = {"css": (FILES["css"], emit_css(d, light_t, dark_t, dark_is_default, shape)),
+             "tailwind": (FILES["tailwind"], emit_tailwind(d, cards)),
+             "shadcn": (FILES["shadcn"], emit_shadcn(d, light_t, dark_t, shape))}
     report = sys.stdout
     if out:
-        os.makedirs(out, exist_ok=True)
-        for k in only:
-            name, body = files[k]
-            open(os.path.join(out, name), "w").write(body)
-            print("wrote", os.path.join(out, name))
+        try:
+            os.makedirs(out, exist_ok=True)
+            for k in only or list(FILES):
+                name, body = files[k]
+                with open(os.path.join(out, name), "w", encoding="utf-8") as f:
+                    f.write(body)
+                print("wrote", os.path.join(out, name))
+        except OSError as e:
+            die("cannot write into %s (%s)" % (out, e))
     else:
         report = sys.stderr  # stdout carries the CSS only, so `> tokens.css` stays clean
-        sys.stdout.write(files["css"][1])
-        print("(printed tokens.css; nothing written. Pass --out DIR to write %s)" % ", ".join(files[k][0] for k in only), file=report)
+        if only is None:
+            sys.stdout.write(files["css"][1])
+            print("(printed tokens.css; nothing written. Pass --out DIR to write %s)" % ", ".join(FILES.values()), file=report)
+        else:
+            for k in only:
+                sys.stdout.write("/* ===== %s ===== */\n%s" % files[k])
+            print("(printed %s; nothing written. Pass --out DIR to write files)" % ", ".join(files[k][0] for k in only), file=report)
     fails = 0
     for name, t in (("light", light_t), ("dark", dark_t)):
         for n, label, r, need, passed in checks(name, t):
@@ -443,8 +497,8 @@ def main():
     for n in NOTES:
         print("note  " + n, file=report)
     print("contrast: %s" % ("all pairs pass" if not fails else "%d pair(s) fail; adjust the direction's colors" % fails), file=report)
-    sys.exit(1 if fails else 0)
+    return 1 if fails else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

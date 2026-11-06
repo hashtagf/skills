@@ -5,46 +5,43 @@
  *
  * Usage:
  *   node fold_check.js <url-or-file> [--cta ".selector"] [--offer ".selector"] [--next ".selector"]
- *                      [--sizes 1440x900,390x844] [--out dir] [--wait 800]
+ *                      [--sizes 1440x900,390x844] [--out dir] [--wait 800] [--timeout 30000] [-h|--help]
  *
  * Defaults: --cta is the first a.btn-primary / button.btn-primary / [data-cta] inside the first
  * <section>, <header> or the first child of <main>; failing that, the first visible a.btn / button-class
  * link, <button>, then <a href> there (outside nav menus); --next is the first heading of the second <section>.
  * Per size: FAIL when the CTA's bottom edge is below the fold; NOTE when nothing of the next section
  * shows and the hero does not end at least 24px above the fold; NOTE when no offer is visible.
- * Screenshots: <out>/fold-<width>.png (default out: render-check next to a local page).
- * Exit 1 on any FAIL, 3 when no browser is available (report "not tested"). A missing file or a
- * refused / unreachable URL prints "ERROR <reason>" and exits 1.
+ * Screenshots: <out>/fold-<width>.png (default out: render-check/ next to a local page; for a URL a new
+ * temp folder <os temp>/ux-ui-fold-check/<host>-<time>, printed).
+ * Exit 1 on any FAIL, 3 when no browser is available (NOT RUN). A refused / unreachable URL prints
+ * "ERROR <reason>" and exits 1; a slow load only WARNs. A missing file or a bad option prints "error: …" and exits 2.
  */
 const path = require('path');
 const fs = require('fs');
-const args = process.argv.slice(2);
-if (!args[0] || args[0].startsWith('--')) { console.error('usage: node fold_check.js <url-or-file> [--cta sel] [--offer sel] [--next sel] [--sizes 1440x900,390x844] [--out dir]'); process.exit(2); }
-const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-if (!/^[a-z]+:\/\//i.test(args[0]) && !fs.existsSync(path.resolve(args[0]))) { console.log(`ERROR file not found: ${path.resolve(args[0])}`); process.exit(1); }
-const { findModule, findBrowser } = require('./_pw');
-const mod = findModule(args[0]);
-const exe = mod ? findBrowser(mod.chromium) : undefined;
-if (!mod || exe === undefined) { console.log('NOT TESTED: fold check skipped (no Playwright module or browser).'); process.exit(3); }
+const A = require('./_args');
+const pw = require('./_pw');
+const a = A.parse(process.argv.slice(2), {
+  file: __filename, values: ['--cta', '--offer', '--next', '--sizes', '--out', '--wait', '--timeout'], positional: [1, 1, '<url-or-file>'],
+});
+const arg0 = a._[0];
+const target = pw.target(arg0);
+const sizes = a.list('--sizes', null, ['1440x900', '390x844']).map(s => s.split('x').map(Number));
+if (sizes.some(s => s.length !== 2 || s.some(n => !Number.isInteger(n) || n < 100))) A.usageError(`--sizes ${a.get('--sizes')} is not WIDTHxHEIGHT,…`, 'e.g. --sizes 1440x900,390x844');
+const wait = a.num('--wait', 800, { min: 0 });
+const timeout = a.num('--timeout', 30000, { min: 1 });
+const sel = { cta: a.get('--cta', ''), offer: a.get('--offer', ''), next: a.get('--next', '') };
+const env = pw.need(arg0, 'fold check');
+const out = A.outFor({ given: a.get('--out'), target: arg0, script: 'fold-check', folder: 'render-check' });
+if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
 
-const isUrl = /^[a-z]+:\/\//i.test(args[0]);
-const target = isUrl ? args[0] : 'file://' + path.resolve(args[0]);
-const out = opt('--out', isUrl ? 'render-check' : path.join(path.dirname(path.resolve(args[0])), 'render-check'));
-const sizes = opt('--sizes', '1440x900,390x844').split(',').map(s => s.split('x').map(Number));
-const wait = Number(opt('--wait', '800'));
-const sel = { cta: opt('--cta', ''), offer: opt('--offer', ''), next: opt('--next', '') };
-
-(async () => {
+A.main(async () => {
   fs.mkdirSync(out, { recursive: true });
-  const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
+  const browser = await pw.launch(env);
   let fails = 0;
   for (const [w, h] of sizes) {
     const page = await browser.newPage({ viewport: { width: w, height: h } });
-    try { await page.goto(target, { waitUntil: 'load', timeout: 30000 }); }
-    catch (e) {
-      if (e && e.name === 'TimeoutError') console.log(`WARN  load did not finish in 30000ms; checking what rendered`);
-      else { console.log(`ERROR could not load ${target}: ${String(e && e.message || e).split('\n')[0]}`); await browser.close(); process.exit(1); }
-    }
+    await pw.goto(page, target, { timeout, browser });
     await page.waitForTimeout(wait);
     await page.evaluate(() => new Promise(r => { scrollTo({ top: 0, behavior: 'instant' }); requestAnimationFrame(() => requestAnimationFrame(r)); }));
     const r = await page.evaluate(sel => {
@@ -102,4 +99,4 @@ const sel = { cta: opt('--cta', ''), offer: opt('--offer', ''), next: opt('--nex
   }
   await browser.close();
   process.exit(fails ? 1 : 0);
-})();
+});

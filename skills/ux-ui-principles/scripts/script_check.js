@@ -2,7 +2,7 @@
 /*
  * Static script check for built pages, no browser needed (Node only).
  *
- * Usage: node script_check.js page.html [more.html ...]
+ * Usage: node script_check.js page.html [more.html ...] [-h|--help]
  *
  * For each page: every inline <script> (except JSON / templates) and every local <script src>
  * is compiled with Node's parser (syntax errors fail), and top-level declarations are checked
@@ -11,7 +11,9 @@
  * so the page silently loses its charts or handlers. Fix: wrap the script in an IIFE / block, or rename.
  *
  * Module scripts (type="module") are compiled as modules and are exempt from the global-name check.
- * Exit code 1 when any problem is found. Use render_check.js as well when a browser is available:
+ * Top-level names are found by V8's own parser, so destructuring (const {top, left} = …, let [a, name] = …,
+ * nested or renamed {x: top}) is caught like a simple name.
+ * Exit code 1 when any problem is found; 2 for a missing file or a bad option. Use render_check.js as well when a browser is available:
  * it catches runtime errors this static check cannot see.
  */
 const fs = require('fs');
@@ -46,35 +48,25 @@ function scriptsOf(file) {
   return out;
 }
 
-// Top-level declarations: strip strings/comments roughly, then track brace depth.
-function topLevelNames(code) {
-  const clean = code.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/.*$/gm, '$1')
-    .replace(/`(?:\\[\s\S]|[^`\\])*`/g, '""').replace(/"(?:\\.|[^"\\\n])*"/g, '""').replace(/'(?:\\.|[^'\\\n])*'/g, "''");
-  const names = [];
-  let depth = 0;
-  const tokens = clean.split(/(\{|\}|\n)/);
-  let buf = '';
-  for (const t of tokens) {
-    if (t === '{') { if (depth === 0) collect(buf); buf = ''; depth++; continue; }
-    if (t === '}') { depth = Math.max(0, depth - 1); continue; }
-    if (depth === 0) buf += t;
+// Top-level names that clash with window globals, found by the parser itself: compile `let <name>;` in front of
+// the script; V8 reports "Identifier '<name>' has already been declared" exactly when the script declares <name>
+// at top level, in any form (const/let/var/class/function, destructuring {top}, [a, name], nested or renamed
+// {x: top}), and never for names in inner blocks or functions, or property keys ({top: x} declares x).
+function globalClashes(code) {
+  const found = [];
+  for (const n of WINDOW_NAMES) {
+    if (!new RegExp(`\\b${n}\\b`).test(code)) continue;
+    try { new vm.Script(`let ${n};\n${code}`); }
+    catch (e) { if (e instanceof SyntaxError && e.message.includes(`'${n}' has already been declared`)) found.push(n); }
   }
-  collect(buf);
-  function collect(s) {
-    const re = /(?:^|[;\s(])(const|let|var|class|function\*?)\s+([A-Za-z_$][\w$]*)|(?:^|[;\s])(?:const|let|var)\s*\{([^}]*)\}/g;
-    let m;
-    while ((m = re.exec(s))) { if (m[2]) names.push(m[2]); }
-    const multi = /(?:^|[;\s])(?:const|let|var)\s+([^;]+)/g;
-    while ((m = multi.exec(s))) {
-      m[1].split(',').forEach((part) => { const n = /^\s*([A-Za-z_$][\w$]*)\s*(=|$)/.exec(part); if (n) names.push(n[1]); });
-    }
-  }
-  return [...new Set(names)];
+  return found;
 }
 
+const A = require('./_args');
+const a = A.parse(process.argv.slice(2), { file: __filename, positional: [1, Infinity, 'page.html (one or more)'] });
+for (const f of a._) if (!fs.existsSync(f) || !fs.statSync(f).isFile()) A.usageError(`file not found: ${path.resolve(f)}`, 'check the path');
 let problems = 0;
-for (const file of process.argv.slice(2)) {
-  if (!fs.existsSync(file)) { console.log(`MISSING ${file}`); problems++; continue; }
+for (const file of a._) {
   const scripts = scriptsOf(file);
   const issues = [];
   for (const s of scripts) {
@@ -87,7 +79,7 @@ for (const file of process.argv.slice(2)) {
       continue;
     }
     if (!s.module) {
-      const clash = topLevelNames(s.code).filter((n) => WINDOW_NAMES.has(n));
+      const clash = globalClashes(s.code);
       if (clash.length) issues.push(`${s.where} declares global ${clash.map((n) => `'${n}'`).join(', ')}, which clash${clash.length > 1 ? '' : 'es'} with window.${clash[0]}: wrap the script in an IIFE or rename`);
     }
   }

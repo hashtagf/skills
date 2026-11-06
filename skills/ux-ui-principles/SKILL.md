@@ -133,7 +133,8 @@ page must look designed, and this skill holds the examples that show how:
    `assets/market/`, `scripts/market_fetch.js`). Recommend it when `look.py <kind>`
    prints no market study.
 2. **Look before you build.** Run `python3 scripts/look.py <kind> [--direction <id>]`
-   (kind: landing, cafe, clinic/dental, saas, dashboard, deck, mobile, portfolio …) and open **every**
+   (kind: landing, cafe, clinic/dental, saas, dashboard, deck, report, cover, mobile, portfolio …; Thai words
+   such as คาเฟ่, หลังบ้าน, สไลด์, รายงาน work; document/invoice/resume print the nearest kinds; `--kinds` lists all) and open **every**
    image it lists: real designed pages of your kind, the market study's sites and facts when
    one exists, then the direction's preview and its product UI. Name in the answer which you looked at and the one move you take from
    them. When it lists fewer than three pages of your kind and no market study, run the

@@ -236,7 +236,7 @@ uppercase labels 6% vs 43%, gradient fills 22% vs 52%. Hero headlines: median
 ## Report format (optional)
 
 When the user wants a shareable review, produce the report from your findings with
-`python3 scripts/review_report.py findings.json --out review.html` (`--template` prints an example): one score per
+`python3 scripts/review_report.py findings.json` (writes `review.html` next to findings.json; `--out` elsewhere; `--template` prints an example): one score per
 criterion of §3 or §4 (0–10, the same criterion score as the rubric) with its band (0-4 Broken, 5-6 Functional, 7-8 Strong, 9-10 Exceptional; the 90+/85/70 bands above apply to the 100-point totals), evidence that cites elements, a radar
 chart, then three lists: **Keep** (do not touch), **Fix** (P0/P1, costly) and **Quick wins** (5 to 15 minutes, big effect).
 Do not average dimensions away: a 9 and a 4 stay visible. The score itself comes from the rubric above; the report only
