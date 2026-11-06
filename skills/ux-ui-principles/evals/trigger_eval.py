@@ -37,7 +37,7 @@ SHOULD = [
     "Pick a chart for showing weekly refunds by reason and say how to color it.",
 ]
 # A more specific installed skill that is also a correct pick for a `should` prompt; counted as PASS, shown as "alt".
-ALT = {"Pick a chart for showing weekly refunds by reason and say how to color it.": ["dataviz"]}
+ALT: dict[str, list[str]] = {}
 
 SHOULD_NOT = [
     "Write a Python function that parses ISO 8601 dates with timezones.",

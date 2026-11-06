@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """Static state-coverage scan: which required UI states have any marker in the source.
 
-Usage: python3 scripts/state_check.py <dir-or-file> [--json] [--need loading,empty,error,...]
+Usage: python3 scripts/state_check.py <dir-or-file> [--json] [--need loading,empty,error,...] [--per-file] [--matrix]
+
+--matrix: print a surface × state Markdown table (one row per source file), each cell
+"Manual (marker)" or "missing", ready to paste into the review report.
+
+--per-file: every file that fetches data must carry its own loading, error and empty
+markers; forms need a busy/disabled state (and an unsaved-changes guard when long);
+search/filter inputs need a no-match state; polling needs a refetch marker; an error
+state needs a retry path. One mention elsewhere in the project does not count.
 
 Looks for loading, empty, error, disabled, focus, selected, submitting, success,
 hover, plus offline/permission when asked. A hit means a marker exists somewhere,
@@ -39,6 +47,45 @@ def files(path):
                 yield os.path.join(d, f)
 
 
+FETCH = r"\bfetch\(|useQuery|useSWR|axios|\$fetch|useFetch|\bload\s*\(|createResource"
+RULES = [
+    # (applies-when, required, message)
+    (FETCH, STATES["loading"], "fetches data but has no loading marker"),
+    (FETCH, STATES["error"], "fetches data but has no error marker"),
+    (FETCH, STATES["empty"], "fetches data but has no empty marker"),
+    (r"<form|onSubmit|on:submit|@submit", r"disabled|isSubmitting|submitting|aria-busy|isPending", "form without a busy/disabled state while submitting"),
+    (r"type=[\"']?search|role=[\"']?search|(name|id)=[\"'][\w-]*(search|filter)|class=[\"'][^\"']*\bfilters?\b|[?&]q=", r"no[\s_-]?(match|results)|nothing found|ไม่พบ|(reset|clear) (filters|search)|empty[\s_-]?for", "search/filter without a no-match state"),
+    (r"refetchInterval|setInterval\([^)]*fetch|polling", r"isFetching|isRefetching|stale|updated[\s_-]?at|last[\s_-]?updated", "polling/refetch without a refreshing or stale marker"),
+    (r"isError|\bfetch\([^;]*\)\s*\.catch\(|\.then\([^;]*\.catch\(|failed to (load|fetch)|โหลด.{0,10}ไม่สำเร็จ", r"retry|try again|refetch|reload|ลองอีกครั้ง", "error state without a retry path"),
+]
+
+
+def per_file(path):
+    gaps = []
+    for f in files(path):
+        if f.endswith(".css"):
+            continue
+        try:
+            text = open(f, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        # fold in local scripts and relative imports: a page's states often live in its module
+        base = os.path.dirname(f)
+        for ref in re.findall(r"<script[^>]+src=[\"']([^\"':]+)[\"']|from\s+[\"'](\.{1,2}/[^\"']+)[\"']|import\([\"'](\.{1,2}/[^\"']+)[\"']\)", text):
+            r = next(x for x in ref if x)
+            for cand in (r, r + ".js", r + ".ts", r + ".tsx", r + ".jsx", os.path.join(r, "index.ts")):
+                q = os.path.normpath(os.path.join(base, cand))
+                if os.path.isfile(q):
+                    text += "\n" + open(q, encoding="utf-8", errors="replace").read()
+                    break
+        for when, need, msg in RULES:
+            if re.search(when, text, re.I) and not re.search(need, text, re.I):
+                gaps.append({"file": f, "gap": msg})
+        if len(re.findall(r"<textarea\b|<input\b(?![^>]*type=[\"']?(search|checkbox|radio|hidden|submit|button))", text, re.I)) >= 6 and not re.search(r"isDirty|beforeunload|unsaved", text, re.I):
+            gaps.append({"file": f, "gap": "long form without an unsaved-changes guard"})
+    return gaps
+
+
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     need = DEFAULT
@@ -48,6 +95,29 @@ def main(argv):
     if not args:
         print(__doc__)
         return 2
+    if "--matrix" in argv:
+        print("| Surface | " + " | ".join(need) + " |")
+        print("|---|" + "---|" * len(need))
+        for f in files(args[0]):
+            if f.endswith(".css"):
+                continue
+            try:
+                text = open(f, encoding="utf-8", errors="replace").read()
+            except OSError:
+                continue
+            cells = ["Manual (marker)" if re.search(STATES[s], text, re.I) else "missing" for s in need]
+            print(f"| {os.path.relpath(f, args[0]) if os.path.isdir(args[0]) else os.path.basename(f)} | " + " | ".join(cells) + " |")
+        print("\nMarker present != state verified: render each cell before marking it Ran.")
+        return 0
+    if "--per-file" in argv:
+        gaps = per_file(args[0])
+        if "--json" in argv:
+            print(json.dumps({"gaps": gaps, "note": "Static markers only; label results Manual."}, indent=2, ensure_ascii=False))
+        else:
+            for g in gaps:
+                print(f"  GAP {g['file']}: {g['gap']}")
+            print(f"{len(gaps)} gap(s). Static markers only; label results Manual.")
+        return 1 if gaps else 0
     hits = {s: [] for s in need}
     n = 0
     for f in files(args[0]):

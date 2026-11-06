@@ -2,7 +2,7 @@
 
 For projects using shadcn/ui. Run the CLI through the project's runner
 (`npx shadcn@latest`) and read `info` for base (radix vs base), icon library and
-aliases first. Source: the shadcn skill.
+aliases first.
 
 ## 1. Critical rules
 

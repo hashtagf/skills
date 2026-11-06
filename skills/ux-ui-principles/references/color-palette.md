@@ -44,6 +44,18 @@ Rules:
 - **Neutrals carry a slight hue** toward the accent; pure grey looks unconsidered.
 - **Accent is not a status.** Don't use the brand color to mean success.
 
+## Colour posture — declare one before code
+
+| Posture | Rule |
+|---|---|
+| Restrained (default) | Accent ≤ 5 % of any viewport |
+| Committed | One colour on 30–60 % of the surface via a field/paper token; the accent stays a signal |
+| Full palette | 3–4 named roles, each with a job |
+| Drenched | The surface is the colour |
+
+A declared surface colour is not accent footprint; undeclared sprawl is. Record the
+posture in DESIGN.md.
+
 ## Choosing the accent
 
 - Start from brand or domain meaning (finance: trust, calm; health: clean,
@@ -54,6 +66,13 @@ Rules:
   [tokens-export.md](tokens-export.md)) and accent fills, icons and UI components 3:1 against the ground; on-accent text on accent fills meets 4.5:1. [S03, S04]
 - Prepare an accent-soft tint for selected rows and highlights that still keeps
   text at 4.5:1.
+
+- **Budget.** About 60 % neutral ground, 30 % secondary tone, ≤10 % accent. Grey builds
+  structure; colour carries meaning.
+- **Palette against the subject.** A palette is proportions (ground, ink, accent, fields)
+  as much as hues. If the hues fight the subject's material, swap once. If the subject
+  has unmistakable colours of its own, keep the proportions, take the hues from the
+  subject, and say so.
 
 ## Contrast requirements to check
 
@@ -144,6 +163,10 @@ and follow §"Roles before hues".
   try/catch) and is applied before first paint to avoid a flash.
   Token blocks: base `:root`, `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])`,
   and `:root[data-theme="dark"]`, so the switch wins in both directions.
+
+**Deriving dark from light:** body weight drops one step (−50); accent chroma −0.02 to
+−0.04 and L +5–10; drop shadows off, elevation by lightness or an inset hairline; never
+`filter` raster images.
 
 ### Dark pages for light directions
 - Derive, then check: `python3 scripts/export_tokens.py <id> --print-dark` (see [tokens to code](tokens-export.md)); every pair passes AA.

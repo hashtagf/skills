@@ -3,8 +3,7 @@
 How strict each rule is (rule classes), who reviews and how much verification
 to spend. This file owns the rule classes (Floor, Reflex, Finish); the device list itself is owned by
 [design quality](design-quality.md) §2; "tier" elsewhere means the rigor tier (Light / Standard / Critical,
-[framework](framework.md)). Source studies: Hallmark gates (S97), Impeccable
-refine/redesign rules (S96); see [sources](sources.md).
+[framework](framework.md)).
 
 ## 1. Three rule classes for every rule
 

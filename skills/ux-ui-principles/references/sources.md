@@ -19,7 +19,7 @@ research agent verified S25–S32 and S36. S28 was abstract-only; do not imply
 review of full experimental methods. Dynamic or inaccessible platform pages
 were excluded rather than cited as if read. Recheck sources for updates when
 making current or exact claims. S94-S95 were fetched by a research agent and
-their quotes are not independently re-verified; S96-S101 are described from a
+their quotes are not independently re-verified; S101 is described from a
 user-supplied guide, not opened or verified. Treat both as context, not hard rules.
 
 ## Evidence discipline
@@ -173,11 +173,6 @@ baymard.com and notifications.service.gov.uk were blocked and are **partial**.
 | S93 | [ARIA APG patterns](https://www.w3.org/WAI/ARIA/apg/patterns/): accordion, alert, alertdialog, breadcrumb, button, carousel, checkbox, combobox, dialog-modal, disclosure, feed, grid, link, listbox, menu-button, menubar, meter, radio, slider, spinbutton, switch, table, tabs, toolbar, tooltip, treegrid, treeview, landmarks | verified (w3c/aria-practices source, 2026-09-29 commit) | W3C WAI note, non-normative; keys are recommended conventions, many optional. Tooltip pattern is work in progress without consensus. "Not for site navigation" guidance comes from the navigation menubar and disclosure navigation examples. Sliders carry a touch-AT warning |
 | S94 | [Material 3 — Navigation bar guidelines](https://m3.material.io/components/navigation-bar/guidelines), accessed 2026-11-04 | fetched by research agent; quotes not independently re-verified | Google platform guidance: 3–5 destinations, keep labels, short labels, use a rail or drawer beyond five |
 | S95 | [Apple HIG — Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars), accessed 2026-11-04 | fetched by research agent; quotes not independently re-verified | Apple platform guidance: tabs for navigation not actions, avoid overflow tabs, don't hide or disable tabs, short labels |
-| S96 | Impeccable (Paul Bakaus), agent design skill — described in a user-supplied guide, 2026-11-04 | not independently verified | Design-command vocabulary (critique, audit, polish, bolder, quieter, distill, typeset, layout, colorize, animate, harden, adapt, optimize, clarify); deterministic AI-UI anti-pattern rules; separate review from build |
-| S97 | Hallmark (Nutlope), agent design skill — described in a user-supplied guide, 2026-11-04 | not independently verified | Structural variety by job, one strong idea, anti-AI-slop checks, render-based validation, respect existing design |
-| S98 | Taste Skill (Leon Lin), agent design skill — described in a user-supplied guide, 2026-11-04 | not independently verified | Brief → design direction → build → multi-viewport render critique; design variance / motion intensity / visual density dials |
-| S99 | Hue (Dominik Martin), brand-to-design-language skill — described in a user-supplied guide, 2026-11-04 | not independently verified | Extract design philosophy from a brand/site/references into tokens, type, spacing, components, light/dark; validator for the generated language |
-| S100 | Interface Design, product-UI skill — described in a user-supplied guide, 2026-11-04 | not independently verified | Decision memory in `.interface-design/system.md`; consistent padding/radius/density across sessions |
 | S101 | Google Labs DESIGN.md draft for Stitch (announced April 2026) — described in a user-supplied guide, 2026-11-04 | not independently verified | Portable design-rules file that keeps reasons, not only CSS values |
 | S103 | `vietit2002/enterprise-admin-ui` agent skill (skills.sh), read 2026-11-05 | secondary; rules tagged from SAP Fiori / Ant Design / Carbon, not re-verified | Permission treatment (hide/disable+reason/explain/waiting-for), field-level read-only and masked reveal, impersonation banner, feedback timing table, import specifics, rendered admin audit by page type, URL-reachable states |
 | S104 | `radianceskills-dev/enterprise-ui-no-slop` agent skill, read 2026-11-05 | secondary; Fiori floorplan summary | Worklist vs list report; status as a domain fact; five distinct empties |

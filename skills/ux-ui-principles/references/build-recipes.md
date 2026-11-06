@@ -60,8 +60,8 @@ primary action are all visible, with the slot not above the headline.
 - **No pictures yet:** a flat `data-slot` field in a *neutral* token
   (`--paper-3`), labelled for assistive tech (`role="img" aria-label="Space for
   the team photo"`), with a one-line script that swaps in a real image later.
-  A large accent-colour fill as a stand-in trips the "accent ≤ 5% of viewport"
-  check of an external linter (Hallmark sloplint, not `slop_check.py`); reserve accent for actions and state.
+  A large accent-colour fill as a stand-in breaks the restrained posture's "accent ≤ 5% of viewport"
+  ([color palette](color-palette.md) "Colour posture"); reserve accent for actions and state.
 - **No numbers yet:** show `—` in stat tiles. Never fill them to look busy.
 - **Sample rows:** name them "Sample Person A", use `example.com` / `.example`
   addresses and add a visible "Sample data for illustration" line.
@@ -113,10 +113,9 @@ State in the hand-off that the address is a placeholder and what replaces it
 5. If `render_check.js --doctor` exits 3 (no Playwright browser) and no fallback runs, report
    *render step not run*; do not claim it passed.
 
-Warnings seen on first builds from external linters such as Hallmark sloplint
-(`slop_check.py` and `contrast.py` do not emit these), worth fixing early: straight quotes in
+Common first-build slips, worth fixing early (`slop_check.py` notes the first three): straight quotes in
 prose (use ’ “ ”), no `:disabled` / `aria-disabled` style on buttons, more than
-one filled-button recipe (derive variants from one `.btn`), large accent fills.
+one filled-button recipe (derive variants from one `.btn`), large accent fills outside a declared posture.
 
 ## 7. Back-office preview before back-office code
 

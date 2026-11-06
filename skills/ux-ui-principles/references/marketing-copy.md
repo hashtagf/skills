@@ -52,6 +52,11 @@ page; leave that proof out instead ("Pages with no proof yet" below). Claims han
   nearest competitor's name; if the headline still works, it says the category.
 - Put the audience in only when it qualifies the reader ("for software companies").
 
+**First screen answers the visitor's first question** in large type. Event: what, when,
+where; the date goes in the headline or at the second size. Product: what it is and what it
+does or costs. Person: who and what they do. A bare-name h1 needs a plain line under it
+(≥18px) saying what it is.
+
 ## 2. Subheadline
 
 The subheadline does one job the headline didn't. Observed jobs:
@@ -165,6 +170,14 @@ A formula filled with adjectives is still filler; the slot must hold a fact.
   the glossary ([content-design.md](content-design.md)).
 - **Don't** ship a /th page in English, or English section labels on a Thai page
   without reason.
+
+**Copy tells.**
+- Say each fact once; a price or time repeated in four sections is filler. A section's last
+  line never restates its heading.
+- Few em/en dashes in page copy; prefer a comma, colon or full stop (Reflex, waivable).
+- No "Not X. Y." rebuttal cadence; no "not just X, it's Y".
+- No rotated labels, scroll cues, BETA pills or locale/weather strips as decoration.
+- A link with no known URL points to the in-page section that does that job; never invent a route.
 
 ## 8. Filler → specific
 

@@ -2,10 +2,8 @@
 
 Separate building from reviewing. Name the problem precisely before fixing
 it; "make it nicer" is not a fix. Review the **render**, not the code alone
-([render verification](render-verification.md)). The verb vocabulary and the
-split between review and build are adapted from Impeccable's command set and
-its deterministic anti-pattern rules (S96); `scripts/slop_check.py` is this
-skill's own detector.
+([render verification](render-verification.md)). `scripts/slop_check.py` is this skill's
+anti-pattern detector.
 
 ## 1. Refinement verbs
 
@@ -28,6 +26,41 @@ change only what that verb covers, and check its result.
 | adapt | Mobile/tablet poor | Reflow, touch targets, nav collapse | 320 px and 200% zoom usable |
 | optimize | Slow | Image sizes, lazy load, skeletons, bundle | LCP/INP/CLS measured, not guessed |
 | clarify | Copy confuses | Labels, errors, empty states, glossary | One name per object/status — [content design](content-design.md) |
+| delight | Works but feels flat at a real emotional moment | One small moment tied to success or first value | Skippable; repeat use is not slower; nothing on error, payment or delete |
+
+### 1a. Verb playbooks
+
+**Before any verb.** State the scope in one line: what changes, what must stay. Ask one
+question only if the verb lacks an input: bolder/quieter → target section and what stays
+untouched; polish → quality bar and deadline; colorize → existing brand colours; animate →
+performance budget; clarify → what the audience knows and how they feel at that moment.
+Refinement keeps identity, copy and behaviour. If the concept itself is wrong, say
+"redesign" and stop; do not polish a look that should be replaced.
+
+**By surface.** Marketing pages: verbs may change voice. App and reading screens: bolder
+means precision, quieter means less chrome, animate means feedback only.
+
+- **bolder.** Lift the target to the level its strongest neighbour already reaches, with the
+  system's own type scale and motif. No new colour, font, radius or shadow; if one is
+  needed, name it and ask. One decisive move, then quiet everything around it; if
+  everything got louder, the section got flatter. Skeleton test: strip the copy; the
+  structure alone still shows what leads.
+- **quieter.** List the intensity sources first (saturation, contrast, weight, motion,
+  decoration, scale). Saturation to 70–85 %, weights one step down (900→600, 700→500),
+  motion travel 10–20 px with no bounce, glows and stacked shadows removed. Keep 1–2 bold
+  anchors. Quiet is not generic: grey text on white, one weight and a grid of equal cards
+  is a failure.
+- **distill.** Name the one primary goal. Limits: 1–2 colours plus neutrals, one family,
+  3–4 sizes, 2–3 weights, one primary action. List each removed item and where users can
+  still reach it.
+- **polish.** Classify each defect: missing token · one-off (a shared component exists) ·
+  concept mismatch (flow differs from sibling screens) · local defect. Fix at the narrowest
+  correct level. Order: broken task → missing states → flow and drift → visual → code
+  cleanup. End by reading the diff for churn, dead CSS and debug output.
+- **animate.** Write a motion plan before code: one focal moment, continuity, feedback,
+  budget ([motion](motion.md)).
+- **delight.** One thesis tied to a real emotional moment (success, first value). Never on
+  error, payment or deletion; skippable; must not slow repeat use.
 
 ### Product-UI polish pass
 
@@ -68,6 +101,12 @@ Mapping to the scale in [validation](validation.md) and
 [templates](../assets/templates.md): blocker → Critical or High; major →
 Medium; minor → Low; note → Low (taste). In the HTML report, P0 = blocker and P1 = major. "Critical" here is a severity, not the
 Critical rigor tier ([framework](framework.md)).
+
+**Persona walk.** Walk the main task as 2–3 of: impatient power user (shortcuts, bulk
+actions) · first-timer (jargon, no undo) · keyboard / screen-reader user · stress tester
+(long, empty, rapid input, back button) · distracted one-thumb mobile user. Each red flag is
+a finding. Also check cognitive load: more than ~7 unordered choices at once, data the user
+must remember from an earlier screen, hidden navigation, two tasks demanded at once.
 
 ## 3. Visual scorecard (final score, internal rubric)
 
@@ -129,12 +168,13 @@ success · disabled / unavailable. Details per state:
 ## 7. Loop
 
 Critique → fix blockers/majors → re-render → audit → polish → re-render →
-score → report. Stop when gates pass and remaining findings are minor or
+score → report. Write the visual judgement **before** reading script output, then merge
+and note what each caught alone; a clean scan is a floor, not a pass. Stop when gates pass and remaining findings are minor or
 notes; list those as known limitations rather than silently dropping them.
 
 ## 8. Calibration and caps
 
-Keeps scores comparable and stops them drifting upward. Source: Taste Skill critique and research files (S98, see [sources](sources.md)). Not a second rubric: apply it to the two §3–4 scores and show which cap applied. The 1–5 pre-emit check in [gate tiers](gate-tiers.md) §2 is plan-only.
+Keeps scores comparable and stops them drifting upward. Not a second rubric: apply it to the two §3–4 scores and show which cap applied. The 1–5 pre-emit check in [gate tiers](gate-tiers.md) §2 is plan-only.
 
 ### 8a. Caps
 
@@ -150,6 +190,16 @@ Caps override the arithmetic:
 | No primary action on the first screen | UX 70 |
 | Anything covers a headline | UX 60 |
 | A reveal that never fires leaves a blank band | UX 50 |
+| A banned device ([design quality](design-quality.md) §2) visible in a screenshot | Visual 65 |
+| A section the brief asked for is missing or reduced to a few words | UX 60 |
+| First screen has no title saying what this is | UX 60 |
+| A section of running text has no heading | UX 70 |
+| Two or more desktop screens mostly empty, or small grey body text | Visual 65 |
+| The idea passes the competitor test (any rival could ship it) | Visual 70 |
+| Page barely moves, or every block has the same fade | Visual 70 |
+
+Self-scoring: if your first score for your own work is 85+, rescore as a reviewer who did
+not build it. Still under 75 after round 3: say so and list what is left. Never round up.
 
 ### 8b. Round report (same every round)
 

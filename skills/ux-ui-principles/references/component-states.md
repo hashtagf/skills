@@ -30,6 +30,10 @@ Rules:
 - State must survive forced-colors/high-contrast modes (borders and outlines,
   not only background tints).
 
+**Hover and timing discipline.** One hover signal per element, on the container; never
+scale the image. Nothing non-interactive reacts. Tooltip delay 800–1000 ms on hover, 0 on
+focus. Focus rings never transition. No overshoot easing on UI state.
+
 ## Feedback timing (wait states)
 
 One table so every screen waits the same way (S103; thresholds follow Nielsen's 0.1 / 1 / 10 s limits):
@@ -95,6 +99,9 @@ Every custom control exposes name, role and state/value to assistive technology
 ## Touch and native
 
 - Touch targets: web minimum 24×24 CSS px with exceptions [S07]; iOS default 44×44 pt [S74]; Android ≥48×48 dp [S78].
+- Extend small controls with a pseudo-element hit area; two hit areas never overlap.
+- Choose the input mode with `@media (pointer: coarse)` / `(hover: none)`, not viewport
+  width. Drag surfaces set `touch-action` and clear drag state on cancel and blur.
 - Native platform controls bring screen-reader and keyboard behavior; custom
   controls must replicate VoiceOver/TalkBack labels, traits and actions
   (see [mobile-native.md](mobile-native.md)).

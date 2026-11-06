@@ -134,6 +134,10 @@ the control or the fields around it. Give every field one reserved message line 
 an error causes no layout shift; in dense grids or table cells reserve it too, so inputs in one row stay on one
 baseline. A message that must wrap needs a wide enough column, not a taller row.
 
+**Form lifecycle:** pristine · dirty · validating · field error · form error ·
+submitting · success. Show async validation inline without shifting layout. Warn before
+leaving with unsaved (dirty) changes.
+
 ### 6b. Implementation contract — every built form
 
 A built form is not done until each item exists. Specify the rules per field

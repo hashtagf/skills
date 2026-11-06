@@ -123,6 +123,12 @@ Rules:
 - Use elevation for things that float (menus, popovers, dialogs, toasts, sticky
   bars); use borders or background contrast for sections.
 - In dark themes, show elevation with lighter surfaces rather than shadows alone.
+- Layering: the sidebar uses the canvas colour plus a hairline, never its own colour;
+  a popover or menu sits one step above its parent; inputs are inset (a touch darker than
+  their surround, never lighter). Each step is a few % of lightness; one step alone is
+  barely visible, the stack shows it.
+- Controls get their own tokens (`--control-bg`, `--control-border`, `--control-focus`);
+  never reuse surface tokens for inputs, selects and checkboxes.
 
 ### Motion
 
@@ -460,6 +466,10 @@ width ([design-quality.md](design-quality.md) §5).
   data highlight (a grey chart with one accent bar).
 - **Color from imagery.** Full color lives in photography, 3D or illustration,
   not UI chrome; sample the accent from the hero image when the brand has none.
+- **Body in full ink.** Running text ≈7:1 or more at 16–20px; muted ink only for
+  secondary notes. Small grey body text reads as unfinished even when it passes AA.
+- **Light on dark** needs slightly more line height, slightly more tracking and one
+  weight step up. Separate paragraphs by spacing or indent, never both.
 - **Status color only in chips and dots**, as tinted pills (bg ~12% alpha, text
   full) — never on buttons or headings.
 - **Dark mode:** elevation by white alpha overlays (.02/.05/.08), borders
@@ -478,6 +488,16 @@ width ([design-quality.md](design-quality.md) §5).
 - **Containers:** page chrome 1200–1440px; prose 680–800px (≈ the 60–75ch measure in Part A); docs sidebar 240–300px.
 - **Shared alignment across siblings:** in side-by-side cards, titles, prices,
   lists and buttons start at the same Y.
+
+**Wide screens and responsive mechanics.**
+- At 1920 the gutters grow; measure and column counts hold; `vw`-sized visuals get a max-width.
+- Hero height in `dvh`/`svh`, never `vh`; `width: 100%`, never `100vw`; `overflow-x: clip`
+  on html and body (`hidden` breaks sticky). Breakpoints in `rem`.
+- With `viewport-fit=cover`: `--gutter: max(16px, env(safe-area-inset-left))`.
+- A button label that wraps: shorten it, then `nowrap`, then collapse the row into a menu.
+- An uppercase head that can wrap keeps line-height ≥ 1.0.
+- z-index from tokens (sticky < sticky-nav < modal < toast < tooltip); a second
+  `position: sticky; top: 0` element offsets by the nav height.
 
 ### 4. Radius, borders, elevation
 

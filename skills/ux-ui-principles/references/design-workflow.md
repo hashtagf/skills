@@ -20,7 +20,7 @@ stop here; decide, label assumptions, continue.
 - Project files: `DESIGN.md`, `PRODUCT.md`, `IDEA.md`, design context, PRDs.
 - System: tokens (CSS vars, Tailwind theme), component library
   (`components.json`, `package.json`), existing screens of the same pattern.
-- Available tools: browser/Playwright, Figma, installed specialist skills.
+- Available tools: browser/Playwright, Figma.
 
 For each artifact record location, viewport, state and observed behavior. A
 screenshot supports visual observations only, not keyboard, screen-reader,
@@ -185,9 +185,8 @@ the dial budget ([motion](motion.md) §7).
 ## Phase 5 — Implement (only when asked to build)
 
 **Do.** Build with the real stack, reusing components and tokens
-([design memory](design-memory.md) §6). Include actions, all specified
-states, responsive behavior and accessibility. Use a specialist skill only if
-it is installed. Prototype rules: [prototyping](prototyping.md); page-build practices: [build recipes](build-recipes.md). Turn the chosen direction into tokens with
+([design memory](design-memory.md) §5). Include actions, all specified
+states, responsive behavior and accessibility. Prototype rules: [prototyping](prototyping.md); page-build practices: [build recipes](build-recipes.md). Turn the chosen direction into tokens with
 `scripts/export_tokens.py` ([tokens to code](tokens-export.md)): CSS, Tailwind v4 or shadcn variables, dark derived and contrast-checked.
 
 **Keep the before.** Before changing an existing page, copy the files you will
@@ -290,7 +289,7 @@ templates in [output templates](../assets/templates.md).
 - Publishing, committing, deploying follow host rules; a design or preview
   grants no authority to do them.
 
-**Scope and completion** (moved from SKILL.md; SKILL.md §6 keeps the summary).
+**Scope and completion** (moved from SKILL.md; SKILL.md §5 keeps the summary).
 - Match the deliverable to the request: do not produce a full audit for a single
   label correction, and supply design decisions and artifacts, not an automatic
   redesign of the whole product.
@@ -307,7 +306,7 @@ templates in [output templates](../assets/templates.md).
   prototypes and their verification). If the project already has a design system
   or tool workflow, follow it and record deviations on the design context card.
 
-**Exit.** The scope and completion list above and SKILL.md §6 are met; open items listed, not dropped.
+**Exit.** The scope and completion list above and SKILL.md §5 are met; open items listed, not dropped.
 
 **Host workflow.** Follow the host's workspace, agreement, and approval rules. Within Change Loop,
 record consequential choices and scenarios in the compiled OpenSpec agreement;
@@ -375,7 +374,7 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [product discovery](product-discovery.md) | Problem framing, roles, evidence labels, success metrics | 1 |
 | [research methods](research-methods.md) | Method chooser, interview guide, survey design, personas vs JTBD, journey maps, diary, recruiting and consent, synthesis | 1, RESEARCH |
 | [sources](sources.md) | Source register (S-IDs), dates, authority, evidence discipline (claim labels, browsing, no universal rules, user control) | 1, RESEARCH, any external claim |
-| [design memory](design-memory.md) | Phase 0 inspection, precedence, DESIGN.md format and generation, brand extraction (§3b), specialist-skill routing (§5), reuse | 0 (§1–2), 3 (§3b), 5 (§6), 8 (§3) |
+| [design memory](design-memory.md) | Phase 0 inspection, precedence, DESIGN.md format and generation, brand extraction (§3b), reuse (§5) | 0 (§1–2), 3 (§3b), 5 (§5), 8 (§3) |
 | [brownfield](brownfield.md) | Existing product without DESIGN.md: inventory, extract, drift, baseline audit | ONBOARD, IMPROVE |
 | [design direction](design-direction.md) | Eight dimensions, page pattern by question, compositions, styles, dials, named directions (§7), keywords (§8), interview (§9) | 2 (§1–2), 3 (§3–9) |
 | [direction library](direction-library.md) | Every direction with fit, risk and previews; how to show and pick | 3 |

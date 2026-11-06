@@ -27,6 +27,11 @@
  * across lines (NOTEs, not failures). Visually hidden radios/checkboxes are measured by their label; closed
  * <details>, off-screen drawers and sticky table headers are skipped; sticky/fixed elements are left out of
  * the text-overlap check (full-page shots stack them mid-page).
+ * Composition (_composition.js): FAIL on unequal outer margins, a blank gap ≥ 0.6 viewport and no h1
+ * on the first screen of a public page; NOTEs for lopsided sections, hero void, scattered left edges,
+ * < 4 pictures at ≥1280, no focal point, body text < 16px / < 7:1 / > 88ch, mostly centred text,
+ * > 9 font sizes, side-scrolling rows, difference-blend text, fonts not loaded, a page that barely
+ * moves or uses one animation for every block, and a dev server (HMR) target.
  * --toggle "<selector>" clicks a language/theme switch after the first pass and
  * repeats every viewport (screenshots prefixed alt-), so both states are checked.
  * --zoom also renders at 320px width (approximates 400% zoom reflow
@@ -56,6 +61,7 @@ if (!doctor && (!args[0] || args[0].startsWith('--'))) { console.error('usage: n
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 
 const { findModule: findModuleFrom, findBrowser } = require('./_pw');
+const composition = require('./_composition');
 const findModule = () => findModuleFrom(args[0]);
 
 const mod = findModule();
@@ -119,7 +125,12 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
     });
   };
   const settle = async () => { await reveal(); await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); };
-  let problems = 0, reported = { errs: 0, cons: 0, fails: 0 };
+  let problems = 0, reported = { errs: 0, cons: 0, fails: 0 }, compFirst = true;
+  // Dev server: the final gate runs on the shipped build (render-verification.md)
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)/.test(target)) {
+    const dev = await page.evaluate(() => !!document.querySelector('script[src*="@vite/client"],script[src*="webpack-hmr"],script[src*="_next/static/webpack"],script[id="__NEXT_DATA__"][data-dev]') || typeof window.__vite_plugin_react_preamble_installed__ !== 'undefined');
+    if (dev) console.log('NOTE  dev server detected (HMR client); run the final gate on the production build');
+  }
   async function matrix(prefix) {
   for (const scheme of schemes) {
     await page.emulateMedia({ colorScheme: scheme });
@@ -311,6 +322,9 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
         }
         return { distorted, decoOver, overflow, wide, noAlt, noName, noLabel, formIssues: [...new Set(formIssues)], punct, hidden, moving, reduce, mobile, broken, edge, overlap, notes, lang: document.documentElement.lang };
       });
+      const comp = (w >= 1024 || w <= 480) ? await page.evaluate(composition, { w, first: compFirst && w >= 1024 }) : { fails: [], notes: [] };
+      if (w >= 1024) compFirst = false;
+      r.notes.push(...comp.notes);
       const file = path.join(out, `${prefix}${scheme}-${w}.png`);
       // Viewport shots are the first screen: scroll to top instantly (smooth scroll would still be moving).
       if (!fullPage) await page.evaluate(() => new Promise(r => { scrollTo({ top: 0, behavior: 'instant' }); requestAnimationFrame(() => requestAnimationFrame(r)); }));
@@ -335,6 +349,7 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
       if (r.distorted && r.distorted.length) issues.push(`image drawn at the wrong aspect ratio (add height:auto or object-fit): ${r.distorted.join(' | ')}`);
       if (r.edge.length) issues.push(`text touches the viewport edge (no gutter): ${r.edge.join(' | ')}`);
       if (r.moving) issues.push(`${r.moving} animation(s) still moving under prefers-reduced-motion`);
+      comp.fails.forEach(x => issues.push(`composition: ${x}`));
       problems += issues.length;
       console.log(`${issues.length ? 'FAIL' : 'PASS'}  ${prefix}${scheme} ${w}px${r.lang ? ' [' + r.lang + ']' : ''}  → ${file}`);
       issues.forEach(i => console.log('   - ' + i));

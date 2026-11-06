@@ -65,10 +65,16 @@ of named motion tokens (`--dur-fast/base/slow`, `--ease-out/in/in-out`).
 - **Hover is a bonus**: anything revealed on hover must also be reachable by
   focus and by tap.
 
+**Scroll-linked budget.** One scroll pattern per page, never on prose. Base CSS shows the end
+state; the effect lives inside `@supports (animation-timeline: view())` and
+`@media (prefers-reduced-motion: no-preference)`. Linear easing. Declare
+`animation-timeline` after the `animation` shorthand, which resets it.
+
 ## 4. Accessibility
 
 - `prefers-reduced-motion: reduce` → remove movement (translate, scale,
-  parallax, auto-play), keep opacity or instant changes. Implement as the
+  parallax, auto-play), keep opacity, colour changes that carry state, or instant
+  changes; never a blanket `0.01ms !important` that also kills feedback. Implement as the
   default branch, not an afterthought. [S16]
 - Auto-moving content > 5 s next to other content needs pause/stop/hide
   (WCAG 2.2.2). [S92] Carousels never auto-advance by default.
@@ -86,6 +92,7 @@ of named motion tokens (`--dur-fast/base/slow`, `--ease-out/in/in-out`).
 - Reserve space for anything that animates in (no CLS); keep INP unaffected
   (no heavy work on input).
 - `will-change` only during the animation, on few elements.
+- Pause non-essential loops when offscreen (`IntersectionObserver`) or the tab is hidden.
 - Test on a mid-range phone; drop the effect if it stutters.
 
 ## 6. Tooling — reuse before adding

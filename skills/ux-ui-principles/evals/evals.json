@@ -71,7 +71,7 @@
       "files": [],
       "assertions": [
         "Recommends keeping the dense table",
-        "Explains that approved DESIGN.md outranks specialist skill guidance",
+        "Explains that approved DESIGN.md outranks generic craft defaults",
         "Ties the decision to the operator's job, not to taste",
         "Offers where visual distinctiveness could go without changing the page pattern"
       ],
@@ -454,12 +454,12 @@
     {
       "id": 17,
       "prompt": "Switch the agency landing page you just built to a different theme from the previews, keep all content and the form working.",
-      "expected_output": "Previous version kept, direction swapped through tokens and composition, form and language toggle still working, conflicts with other skills' house rules reported as accepted.",
+      "expected_output": "Previous version kept, direction swapped through tokens and composition, form and language toggle still working.",
       "files": [],
       "assertions": [
         "Copies the existing files (or confirms a clean tree) and takes before screenshots before editing",
         "Keeps every link, form field id, handler and the language toggle; verifies the form's invalid and success states after the change",
-        "States which house rules of other installed checkers the new direction overrides (for example shadows or hairlines) and reports those findings as accepted, not as failures",
+        "States which of this skill's defaults the new direction overrides (for example shadows or hairlines) and records the reason in DESIGN.md",
         "Does not edit a checker or its config to make it pass",
         "Re-runs render_check with --toggle and contrast.py --css on the new tokens, including oklch values and the dark block",
         "Hand-off states where the previous version is, what changed, and what was not re-checked"

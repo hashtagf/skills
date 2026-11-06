@@ -7,6 +7,11 @@ States and keyboard contracts for every family are in
 [forms.md](forms.md). Keyboard expectations follow the ARIA Authoring Practices
 patterns. [S14, S93] Source IDs resolve in [sources.md](sources.md).
 
+**Use what exists.** Native element → headless primitive → hand-rolled, in that order.
+Never put a click handler on a `div`. A hand-rolled control owes the full contract: arrow,
+Enter and Escape keys; focus trap and return; ARIA roles and state; click-outside;
+background scroll lock.
+
 ## Part 1 — choosing between similar components
 
 ### Showing extra information or a task over the page

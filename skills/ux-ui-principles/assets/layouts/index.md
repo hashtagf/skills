@@ -12,8 +12,7 @@ not counted as additional original blueprints.
 ## Page anatomy by job (start here)
 
 Formerly references/layout index.md: pick sections from the visitor's job, then a blueprint below.
-For public pages (Persuade surface). Source studies: Hallmark anatomy/layout,
-Taste Skill research, Impeccable shape.
+For public pages (Persuade surface).
 
 ### 1. Start from the visitor's job
 

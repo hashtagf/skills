@@ -157,8 +157,8 @@ landing page is an idea and rhythm. Judge each by its own column.
 
 ## 7. Direction exploration — art direction before build
 
-Adapted from Taste Skill's brief → direction → build → render-critique loop
-and its variance/motion/density dials (S98). Use for new public pages, a new
+A brief → direction → build → render-critique loop with
+variance/motion/density dials. Use for new public pages, a new
 product look, or "it looks generic"; skip when DESIGN.md already fixes the
 direction (then work inside it).
 
@@ -187,6 +187,12 @@ direction (then work inside it).
    [design quality](design-quality.md) §5 and the [review loop](review-loop.md).
    Fix the top three issues; the round budget (≤ 3) is owned by
    [design workflow](design-workflow.md) Phase 8.
+
+
+**Commit to the chosen direction.** Adopt it whole; do not blend it back toward a default
+layout. Swap one slot only for a stated reason (clashes with a brand constraint, needs an
+asset that does not exist, cannot hold the real content) and log it. When a section pattern
+cannot hold the real content, change the pattern, not the content.
 
 ## 8. Style keywords — from the user's words to a direction
 
@@ -250,7 +256,7 @@ and adds a marked block to `AGENTS.md` / `CLAUDE.md` so the next agent reads DES
 the direction pick, whether to save it; the default is yes. Set Status: approved only after the user confirms.
 
 
-## 10. Domain exploration and token names (from Interface Design)
+## 10. Domain exploration and token names
 
 Before proposing visuals write: 5+ concepts from the product's world, 5+ colours
 that physically exist in it, and 3 default choices you will reject. Name tokens

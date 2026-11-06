@@ -75,7 +75,7 @@ from the brief; never stop at "nothing to finish".
 | Accessibility / WCAG question or check (focus ring, target size, contrast, screen reader) | **[accessibility](references/accessibility.md)**; focus-ring style → also [component states](references/component-states.md); "confirm it passes" on built UI → also **[render verification](references/render-verification.md)** (no browser → report *not tested*) |
 | Thai / bilingual pages, localization, performance | [i18n & performance](references/i18n-performance.md), [visual system](references/visual-system.md) Part A "Thai with Latin display faces" |
 | Review, critique, score, usability audit, "rank the problems", refinement verb (polish, bolder, quieter, distill …) | **[review loop](references/review-loop.md)** (scorecards, hard gates, §8 caps); "looks generic / like a template", bolder → [design quality](references/design-quality.md) |
-| DESIGN.md, design memory, conflicts between docs, code and other skills | [design memory](references/design-memory.md) |
+| DESIGN.md, design memory, conflicts between docs and code | [design memory](references/design-memory.md) |
 | Existing product without DESIGN.md (brownfield) | [brownfield](references/brownfield.md) (`scripts/code_extract.py`, `scripts/design_md.py --from-code`) |
 | Building UI (HTML, React, Tailwind, shadcn) | [build recipes](references/build-recipes.md), [prototyping](references/prototyping.md); [tailwind](references/tailwind.md) · [shadcn rules](references/shadcn-rules.md) · [tokens to code](references/tokens-export.md) as the stack needs |
 | Verifying rendered UI | **[render verification](references/render-verification.md)** "Run order" |
@@ -184,29 +184,7 @@ away only if they said so; then take the recommended options, mark them *assumed
 and end with "Decisions to confirm". Away with no artifact to start from (no page,
 no repo): design from the brief with defaults rather than stopping. Detail: [design workflow](references/design-workflow.md) "Asking well".
 
-## 5. Other design skills
-
-Use another skill only if it is installed and fits; never report a skill or tool
-as run when it was not. Hallmark: named public-page directions. Taste Skill: art
-direction and its inspector. Impeccable: refinement verbs after its context step.
-Interface Design: product UI. shadcn: projects with `components.json`. House-rule
-conflicts: [design memory](references/design-memory.md) §2 and §5.
-
-**Codex skills** (`~/.codex/skills`, when present) work as a second opinion and as
-extra checkers, under this skill's rules: `senior-ui-ux-orchestrator` routes
-(dashboard → `webapp-ui-skill`, public page → `marketing-site-skill`, critique →
-`design-critic-skill`); `webapp-ui-skill`'s doctrine is already in
-[app-screen rules](references/app-screen-rules.md) §7 and its
-`scripts/check_state_coverage.ts` can run beside `state_check.py`;
-`marketing-site-skill`'s first-viewport and metadata rules are in `fold_check.js` and
-`check.py`; `design-critic-skill`'s repeated-media and text-overlap findings are in
-[design quality](references/design-quality.md) §2. Their smoke script needs a browser
-driver; when it has none, report it *Skipped*. Conflicts resolve to this skill: e.g.
-`frontend-design`'s gradients, textures and dramatic shadows lose to the bans in
-[design quality](references/design-quality.md) §2; `marketing-site-skill`'s "no hero text
-in a card" yields to a direction that requires the panel (record the tradeoff in DESIGN.md).
-
-## 6. Evidence and completion
+## 5. Evidence and completion
 
 - Separate standard requirement, platform convention, heuristic, research
   observation and project recommendation; cite source IDs ([sources](references/sources.md), "Evidence discipline")

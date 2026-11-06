@@ -1,7 +1,7 @@
 # App-screen rules (Operate surface)
 
 Pages people work in: dashboards, admin, settings, inboxes. Complements
-[back-office](back-office.md). Source: Taste Skill app-screen study.
+[back-office](back-office.md).
 
 ## 1. One question per page
 
@@ -51,8 +51,6 @@ destructive confirm, a required decision). Otherwise inline, a sheet or a page.
 
 ## 7. Operational UI doctrine (dashboards, admin, CRM, internal tools)
 
-Source: Codex `webapp-ui-skill`, kept where it adds to the rules above.
-
 - **Scan, compare, repeat.** Optimize for scanning rows, comparing values and
   repeating an action; not for composition. Open on the task; a hero only as the first-run exception in §8.
 - **Stable geometry.** Buttons, controls, table columns and row heights keep
@@ -70,7 +68,10 @@ Source: Codex `webapp-ui-skill`, kept where it adds to the rules above.
   repeated inspect/edit; full-width operational layouts over decorative sections.
 - **Palette.** One neutral ground, one brand hue, a semantic set (success,
   warning, danger, info) that never doubles as decoration. A one-note palette
-  cannot show status.
+  cannot show status. Colour covers about 3 % of the screen (10–15 % only for tinted
+  styles); charts default to one accent plus neutrals, ≤4 hues unless the categories
+  need more ([data visualization](data-visualization.md)). A chart with no hue on its
+  main data element reads as a kit.
 - **Never ship:** empty state without a next action; error that discards the
   user's input; hidden keyboard focus; disabled control with no reason when the
   user could reasonably expect it to work; hero as the first screen.
@@ -115,8 +116,7 @@ Plain chrome is not an anonymous product. Every from-scratch console gets, on to
   (data state: ready / loading / first-run / error; "simulate save failure") lets reviewers and
   `flow_check.js` reach every cell of the state matrix. Remove it, or hide it behind a flag, in production.
 - **Marker names the checkers understand:** in-flight buttons get `aria-busy="true"` and a
-  `submitting` class; success uses `role="status"`. `state_check.py` and Codex `webapp-ui-skill`'s
-  `check_state_coverage.ts` both look for these words.
+  `submitting` class; success uses `role="status"`. `state_check.py` looks for these words.
 - **Admin pages are not public:** add `<meta name="robots" content="noindex">` (or keep them under
   `/admin/`); `check.py` then skips the public-page metadata line.
 

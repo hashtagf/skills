@@ -35,6 +35,11 @@ illustration, a photo, an icon-led list or a figure/number band.
 | 7 | Pattern or texture from the subject | Section fields, footers | Calendar grid, map contour, receipt perforation; low contrast, decorative `aria-hidden` |
 | 8 | Generated images | Only when a generation tool is available and the user agrees | Mark as generated; never present as real customers, staff or offices |
 
+**Generated images as a reference pass.** When a generation tool exists, use it for a
+direction board (mood, material, colour; no UI) or a paintover of the current screenshot.
+Take palette, density and proportions from it, then build in code. A generated image is
+never the delivered UI.
+
 ### 2b. Open-collection photographs
 
 `assets/photos/` holds 14 already-licensed stand-ins (coffee roasting, concrete, stage
@@ -110,6 +115,14 @@ service menus, process steps, contact methods, deliverables, comparison rows.
 | Proof | Real numbers, quotes, logos only from the client | Otherwise omit the section and list it in hand-off |
 | Contact | Form + icon contact rows | Form in a panel; icons for email/phone/location |
 | Footer | Brand field colour, wordmark, pattern from §2 rung 7 | Designed close |
+
+**Texture budget.** One texture family per page (grain, halftone, misregistration or
+scanline). Opacity ≤ 0.08 page-wide, ≤ 0.05 under body text; never animated; overlays get
+`pointer-events: none` and `aria-hidden`; CSS or data-URI only.
+
+**Photo balance.** Below the hero, photographs cover at most a third of the page and never
+lead two sections in a row. Text over a photo sits on its calmest part, over an ink scrim on
+that side only, at 4.5:1.
 
 ## 5. Mockups and frames — when they are fine
 

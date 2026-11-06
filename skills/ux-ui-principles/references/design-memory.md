@@ -11,7 +11,7 @@ reason, and reading it before every design task.
 Look for, in this order, and note what exists:
 
 1. Product docs: `PRODUCT.md`, `IDEA.md`, PRDs, the [design context](../assets/design-context.md) file.
-2. Design language: `DESIGN.md`, `.interface-design/system.md`, `docs/design*`, Figma library links.
+2. Design language: `DESIGN.md`, `docs/design*`, Figma library links.
 3. Tokens: CSS variables, Tailwind `@theme`/config, token JSON.
 4. Component system: `components.json` (shadcn), `package.json` deps (Radix, MUI,
    Ant, Chakra, Vuetify, PrimeVue, Element Plus, Naive UI, shadcn-vue, Reka UI),
@@ -34,13 +34,19 @@ tokens, roles and drift; `design_md.py --from-code SRC` writes a draft DESIGN.md
 | 3 | Approved DESIGN.md / design context | Agreed brand and system decisions |
 | 4 | Existing code and components | What actually ships today |
 | 4a | The chosen direction's own rules ([direction library](direction-library.md)) | The look the user picked |
-| 5 | This skill's defaults, then specialist skill guidance (house rules) | General craft, not project facts |
+| 5 | This skill's defaults | General craft, not project facts |
 | 6 | Creative defaults | Unapproved proposals |
 
 Rules:
 - A lower rank never silently overrides a higher one. Example: a creative
-  skill wants visual variety, DESIGN.md says operations pages are dense
+  default wants visual variety, DESIGN.md says operations pages are dense
   tables → keep the dense table; propose variety only where DESIGN.md allows.
+- **A chosen direction is a decision.** When its material needs something this
+  skill's defaults ban (paper lift needs a shadow, a print look needs hairlines),
+  state the rule it overrides and why, record it in DESIGN.md, and report the
+  resulting checker findings as accepted, not as failures. The hard gates in the
+  [review loop](review-loop.md) §5 still apply. Never edit a checker or its
+  config to make it pass.
 - **Docs vs code conflict** (DESIGN.md says 8px radius, code uses 6px):
   report both values and where each lives, recommend one, change neither
   system-wide without approval. Scoped work follows the code for consistency
@@ -101,7 +107,7 @@ Status: draft | approved (<date>, <owner>)
 ## Layout              <- page pattern and composition per area; breakpoints
 ## Elevation & Depth   <- one depth strategy; border vs shadow policy
 ## Shapes              <- radius per component class; corner treatment
-## Components          <- library + version; approved variants; overrides with reason
+## Components          <- library + version; approved variants; overrides with reason; specs for anything used 2+ times (`Button primary — 36h · 12/16 pad · 6r · 14/500`)
 ## Do's and Don'ts     <- what the brand deliberately avoids (3 or more)
 ## Direction dials     <- ours: Variance n/10 · Motion n/10 · Density n/10
 ## Interaction rules   <- ours: loading, destructive confirmation, validation timing, keyboard, motion limits
@@ -117,8 +123,8 @@ validates it, and files without front matter are flagged as the older prose-only
 
 This is a starter structure, not values to impose. Example values in any
 template are placeholders until the project approves them. The idea of keeping
-decisions in a project file read every session follows Interface Design's
-`.interface-design/system.md` (S100) and the DESIGN.md draft format (S101).
+decisions in a project file read every session follows the DESIGN.md draft
+format (S101).
 
 Validate before handing it on: `python3 scripts/design_md_check.py DESIGN.md`
 (front matter, token references, value formats, canonical section order, contrast of component pairs,
@@ -146,8 +152,13 @@ should change, then approves.
 
 ## 3b. Brand extraction — from references to a design language
 
-Adapted from Hue's brand-to-design-language approach (S99). The goal is the
+The goal is the
 brand's *philosophy*, not a copied palette.
+
+A real brand's colours and fonts come from its live site and same-origin CSS, never from
+memory: cluster the literals, name the primary (most-used saturated colour on controls) and
+the surface, record source and date in DESIGN.md. Cannot fetch: ask for the hex once, or
+build with no brand claim. Never redraw a real logo.
 
 1. **Collect.** The brand's own site and product (several pages and states),
    logo, printed or physical artefacts, 2–5 references the user likes, and what
@@ -178,56 +189,7 @@ tied to rank 1–2 (a task fails, a constraint changed, an a11y defect). Write
 the old value, new value, reason and affected screens in the decision log. Taste
 alone is not a reason.
 
-## 5. Routing to specialist skills
-
-When the user names a design skill:
-
-| Skill | Use it for | Do not use it for |
-|---|---|---|
-| This skill | Decisions, page spec, verification, Thai and bilingual pages, quality gates | — |
-| Hallmark | A named direction or a redesign of a public page: material, type, a stamped CSS header, its `sloplint`, direction previews | App screens; changing a design that is not a Hallmark run |
-| Taste Skill | Art direction for pages, its `draw`/`inspect`/`lint` scripts, critique | Pages whose direction needs shadows, hairlines or gradients (see below) |
-| Impeccable | Refinement verbs (polish, bolder, quieter, typeset, layout) and design critique, after its context step | Skipping its context step; do not run its edits without it |
-| Interface Design | Product UI: dashboards, admin, settings, tools | Marketing or landing pages |
-| shadcn/ui | Projects with a `components.json` | Static pages or projects without it |
-
-Use a specialist only if it is **actually available** in this session (listed
-skills, installed plugins, files in the repo). If it is not, apply the
-matching reference in this skill instead. Never write that a tool or skill was
-run when it was not.
-
-| Need | Prefer, if available | Fallback in this skill |
-|---|---|---|
-| New design language / tokens / component library | `design-system-builder` | [visual system](visual-system.md) Part A, [color palette](color-palette.md) |
-| Brand extraction from a site or references | A brand/design-language skill (e.g. Hue) | §3b procedure + [visual system](visual-system.md) Part C |
-| Expressive landing or creative direction | `frontend-design`, Taste Skill or Hallmark | [design direction](design-direction.md) §7, [design quality](design-quality.md) |
-| Admin / SaaS product UI craft | Interface Design | [back office](back-office.md), [design quality](design-quality.md) §7 |
-| React components on a shadcn project | shadcn tooling (`components.json` present) | [components usage](components-usage.md) |
-| Vue components | The project's Vue library | same |
-| Figma output | Figma MCP / figma-cli skill | [prototyping](prototyping.md) |
-| Charts | `dataviz` | [data visualization](data-visualization.md) |
-| Test cases for the flow | `test-design` | [validation](validation.md) |
-| Critique, polish, audit | Impeccable | [review loop](review-loop.md), `scripts/slop_check.py` |
-
-Named skills (Hallmark, Impeccable, Hue, Taste Skill, Interface Design) are
-third-party; their ideas are adapted into this skill's references, so they are
-optional. Check that one is installed before naming it as used.
-
-**Direction versus another skill's house rules** (extension of §2, which owns the
-precedence): House rules differ: Taste Skill bans resting shadows, hairlines and
-gradients; some Hallmark themes (paper lift, plastic, hard offsets) require
-them. Within ranks 3–5 (§2 table) the order is: approved DESIGN.md → the chosen direction's
-own rules (from the [direction library](direction-library.md)) → this skill's
-defaults → another skill's house rules. The user's job and the hard gates in the
-[review loop](review-loop.md) §5 sit above all of them. A chosen direction is a
-decision: state the rules it overrides ("shadows are allowed because the
-direction's material is paper") and report the other skill's resulting findings
-as accepted, not as failures. Never edit one skill's checker to pass it.
-
-This skill stays the orchestrator: it owns dimensions 1–3 and the quality
-gates; specialists may own 4–7 but cannot override the page pattern.
-
-## 6. Reuse before invent
+## 5. Reuse before invent
 
 | Exists in project | Do |
 |---|---|

@@ -46,6 +46,9 @@ rules ([gate-tiers.md](gate-tiers.md) §1): use one only when the brief asks for
 or you can defend it in one sentence, which is the waiver line. This list removes
 defaults; it does not remove visuals. Every device you drop must be replaced by
 a visual anchor from [visual-assets.md](visual-assets.md), not by empty space.
+Tells date: every published "use X instead" becomes the next tell. Replace a device
+with a procedure (derive it from the subject), never with a named font, colour or
+component. A page with every tell removed and nothing added is a tell too.
 
 | Device | Use instead |
 |---|---|
@@ -65,11 +68,15 @@ a visual anchor from [visual-assets.md](visual-assets.md), not by empty space.
 | The same photograph used twice on one page (hero and a later section), even recropped | One picture per job; with only one usable photo, use type, a fragment or a marked slot (`[รูปหน้าร้าน]`) for the second section (`slop_check.py` duplicate-image) |
 | A badge, stamp or ornament overlapping a headline or button text | Move the decoration onto the picture or the panel edge; text stays clear at every width (`render_check.js` reports decoration-over-text) |
 | Headlines of three or more lines | Cut words to fit two lines at every width (roughly 25–35 Thai/Latin characters at display size); Thai limits in [visual-system.md](visual-system.md) "Headline length" |
+| `mix-blend-mode: difference` text over colour (random hues) | A solid ink chosen for the ground |
+| A display line bleeding a few px off one edge (reads as a mistake) | Fit it, or bleed by a clear, deliberate amount |
+| Agency micro-meta: local time, coordinates, weather, version stamps, "© — Scroll" | Remove, unless it is the subject's real data |
+| Video with no poster frame (blank box while loading) | One honest muted loop with a poster |
+| Structural hacks: negative margins undoing parent padding, escape-hatch `calc()`, absolute positioning to dodge flow | Fix the container |
 
 ## 2b. Structural slop — beyond surface devices
 
-Ideas adapted from Hallmark's structural-variety and anti-slop approach
-(S97). Surface devices (§2) are styling; structural slop is the *shape* of
+Surface devices (§2) are styling; structural slop is the *shape* of
 the page coming out the same whatever the brief.
 
 | Structural slop | Sign | Fix |
@@ -119,6 +126,9 @@ not screenshots shrunk until unreadable.
 - Neighbouring sections use different compositions.
 - Carry the idea past the first screen: process, pricing, FAQ and footer too.
 - The footer is a designed close (for example the name at full width), not a sitemap.
+- Read each desktop screen as a poster: one dominant thing plus the content it carries.
+  At most one deliberate rest per page, and it is a placed picture or colour field,
+  never nothing.
 
 ## 5. Look at the render and critique it
 

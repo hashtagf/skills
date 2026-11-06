@@ -45,5 +45,5 @@ baseline audit (step 4); dials come from an interview only if a restyle is plann
   touched (boy-scout rule), not in one big sweep, unless the team asks for a sweep.
 - New components extend the existing system ([components usage](components-usage.md));
   never add a parallel button, input or table.
-- If a design-system package is wanted (tokens + components as a library), hand over to
-  `design-system-builder` after step 5; this skill supplies the decisions.
+- Redesign order: type → colour → frame (margins, rhythm, titles) → states → stock
+  components. Report before/after measurements side by side.

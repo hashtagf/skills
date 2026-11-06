@@ -295,9 +295,6 @@ spinners, tables, tabs, tags, text areas, toasts, toggles, tooltips.
 - Still missing: real photography (see [visual assets](../references/visual-assets.md)
   rung 1b), live shader or video backgrounds, and motion. Say so when
   presenting a preview.
-- Conflicts: gradient, glow, glass and blur are banned by some other skills'
-  house rules. Treat them as part of a chosen direction and record the override
-  ([SKILL.md](../SKILL.md) "Working with other design skills").
 
 
 ## 21st.dev dashboard widget study
