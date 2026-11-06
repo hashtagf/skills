@@ -167,7 +167,7 @@ def brand(slugs, sv):
                 note = f"brand colour #{i['hex']} is {r:.2f}:1 on {ground} (passes 3:1)"
         if mono:
             fill = "currentColor"
-        print(f'<svg class="brand" width="{size}" height="{size}" viewBox="0 0 24 24" fill="{fill}" aria-hidden="true" '
+        print(f'<svg class="brand-mark" width="{size}" height="{size}" viewBox="0 0 24 24" fill="{fill}" aria-hidden="true" '
               f'data-brand="{i["slug"]}"><path d="{path}"/></svg>')
         print(f"<!-- {i['title']}: trademark of its owner; use it only to name or link to that brand (contact, pay with, "
               f"integrations), unaltered. {note}")
