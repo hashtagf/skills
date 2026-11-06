@@ -1,0 +1,3 @@
+/* Regression for contrast.py: Tailwind v4 @theme block with shadcn-style names; foreground fails. */
+@import "tailwindcss";
+@theme{--color-background:#ffffff;--color-foreground:#9ca3af;--color-primary:#4f46e5;--color-primary-foreground:#ffffff}

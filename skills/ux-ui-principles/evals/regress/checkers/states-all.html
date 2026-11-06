@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>States all</title>
+<!-- Regression: every default state has a marker, so check.py must report states PASS (bug: always MANUAL). -->
+<style>
+button:hover{opacity:.9} button:focus-visible{outline:2px solid} button:disabled{opacity:.5}
+.is-active{font-weight:600} .skeleton{background:#eee} .busy{cursor:progress}
+</style></head><body>
+<h1>Orders</h1>
+<div class="skeleton" aria-busy="true">loading</div>
+<p class="empty">No results yet</p>
+<p role="alert" class="error">Failed to load</p>
+<button disabled>Save</button><button aria-selected="true">Tab</button>
+<p role="status">Saved</p>
+</body></html>

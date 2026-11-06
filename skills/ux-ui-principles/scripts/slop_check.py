@@ -182,7 +182,49 @@ def check(path):
     if len(idx) >= 3:
         add("note", "index-numbering", f"{len(idx)} '01/02/03' markers; keep only for real sequences", idx)
 
-    # Rows of identical cards (3-12 siblings, same tag+class, each with a heading and an icon)
+    # Rows of identical cards (3-12 siblings, same tag+class, each with a heading and an icon).
+    # An icon is an <svg>, an empty <i>, an icon-class element, or an <img> drawn at <= 64px (width/height
+    # attributes, inline style or a CSS rule naming its class); photos (a team grid) and a glyph standing in
+    # a photo placeholder ([รูป…] / .ph next to it) are not icons.
+    small_img_sel = [sel for sel, body in rules
+                     if any(float(v) <= 64 for v in re.findall(r"(?<![-\w])(?:max-)?(?:width|height|inline-size|block-size)\s*:\s*([\d.]+)px", body))]
+
+    def px(v):
+        m = re.fullmatch(r"\s*([\d.]+)\s*(px)?\s*", v or "")
+        return float(m.group(1)) if m else None
+
+    def icon_class(d):
+        return any("icon" in k or k in ("ic", "fa", "fas", "far", "fab") or k.startswith(("fa-", "bi-", "ti-", "ri-", "lucide", "material-symbols", "material-icons"))
+                   for k in d.cls())
+
+    def small_img(d):
+        sizes = [px(d.attrs.get(a)) for a in ("width", "height")]
+        sizes += [float(v) for v in re.findall(r"(?:^|;)\s*(?:max-)?(?:width|height)\s*:\s*([\d.]+)px", d.attrs.get("style", ""))]
+        if any(v is not None for v in sizes):
+            return all(v <= 64 for v in sizes if v is not None)
+        anc = set()
+        for a in (d.parent, d.parent.parent if d.parent else None):
+            if a is not None:
+                anc |= a.cls()
+        for sel in small_img_sel:
+            for part in sel.split(","):
+                last = re.split(r"[\s>+~]+", part.strip())[-1]
+                classes = set(re.findall(r"\.([\w-]+)", last))
+                if classes & d.cls() or (re.match(r"img\b", last) and set(re.findall(r"\.([\w-]+)", part)) & anc):
+                    return True
+        return False
+
+    def in_photo_slot(d):
+        p = d.parent
+        return p is not None and any(c is not d and ("ph" in c.cls() or "data-placeholder" in c.attrs) for c in p.children)
+
+    def is_icon(d):
+        if d.tag == "img":
+            return icon_class(d) or small_img(d)
+        if d.tag == "svg" or (d.tag == "i" and not d.all_text()) or icon_class(d):
+            return not in_photo_slot(d)
+        return False
+
     rows = []
     for n in nodes:
         if n.tag in ("table", "tbody", "thead", "tr", "select"):
@@ -195,7 +237,7 @@ def check(path):
             group = [c for c in n.children if c.tag == tag and c.attrs.get("class", "") == k]
             iconed = sum(1 for g in group
                          if any(d.tag in HEADINGS | {"h4"} for d in g.walk())
-                         and any(d.tag in ("svg", "i", "img") for d in g.walk()))
+                         and any(d is not g and is_icon(d) for d in g.walk()))
             if iconed >= 3:
                 rows.append(f"{tag}.{k or '-'} x{iconed}: " + " / ".join(g.all_text()[:20] for g in group[:3]))
     if rows:
@@ -323,9 +365,19 @@ def check(path):
             add("note", "format-field-without-example", f"{len(nohint)} format field(s) with neither an example placeholder nor a hint (forms.md §3)", nohint)
     # App navigation items without icons (iconography.md: navigation = icon + label). Applies to product UI:
     # a sidebar / aside, or a nav of 7+ items. A public page's short text menu (3-6 links) is a convention, not slop.
+    # Only menu links count: the brand/logo link and buttons / CTAs in the header are not navigation items.
     navs = [n for n in nodes if n.tag in ("aside", "nav") or any(k in ("sidebar", "side", "nav-list", "menu") for k in n.cls())]
+    def menu_link(a, first):
+        """A menu item: not the brand/logo link (also an image link to the home page first in the nav), not a button or CTA."""
+        k = " ".join(a.cls()).lower()
+        if re.search(r"brand|logo|\bbtn|button|cta", k) or a.attrs.get("rel") == "home":
+            return False
+        if first and a.attrs.get("href", "") in ("/", "./", "#", "#top", "index.html", "./index.html") and any(d.tag in ("svg", "img") for d in a.walk()):
+            return False
+        return True
     for nv in navs[:1]:
-        links = [a for a in nv.walk() if a.tag == "a"]
+        anchors = [a for a in nv.walk() if a.tag == "a"]
+        links = [a for i, a in enumerate(anchors) if menu_link(a, i == 0)]
         app_nav = nv.tag == "aside" or any(k in ("sidebar", "side") for k in nv.cls()) or len(links) >= 7
         if app_nav and len(links) >= 4:
             with_icon = [a for a in links if any(d.tag in ("svg", "img", "i", "use") or any("icon" in k or k in ("ic", "fa") for k in d.cls())
@@ -453,6 +505,7 @@ def finish_checks(add, html, css, js, rules, nodes, text, sharp):
     emo = [n.all_text() for n in nodes if n.tag in ("button", "a", "li", "h1", "h2", "h3", "h4") and EMOJI.search(n.all_text())]
     if emo:
         add("flag", "emoji-icon", f"{len(emo)} emoji used as icons; use one icon family (iconography.md)", emo)
+    icon_family_checks(add, html, js, rules, nodes)
 
     # Media
     for n in nodes:
@@ -486,6 +539,97 @@ def finish_checks(add, html, css, js, rules, nodes, text, sharp):
     echo = [f"{k} x{v}" for k, v in tokens.items() if v >= 4]
     if echo:
         add("note", "echo", "the same price/time repeated 4+ times; say each fact once", echo)
+
+
+# UI icon libraries and the markup each leaves behind (class tokens, attributes, script/stylesheet/import names).
+# Brand-logo sets are a different role (iconography.md "Icon libraries") and never count as a UI family.
+ICON_FAMILIES = {
+    "Lucide": (re.compile(r"^lucide(-[\w-]+)?$"), ("data-lucide",), r"lucide(-react|-vue|-svelte|-static|-angular)?[@/\"']|lucide\.createIcons"),
+    "Feather": (re.compile(r"^feather(-[\w-]+)?$"), ("data-feather",), r"feather-icons|feather\.replace"),
+    "Phosphor": (re.compile(r"^ph(-(bold|fill|light|thin|duotone|[a-z][\w-]*))?$"), (), r"@phosphor-icons|phosphor-icons|<ph-[a-z]"),
+    "Tabler": (re.compile(r"^ti(-[\w-]+)?$"), (), r"tabler-icons|@tabler/icons"),
+    "Font Awesome": (re.compile(r"^(fa|fas|far|fal|fad|fa-(solid|regular|light|thin|duotone|sharp)|fa-(?!brands$)[a-z][\w-]*)$"), (), r"font-?awesome|kit\.fontawesome\.com|@fortawesome/(?!free-brands)"),
+    "Bootstrap Icons": (re.compile(r"^bi(-[\w-]+)?$"), (), r"bootstrap-icons"),
+    "Material": (re.compile(r"^material-(icons|symbols)[\w-]*$"), (), r"fonts\.googleapis\.com/(icon\?family=Material|css2\?family=Material\+Symbols)|@mui/icons-material"),
+    "Heroicons": (re.compile(r"^heroicon[\w-]*$"), (), r"heroicons"),
+    "Remix": (re.compile(r"^ri-[\w-]+$"), (), r"remixicon"),
+    "Ionicons": (re.compile(r"^$"), (), r"<ion-icon|ionicons"),
+}
+ICONIFY_PREFIX = {"lucide": "Lucide", "ph": "Phosphor", "tabler": "Tabler", "mdi": "Material Design Icons", "material-symbols": "Material",
+                  "fa": "Font Awesome", "fa6-solid": "Font Awesome", "fa6-regular": "Font Awesome", "bi": "Bootstrap Icons",
+                  "heroicons": "Heroicons", "ri": "Remix", "feather": "Feather", "ion": "Ionicons", "carbon": "Carbon", "iconoir": "Iconoir"}
+BRAND_SETS = re.compile(r"^(simple-icons|simpleicons|logos|skill-icons|devicon|fa-brands|fa6-brands|cib)$")
+
+
+def icon_family_checks(add, html, js, rules, nodes):
+    """Mixed icon sets (iconography.md "Choosing glyphs": one family, one stroke style)."""
+    found = {}
+
+    def seen(fam, ev):
+        found.setdefault(fam, set()).add(ev)
+
+    def is_brand(n):
+        p = n
+        while p is not None:
+            if p.attrs.get("data-brand") or any(re.search(r"brand|logo|wordmark", k) for k in p.cls()):
+                return True
+            p = p.parent
+        return False
+
+    for n in nodes:
+        if is_brand(n) or "fab" in n.cls() or "fa-brands" in n.cls():
+            continue
+        for fam, (cls_re, attrs, _src) in ICON_FAMILIES.items():
+            hit = next((k for k in n.cls() if cls_re.match(k)), None)
+            # a bare short token (ph, ti, bi, fa) counts only beside its icon token (ph ph-house); ".ph" alone is
+            # often a project class (placeholders)
+            if hit and not (hit in ("ph", "ti", "bi", "fa") and not any(k.startswith(hit + "-") for k in n.cls())):
+                seen(fam, f"class {hit}")
+            for a in attrs:
+                if a in n.attrs:
+                    seen(fam, a)
+        ic = n.attrs.get("icon") if n.tag == "iconify-icon" else n.attrs.get("data-icon", "")
+        if ic and ":" in ic:
+            pre = ic.split(":")[0]
+            if not BRAND_SETS.match(pre):
+                seen(ICONIFY_PREFIX.get(pre, f"Iconify {pre}"), f"iconify {pre}:")
+    srcs = "\n".join([n.attrs.get("src", "") for n in nodes if n.tag == "script"] + [n.attrs.get("href", "") for n in nodes if n.tag == "link"]) + "\n" + js
+    for fam, (_c, _a, src_re) in ICON_FAMILIES.items():
+        m = re.search(src_re, srcs + ("\n" + html if fam == "Ionicons" else ""), re.I)
+        if m:
+            seen(fam, m.group(0)[:40])
+    if len(found) >= 2:
+        add("flag", "mixed-icon-families", f"{len(found)} UI icon families on one page ({', '.join(sorted(found))}); keep one, and redraw any missing glyph in its style (iconography.md \"Icon libraries\")",
+            [f"{f}: {', '.join(sorted(e))}" for f, e in sorted(found.items())])
+
+    # Inline SVG icons: one stroke width and one fill style. Icon-sized viewBox only; logos, brand marks,
+    # illustrations and charts are skipped.
+    widths, outline, filled = Counter(), [], []
+    css_sw = {}
+    for sel, body in rules:
+        m = re.search(r"stroke-width\s*:\s*([\d.]+)", body)
+        if m and re.search(r"icon", sel) and not re.search(r"brand|logo|chart|map|illus", sel):  # icon selectors only; "svg" alone hits drawings
+            css_sw[sel.strip()] = m.group(1)
+    for n in nodes:
+        if n.tag != "svg" or is_brand(n):
+            continue
+        vb = re.sub(r"\s+", " ", n.attrs.get("viewbox", n.attrs.get("viewBox", ""))).strip()
+        if vb not in ("0 0 24 24", "0 0 20 20", "0 0 16 16", "0 0 32 32"):
+            continue
+        fill, sw = n.attrs.get("fill", ""), n.attrs.get("stroke-width")
+        if fill == "none" or (n.attrs.get("stroke") and fill != "currentColor") or (not fill and any("icon" in k for k in n.cls())):
+            outline.append(n)
+            if sw:
+                widths[sw] += 1
+        elif fill:
+            filled.append(n)
+    allw = set(widths) | set(css_sw.values())
+    if len(allw) >= 2:
+        add("note", "mixed-icon-strokes", f"icons drawn with {len(allw)} stroke widths ({', '.join(sorted(allw))}); use one per page (iconography.md \"Icon libraries\")",
+            [f"stroke-width {w} x{c}" for w, c in widths.most_common()] + [f"{s} {{stroke-width:{w}}}" for s, w in css_sw.items()])
+    if outline and len(filled) >= 2:
+        add("note", "mixed-icon-fill", f"{len(outline)} outline and {len(filled)} filled UI icons; one style, filled only for a selected state (iconography.md)",
+            [f"filled svg fill={n.attrs.get('fill')}" for n in filled])
 
 
 def main(argv):

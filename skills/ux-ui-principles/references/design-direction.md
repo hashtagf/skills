@@ -240,7 +240,8 @@ only where marked.
 **Round B: the taste (show pictures first, then ask; one batch, up to 4 questions)**
 Show pictures of 2–3 directions at a time (one picture sheet holds at most 6), at least one soft or round and
 at least one square ([direction library](direction-library.md) step 2), never names alone. Render them on the
-client's subject and in different layouts (`node scripts/direction_preview.js --ids a,b,c --subject <kind> --sheet`);
+client's subject and in different layouts (`node scripts/direction_preview.js --ids a,b,c --subject <kind> --sheet --out <project>/previews`;
+without `--out` it writes to a temp folder it prints, never over the library previews);
 three previews that differ only in colour cannot be compared. The direction question always offers **"Research the
 market first"** as an option, and it is the recommended one when `look.py <kind>` lists no market study.
 

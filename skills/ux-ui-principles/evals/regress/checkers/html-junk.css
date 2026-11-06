@@ -1,0 +1,3 @@
+/* Regression for contrast.py selector clean-up (and/or precedence): HTML junk before a selector is dropped,
+   a CSS ">" combinator is kept. */
+<i>x</i> .dark{--ink:#fafafa;--bg:#000000}

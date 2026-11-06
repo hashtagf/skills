@@ -1,0 +1,6 @@
+/* Regression for contrast.py: token blocks beyond :root. Each dark/theme block has one failing pair. */
+:root{--bg:#ffffff;--fg:#1f2937;--muted:#4b5563}
+[data-theme="dark"]{--bg:#111827;--fg:#f9fafb;--muted:#6b7280}
+.dark{--bg:#0b0b0b;--fg:#fafafa;--muted:#555555}
+html[data-theme="sepia"]{--bg:#f4ecd8;--muted:#a89f8c}
+.card{--muted:#000000}

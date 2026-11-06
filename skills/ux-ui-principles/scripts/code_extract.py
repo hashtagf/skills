@@ -5,7 +5,8 @@ Usage:
   python3 code_extract.py SRC [--json]
 
 Scans CSS/SCSS/LESS, Tailwind config, JS/TS/JSX/TSX, Vue, Svelte and HTML under SRC (skips node_modules,
-.git, build output). Reports: stack, CSS custom properties (light and dark blocks), every color literal
+.git, build output). In HTML/Vue/Svelte/Astro only the <style> contents are parsed as CSS, plus local
+stylesheets an HTML file links to; light vs dark is decided per rule by its own selector and @media. Reports: stack, CSS custom properties (light and dark blocks), every color literal
 with counts and files, font families, font sizes, radii, Tailwind utility usage, and drift (near-duplicate
 colors, too many radii/fonts/sizes, hard-coded colors in component files). Maps variables to the DESIGN.md
 color roles by name (shadcn, MUI-like and common names), with a frequency fallback marked "guessed".
@@ -55,6 +56,35 @@ ROLE_NAMES = [  # (role, regex on var name without leading --); first match wins
     ("primary", r"^(primary|brand|accent|color-primary|color-brand|primary-color|brand-color|theme-primary)(-500|-600|-default|-main)?$"),
 ]
 DARK_SEL = re.compile(r"\.dark\b|\[data-theme=['\"]?dark|\[data-mode=['\"]?dark|prefers-color-scheme:\s*dark|\.theme-dark", re.I)
+NOT_DARK = re.compile(r":not\([^)]*\)", re.I)  # :root:not(.dark) / :not([data-theme=dark]) is a light block
+STYLE_TAG = re.compile(r"<style\b[^>]*>([\s\S]*?)</style\s*>", re.I)
+LINK_CSS = re.compile(r"<link\b[^>]*>", re.I)
+MARKUP_EXT = {".html", ".vue", ".svelte", ".astro"}
+
+
+def is_dark(selector):
+    """Light vs dark is decided per block by its own selector and enclosing @media, not by text around it."""
+    return bool(DARK_SEL.search(NOT_DARK.sub("", selector)))
+
+
+def style_text(text):
+    """Only the CSS inside <style> elements of a markup file (HTML head, Vue/Svelte/Astro SFC)."""
+    return "\n".join(m.group(1) for m in STYLE_TAG.finditer(text))
+
+
+def linked_css(text, base_dir):
+    """Local stylesheets an HTML file links to (<link rel=stylesheet href=...>), resolved from its folder."""
+    out = []
+    for tag in LINK_CSS.findall(text):
+        if not re.search(r"\brel\s*=\s*['\"]?[^'\">]*stylesheet", tag, re.I):
+            continue
+        m = re.search(r"\bhref\s*=\s*['\"]?([^'\" >]+)", tag, re.I)
+        if not m or re.match(r"^(?:[a-z]+:)?//|^data:", m.group(1), re.I):
+            continue
+        p = os.path.normpath(os.path.join(base_dir, m.group(1).split("?")[0].split("#")[0]))
+        if os.path.isfile(p) and os.path.getsize(p) <= MAX_BYTES:
+            out.append(p)
+    return out
 
 
 # ---------- color parsing ----------
@@ -206,11 +236,20 @@ def scan(src):
     vars_light, vars_dark, var_raw = {}, {}, {}
     fonts, fsizes, radii, tw = Counter(), Counter(), Counter(), Counter()
     files_scanned = 0
-    for path, ext in walk(src):
+    queue = list(walk(src))
+    seen = {os.path.abspath(p) for p, _ in queue}
+    while queue:
+        path, ext = queue.pop(0)
         try:
-            text = strip_comments(open(path, encoding="utf-8", errors="ignore").read(), ext)
+            raw = open(path, encoding="utf-8", errors="ignore").read()
         except OSError:
             continue
+        text = strip_comments(raw, ext)
+        if ext == ".html":  # linked local CSS outside the walked folders (public/, static/) still counts
+            for css in linked_css(raw, os.path.dirname(path)):
+                if os.path.abspath(css) not in seen:
+                    seen.add(os.path.abspath(css))
+                    queue.append((css, os.path.splitext(css)[1].lower()))
         files_scanned += 1
         rel = os.path.relpath(path, src)
         is_style = ext in STYLE_EXT
@@ -226,13 +265,16 @@ def scan(src):
         if not is_style and "tailwind.config" not in rel and found:
             hard_in_components[rel] += len(found)
         # custom properties with their block (light vs dark)
-        if is_style or ext in (".vue", ".svelte", ".html", ".astro"):
-            for sel, body in css_blocks(text):
+        if is_style or ext in MARKUP_EXT:
+            # markup: feed only the <style> contents to the CSS parser, so the <head> text before the first
+            # rule (meta tags, inline scripts) never becomes part of a selector
+            css = text if is_style else style_text(text)
+            for sel, body in css_blocks(css):
                 for m in VAR_RE.finditer(body):
                     name, val = m.group(1), m.group(2).strip()
                     if "{" in val:
                         continue
-                    target = vars_dark if DARK_SEL.search(sel) else vars_light
+                    target = vars_dark if is_dark(sel) else vars_light
                     target.setdefault(name, Counter())[val] += 1
                     var_raw.setdefault(name, val)
             for m in FONT_RE.finditer(text):

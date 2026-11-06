@@ -3,7 +3,7 @@
  *
  * A direction (assets/directions/directions.json) supplies tokens: ground, surface, ink, muted, accent,
  * faces, weight, case, tracking, radius, button shape. A composition supplies the arrangement, and a
- * content pack (assets/directions/content-packs.json) supplies a real subject. Ten compositions, each
+ * content pack (assets/directions/content-packs.json) supplies a real subject. Fourteen compositions (c1..c14), each
  * distilled from a studied reference (assets/references/README.md); they differ in structure, not paint:
  *
  *   c1 editorial   register strip, very large serif headline with one italic phrase, ledger, three pillars

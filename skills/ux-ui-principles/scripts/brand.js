@@ -12,7 +12,12 @@
  * Standard library only.
  */
 
-function hex(h) { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); return m ? parseInt(m[1], 16) : null; }
+// #rgb, #rgba, #rrggbb, #rrggbbaa -> 0xrrggbb (alpha dropped); null when not a hex color
+function hex(h) {
+  const m = /^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(String(h || '').trim()); if (!m) return null;
+  let s = m[1]; if (s.length <= 4) s = s.slice(0, 3).split('').map((c) => c + c).join('');
+  return parseInt(s.slice(0, 6), 16);
+}
 function lum(h) {
   const n = hex(h); if (n == null) return 1;
   const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
@@ -25,6 +30,15 @@ function mix(a, b, t) { // a*(1-t) + b*t
   return '#' + v.map((n) => n.toString(16).padStart(2, '0')).join('');
 }
 const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+
+// the most raised mix of ground toward ink that still keeps ink and muted at 4.5:1
+function raised(ground, ink, muted) {
+  for (const t of [0.1, 0.08, 0.06, 0.04, 0.02]) {
+    const s = mix(ground, ink, t);
+    if (contrast(ink, s) >= 4.5 && contrast(muted, s) >= 4.5) return s;
+  }
+  return ground;
+}
 
 function baseFor(d) {
   if (d.product && d.product.base) return d.product.base;
@@ -44,14 +58,19 @@ function productStyle(d, styles) {
   const dark = lum(d.ground) < 0.2;
   // product UI wants a quieter ground than a poster: keep the hue, pull it toward the surface
   const ground = dark ? d.ground : mix(d.ground, d.surface, 0.35);
-  const surface = d.surface;
+  // product UI puts ink and muted text on its cards: a surface of the opposite tone (light plan cards on a dark
+  // page, e.g. squeeze) would give 1:1 text, so derive a raised step of the page tone instead
+  const surface = contrast(d.ink, d.surface) >= 4.5 && contrast(d.muted, d.surface) >= 4.5 ? d.surface : raised(ground, d.ink, d.muted);
   const r = Math.min(d.radius, 14);
-  const accentInk = contrast(d.accentInk, d.accent) >= 4.5 ? d.accentInk : (contrast('#ffffff', d.accent) >= contrast('#111111', d.accent) ? '#ffffff' : '#111111');
+  // keep the direction's ink on the accent if it passes, else white/#111, else the best candidate (as export_tokens.roles())
+  const bw = contrast('#ffffff', d.accent) >= contrast('#111111', d.accent) ? '#ffffff' : '#111111';
+  const accentInk = contrast(d.accentInk, d.accent) >= 4.5 ? d.accentInk : contrast(bw, d.accent) >= 4.5 ? bw
+    : [d.accentInk, d.ground, d.ink, '#ffffff', '#000000'].reduce((x, y) => (contrast(y, d.accent) > contrast(x, d.accent) ? y : x));
   const p = d.product || {};
   const compact = p.density === 'compact' || (!p.density && b.rowH <= 44);
   return Object.assign({}, b, {
     id: d.id, name: `${d.name} (product)`, note: `Product UI of the ${d.name} direction on the ${b.name} structure.`,
-    dark, ground, surface, side: dark ? mix(d.ground, d.surface, 0.5) : surface, sideDark: false,
+    dark, ground, surface, side: dark ? mix(d.ground, surface, 0.5) : surface, sideDark: false,
     ink: d.ink, muted: d.muted, line: mix(surface, d.ink, dark ? 0.18 : 0.12),
     accent: d.accent, accentInk, accentSoft: mix(surface, d.accent, dark ? 0.22 : 0.14),
     font: d.body, displayFont: d.display,

@@ -87,8 +87,31 @@ module.exports = async function composition({ w, first }) {
   }
 
   // Running text
-  const lum = c => { const m = c.match(/[\d.]+/g); if (!m) return null; const [r, g, b] = m.slice(0, 3).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
-  const bgOf = e => { for (let p = e; p; p = p.parentElement) { const s = getComputedStyle(p); if (s.backgroundImage !== 'none') return null; const c = s.backgroundColor; const a = c.match(/[\d.]+/g); if (a && (a.length < 4 || parseFloat(a[3]) > 0.9)) return c; } return 'rgb(255, 255, 255)'; };
+  // Computed colours may be rgb(), oklab(), oklch(), color(srgb …) etc.: paint each on a 1x1 canvas and read sRGB back.
+  const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+  const cx = cv.getContext('2d', { willReadFrequently: true });
+  const rgbaCache = new Map();
+  const toRGBA = c => {
+    if (rgbaCache.has(c)) return rgbaCache.get(c);
+    let v = null;
+    if (c && c !== 'transparent') {
+      cx.clearRect(0, 0, 1, 1); cx.fillStyle = '#000'; cx.fillStyle = c;
+      cx.fillRect(0, 0, 1, 1); const d = cx.getImageData(0, 0, 1, 1).data;
+      v = [d[0], d[1], d[2], d[3] / 255];
+    } else v = [0, 0, 0, 0];
+    rgbaCache.set(c, v); return v;
+  };
+  const over = (top, under) => { const a = top[3]; return [0, 1, 2].map(i => top[i] * a + under[i] * (1 - a)).concat(1); };
+  const lum = rgb => { const [r, g, b] = rgb.slice(0, 3).map(v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  // Resolved background: semi-transparent layers composited up to the first opaque one (white canvas below); null over an image.
+  const bgOf = e => {
+    const layers = [];
+    for (let p = e; p; p = p.parentElement) {
+      const s = getComputedStyle(p); if (s.backgroundImage !== 'none') return null;
+      const c = toRGBA(s.backgroundColor); if (c[3] > 0) layers.push(c); if (c[3] >= 0.99) break;
+    }
+    return layers.reverse().reduce((under, top) => over(top, under), [255, 255, 255, 1]);
+  };
   const quiet = /muted|meta|caption|hint|small|note|sub|fine|legal|foot/i;
   const paras = texts.filter(e => e.tagName === 'P' && words(e.innerText) >= 8 && !quiet.test(typeof e.className === 'string' ? e.className : '') && !e.closest('footer,small,figcaption'));
   const small = [], weak = [], wide = [];
@@ -96,7 +119,7 @@ module.exports = async function composition({ w, first }) {
     const s = getComputedStyle(p), fs = parseFloat(s.fontSize);
     if (fs < 16) small.push(sel(p));
     const bg = bgOf(p);
-    if (bg) { const a = lum(s.color), b = lum(bg); if (a != null && b != null) { const cr = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); if (cr < 7) weak.push(`${sel(p)} ${cr.toFixed(1)}:1`); } }
+    if (bg) { const a = lum(over(toRGBA(s.color), bg)), b = lum(bg); const cr = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); if (cr < 7) weak.push(`${sel(p)} ${cr.toFixed(1)}:1`); }
     if (p.getBoundingClientRect().width / (fs * 0.5) > 88) wide.push(sel(p));
   }
   if (small.length) notes.push(`${small.length} paragraph(s) under 16px: ${small.slice(0, 3).join(', ')}`);

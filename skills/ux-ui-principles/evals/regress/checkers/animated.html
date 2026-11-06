@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Entrance animation</title>
+<!-- Regression for render_check.js settle(): p.anim darkens its colour over 3s (linear) on load.
+     Measured mid-animation it reads as grey (< 7:1); after the animation it is near black and must pass. -->
+<style>
+body{margin:0;font:18px/1.5 system-ui,sans-serif;background:#fff;color:#111;padding:40px 64px}
+@keyframes ink{from{color:#d0d0d0}to{color:#111}}
+.anim{animation:ink 3s linear both}
+</style></head><body>
+<h1>Entrance</h1>
+<p class="anim">This paragraph starts pale grey and darkens to near black during a three second entrance.</p>
+</body></html>

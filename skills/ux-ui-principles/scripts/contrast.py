@@ -4,18 +4,21 @@
 Usage:
   python3 contrast.py pairs.json            # JSON: [{"name","fg","bg","min"}...]
   python3 contrast.py "#0f6e64" "#ffffff"   # single pair, prints ratio
-  python3 contrast.py --css page.html       # read :root token blocks, check role pairs per theme
+  python3 contrast.py --css page.html       # read token blocks (:root, .dark, [data-theme], @theme), check role pairs per theme
   python3 contrast.py --css tokens.css      # also works on a stylesheet; local @import and <link> files are followed
 
---css finds every rule whose selector contains :root (including inside @media),
-layers its custom properties over the base :root block, and checks known role
-pairs (ink/bg, muted/panel, accent-ink/accent, field/panel, …) plus naming
-patterns: --X with --X-ink or --on-X, and --lN with --lNi. A leading "color-" is
-ignored (--color-ink = ink) and paper/paper-2/paper-3 count as bg/panel grounds. Blocks whose selector
-mentions "dark" are layered over the first plain dark block (approximating the
-cascade for palette variants). Values resolved: #hex, rgb(), hsl(), oklch() and var(--x) references (with
-fallback). color-mix(), alpha and transparent values are skipped. Local @import
-and <link rel=stylesheet> files are read too. It cannot see colors set outside tokens.
+--css finds every token block: rules whose selector is :root, html or body, a theme class or
+attribute (.dark, .light, .theme-x, [data-theme=…], [data-mode=…], [data-color-scheme=…]) alone or
+on :root/html/body, and Tailwind v4 @theme {} (also inside @media). It layers each block's custom
+properties over the base (first light) block and checks known role pairs (ink/bg, muted/panel,
+accent-ink/accent, field/panel, foreground/background, …) plus naming patterns: --X with --X-ink,
+--X-foreground or --on-X, and --lN with --lNi. A leading "color-" is ignored (--color-ink = ink)
+and paper/paper-2/paper-3 count as bg/panel grounds. Blocks whose selector mentions "dark" are
+layered over the first plain dark block (approximating the cascade for palette variants); blocks
+other than :root ones are labelled "(light theme)" / "(dark theme)". Values resolved: #hex, rgb(), hsl(), oklch()
+and var(--x) references (with fallback). color-mix(), alpha and transparent values are skipped. Local
+@import and <link rel=stylesheet> files are read too. It cannot see colors set outside tokens.
+Exit 2 (check.py: N/A) when no token block or no checkable pair is found.
 
 `min` defaults to 4.5 (normal text). Use 3 for large text, UI components,
 focus indicators and graphics (WCAG 1.4.3 / 1.4.11). Colors: #rgb or #rrggbb.
@@ -134,23 +137,39 @@ ROLE_PAIRS = [
     ("crit", "crit-soft", 4.5), ("warn", "warn-soft", 4.5), ("ok", "ok-soft", 4.5),
     ("crit", "panel", 4.5), ("ok", "panel", 4.5),
     ("field", "panel", 3.0), ("focus", "panel", 3.0), ("focus", "bg", 3.0),
+    ("foreground", "background", 4.5), ("muted-foreground", "background", 4.5),
 ]
 
 
+# A token block: :root, html, body, a theme class / attribute (.dark, .light, .theme-x, [data-theme=…],
+# [data-mode=…], [data-color-scheme=…], [class~=dark]) on its own or on :root/html/body, or Tailwind v4 @theme.
+_THEME = r"(?:\.(?:(?:dark|light)(?:-mode)?|theme[\w-]*|[\w-]*-theme)|\[(?:data-(?:theme|mode|color-scheme|bs-theme)|class[~*]?=[\"']?(?:dark|light))[^\]]*\])"
+_TOKEN_SEL = re.compile(r"(?:(?::root|html|body)(?::where\([^)]*\)|" + _THEME + r")*|(?::where\()?" + _THEME + r"+\)?)")
+
+
+def is_token_selector(sel):
+    """True for selectors that hold design tokens (see _TOKEN_SEL); component rules are skipped."""
+    if re.match(r"@theme\b", sel):
+        return True
+    parts = [p.strip() for p in sel.split(",") if p.strip()]
+    return bool(parts) and all(_TOKEN_SEL.fullmatch(p) for p in parts)
+
+
 def css_blocks(text):
-    """Yield (label, {prop: value}) for rules whose selector contains :root."""
+    """Yield (label, {prop: value}) for token blocks (:root, html, theme selectors, @theme)."""
     text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
     out, stack, buf, i = [], [], "", 0
     while i < len(text):
         c = text[i]
         if c == "{":
             sel = buf.strip().splitlines()[-1] if buf.strip() else ""
-            if "<" in sel or ">" in sel and ":root" not in sel:
-                sel = re.split(r"[<>]", sel)[-1]
+            sel = re.split(r";", sel)[-1]                     # "@import …; :root" on one line
+            if "<" in sel:          # leftover HTML before the selector; a bare ">" is a CSS child combinator, kept
+                sel = re.split(r"<[^<>]*>?", sel)[-1]
             stack.append(sel.strip()); buf = ""
         elif c == "}":
             sel = stack.pop() if stack else ""
-            if ":root" in sel and "--" in buf:
+            if "--" in buf and (":root" in sel or is_token_selector(sel)):
                 props = dict(re.findall(r"--([\w-]+)\s*:\s*([^;]+);?", buf))
                 ctx = " ".join(x for x in stack if x.startswith("@"))
                 out.append(((ctx + " " + sel).strip(), {k: v.strip() for k, v in props.items()}))
@@ -161,15 +180,20 @@ def css_blocks(text):
     return out
 
 
+def theme_of(label):
+    return "dark" if "dark" in label.lower() else "light"
+
+
 def check_css(path):
     blocks = css_blocks(read_css(path))
     if not blocks:
-        print("no :root custom properties found"); return 2
-    base = blocks[0][1]
-    dark_base = next((p for l, p in blocks[1:] if "dark" in l and "palette" not in l), {})
+        print("no :root custom properties found (no :root, html, .dark, [data-theme] or @theme token block)"); return 2
+    base_i = next((i for i, (l, _) in enumerate(blocks) if theme_of(l) == "light"), 0)
+    base = blocks[base_i][1]
+    dark_base = next((p for i, (l, p) in enumerate(blocks) if i != base_i and "dark" in l and "palette" not in l), {})
     strip = lambda d: {(k[6:] if k.startswith("color-") else k): v for k, v in d.items()}
     failed = total = 0
-    for label, props in blocks:
+    for i, (label, props) in enumerate(blocks):
         raw = dict(base)
         if "dark" in label:  # theme variants layer over the main dark block, as in the browser
             raw.update(dark_base)
@@ -180,6 +204,7 @@ def check_css(path):
         pairs = list(ROLE_PAIRS)
         for k in tok:
             if k + "-ink" in tok: pairs.append((k + "-ink", k, 4.5))
+            if k + "-foreground" in tok: pairs.append((k + "-foreground", k, 4.5))
             if "on-" + k in tok: pairs.append(("on-" + k, k, 4.5))
             m = re.fullmatch(r"(l\d+)", k)
             if m and k + "i" in tok: pairs.append((k + "i", k, 4.5))
@@ -187,13 +212,16 @@ def check_css(path):
         for fg, bg, need in pairs:
             if (fg, bg) in seen: continue
             seen.add((fg, bg))
-            if label != blocks[0][0] and fg not in props and bg not in props: continue
+            if i != base_i and fg not in props and bg not in props: continue
             a, b = hexv(fg), hexv(bg)
             if not (a and b): continue
             r = ratio(a, b); ok = r >= need; total += 1; failed += not ok
             rows.append(f"  {'PASS' if ok else 'FAIL'}  {r:5.2f}:1  need {need}:1  --{fg} on --{bg}  ({a} on {b})")
         if rows:
-            print(f"[{label}]"); print("\n".join(rows))
+            print(f"[{label}]" + ("" if ":root" in label or i == base_i else f"  ({theme_of(label)} theme)")); print("\n".join(rows))
+    if not total:
+        print("no checkable colour pairs: token blocks found, but no known role pair resolves to plain colours (check pairs by hand)")
+        return 2
     print(f"\n{total - failed}/{total} pairs pass")
     return 1 if failed else 0
 

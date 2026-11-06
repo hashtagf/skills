@@ -1,0 +1,2 @@
+/* Regression for contrast.py: tokens exist but no checkable colour pair: exit 2 (check.py N/A), not "0/0 pass". */
+:root{--radius:6px;--brand:#123456;--space-2:8px}

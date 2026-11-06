@@ -58,6 +58,7 @@ component. A page with every tell removed and nothing added is a tell too.
 | One word in the headline in a different color, italic or weight | Let the words carry emphasis; one face, one colour |
 | Rows of identical rounded cards with an icon in a tinted square | Varied compositions: bento with one large fragment, icon-led lists, splits. Icons themselves are fine with labels in one family ([visual-assets.md](visual-assets.md) §3) |
 | Hero-metric template (big number + label + supporting stat); sparkline or progress-ring filler | The one number that matters, in its sentence or a real chart |
+| Icons from two sets on one page (Lucide beside Font Awesome or Phosphor), two stroke widths, outline beside filled | One family with one stroke ([iconography.md](iconography.md) "Icon libraries"); draw a missing glyph in its style. Brand logos are a separate role (`slop_check.py` mixed-icon-*) |
 | Coloured `border-left/right` over 1px on cards or alerts; hard offset shadows (outside neobrutalism); gradient text; emoji or Unicode glyphs as icons | A tone step, a leading icon from one family, plain text |
 | Hairline borders and grid lines everywhere | Space and tone steps between surfaces |
 | Gradients as decoration; glows; soft grey shadows on resting elements | Flat colour; shadows only on things that float (menus, dialogs) |

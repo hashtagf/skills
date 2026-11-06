@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Fold CTA fallback</title>
+<!-- Regression for fold_check.js: the hero action is a plain a.btn (no .btn-primary / [data-cta]).
+     It must be found as the CTA; the nav link before it must not be. -->
+<style>body{margin:0;font:18px/1.5 sans-serif}header,section{padding:24px 48px}.btn{display:inline-block;padding:12px 20px;background:#0a5;color:#fff}</style>
+</head><body>
+<header><b>Shop</b><nav><a href="#more">More</a></nav></header>
+<section class="hero"><h1>Fresh beans every morning</h1><p>Roasted on Mondays.</p><a class="btn" href="#more">See the beans</a></section>
+<section id="more"><h2>Beans</h2><p>Three origins.</p></section>
+</body></html>

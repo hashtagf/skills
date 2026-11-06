@@ -14,11 +14,20 @@ required sections, reasons (not only values), color roles with values and a
 dark theme, an anti-pattern list, dials in range, a status line, and leftover
 placeholders. It does not judge taste; contrast is checked only for the component pairs DESIGN.md
 declares, so run `python3 contrast.py --css <page>` on the built tokens too.
+Contrast pairs that fail WCAG AA are errors: on-surface / muted / primary-text on canvas and on surface
+(cards; opposite-tone cards use on-card / card-muted / card-primary-text), on-primary on primary, on-tint-N
+on tint-N (4.5:1) and focus on canvas and surface (3:1), each for light and dark-*. An unquoted name or
+description that YAML would not read as a plain string (starts with [ { & * ! | > % @ ` or contains ": "
+or " #") is an error.
 Exit code 1 on any error, 2 on usage error. Standard library only.
 """
 import json
+import os
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _color import ratio  # noqa: E402
 
 REQUIRED = {
     "personality": r"personality|brand",
@@ -107,18 +116,31 @@ def parse_yaml(text):
     return root, dups
 
 
-def lum_hex(h):
-    h = h.lstrip("#")
-    if len(h) in (3, 4):
-        h = "".join(c * 2 for c in h[:3])
-    c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-    c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
-    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+YAML_UNSAFE_START = tuple("[{&*!|>%@`") + ("- ", "? ")
 
 
-def ratio(a, b):
-    x, y = sorted((lum_hex(a), lum_hex(b)), reverse=True)
-    return (x + 0.05) / (y + 0.05)
+def unsafe_plain(raw):
+    """True when an unquoted YAML value would not parse as a plain string (list, map, alias, tag, block, comment)."""
+    v = raw.strip()
+    if not v or v[0] in "\"'":
+        return False
+    return v.startswith(YAML_UNSAFE_START) or ": " in v or " #" in v or v.endswith(":")
+
+
+def text_pairs(colors):
+    """(fg, bg, need) pairs that must pass in a DESIGN.md: page text on canvas and on surface (cards), light and dark.
+    Opposite-tone cards declare on-card / card-muted / card-primary-text / card-focus; those replace the page roles on surface."""
+    out = []
+    for pre in ("", "dark-"):
+        c = lambda k: pre + k
+        card = lambda k, page: c(k) if c(k) in colors else c(page)
+        out += [(c("on-surface"), c("canvas"), 4.5), (card("on-card", "on-surface"), c("surface"), 4.5),
+                (c("muted"), c("canvas"), 4.5), (card("card-muted", "muted"), c("surface"), 4.5),
+                (c("on-primary"), c("primary"), 4.5),
+                (c("primary-text"), c("canvas"), 4.5), (card("card-primary-text", "primary-text"), c("surface"), 4.5),
+                (c("focus"), c("canvas"), 3.0), (card("card-focus", "focus"), c("surface"), 3.0)]
+        out += [(c("on-tint-%d" % i), c("tint-%d" % i), 4.5) for i in range(1, 5)]
+    return out
 
 
 def resolve(tokens, ref):
@@ -138,6 +160,11 @@ def check_spec(md, fm_text, body):
         add("error", f"duplicate key in front matter: {d}")
     if not tokens.get("name"):
         add("error", "front matter has no name")
+    for raw in fm_text.splitlines():
+        m = re.match(r"^(name|description|version):[ \t]*(.*)$", raw)
+        if m and unsafe_plain(m.group(2)):
+            add("error", f"{m.group(1)} is not a plain YAML string (unquoted {m.group(2).strip()[:40]!r} parses as a list, map, alias "
+                         f"or breaks the parser); quote it: {m.group(1)}: {json.dumps(scalar(m.group(2)), ensure_ascii=False)}")
     if tokens.get("version") not in (None, "alpha"):
         add("warn", f"unknown spec version {tokens.get('version')}; this checker knows alpha")
     elif tokens.get("version") is None:
@@ -197,15 +224,12 @@ def check_spec(md, fm_text, body):
             return x if isinstance(x, str) and HEX.match(x) else None
         a, b = val(bg), val(fg)
         if a and b and ratio(a, b) < 4.5:
-            add("warn", f"components.{n}: text on background is {ratio(a, b):.1f}:1, below 4.5:1")
-    # pairs on the page itself
-    for fgk, bgk in (("on-surface", "canvas"), ("on-surface", "surface"), ("muted", "canvas"), ("on-primary", "primary"),
-                     ("primary-text", "canvas"), ("dark-on-surface", "dark-canvas"), ("dark-muted", "dark-canvas"),
-                     ("dark-on-primary", "dark-primary"), ("dark-primary-text", "dark-canvas")) + tuple(
-            (("on-tint-%d" % i), ("tint-%d" % i)) for i in range(1, 5)) + tuple(
-            (("dark-on-tint-%d" % i), ("dark-tint-%d" % i)) for i in range(1, 5)):
-        if HEX.match(colors.get(fgk, "")) and HEX.match(colors.get(bgk, "")) and ratio(colors[fgk], colors[bgk]) < 4.5:
-            add("warn", f"colors {fgk} on {bgk} is {ratio(colors[fgk], colors[bgk]):.1f}:1, below 4.5:1")
+            add("error", f"components.{n}: text on background is {ratio(a, b):.1f}:1, below 4.5:1 (WCAG AA)")
+    # pairs on the page itself: text on canvas and on surface, light and dark; a failed AA pair is an error
+    for fgk, bgk, need in text_pairs(colors):
+        fg, bg = colors.get(fgk, ""), colors.get(bgk, "")
+        if isinstance(fg, str) and isinstance(bg, str) and HEX.match(fg) and HEX.match(bg) and ratio(fg, bg) < need:
+            add("error", f"colors {fgk} on {bgk} is {ratio(fg, bg):.2f}:1, below {need}:1 (WCAG AA)")
     if not any(k.startswith("dark-") for k in colors) and not re.search(r"light only|dark theme", md, re.I):
         add("warn", "no dark-* colors and no 'light only' decision")
     # sections

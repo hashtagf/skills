@@ -110,12 +110,14 @@ states are in [component-states.md](component-states.md).
 2. Icon-only controls are limited to bell, search, close, menu and similar, each with `aria-label` and `title`.
 3. Status pills pair an icon with text; trend uses an icon plus hidden text, never the characters ▲▼.
 4. Delivered as one sprite or one package; the glyph → meaning table lives in DESIGN.md.
-5. Run `scripts/slop_check.py <page>`: `nav-without-icons` must be clear.
+5. Run `scripts/slop_check.py <page>`: `nav-without-icons` and `mixed-icon-families` must be clear; `mixed-icon-strokes`
+   and `mixed-icon-fill` are cleared or waived in one sentence (filled for a selected tab is a valid reason).
 
 ## Review checklist
 
 1. Every icon-only control is from the "universally recognized" list or has a visible label.
-2. One family, one stroke style, consistent sizes from the scale.
+2. One family, one stroke style, consistent sizes from the scale (`slop_check.py` reports `mixed-icon-families`,
+   `mixed-icon-strokes`, `mixed-icon-fill`; brand marks and logos do not count).
 3. Each glyph has one meaning across the product.
 4. Decorative icons are hidden from assistive technology; meaningful ones are named.
 5. Targets meet the platform minimum; informative icons meet 3:1 contrast.

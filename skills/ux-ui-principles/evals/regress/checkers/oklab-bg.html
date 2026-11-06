@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>oklab background</title>
+<!-- Regression for _composition.js colour parsing. Chrome computes color-mix()/oklch() as oklab()/oklch();
+     p.lede is near-black on a pale oklab ground (true ~15:1) and must not be reported below 7:1.
+     p.half is 50% black over white (~4:1) and must be reported (alpha composited over the background). -->
+<style>
+body{margin:0;font:18px/1.5 system-ui,sans-serif;background:#fff;color:#111}
+.hero{background:color-mix(in oklab, #dff0e6 80%, white);padding:40px 64px}
+.tint{background:oklch(0.96 0.02 150);padding:40px 64px}
+.lede{color:#151a18}
+.ink{color:oklch(0.2 0.02 150)}
+.half{color:rgba(0,0,0,.5);padding:0 64px}
+</style></head><body>
+<section class="hero"><h1>Oklab ground</h1><p class="lede">This paragraph is dark text on a pale colour-mix background and reads at a high contrast ratio.</p></section>
+<section class="tint"><p class="ink">This paragraph uses an oklch text colour on an oklch background and reads at a high contrast ratio too.</p></section>
+<section><p class="half">This paragraph is half transparent black over white so its real contrast is only about four to one.</p></section>
+</body></html>

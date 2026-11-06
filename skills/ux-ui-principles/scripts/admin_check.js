@@ -22,7 +22,8 @@
  *   uppercase-text     uppercase text runs longer than 20 characters (note)
  * --states renders <page>?state=loading|empty|nomatch|error|denied|partial and fails a state whose
  *   visible text is identical to the default page (the state is declared but not built).
- * Exit 1 on any FAIL; 3 when no Playwright/browser (report NOT TESTED).
+ * Exit 1 on any FAIL; 3 when no Playwright/browser (report NOT TESTED). A missing file or a
+ * refused / unreachable URL prints "ERROR <reason>" and exits 1 (a slow load only WARNs).
  */
 const path = require('path');
 const fs = require('fs');
@@ -32,6 +33,7 @@ const type = opt('--type', 'list');
 if (!args[0] || args[0].startsWith('--') || !['list', 'detail', 'form', 'dashboard'].includes(type)) {
   console.error('usage: node admin_check.js <url-or-file> --type list|detail|form|dashboard [--states] [--out dir]'); process.exit(2);
 }
+if (!/^[a-z]+:\/\//i.test(args[0]) && !fs.existsSync(path.resolve(args[0]))) { console.log(`ERROR file not found: ${path.resolve(args[0])}`); process.exit(1); }
 const { findModule, findBrowser } = require('./_pw');
 const mod = findModule(args[0]);
 const exe = mod ? findBrowser(mod.chromium) : undefined;
@@ -95,7 +97,14 @@ function audit(type) {
   const browser = await mod.chromium.launch(exe ? { executablePath: exe } : {});
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
-  const load = async u => { try { await page.goto(u, { waitUntil: 'load', timeout: 30000 }); } catch (e) { console.log('WARN  load timed out: ' + u); } await page.waitForTimeout(500); };
+  const load = async u => {
+    try { await page.goto(u, { waitUntil: 'load', timeout: 30000 }); }
+    catch (e) {
+      if (e && e.name === 'TimeoutError') console.log('WARN  load timed out: ' + u);
+      else { console.log(`ERROR could not load ${u}: ${String(e && e.message || e).split('\n')[0]}`); await browser.close(); process.exit(1); }
+    }
+    await page.waitForTimeout(500);
+  };
   let failed = 0;
   await load(base);
   const r = await page.evaluate(audit, type);

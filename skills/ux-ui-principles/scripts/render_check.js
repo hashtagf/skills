@@ -48,7 +48,10 @@
  * the script exits 3 at once: report the render check as "not tested" and move
  * on; do not install browsers mid-task (`npx playwright install chromium` is a
  * one-time setup the user can run).
- * --timeout bounds the page load (no shell `timeout` needed; macOS lacks it).
+ * --timeout bounds the page load (no shell `timeout` needed; macOS lacks it). A load that times out is
+ * checked as far as it rendered (WARN); a missing file or a refused / unreachable URL prints
+ * "ERROR <reason>" and exits 1. Before each viewport is measured, finite CSS/JS animations and
+ * transitions are given up to 3s to finish, so entrance effects do not skew the checks or shots.
  * This is a smoke check, not an accessibility audit: it does not test keyboard
  * flows, screen readers, contrast or task success.
  */
@@ -59,6 +62,7 @@ const args = process.argv.slice(2);
 const doctor = args.includes('--doctor');
 if (!doctor && (!args[0] || args[0].startsWith('--'))) { console.error('usage: node render_check.js <url-or-file> [--out dir] [--widths 1440,768,390] [--schemes light,dark] [--zoom] [--fast] [--viewport-shots] [--toggle selector] [--timeout ms] | --doctor'); process.exit(2); }
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
+if (!doctor && !/^[a-z]+:\/\//i.test(args[0]) && !fs.existsSync(path.resolve(args[0]))) { console.log(`ERROR file not found: ${path.resolve(args[0])}`); process.exit(1); }
 
 const { findModule: findModuleFrom, findBrowser } = require('./_pw');
 const composition = require('./_composition');
@@ -110,7 +114,11 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
   page.on('console', m => { if (m.type() === 'error') cons.push(m.text()); });
   page.on('requestfailed', r => fails.push(r.url()));
   try { await page.goto(target, { waitUntil: 'load', timeout }); }
-  catch (e) { console.log(`WARN  load did not finish in ${timeout}ms; checking what rendered`); }
+  catch (e) {
+    // A timeout leaves a partly rendered page worth checking; a refused / missing target leaves nothing.
+    if (e && e.name === 'TimeoutError') console.log(`WARN  load did not finish in ${timeout}ms; checking what rendered`);
+    else { console.log(`ERROR could not load ${target}: ${String(e && e.message || e).split('\n')[0]}`); await browser.close(); process.exit(1); }
+  }
   await page.waitForTimeout(wait);
   await page.evaluate(async () => {
     document.querySelectorAll('img[loading=lazy]').forEach(i => { i.loading = 'eager'; });
@@ -124,7 +132,13 @@ const fullPage = !(fast || args.includes('--viewport-shots'));
       scrollTo({ top: 0, behavior: 'instant' }); await new Promise(r => setTimeout(r, 400));
     });
   };
-  const settle = async () => { await reveal(); await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); };
+  // Let entrance animations / transitions end (finite ones only, capped at 3s) so checks and shots see the final state.
+  const idle = () => page.evaluate(async () => {
+    const finite = () => document.getAnimations().filter(a => { if (a.playState !== 'running' && a.playState !== 'pending') return false; const t = a.effect && a.effect.getComputedTiming(); return t && Number.isFinite(t.endTime); });
+    const t0 = performance.now();
+    while (finite().length && performance.now() - t0 < 3000) await Promise.race([Promise.all(finite().map(a => a.finished.catch(() => 0))), new Promise(r => setTimeout(r, 250))]);
+  }).catch(() => {});
+  const settle = async () => { await reveal(); await idle(); await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); };
   let problems = 0, reported = { errs: 0, cons: 0, fails: 0 }, compFirst = true;
   // Dev server: the final gate runs on the shipped build (render-verification.md)
   if (/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)/.test(target)) {

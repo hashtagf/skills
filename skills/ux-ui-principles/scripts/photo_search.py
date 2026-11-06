@@ -12,7 +12,9 @@ number, title, licence, creator, size, file page and a 1280px picture URL.
 Look at the candidates before choosing (download a few, open them): reject clutter, staged stock, people who
 could be mistaken for the client's staff or patients, and anything that does not show the subject's world.
 --download DIR saves the --pick'ed hits (default all) as DIR/<name>.jpg and merges their credits into
-DIR/credits.json ({name: {title, artist, license, page}}), the format assets/photos/credits.json uses.
+DIR/credits.json ({name: {title, artist, license, page}}), the format assets/photos/credits.json uses; the
+credit is written right after each file is saved. A --pick outside the listed hits exits 2 before downloading;
+a failed download is skipped and the run exits 1.
 Credit every photo on the page (footer line) and list it in the hand-off as a stand-in to replace.
 
 Network: curl (system certificates) to the Commons API and api.openverse.org, anonymous, one request per query.
@@ -99,23 +101,41 @@ def main():
     out = arg("--download")
     if not out:
         print("\nNext: --download DIR --pick 2,5 --name a,b, then open each picture before using it."); return 0
-    picks = [int(x) for x in arg("--pick", ",".join(str(i) for i in range(1, len(hits) + 1))).split(",")]
+    raw = arg("--pick") or ",".join(str(i) for i in range(1, len(hits) + 1))
+    try:
+        picks = [int(x) for x in raw.split(",") if x.strip()]
+    except ValueError:
+        picks = []
+    bad = [k for k in picks if not 1 <= k <= len(hits)]
+    if not picks or bad:
+        print(f"--pick {raw}: choose hit numbers from 1 to {len(hits)}, comma-separated (nothing downloaded)", file=sys.stderr)
+        return 2
     names = (arg("--name") or "").split(",") if arg("--name") else []
     os.makedirs(out, exist_ok=True)
     cpath = os.path.join(out, "credits.json")
     credits = json.load(open(cpath, encoding="utf-8")) if os.path.exists(cpath) else {}
+    failed = 0
     for j, k in enumerate(picks):
         h = hits[k - 1]
         name = names[j] if j < len(names) and names[j] else re.sub(r"[^a-z0-9]+", "-", h["title"].lower())[:40].strip("-")
-        body = get(h["img"])
+        try:
+            body = get(h["img"])
+        except RuntimeError as e:
+            print(f"skip {name}: download failed ({e})"); failed += 1; continue
         if not body[:3] == b"\xff\xd8\xff" and not body[:8] == b"\x89PNG\r\n\x1a\n":
-            print(f"skip {name}: not an image (the server returned something else)"); continue
+            print(f"skip {name}: not an image (the server returned something else)"); failed += 1; continue
         ext = ".png" if body[:4] == b"\x89PNG" else ".jpg"
         open(os.path.join(out, name + ext), "wb").write(body)
         credits[name] = {"title": h["title"], "artist": h["artist"], "license": h["license"], "page": h["page"]}
+        # credit each file as soon as it is saved, so an interrupted run never leaves an uncredited photo
+        tmp = cpath + ".part"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(credits, f, ensure_ascii=False, indent=1)
+        os.replace(tmp, cpath)
         print(f"saved {os.path.join(out, name + ext)}  ({h['license']}, {h['artist'][:40]})")
-    json.dump(credits, open(cpath, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"credits → {cpath}. Footer line: 'ภาพ: <artist> (<licence>)' linked to each page.")
+    if failed:
+        print(f"{failed} of {len(picks)} picks not saved (see above)"); return 1
     return 0
 
 

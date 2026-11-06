@@ -6,6 +6,10 @@ Usage:
   python3 export_tokens.py --json my-tokens.json [--out DIR]     # same keys as a directions.json entry
   python3 export_tokens.py --list
   python3 export_tokens.py <direction-id> --print-dark     # derived dark theme as JSON (used by previews)
+  python3 export_tokens.py <direction-id> --shape soft|mixed|sharp   # shape override, same rule as design_md.py
+
+--shape soft turns a 0px direction into 24px cards + pill buttons (what DESIGN.md writes when the subject is
+round); sharp forces 0px + square buttons; mixed (or no flag) keeps the direction's radius.
 
 Without --out it writes nothing: it prints tokens.css to stdout (redirect it, or pass --out) and the contrast
 report to stderr, so running it from the skill folder never leaves files behind. With --out DIR it writes:
@@ -14,8 +18,10 @@ report to stderr, so running it from the skill folder never leaves files behind.
   tailwind-theme.css  Tailwind v4: @theme inline mapping onto tokens.css
   shadcn-globals.css  shadcn/ui variable names (:root and .dark) plus @theme inline
 
-The dark theme is derived, then every text/background pair is checked (WCAG AA) and the
-derived colors are nudged until they pass. A pair that still fails is printed and exit
+The dark theme is derived, then every text/background pair is checked (WCAG AA) on the page (paper)
+and on cards (surface), and the derived colors are nudged until they pass. Cards of the opposite tone
+(light cards on a dark page) use surface-ink / surface-muted (the direction's cardInk / cardMuted when
+given) plus surface-accent-text / surface-focus, emitted only for such directions. A pair that still fails is printed and exit
 code is 1. Review the output; it is a starting point, not a finished brand.
 Standard library only.
 """
@@ -29,15 +35,8 @@ DIRS = os.path.join(HERE, "..", "assets", "directions", "directions.json")
 
 
 # ---------- color math (sRGB hex <-> OKLCH) ----------
-def hex_rgb(h):
-    h = h.lstrip("#")
-    if len(h) == 3:
-        h = "".join(c * 2 for c in h)
-    return [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-
-
-def lin(c):
-    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+sys.path.insert(0, HERE)
+from _color import hex_rgb, lin, lum, ratio  # noqa: E402,F401  (re-exported: code_extract / design_md use ex.lum etc.)
 
 
 def delin(c):
@@ -68,16 +67,6 @@ def from_oklch(L, C, H):
     return "#" + "".join("%02x" % round(delin(x) * 255) for x in (r, g, bl))
 
 
-def lum(h):
-    r, g, b = [lin(x) for x in hex_rgb(h)]
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-
-def ratio(a, b):
-    x, y = sorted((lum(a), lum(b)), reverse=True)
-    return (x + 0.05) / (y + 0.05)
-
-
 def ok_css(h):
     L, C, H = to_oklch(h)
     return "oklch(%.1f%% %.3f %.0f)" % (L * 100, C, H)
@@ -94,11 +83,12 @@ def best_on(bg, a, b):
 
 
 def reach(color, bg, need, direction):
-    """Move lightness of color (+1 lighter, -1 darker) until it has `need` contrast on bg."""
+    """Move lightness of color (+1 lighter, -1 darker) until it has `need` contrast on bg (one color or a list)."""
+    bgs = [bg] if isinstance(bg, str) else list(bg)
     L, C, H = to_oklch(color)
     for _ in range(60):
         c = from_oklch(L, C, H)
-        if ratio(c, bg) >= need:
+        if all(ratio(c, b) >= need for b in bgs):
             return c
         L = max(0.0, min(1.0, L + 0.01 * direction))
     return from_oklch(L, C, H)
@@ -106,8 +96,10 @@ def reach(color, bg, need, direction):
 
 # ---------- themes ----------
 def light_theme(d):
+    """The direction's own colors. cardInk / cardMuted (optional) are text colors for cards of the opposite tone."""
     return dict(ground=d["ground"], surface=d["surface"], ink=d["ink"], muted=d["muted"],
-                accent=d["accent"], accent_ink=d["accentInk"], tints=list(d["tints"]))
+                accent=d["accent"], accent_ink=d["accentInk"], tints=list(d["tints"]),
+                card_ink=d.get("cardInk"), card_muted=d.get("cardMuted"))
 
 
 def derive_dark(d):
@@ -161,21 +153,40 @@ def roles(t, dark, label=""):
     if best != t["accent_ink"] and ratio(t["accent_ink"], t["accent"]) < 4.5:
         NOTES.append("%s: text on accent changed %s -> %s (%.1f:1)" % (label, t["accent_ink"], best, ratio(best, t["accent"])))
         t["accent_ink"] = best
+    # cards that sit on the opposite tone of the page (light cards on a dark ground) need their own ink;
+    # the direction's cardInk / cardMuted win when they pass on the surface.
+    ci, cm = t.get("card_ink"), t.get("card_muted")
+    if ratio(t["ink"], t["surface"]) >= 4.5:
+        si = t["ink"]
+    elif ci and ratio(ci, t["surface"]) >= 4.5:
+        si = ci
+    else:
+        si = max([g, "#000000", "#ffffff"], key=lambda c: ratio(c, t["surface"]))
+    t["surface_ink"] = si
+    opposite = si != t["ink"]
+    toward = -1 if lum(si) < lum(t["surface"]) else +1
+    if ratio(t["muted"], t["surface"]) >= 4.5:
+        t["surface_muted"] = t["muted"]
+    elif cm and ratio(cm, t["surface"]) >= 4.5:
+        t["surface_muted"] = cm
+    else:
+        t["surface_muted"] = reach(mix(t["surface"], si, 0.35), t["surface"], 4.5, toward)
     # accent as TEXT (links, icons) is a separate, darker/lighter step so the fill stays on brand.
-    t["accent_text"] = reach(t["accent"], g, 4.5, d)
+    # It must read on the page and on cards of the same tone; opposite-tone cards get surface-accent-text.
+    same = [g] if opposite else [g, t["surface"]]
+    t["accent_text"] = reach(t["accent"], same, 4.5, d)
     if t["accent_text"] != t["accent"]:
         NOTES.append("%s: accent-text %s derived from accent %s for links" % (label, t["accent_text"], t["accent"]))
-    # cards that sit on the opposite tone of the page (light cards on a dark ground) need their own ink.
-    si = t["ink"] if ratio(t["ink"], t["surface"]) >= 4.5 else max([g, "#000000", "#ffffff"], key=lambda c: ratio(c, t["surface"]))
-    t["surface_ink"] = si
-    t["surface_muted"] = t["muted"] if ratio(t["muted"], t["surface"]) >= 4.5 else reach(mix(t["surface"], si, 0.35), t["surface"], 4.5, -1 if lum(si) < lum(t["surface"]) else +1)
-    if si != t["ink"]:
-        NOTES.append("%s: cards are the opposite tone; use surface-ink/surface-muted on cards" % label)
+    t["focus"] = reach(t["accent"], same, 3.0, d)
+    t["surface_accent_text"] = reach(t["accent"], t["surface"], 4.5, toward) if opposite else t["accent_text"]
+    t["surface_focus"] = reach(t["accent"], t["surface"], 3.0, toward) if opposite else t["focus"]
+    t["cards_opposite"] = opposite
+    if opposite:
+        NOTES.append("%s: cards are the opposite tone; use surface-ink/surface-muted/surface-accent-text on cards" % label)
     # tints are brand fills; each gets its own readable ink (best of ink, ground, white, black)
     t["tint_inks"] = [t["ink"] if ratio(t["ink"], tn) >= 4.5 else max([g, "#ffffff", "#000000"], key=lambda c: ratio(c, tn)) for tn in t["tints"]]
     t["border"] = mix(g, t["ink"], 0.16)
     t["subtle"] = mix(g, t["surface"], 0.7) if dark else mix(g, t["ink"], 0.04)
-    t["focus"] = reach(t["accent"], g, 3.0, d)
     return t
 
 
@@ -184,7 +195,9 @@ def checks(name, t):
              ("muted on ground", t["muted"], t["ground"], 4.5), ("muted on surface", t["surface_muted"], t["surface"], 4.5),
              ("accent-ink on accent", t["accent_ink"], t["accent"], 4.5),
              ("accent-text on ground", t["accent_text"], t["ground"], 4.5),
+             ("accent-text on surface", t["surface_accent_text"], t["surface"], 4.5),
              ("focus ring on ground", t["focus"], t["ground"], 3.0),
+             ("focus ring on surface", t["surface_focus"], t["surface"], 3.0),
              ("border on ground", t["border"], t["ground"], 1.0)]
     for k in ("ok", "warn", "bad", "info"):
         pairs.append((k + " on ground", t[k], t["ground"], 4.5))
@@ -205,23 +218,51 @@ MOTION = ("--ease-out: cubic-bezier(0.22, 1, 0.36, 1); --ease-in: cubic-bezier(0
           "  --dur-fast: 120ms; --dur-base: 240ms; --dur-slow: 600ms;  /* motion.md: micro 100-150, layout 200-300, reveal 500-800 */")
 
 
-def color_block(t, indent="  "):
+def color_block(t, indent="  ", cards=False):
+    """cards: the direction has opposite-tone cards in a theme, so both themes carry the surface-accent-text/surface-focus pair."""
     rows = [("paper", t["ground"]), ("surface", t["surface"]), ("surface-ink", t["surface_ink"]), ("surface-muted", t["surface_muted"]), ("ink", t["ink"]), ("muted", t["muted"]),
             ("rule", t["border"]), ("subtle", t["subtle"]), ("accent", t["accent"]), ("accent-ink", t["accent_ink"]), ("accent-text", t["accent_text"]),
             ("focus", t["focus"]), ("ok", t["ok"]), ("warn", t["warn"]), ("bad", t["bad"]), ("info", t["info"])]
+    if cards:
+        rows[4:4] = [("surface-accent-text", t["surface_accent_text"]), ("surface-focus", t["surface_focus"])]
     rows += [("tint-%d" % (i + 1), c) for i, c in enumerate(t["tints"])]
     rows += [("on-tint-%d" % (i + 1), c) for i, c in enumerate(t["tint_inks"])]
     return "\n".join("%s--color-%s: %s; /* %s */" % (indent, k, ok_css(v), v) for k, v in rows)
 
 
-def radii(d):
-    r = int(d["radius"])
-    btn = {"pill": "999px", "round": "%dpx" % max(8, round(r * 0.6)), "square": "0px"}.get(d.get("btn"), "%dpx" % r)
-    return r, btn
+SHAPES = ("soft", "mixed", "sharp")
 
 
-def emit_css(d, light, dark, dark_is_default):
-    r, btn = radii(d)
+def shape_radii(d, shape=None):
+    """The one radius rule (export_tokens and design_md both use it).
+
+    shape (from --shape or the interview) overrides the direction:
+      soft  - a 0px direction becomes 24px cards and pill buttons (round subject / soft brief)
+      sharp - 0px cards and square buttons
+      mixed / None - the direction's own radius and button shape
+    Returns dict(card, input, button (CSS value), btn (pill|round|square), replaced).
+    """
+    r, btn = int(d["radius"]), d.get("btn", "round")
+    replaced = False
+    if shape == "soft" and r == 0:
+        r, btn, replaced = 24, "pill", True
+    elif shape == "sharp" and (r != 0 or btn != "square"):
+        r, btn, replaced = 0, "square", True
+    inp = max(6, round(r * 0.6))
+    button = {"pill": "999px", "round": "%dpx" % inp, "square": "0px"}.get(btn, "%dpx" % r)
+    return dict(card=r, input=inp, button=button, btn=btn, replaced=replaced)
+
+
+def radii(d, shape=None):
+    """(card radius px, button radius CSS value); kept for older callers."""
+    x = shape_radii(d, shape)
+    return x["card"], x["button"]
+
+
+def emit_css(d, light, dark, dark_is_default, shape=None):
+    rx = shape_radii(d, shape)
+    r, btn = rx["card"], rx["button"]
+    cards = light["cards_opposite"] or dark["cards_opposite"]
     disp, body = d["display"], d["body"]
     fonts = ('--font-display: "%s", "Noto Sans Thai", ui-sans-serif, sans-serif;\n'
              '  --font-body: "%s", "Noto Sans Thai", ui-sans-serif, sans-serif;\n'
@@ -232,10 +273,10 @@ def emit_css(d, light, dark, dark_is_default):
    Fonts: add the Google Fonts links for {disp} and {body}; Thai falls back to Noto Sans Thai. */
 :root {{
   color-scheme: {first_name};
-{color_block(first)}
+{color_block(first, cards=cards)}
   {fonts}
   --display-weight: {d['dw']}; --tracking-display: {d['track']};
-  --radius-card: {r}px; --radius-input: {max(6, round(r * 0.6))}px; --radius-button: {btn}; --radius-pill: 999px;
+  --radius-card: {r}px; --radius-input: {rx['input']}px; --radius-button: {btn}; --radius-pill: 999px;
   --shadow-card: {sh};
   {SPACE}
   {TEXT}
@@ -244,11 +285,11 @@ def emit_css(d, light, dark, dark_is_default):
 }}
 [data-theme="{second_name}"] {{
   color-scheme: {second_name};
-{color_block(second)}
+{color_block(second, cards=cards)}
 }}
 @media (prefers-color-scheme: {second_name}) {{
   :root:not([data-theme]) {{
-{color_block(second, '    ')}
+{color_block(second, '    ', cards)}
   }}
 }}
 @media (prefers-reduced-motion: reduce) {{
@@ -257,14 +298,15 @@ def emit_css(d, light, dark, dark_is_default):
 """
 
 
-def emit_tailwind(d):
+def emit_tailwind(d, cards=False):
+    extra = "  --color-surface-accent-text: var(--color-surface-accent-text);\n  --color-surface-focus: var(--color-surface-focus);\n" if cards else ""
     return f"""/* Tailwind v4 theme for "{d['id']}". Import after tokens.css:  @import "tailwindcss"; @import "./tokens.css"; */
 @theme inline {{
   --color-paper: var(--color-paper);
   --color-surface: var(--color-surface);
   --color-surface-ink: var(--color-surface-ink);
   --color-surface-muted: var(--color-surface-muted);
-  --color-ink: var(--color-ink);
+{extra}  --color-ink: var(--color-ink);
   --color-muted: var(--color-muted);
   --color-rule: var(--color-rule);
   --color-subtle: var(--color-subtle);
@@ -311,10 +353,10 @@ def shadcn_vars(t):
     return m
 
 
-def emit_shadcn(d, light, dark):
+def emit_shadcn(d, light, dark, shape=None):
     def block(t):
         return "\n".join("  --%s: %s; /* %s */" % (k, ok_css(v), v) for k, v in shadcn_vars(t).items())
-    r, _ = radii(d)
+    r, _ = radii(d, shape)
     names = [k for k in shadcn_vars(light)]
     inline = "\n".join("  --color-%s: var(--%s);" % (k, k) for k in names)
     return f"""/* shadcn/ui theme for "{d['id']}". Paste into app/globals.css (or src/index.css) in place of the default :root/.dark blocks. */
@@ -345,7 +387,8 @@ def load(args):
     if "--list" in args:
         print(", ".join(x["id"] for x in items))
         sys.exit(0)
-    ids = [a for a in args if not a.startswith("--") and a not in (args[args.index("--out") + 1] if "--out" in args else None, args[args.index("--only") + 1] if "--only" in args else None)]
+    vals = {args[args.index(f) + 1] for f in ("--out", "--only", "--shape") if f in args and args.index(f) + 1 < len(args)}
+    ids = [a for a in args if not a.startswith("--") and a not in vals]
     if not ids:
         print(__doc__)
         sys.exit(2)
@@ -361,6 +404,10 @@ def main():
     d = load(args)
     out = args[args.index("--out") + 1] if "--out" in args else None
     only = (args[args.index("--only") + 1] if "--only" in args else "css,tailwind,shadcn").split(",")
+    shape = args[args.index("--shape") + 1] if "--shape" in args and args.index("--shape") + 1 < len(args) else None
+    if "--shape" in args and shape not in SHAPES:
+        print("--shape must be one of: %s" % ", ".join(SHAPES))
+        sys.exit(2)
     dark_is_default = lum(d["ground"]) < 0.2
     if dark_is_default:
         dark_t, light_t = light_theme(d), derive_light_from_dark(d)
@@ -372,9 +419,10 @@ def main():
         print(json.dumps(dict(ground=u["ground"], surface=u["surface"], ink=u["ink"], muted=u["muted"],
                               accent=u["accent"], accentInk=u["accent_ink"], tints=u["tints"], dark=True)))
         return
-    files = {"css": ("tokens.css", emit_css(d, light_t, dark_t, dark_is_default)),
-             "tailwind": ("tailwind-theme.css", emit_tailwind(d)),
-             "shadcn": ("shadcn-globals.css", emit_shadcn(d, light_t, dark_t))}
+    cards = light_t["cards_opposite"] or dark_t["cards_opposite"]
+    files = {"css": ("tokens.css", emit_css(d, light_t, dark_t, dark_is_default, shape)),
+             "tailwind": ("tailwind-theme.css", emit_tailwind(d, cards)),
+             "shadcn": ("shadcn-globals.css", emit_shadcn(d, light_t, dark_t, shape))}
     report = sys.stdout
     if out:
         os.makedirs(out, exist_ok=True)

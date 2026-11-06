@@ -8,7 +8,14 @@ python3 scripts/export_tokens.py <direction-id> --out src/styles
 python3 scripts/export_tokens.py --list
 python3 scripts/export_tokens.py --json my-brand.json     # same keys as a directions.json entry
 python3 scripts/export_tokens.py <direction-id> --only css,tailwind,shadcn   # subset of files
+python3 scripts/export_tokens.py <direction-id> --shape soft     # soft | mixed | sharp; same radius rule as DESIGN.md
 ```
+
+`--shape` applies the radius rule `design_md.py` uses (one function, `shape_radii()`): `soft` turns a 0px
+direction into 24px cards and pill buttons (what DESIGN.md writes when the subject is round; its Decision log
+then prints the command with `--shape soft`), `sharp` forces 0px and square buttons, `mixed` or no flag keeps the
+direction. A `round` button uses the input radius (`max(6px, 0.6 × card)`), so `--radius-button` and DESIGN.md's
+`rounded.md` agree.
 
 Without `--out` nothing is written: `tokens.css` goes to stdout (the contrast report to stderr), so a run from the skill folder leaves no files. Exit codes: 1 when a
 color pair cannot pass, 2 for an unknown direction.
@@ -39,7 +46,13 @@ own density variables.
   buttons; `--color-accent-text` is the darker or lighter step for links and small text.
 - Text on the accent fill is picked for contrast (`--color-accent-ink`). The script prints a
   `note` when it changes the direction's own value (many bright accents need dark text).
-- Cards of the opposite tone get `--color-surface-ink` and `--color-surface-muted`.
+- Text roles are checked on the page **and on cards**, light and dark: ink, muted and accent-text at 4.5:1,
+  the focus ring at 3:1, on `--color-paper` and on `--color-surface`. Accent-text and focus move until they pass on both.
+- Cards of the opposite tone (light cards on a dark page) get `--color-surface-ink` and `--color-surface-muted`
+  (the direction's `cardInk` / `cardMuted` when set and passing), plus `--color-surface-accent-text` and
+  `--color-surface-focus`, emitted only for such directions. In DESIGN.md these are `on-card`, `card-muted`,
+  `card-primary-text`, `card-focus`; `design_md_check.py` checks them on `surface` instead of the page roles and
+  exits 1 on any failed AA pair.
 - Status colors (ok, warn, bad, info) are derived per theme to 4.5:1. Never rely on color alone.
 - Thai falls back to Noto Sans Thai in every font stack.
 

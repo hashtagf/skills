@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="th"><head>
+<meta charset="utf-8">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13110c">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="public/extra.css">
+<style>
+:root{
+  --ground:#faf7ef; --surface:#ffffff; --ink:#0c1c16; --muted:#54655d; --line:#e8e5dd;
+  --accent:#007948; --on-accent:#f8fdfa; --r-card:26px; --r-ctrl:14px; --r-pill:999px; --dur-fast:150ms;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --ground:#13110c; --surface:#1e1c16; --ink:#efeeeb; --muted:#a7a49d; --accent:#298e5c; }
+}
+:root:not(.dark){ --tint-1:#f6d3d1; }
+body{background:var(--ground);color:var(--ink)}
+.card{background:#ffffff;border-radius:var(--r-card)} .tile{background:#ffffff} .x{color:#ffffff} .y{border-color:#ffffff}
+</style>
+</head><body><div class="card">Card</div><a style="color:#ffffff">x</a></body></html>

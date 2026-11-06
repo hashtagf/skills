@@ -10,9 +10,11 @@ For every item on the showcase index: title, type, attribution and licence lines
 
 Pictures are a STUDY SET, not assets: each item's licence covers the plugin, "not every depicted asset", so the
 pictures stay local (git-ignored) and are never copied into client work. Re-run to refresh.
-Network: curl (system certificates). Pillow resizes the pictures. Be polite: one request per --delay seconds.
+Pictures are found from the item page's own <img src/srcset> (and og:image), so a change of image host does
+not break the run; exits 1 when no picture was fetched, 3 when Pillow is missing.
+Network: curl --fail (system certificates). Pillow resizes the pictures. Be polite: one request per --delay seconds.
 """
-import html, io, json, os, re, subprocess, sys, time
+import html, io, json, os, re, subprocess, sys, time, urllib.parse
 
 BASE = "https://open-design.ai"
 UA = "Mozilla/5.0 (design study; ux-ui-principles skill)"
@@ -23,8 +25,15 @@ def arg(name, default=None):
     return a[a.index(name) + 1] if name in a else default
 
 
+class FetchError(RuntimeError):
+    pass
+
+
 def get_bytes(url):
-    return subprocess.run(["curl", "-sL", "--max-time", "60", "-A", UA, url], capture_output=True).stdout
+    r = subprocess.run(["curl", "-sSL", "--fail", "--max-time", "60", "-A", UA, url], capture_output=True)
+    if r.returncode or not r.stdout:
+        raise FetchError(f"{url}: {r.stderr.decode('utf-8', 'replace').strip() or f'curl exit {r.returncode}, empty body'}")
+    return r.stdout
 
 
 def get(url):
@@ -58,34 +67,105 @@ def text_of(fragment):
     return re.sub(r"\s+", " ", t).strip()
 
 
+def _attr(tag, name):
+    m = re.search(r'\s' + name + r'\s*=\s*"([^"]*)"', tag)
+    return html.unescape(m.group(1)) if m else None
+
+
+def _num(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def item_images(page, base_url, view_w=1440, full_w=960):
+    """(view_url, full_url) of an item page: its first-view picture and its full-page capture.
+
+    Reads every <img src/srcset> between the item's <h1> and the related-items list ("More ..."/"Related"),
+    with each picture's declared size (width/height or style aspect-ratio). The full page is the tallest
+    picture (height >= 2x width); the view is the first wide picture that is not it. Falls back to og:image
+    for the view. From a srcset it takes the smallest candidate at least as wide as needed (polite), else src.
+    """
+    start = (re.search(r"<h1[\s>]", page) or re.search(r"<body", page) or re.match("", page)).start()
+    end_m = re.search(r"<h[23][^>]*>\s*(?:<[^>]+>\s*)*(?:Related|More )", page[start:])
+    main = page[start:start + end_m.start()] if end_m else page[start:]
+    cands = []
+    for m in re.finditer(r"<img\b[^>]*>", main, re.S):
+        tag = m.group(0)
+        src = _attr(tag, "src")
+        srcset = _attr(tag, "srcset") or ""
+        if not src and not srcset:
+            continue
+        w, h = _num(_attr(tag, "width")), _num(_attr(tag, "height"))
+        ar = re.search(r"aspect-ratio\s*:\s*([\d.]+)\s*/\s*([\d.]+)", _attr(tag, "style") or "")
+        if ar and not (w and h):
+            w, h = float(ar.group(1)), float(ar.group(2))
+        if w and w < 200:  # icons, avatars
+            continue
+        sizes = []
+        for part in srcset.split(","):
+            bits = part.strip().split()
+            if bits and len(bits) > 1 and bits[1].endswith("w"):
+                sizes.append((_num(bits[1][:-1]) or 0, bits[0]))
+        cands.append({"src": src, "srcset": sorted(sizes), "w": w, "h": h})
+
+    def pick(c, need):
+        ok = [u for sw, u in c["srcset"] if sw >= need]
+        u = ok[0] if ok else (c["src"] or (c["srcset"][-1][1] if c["srcset"] else None))
+        return urllib.parse.urljoin(base_url, u) if u else None
+
+    tall = [c for c in cands if c["w"] and c["h"] and c["h"] >= 2 * c["w"]]
+    full = max(tall, key=lambda c: c["h"] / c["w"]) if tall else None
+    view = next((c for c in cands if c is not full and not (c["w"] and c["h"] and c["h"] >= 2 * c["w"])), None)
+    view_url = pick(view, view_w) if view else None
+    if not view_url:
+        og = re.search(r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"', page) or \
+            re.search(r'<meta[^>]+content="([^"]+)"[^>]+property="og:image"', page)
+        view_url = urllib.parse.urljoin(base_url, html.unescape(og.group(1))) if og else None
+    return view_url, (pick(full, full_w) if full else None)
+
+
 def main():
     out = os.path.abspath(arg("--out", os.path.join(os.path.dirname(__file__), "..", "assets", "showcase")))
     limit, delay = int(arg("--limit", "100")), float(arg("--delay", "1.0"))
     os.makedirs(os.path.join(out, "img"), exist_ok=True)
-    index = get(BASE + "/showcase/?type=all")
+    try:
+        from PIL import Image
+    except ImportError:
+        print("NOT RUN: Pillow is needed to resize the pictures (pip install pillow)"); return 3
+    try:
+        index = get(BASE + "/showcase/?type=all")
+    except FetchError as e:
+        print(f"index fetch failed: {e}"); return 1
     slugs = sorted(set(re.findall(r'href="/showcase/([a-z0-9-]+)/"', index)))[:limit]
-    from PIL import Image
-    items = []
+    if not slugs:
+        print("no showcase items found on the index page (layout changed?)"); return 1
+    items, fetched = [], 0
     for n, slug in enumerate(slugs, 1):
-        page = get(f"{BASE}/showcase/{slug}/")
+        url = f"{BASE}/showcase/{slug}/"
+        try:
+            page = get(url)
+        except FetchError as e:
+            print(f"[{n}/{len(slugs)}] {slug} PAGE FAILED: {e}", flush=True); time.sleep(delay); continue
         h1 = re.search(r"<h1[^>]*>(.*?)</h1>", page, re.S)
-        imgs = re.findall(r'src="(/showcase/generated/[^"]+\.(?:png|jpe?g|webp))"', page)
-        view = next((u for u in imgs if "view-1" in u), imgs[0] if imgs else None)
-        full = next((u for u in imgs if "full-page" in u), None)
+        view, full = item_images(page, url)
         item = {
             "slug": slug, "title": text_of(h1.group(1)) if h1 else slug,
             "type": slug.replace("-design", "").split("-")[-1],
-            "url": f"{BASE}/showcase/{slug}/",
+            "url": url,
             "sections": sections(page),
-            "view": view and BASE + view, "full": full and BASE + full,
+            "view": view, "full": full,
         }
-        for key, url, w, cap in (("img", item["view"], 1440, 1000), ("img_full", item["full"], 960, 2800)):
-            if not url:
+        for key, img_url, w, cap in (("img", item["view"], 1440, 1000), ("img_full", item["full"], 960, 2800)):
+            if not img_url:
                 continue
-            raw = get_bytes(url)
+            time.sleep(delay / 2)
             try:
+                raw = get_bytes(img_url)
                 im = Image.open(io.BytesIO(raw)).convert("RGB")
-            except Exception:
+            except Exception as e:  # network error or not a picture: report, keep going
+                print(f"  {slug} {key}: {e}", flush=True)
                 continue
             if im.width > w:
                 im = im.resize((w, round(im.height * w / im.width)))
@@ -93,15 +173,17 @@ def main():
             name = f"img/{slug}{'' if key == 'img' else '-full'}.jpg"
             im.save(os.path.join(out, name), "JPEG", quality=72, optimize=True)
             item[key] = name
-            time.sleep(delay / 2)
         att = [x["text"] for x in item["sections"] if x["h"].lower().startswith("source and attribution")]
         item["attribution"] = att[0] if att else ""
         items.append(item)
-        print(f"[{n}/{len(slugs)}] {slug} {'img' if item.get('img') else 'NO IMAGE'}", flush=True)
+        fetched += bool(item.get("img"))
+        print(f"[{n}/{len(slugs)}] {slug} {'img' if item.get('img') else 'NO IMAGE'}{' +full' if item.get('img_full') else ''}", flush=True)
         json.dump(items, open(os.path.join(out, "items.json"), "w"), ensure_ascii=False, indent=1)
         time.sleep(delay)
-    print("saved", len(items), "items to", out)
-
+    print("saved", len(items), "items,", fetched, "with pictures, to", out)
+    if not fetched:
+        print("no pictures fetched: the item pages' <img> layout may have changed"); return 1
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

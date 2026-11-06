@@ -7,8 +7,11 @@ Usage:
 Runs, per page:
   script   node scripts/script_check.js   syntax of every script; globals that clash with window (e.g. const top)
   slop     python3 scripts/slop_check.py  template devices, inert forms, removed focus, motion without reduced motion
-  contrast python3 scripts/contrast.py --css  role colour pairs in :root token blocks (light and dark)
-  states   python3 scripts/state_check.py  markers of loading / empty / error / disabled / focus … in the page's folder
+  contrast python3 scripts/contrast.py --css  role colour pairs in token blocks (:root, html, .dark, [data-theme], @theme)
+                                            (N/A when the page defines no checkable colour tokens)
+  states   python3 scripts/state_check.py  markers of loading / empty / error / disabled / focus … in the page and the
+                                            local scripts / stylesheets it links (PASS when every state has a marker,
+                                            MANUAL listing the missing ones otherwise)
   meta     built in                         public pages: title, description, canonical, og:title/description/image,
                                             twitter:card, exactly one h1 (N/A for /admin/ paths, noindex or data-surface="app")
   render   node scripts/render_check.js --fast (with --render; --full drops --fast)  overflow, JS errors, targets, shots
@@ -20,7 +23,7 @@ Prints one line per check (PASS / FLAG / FAIL / ERROR / N/A / MANUAL / NOT RUN) 
 A check that cannot run (no node, no browser) says NOT RUN; never report it as passed. Exit 1 when any check
 fails or flags. Standard library only.
 """
-import os, re, shutil, subprocess, sys
+import json, os, re, shutil, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,6 +36,33 @@ def run(cmd):
         return None, "not installed"
     except subprocess.TimeoutExpired:
         return 1, "timed out"
+
+
+def linked_sources(page):
+    """The page plus the local scripts and stylesheets it links (what the states check scans)."""
+    with open(page, encoding="utf-8", errors="replace") as f:
+        html = f.read()
+    out, base = [page], os.path.dirname(page)
+    refs = re.findall(r"<script\b[^>]*\bsrc=[\"']([^\"']+)[\"']", html, re.I)
+    refs += [h for tag in re.findall(r"<link\b[^>]*>", html, re.I) if re.search(r"rel=[\"']?stylesheet", tag, re.I)
+             for h in re.findall(r"href=[\"']([^\"']+)[\"']", tag, re.I)]
+    for r in refs:
+        if re.match(r"[a-z][a-z0-9+.-]*:|//", r, re.I):
+            continue                              # remote / data: resources are not the page's own source
+        q = os.path.normpath(os.path.join(base, r.split("?")[0].split("#")[0]))
+        if os.path.isfile(q) and q not in out:
+            out.append(q)
+    return out
+
+
+def states_result(out):
+    """(status, lines) from state_check.py --json output; None when it is not JSON."""
+    try:
+        rep = json.loads(out)
+    except ValueError:
+        return None
+    missing = rep.get("missing") or []
+    return ("MANUAL", [f"MISS {s}" for s in missing] + ["missing = no marker found; verify by hand"]) if missing else ("PASS", [])
 
 
 def is_app_page(page, html):
@@ -75,11 +105,15 @@ def main(argv):
     for page in pages:
         page = os.path.abspath(page)
         print(f"== {page}")
+        if not os.path.isfile(page):
+            print("  ERROR    page not found (pass the path to a built .html file)")
+            worst = max(worst, 1)
+            continue
         checks = [
             ("script", [node, os.path.join(HERE, "script_check.js"), page] if node else None),
             ("slop", [sys.executable, os.path.join(HERE, "slop_check.py"), page]),
             ("contrast", [sys.executable, os.path.join(HERE, "contrast.py"), "--css", page]),
-            ("states", [sys.executable, os.path.join(HERE, "state_check.py"), os.path.dirname(page)]),
+            ("states", [sys.executable, os.path.join(HERE, "state_check.py")] + linked_sources(page) + ["--json"]),
         ]
         if "--render" in argv or "--full" in argv:
             checks.append(("render", [node, os.path.join(HERE, "render_check.js"), page] + ([] if "--full" in argv else ["--fast"]) if node else None))
@@ -111,14 +145,18 @@ def main(argv):
             if code is None:
                 print(f"  NOT RUN  {name:<8} ({out})"); continue
             low = out.lower()
+            shown = None
             if "traceback (most recent call last)" in low:
                 status = "ERROR"; worst = 1            # the checker itself crashed: report it, never as a pass
             elif "not tested" in low or "not run" in low:
                 status = "NOT RUN"
-            elif name == "contrast" and "no :root custom properties" in low:
-                status = "N/A"                         # page defines no colour tokens; check its pairs by hand
+            elif name == "contrast" and (code == 2 or "no :root custom properties" in low):
+                status = "N/A"                         # page defines no checkable colour tokens; check its pairs by hand
             elif name == "states":
-                status = "MANUAL" if "miss" in low else "PASS"   # markers only; a miss means unverified, not failed
+                res = states_result(out)               # markers only; a miss means unverified, not failed
+                status, shown = res if res else ("MANUAL" if code else "PASS", None)
+            elif code != 0 and out.startswith("ERROR"):
+                status = "ERROR"; worst = 1            # the page could not be loaded (missing file, refused URL)
             elif code == 0:
                 status = "PASS"
             else:
@@ -126,7 +164,7 @@ def main(argv):
                 worst = 1
             print(f"  {status:<8} {name}")
             if status not in ("PASS", "N/A"):
-                for line in [l for l in out.splitlines() if l.strip()][:8]:
+                for line in shown if shown is not None else [l for l in out.splitlines() if l.strip()][:8]:
                     print(f"           {line[:160]}")
     return worst
 

@@ -110,6 +110,8 @@
 | `direction_preview.js` | ภาพ preview ของ direction | ภาพสำหรับ interview | build_previews.js |
 | `direction_recipe.py` | token/ข้อห้าม/component ที่ต้องมีของ direction | แปลง direction เป็นกติกา | §3 ข้อ 2 |
 | `ds_lookup.py` | ค้นคู่มือ 126 design system | หาตัวอย่างจริงก่อนตั้งค่า | design-system-benchmarks.md |
+| `_composition.js` | ตัวตรวจที่รันในหน้าเว็บให้ render_check (contrast, ขนาดตัวอักษร, การจัดวาง) | แยกโค้ดฝั่ง browser ออกจาก render_check.js | ใช้โดย render_check.js |
+| `_color.py` | สูตรสีกลาง: อ่าน hex, luminance, contrast, เลือกสีตัวอักษร | ให้สคริปต์ Python คำนวณสีตรงกัน | ใช้โดย export_tokens, design_md, design_md_check, tweaks_panel |
 | `export_tokens.py` | direction → token ในโค้ด (`--out DIR`; ไม่ใส่ = พิมพ์ออก stdout ไม่เขียนไฟล์; `--print-dark`) | ส่งต่อให้โค้ดโดยไม่พิมพ์มือ | tokens-export.md |
 | `flow_check.js` | เดิน journey จาก steps.json รวม failure path | ตรวจว่างานหลักทำได้จริง | §3 ข้อ 6 |
 | `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |

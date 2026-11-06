@@ -4,7 +4,7 @@
 Usage:
   python3 scripts/icons.py search booking calendar          # Lucide names + Simple Icons brands matching the words
   python3 scripts/icons.py lucide calendar-check phone [--size 20] [--stroke 2] [--sprite icons.svg]
-  python3 scripts/icons.py brand line whatsapp [--ground "#faf7ef"] [--mono] [--size 20]
+  python3 scripts/icons.py brand line whatsapp [--ground "#faf7ef"] [--mono] [--size 20]   # --ground: #rgb or #rrggbb
   options: [--lucide-version 1.58.0] [--simple-version 16.35.0]
 
 lucide  prints each icon as inline SVG ready to paste: currentColor, aria-hidden, class="icon", your size and
@@ -15,7 +15,8 @@ brand   prints the brand's single-path SVG with its hex colour (or currentColor 
         guidelines, licence and source links. A brand that is not in Simple Icons (PromptPay, KBank, SCB, Lazada,
         Agoda, Wongnai, LINE MAN …) must come from the brand's own media kit: never redraw a logo.
 
-Versions are pinned (at least two weeks old) so pages stay reproducible; data is cached in the temp folder.
+Versions are pinned (at least two weeks old) so pages stay reproducible; data is cached in the temp folder
+(written only after a successful fetch; an empty or broken cache file is fetched again).
 Network: curl to cdn.jsdelivr.net. Standard library only.
 """
 import json, os, re, subprocess, sys, tempfile
@@ -28,7 +29,10 @@ CACHE = os.path.join(tempfile.gettempdir(), "ux-ui-icons-cache")
 
 def arg(name, default=None):
     a = sys.argv
-    return a[a.index(name) + 1] if name in a else default
+    if name not in a:
+        return default
+    i = a.index(name) + 1
+    return a[i] if i < len(a) else ""
 
 
 def get(url):
@@ -38,12 +42,37 @@ def get(url):
     return r.stdout.decode("utf-8")
 
 
+def _valid(text, name):
+    if not text.strip():
+        return False
+    if name.endswith(".json"):
+        try:
+            json.loads(text)
+        except ValueError:
+            return False
+    return True
+
+
 def cached(url, name):
+    """Return the file at url, cached under CACHE. Fetches first and writes atomically, so a failed or
+    interrupted fetch never leaves a file behind; an empty or unreadable cached file is fetched again."""
     os.makedirs(CACHE, exist_ok=True)
     p = os.path.join(CACHE, name)
-    if not os.path.exists(p):
-        open(p, "w", encoding="utf-8").write(get(url))
-    return open(p, encoding="utf-8").read()
+    if os.path.exists(p):
+        try:
+            text = open(p, encoding="utf-8").read()
+            if _valid(text, name):
+                return text
+        except (OSError, UnicodeDecodeError):
+            pass
+    text = get(url)
+    if not _valid(text, name):
+        raise RuntimeError(f"{url}: empty or invalid response")
+    fd, tmp = tempfile.mkstemp(dir=CACHE, prefix=".part-")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, p)
+    return text
 
 
 def lucide_tags(v):
@@ -178,10 +207,16 @@ def brand(slugs, sv):
     return 1 if bad else 0
 
 
+HEX = re.compile(r"#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})")
+
+
 def main():
     a = sys.argv[1:]
     if not a or a[0] not in ("search", "lucide", "brand"):
         print(__doc__); return 2
+    g = arg("--ground")
+    if g is not None and not HEX.fullmatch(g):
+        print(f"usage: --ground takes a hex colour, #rgb or #rrggbb (got {g!r})", file=sys.stderr); return 2
     lv, sv = arg("--lucide-version", LUCIDE_V), arg("--simple-version", SIMPLE_V)
     w = words(sys.argv)[2:]
     if not w:

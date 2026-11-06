@@ -14,6 +14,8 @@ semantics, data-honesty rules. Use it before building product UI that has no DES
 --from-code reads an existing codebase (code_extract.py) and writes a DESIGN.md of what the code ships today:
 color roles from CSS variables (light and dark blocks), fonts, radius, plus a Drift section and evidence for
 every value (found / guessed / derived). It is always Status: draft; the team approves it before it binds.
+Contrast failures the code ships (e.g. light grey text) stay as found and make design_md_check.py exit 1: they are
+findings for the baseline audit, not something this script hides.
 The interview is optional here (brand, goal, audience); without it those lines say "not asked yet".
 
 Writes DESIGN.md into DIR (default: current directory) with Status: draft (or approved with --approved),
@@ -23,6 +25,10 @@ overwrite an existing DESIGN.md (use --force). The result passes design_md_check
 
 --wire appends a short, marked block to AGENTS.md and CLAUDE.md in DIR (whichever exist; if neither,
 creates AGENTS.md) so the next agent reads DESIGN.md first. Running it again replaces the block.
+The whole file is built before anything is written (temp file + rename), so a failed run (unknown direction or
+look, bad interview) leaves no DESIGN.md and no new folder. Free-text scalars (name, description) are quoted.
+Radius follows export_tokens.shape_radii(): a round subject turns a 0px direction into 24px cards and pill
+buttons, and the Decision log then says `export_tokens.py <id> --shape soft` so the code tokens match.
 Standard library only.
 """
 import json
@@ -99,9 +105,31 @@ def q(h):
     return '"%s"' % h
 
 
-def front_matter(d, iv, light_t, dark_t, r, btn, thai):
+def ys(v):
+    """A free-text YAML scalar, always double-quoted (a brand like "[name]" or "Acme: #1" stays a string)."""
+    return json.dumps(str(v), ensure_ascii=False)
+
+
+def write_atomic(path, text):
+    """Write the finished text to a temp file next to path, then rename; a failed run leaves nothing behind."""
+    import tempfile
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)  # only now, after the text was built
+    fd, tmp = tempfile.mkstemp(prefix=".DESIGN.", suffix=".tmp", dir=os.path.dirname(os.path.abspath(path)))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+
+
+def front_matter(d, iv, light_t, dark_t, rx, thai):
+    r = rx["card"]
     name = iv.get("brand", d["name"])
-    y = ["---", "version: alpha", "name: %s" % name,
+    cards = light_t.get("cards_opposite") or dark_t.get("cards_opposite")
+    y = ["---", "version: alpha", "name: %s" % ys(name),
          "description: %s" % json.dumps(iv.get("what", d["note"]), ensure_ascii=False), "colors:"]
     def colors(t, pre):
         rows = [("canvas", t["ground"]), ("surface", t["surface"]), ("on-surface", t["ink"]), ("muted", t["muted"]),
@@ -110,6 +138,9 @@ def front_matter(d, iv, light_t, dark_t, r, btn, thai):
                 ("warning", t["warn"]), ("error", t["bad"]), ("tint-1", t["tints"][0]), ("tint-2", t["tints"][1]),
                 ("tint-3", t["tints"][2]), ("tint-4", t["tints"][3]),
                 ("on-tint-1", t["tint_inks"][0]), ("on-tint-2", t["tint_inks"][1]), ("on-tint-3", t["tint_inks"][2]), ("on-tint-4", t["tint_inks"][3])]
+        if cards:  # cards of the opposite tone: their own text roles (from cardInk / cardMuted when the direction has them)
+            rows[4:4] = [("on-card", t["surface_ink"]), ("card-muted", t["surface_muted"]),
+                         ("card-primary-text", t["surface_accent_text"]), ("card-focus", t["surface_focus"])]
         return ["  %s%s: %s" % (pre, k, q(v)) for k, v in rows]
     y += colors(light_t, "") + colors(dark_t, "dark-")
     fam_d = '%s, %s' % (d["display"], "Noto Sans Thai" if thai else "sans-serif")
@@ -126,7 +157,7 @@ def front_matter(d, iv, light_t, dark_t, r, btn, thai):
     y += ty("body-md", fam_b, "16px", 400, body_lh)
     y += ty("body-sm", fam_b, "14px", 400, body_lh)
     y += ty("label-md", fam_b, "14px", 600, "1.2")
-    inp = max(6, round(r * 0.6))
+    inp = rx["input"]
     y += ["rounded:", "  none: 0px", "  sm: 4px", "  md: %dpx" % inp, "  lg: %dpx" % r, "  xl: %dpx" % (r + 8), "  full: 9999px",
           "spacing:", "  xs: 4px", "  sm: 8px", "  md: 16px", "  lg: 24px", "  xl: 40px", "  2xl: 64px", "  3xl: 96px"]
     brad = {"pill": "{rounded.full}", "round": "{rounded.md}", "square": "{rounded.none}"}.get(d.get("btn"), "{rounded.md}")
@@ -134,7 +165,7 @@ def front_matter(d, iv, light_t, dark_t, r, btn, thai):
           "  button-primary:", '    backgroundColor: "{colors.primary}"', '    textColor: "{colors.on-primary}"',
           '    typography: "{typography.label-md}"', '    rounded: "%s"' % brad, "    height: 44px", "    padding: 12px",
           "  button-primary-hover:", '    backgroundColor: "{colors.primary}"', '    textColor: "{colors.on-primary}"',
-          "  card:", '    backgroundColor: "{colors.surface}"', '    textColor: "{colors.on-surface}"', '    rounded: "{rounded.lg}"', "    padding: 24px",
+          "  card:", '    backgroundColor: "{colors.surface}"', '    textColor: "%s"' % ("{colors.on-card}" if cards else "{colors.on-surface}"), '    rounded: "{rounded.lg}"', "    padding: 24px",
           "  input:", '    backgroundColor: "{colors.surface}"', '    textColor: "{colors.on-surface}"', '    rounded: "{rounded.md}"', "    height: 48px", "    padding: 12px",
           "  chip:", '    backgroundColor: "{colors.tint-1}"', '    textColor: "{colors.on-tint-1}"', '    rounded: "{rounded.full}"', "    padding: 8px",
           "---"]
@@ -148,13 +179,13 @@ def build(d, iv, approved):
     else:
         light_t, dark_t = ex.light_theme(d), ex.derive_dark(d)
     light_t, dark_t = ex.roles(light_t, False, "light"), ex.roles(dark_t, True, "dark")
-    r, btn = ex.radii(d)
     subject = [x for x in iv.get("shape_from_subject", []) if x]
     corner = d.get("corner", "even")
-    btn_kind = d.get("btn", "round")
-    replaced = False
-    if subject and iv.get("shape") != "square" and r == 0:
-        r, btn, btn_kind, replaced = 24, "999px", "pill", True   # the recipe default (0) loses to a round subject
+    # the recipe default (0) loses to a round subject; export_tokens.py --shape soft applies the same rule
+    shape_flag = "soft" if subject and iv.get("shape") != "square" else None
+    rx = ex.shape_radii(d, shape_flag)
+    r, btn, btn_kind = rx["card"], rx["button"], rx["btn"]
+    replaced = rx["replaced"]
     shape, shape_desc = shape_words(r, btn_kind, corner)
     v, m, den = DIALS.get(iv.get("energy", "balanced"), DIALS["balanced"])
     feel = ", ".join(iv.get("feel", []))
@@ -168,7 +199,9 @@ def build(d, iv, approved):
         "hiding content until a script reveals it (must be visible without JS and under reduced motion)",
         "text on the primary fill that is not `on-primary`; accent text that is not `primary-text`"]
     status = "approved" if approved else "draft"
-    fm = front_matter(dict(d, btn=btn_kind), iv, light_t, dark_t, r, btn, thai)
+    cards_line = ("\nCards are the opposite tone of the page in at least one theme: text on `surface` uses `on-card`, `card-muted`,"
+                  " `card-primary-text` and the `card-focus` ring, never the page roles." if light_t["cards_opposite"] or dark_t["cards_opposite"] else "")
+    fm = front_matter(dict(d, btn=btn_kind), iv, light_t, dark_t, rx, thai)
     shape_lines = ["Radius %dpx on cards (`rounded.lg`), buttons `%s` (%s), corner treatment `%s`; %s overall." % (r, btn_kind, btn, corner, shape)]
     if subject:
         shape_lines.append("Shapes come from the subject: %s. Check every new component against these objects before using a recipe default." % ", ".join(subject))
@@ -194,7 +227,7 @@ Philosophy, ranked:
 Values live in the front matter. `primary` is for fills and buttons with `on-primary` text; `primary-text` is the
 darker or lighter step for links and small accent text (4.5:1 checked). `muted` is secondary text (4.5:1),
 `border` is for hairlines, `focus` is the ring color (2px, 3:1). `tint-1..4` are fills only, never text; text on a tint uses its own `on-tint-N`. The dark theme is the
-`dark-*` set, derived and AA-checked; review it by eye. Status colors (`success`, `warning`, `error`) are never the only cue.
+`dark-*` set, derived and AA-checked; review it by eye. Status colors (`success`, `warning`, `error`) are never the only cue.{cards_line}
 
 ## Typography
 - Display: {d['display']} {d['dw']}, tracking {d['track']}, because it carries the {feel or 'brand'} feel without a second display face.
@@ -238,7 +271,7 @@ Interview ({iv.get('asked_by', 'user')}, {iv.get('date', 'today')}):
 - Competitors: {", ".join(iv.get('competitors', [])) or 'none given'}
 - Constraints: {", ".join(iv.get('constraints', [])) or 'none given'}
 - Chosen direction `{d['id']}` because it matches feel ({feel}) and shape ({shape}).
-Tokens in code: `python3 scripts/export_tokens.py {d['id']} --out src/styles` (CSS, Tailwind v4, shadcn).
+Tokens in code: `python3 scripts/export_tokens.py {d['id']}{" --shape soft" if replaced else ""} --out src/styles` (CSS, Tailwind v4, shadcn).
 """
     return re.sub(r"\n{3,}", "\n\n", out)
 
@@ -260,7 +293,7 @@ def build_from_code(res, iv, src_label):
     name = iv.get("brand") or os.path.basename(res["src"].rstrip("/")) or "Product"
     rows = ["canvas", "surface", "on-surface", "muted", "border", "primary", "on-primary", "primary-text",
             "focus", "success", "warning", "error"]
-    y = ["---", "version: alpha", "name: %s" % name,
+    y = ["---", "version: alpha", "name: %s" % ys(name),
          "description: %s" % json.dumps(iv.get("what", "Design language extracted from the shipping code"), ensure_ascii=False),
          "colors:"]
     y += ["  %s: %s" % (k, q(L[k])) for k in rows]
@@ -380,6 +413,18 @@ the reason in its Decision log. Check it with `design_md_check.py DESIGN.md` and
 """
 
 
+def backoffice_text_roles(st):
+    """on-primary, primary-text, focus for a back-office look, derived like export_tokens.roles():
+    the fill keeps the look's accent; its text is the best-contrast ink; accent as text and the focus ring
+    move in lightness until they pass on canvas and surface (4.5:1 and 3:1)."""
+    acc, bgs = st["accent"], [st["ground"], st["surface"]]
+    on_primary = st["accentInk"]
+    if ex.ratio(on_primary, acc) < 4.5:
+        on_primary = max([st["accentInk"], st["ground"], st["ink"], "#ffffff", "#000000"], key=lambda c: ex.ratio(c, acc))
+    toward = -1 if ex.lum(st["ink"]) < ex.lum(st["ground"]) else +1
+    return on_primary, ex.reach(acc, bgs, 4.5, toward), ex.reach(acc, bgs, 3.0, toward)
+
+
 def build_backoffice(sid, iv):
     import datetime
     styles = json.load(open(os.path.join(HERE, "..", "assets", "backoffice", "styles.json")))
@@ -401,11 +446,12 @@ def build_backoffice(sid, iv):
     asked = iv.get("asked_by", "assumed (user away)")
     def ty(n, size, w, l):
         return ["  %s:" % n, "    fontFamily: %s" % json.dumps(fam), "    fontSize: %dpx" % size, "    fontWeight: %s" % w, "    lineHeight: %s" % l]
-    y = ["---", "version: alpha", "name: %s" % name,
+    y = ["---", "version: alpha", "name: %s" % ys(name),
          "description: %s" % json.dumps(iv.get("what", "Product UI, %s look" % st["name"]), ensure_ascii=False), "colors:"]
+    on_primary, primary_text, focus = backoffice_text_roles(st)
     for k, v in [("canvas", st["ground"]), ("surface", st["surface"]), ("sidebar", st["side"]), ("on-surface", st["ink"]),
-                 ("muted", st["muted"]), ("border", st["line"]), ("primary", st["accent"]), ("on-primary", st["accentInk"]),
-                 ("primary-soft", st["accentSoft"]), ("primary-text", st["accent"]), ("focus", st["accent"]),
+                 ("muted", st["muted"]), ("border", st["line"]), ("primary", st["accent"]), ("on-primary", on_primary),
+                 ("primary-soft", st["accentSoft"]), ("primary-text", primary_text), ("focus", focus),
                  ("success", ok[0]), ("success-soft", ok[1]), ("warning", warn[0]), ("warning-soft", warn[1]),
                  ("error", bad[0]), ("error-soft", bad[1])]:
         y.append("  %s: %s" % (k, q(v)))
@@ -504,11 +550,10 @@ def main():
         sid = a[a.index("--backoffice") + 1] if a.index("--backoffice") + 1 < len(a) else ""
         iv = json.load(open(a[a.index("--interview") + 1])) if "--interview" in a else {}
         out = a[a.index("--out") + 1] if "--out" in a else "."
-        os.makedirs(out, exist_ok=True)
         path = os.path.join(out, "DESIGN.md")
         if os.path.exists(path) and "--force" not in a:
             sys.exit("DESIGN.md already exists in %s (use --force to overwrite)" % out)
-        open(path, "w").write(build_backoffice(sid, iv))
+        write_atomic(path, build_backoffice(sid, iv))
         print("wrote", path)
         if "--wire" in a:
             wire(out)
@@ -520,14 +565,13 @@ def main():
         import code_extract  # noqa: E402
         iv = json.load(open(a[a.index("--interview") + 1])) if "--interview" in a else {}
         out = a[a.index("--out") + 1] if "--out" in a else "."
-        os.makedirs(out, exist_ok=True)
         path = os.path.join(out, "DESIGN.md")
         if os.path.exists(path) and "--force" not in a:
             sys.exit("DESIGN.md already exists in %s (use --force to overwrite; or compare with code_extract.py SRC first)" % out)
         if "--approved" in a:
             print("note: --from-code always writes Status: draft")
         res = code_extract.extract(src)
-        open(path, "w").write(build_from_code(res, iv, src))
+        write_atomic(path, build_from_code(res, iv, src))
         print("wrote", path)
         if "--wire" in a:
             wire(out)
@@ -538,11 +582,10 @@ def main():
         sys.exit(2)
     iv = json.load(open(a[a.index("--interview") + 1]))
     out = a[a.index("--out") + 1] if "--out" in a else "."
-    os.makedirs(out, exist_ok=True)
     path = os.path.join(out, "DESIGN.md")
     if os.path.exists(path) and "--force" not in a:
         sys.exit("DESIGN.md already exists in %s (use --force to overwrite)" % out)
-    open(path, "w").write(build(load_direction(ids[0]), iv, "--approved" in a))
+    write_atomic(path, build(load_direction(ids[0]), iv, "--approved" in a))
     print("wrote", path)
     if "--wire" in a:
         wire(out)

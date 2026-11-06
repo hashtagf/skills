@@ -8,17 +8,20 @@
  *                      [--sizes 1440x900,390x844] [--out dir] [--wait 800]
  *
  * Defaults: --cta is the first a.btn-primary / button.btn-primary / [data-cta] inside the first
- * <section>, <header> or the first child of <main>; --next is the first heading of the second <section>.
+ * <section>, <header> or the first child of <main>; failing that, the first visible a.btn / button-class
+ * link, <button>, then <a href> there (outside nav menus); --next is the first heading of the second <section>.
  * Per size: FAIL when the CTA's bottom edge is below the fold; NOTE when nothing of the next section
  * shows and the hero does not end at least 24px above the fold; NOTE when no offer is visible.
  * Screenshots: <out>/fold-<width>.png (default out: render-check next to a local page).
- * Exit 1 on any FAIL, 3 when no browser is available (report "not tested").
+ * Exit 1 on any FAIL, 3 when no browser is available (report "not tested"). A missing file or a
+ * refused / unreachable URL prints "ERROR <reason>" and exits 1.
  */
 const path = require('path');
 const fs = require('fs');
 const args = process.argv.slice(2);
 if (!args[0] || args[0].startsWith('--')) { console.error('usage: node fold_check.js <url-or-file> [--cta sel] [--offer sel] [--next sel] [--sizes 1440x900,390x844] [--out dir]'); process.exit(2); }
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
+if (!/^[a-z]+:\/\//i.test(args[0]) && !fs.existsSync(path.resolve(args[0]))) { console.log(`ERROR file not found: ${path.resolve(args[0])}`); process.exit(1); }
 const { findModule, findBrowser } = require('./_pw');
 const mod = findModule(args[0]);
 const exe = mod ? findBrowser(mod.chromium) : undefined;
@@ -37,7 +40,11 @@ const sel = { cta: opt('--cta', ''), offer: opt('--offer', ''), next: opt('--nex
   let fails = 0;
   for (const [w, h] of sizes) {
     const page = await browser.newPage({ viewport: { width: w, height: h } });
-    await page.goto(target, { waitUntil: 'load' });
+    try { await page.goto(target, { waitUntil: 'load', timeout: 30000 }); }
+    catch (e) {
+      if (e && e.name === 'TimeoutError') console.log(`WARN  load did not finish in 30000ms; checking what rendered`);
+      else { console.log(`ERROR could not load ${target}: ${String(e && e.message || e).split('\n')[0]}`); await browser.close(); process.exit(1); }
+    }
     await page.waitForTimeout(wait);
     await page.evaluate(() => new Promise(r => { scrollTo({ top: 0, behavior: 'instant' }); requestAnimationFrame(() => requestAnimationFrame(r)); }));
     const r = await page.evaluate(sel => {
@@ -48,6 +55,16 @@ const sel = { cta: opt('--cta', ''), offer: opt('--offer', ''), next: opt('--nex
       if (!cta) {
         const scopes = [document.querySelector('main section'), document.querySelector('section'), document.querySelector('header'), document.querySelector('main > *')].filter(Boolean);
         for (const s of scopes) { cta = [...s.querySelectorAll('a.btn-primary, button.btn-primary, [data-cta]')].find(vis); if (cta) break; }
+        // No marked primary: the first visible button-like link or button in the hero / first section
+        // (a.btn, [class*=btn|button|cta], role=button, then any <button>), skipping nav menus.
+        if (!cta) {
+          const okEl = e => vis(e) && !e.closest('nav') && (e.innerText || e.getAttribute('aria-label') || '').trim();
+          for (const s of scopes) {
+            cta = [...s.querySelectorAll('a.btn, a[class*=button], a[class*=cta], button[class*=btn], button[class*=cta], a[role=button]')].find(okEl)
+              || [...s.querySelectorAll('button:not([type=reset])')].find(okEl) || [...s.querySelectorAll('a[href]')].find(okEl);
+            if (cta) break;
+          }
+        }
       }
       let next = sel.next ? document.querySelector(sel.next) : null;
       if (!next) { const s2 = sections.find(s => s !== hero && !hero?.contains(s) && s.getBoundingClientRect().top >= (hero ? hero.getBoundingClientRect().bottom - 1 : 0)); next = s2 && (s2.querySelector('h1,h2,h3') || s2); }

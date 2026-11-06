@@ -23,8 +23,7 @@ material, type voice and surface; it never changes the page pattern
    rows; a consumer or youth brand from *Playful*; do not offer a direction in
    "Avoid for" unless the user asks for it.
 2. **Shortlist 2-3 with pictures; six is only the cap of one picture sheet.** Previews are generated on demand (not committed; rebuild with
-   `node scripts/build_previews.js --only directions` or
-   `node scripts/direction_preview.js --ids <ids> --sheet`). Each
+   `node scripts/build_previews.js --only directions`; a no-flag `direction_preview.js --sheet` does the same). Each
    direction has `assets/directions/previews/<id>.jpg`, plus labelled overviews
    per group (`sheet-company.jpg`, `sheet-premium.jpg`, `sheet-playful.jpg`,
    `sheet-atmospheric.jpg`) and `sheet.jpg` with all of them: read the images
@@ -37,11 +36,15 @@ material, type voice and surface; it never changes the page pattern
    it, not a palette swatch. The same direction as product UI (same tokens, admin
    structure) is in `previews/product/<id>-overview.jpg` and `-records.jpg`. Try another
    arrangement or subject, or the user's own copy:
-   `node scripts/direction_preview.js --ids dose,riso [--comp c3] [--subject cafe] [--brief "Headline|Sentence|Button"] [--sheet]`.
+   `node scripts/direction_preview.js --ids dose,riso [--comp c3] [--subject cafe] [--brief "Headline|Sentence|Button"] [--sheet] --out <project>/previews`.
+   With `--ids`, `--subject`, `--comp` or `--brief` the pictures go to `--out` (or a printed temp folder when it is
+   left out), never over `assets/directions/previews/`, which `look.py` serves. Unknown ids, compositions or
+   subjects stop the run (exit 2).
    **A shortlist differs in layout, not only colour.** Several directions share a composition (Dose, Cobalt,
    Coral and Fjord are all `c5`), so their stored previews are the same page in other colours. Render the shortlist
    with `--ids` (the script gives later picks the next unused composition and says so; `--same-comp` keeps them)
-   and with `--subject <client kind>` (packs include `dental`, `clinic`, `cafe` …) so every option shows the client's world;
+   and with `--subject <client kind>` (packs include `dental`, `clinic`, `cafe` …) so every option shows the client's world
+   (a subject without photographs, such as `saas` or `data`, is only moved to a composition that needs none);
    Without a preview, render a one-screen sketch yourself; never describe looks in words only.
 3. **Say what each costs**: one line on risk for this subject, and which one you
    recommend and why. Lead with the recommendation.

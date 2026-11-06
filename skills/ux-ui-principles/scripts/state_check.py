@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Static state-coverage scan: which required UI states have any marker in the source.
 
-Usage: python3 scripts/state_check.py <dir-or-file> [--json] [--need loading,empty,error,...] [--per-file] [--matrix]
+Usage: python3 scripts/state_check.py <dir-or-file> [more files ...] [--json] [--need loading,empty,error,...] [--per-file] [--matrix]
+
+Several paths are scanned together (check.py passes a page plus the local scripts and
+stylesheets it links). Exit 0 when every needed state has a marker, 1 when any is missing.
 
 --matrix: print a surface × state Markdown table (one row per source file), each cell
 "Manual (marker)" or "missing", ready to paste into the review report.
@@ -120,7 +123,11 @@ def main(argv):
         return 1 if gaps else 0
     hits = {s: [] for s in need}
     n = 0
-    for f in files(args[0]):
+    scanned = set()
+    for f in (f for a in args for f in files(a)):
+        if os.path.abspath(f) in scanned:
+            continue
+        scanned.add(os.path.abspath(f))
         n += 1
         try:
             text = open(f, encoding="utf-8", errors="replace").read()

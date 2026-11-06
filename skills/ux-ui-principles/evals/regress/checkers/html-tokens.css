@@ -1,0 +1,2 @@
+/* Regression for contrast.py: tokens declared on html (no :root). */
+html{--ink:#111111;--bg:#ffffff}
