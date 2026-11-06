@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-06
+
+### Added (machine-readable checker output)
+- `--json` on the Node checkers (`render_check`, `fold_check`, `admin_check`, `flow_check`, `script_check`): one JSON document on stdout (logs to stderr), same exit codes, also for usage errors, NOT RUN and load failures. Shared shape from `scripts/_report.js`: `script`, `target`, `result`, `exit`, `findings` (level/rule/message/where), `artifacts`. Text output unchanged.
+
+### Changed (shared script contract)
+- README "Script contract": exit 0 ok, 1 check failed, 2 usage/input error, 3 not run; levels PASS/FLAG/FAIL/NOTE/WARN/ERROR/N/A/NOT RUN; usage errors instead of tracebacks; `--help` everywhere; no output into cwd or the skill folder by default.
+- Shared modules `_color.py`, `_color.js`, `_net.py` (curl `--fail`, atomic cache), `_args.js`; `_pw.js` safe goto/launch.
+- `check.py` reads sub-script exit codes, flags `example.com` and `[..]` placeholders in meta, `--json`; `contrast`, `state_check`, `placeholders`, `review_report`, `design_md_check` move to argparse with `--json`.
+- `look.py` real kinds first, Thai synonyms, nearest kind for document/invoice/resume; `code_extract.py` reads React Native/Expo; `tweaks_panel` contrast-safe accent text.
+
+### Fixed (level-1 script bugs)
+- `check.py` states can PASS, scans only linked sources, ERROR on a missing page; `admin_check`/`fold_check`/`render_check` real ERROR + exit 1 on a missing file or unreachable URL.
+- `render_check`/`_composition` resolve oklab/oklch/color-mix to sRGB via canvas and wait for animations before measuring; `contrast.py` reads `[data-theme]`/`.dark`/`@theme` blocks, 0 pairs → exit 2 (N/A).
+- `design_md.py` atomic write and quoted name; `design_md_check` errors on unsafe YAML and AA fails; one `shape_radii()` for `design_md` and `export_tokens` (`--shape`).
+- `direction_preview` ad-hoc runs go to a temp folder (never overwrite library previews), errors on unknown ids/comp/subject.
+- `slop_check`: icon-card-row ignores photos; new `mixed-icon-families` (flag), `mixed-icon-strokes` and `mixed-icon-fill` (note).
+- `icons.py` brand marks use class `brand-mark` (`brand` clashed with the common logo-link class).
+- Regression suites in `evals/regress/` (`run.py`): 292 cases across checkers, design, preview, Node, Python checkers and tools.
+
+### Added (icon libraries)
+- `iconography.md` "Icon libraries": Lucide for UI glyphs, Simple Icons for brand marks; delivery, version pinning, stroke rules, custom glyphs to Lucide's spec, trademark use, 3:1 brand colour check, missing Thai brands, no mixing in one row.
+- `scripts/icons.py`: search both sets, paste Lucide SVG or sprite, brand SVG with contrast check and guideline/licence notes (pinned lucide 1.58.0, simple-icons 16.35.0). Sources S108–S109, eval #126.
+
+### Added (market research, photo search)
+- Round B always offers "research the market first" (`design-direction.md` §9). `assets/market/`: per-kind studies (category look, design-led moves, gaps, sourced facts), starting with a clinic study of 13 sites; screenshots rebuilt by `scripts/market_fetch.js`.
+- `look.py` clinic/dental kind and prints the market study; `scripts/photo_search.py` searches Commons/Openverse with a licence filter and writes credits.
+- `direction_preview.js`: shortlisted directions that share a composition get different ones; dental content pack.
+- `export_tokens.py` without `--out` prints `tokens.css` to stdout and writes nothing.
+
+### Changed (absorbed concepts from other design skills)
+- No mentions of or routing to other skills; override and never-edit-a-checker rules restored in `design-memory.md` §2.
+- Docs: verb playbooks, persona walk, new caps (`review-loop`); colour posture, accent budget, dark derivation (`color-palette`); surface layering, control tokens, wide-screen mechanics (`visual-system`); form lifecycle, copy tells, texture/scroll budgets, production-build gate.
+- `slop_check.py` ~50 new rules (motion, layout, palette, type, controls, copy, headings, fake send); `render_check.js` composition checks (`_composition.js`); `state_check.py --per-file --matrix`.
+
 ### Changed (infographic lessons from the same café page)
 - `visual-assets.md` §4: new recipe row "Choosing a physical product". Use a cross-section or anatomy infographic in the subject's vessel shape. Tell parts apart by fill and pattern, put a part list beside each item, and add a text summary. General proportions are labelled approximate; client facts are placeholders.
 - `data-visualization.md` review checklist #11: no part may share its ground colour, and fills use theme tokens (a fixed dark fill vanishes in dark mode). Check both themes visually, because `contrast.py` does not test graphic parts.
@@ -741,7 +776,9 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/hashtagf/skills/compare/v0.12.0...v0.13.0
+[0.12.0]: https://github.com/hashtagf/skills/compare/v0.10.0...v0.12.0
 [0.10.0]: https://github.com/hashtagf/skills/compare/026626b...v0.10.0
 [0.9.2]: https://github.com/hashtagf/skills/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/hashtagf/skills/compare/v0.9.0...v0.9.1
