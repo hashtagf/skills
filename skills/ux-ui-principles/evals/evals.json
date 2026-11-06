@@ -2361,6 +2361,28 @@
         "marketing-copy",
         "direction-library"
       ]
+    },
+    {
+      "id": 126,
+      "field": "answer",
+      "category": "iconography",
+      "prompt": "หน้าเว็บคลินิกต้องมีแถวติดต่อ: โทร, LINE, WhatsApp, จ่ายผ่าน PromptPay ใช้ icon จากไหนดี ใส่โลโก้ LINE สีเขียวบนพื้นครีมได้ไหม",
+      "expected_output": "Lucide for the phone glyph, Simple Icons for LINE and WhatsApp marks under trademark rules; LINE green fails 3:1 on cream so mono or a solid chip; PromptPay is not in Simple Icons, so the official file or text, never a redrawn logo; brand mark at about 0.85-0.9x the Lucide size; the link carries the accessible name.",
+      "files": [],
+      "assertions": [
+        "Separates UI glyphs (Lucide) from brand marks (Simple Icons) and says why",
+        "Says the LINE green on a cream ground fails 3:1 and gives mono or a solid chip as the fix",
+        "Says PromptPay must come from the official asset or be text, not redrawn",
+        "Gives the link or button an accessible name and hides the mark from assistive technology"
+      ],
+      "expected_reads": [
+        [
+          "iconography"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
     }
   ]
 }

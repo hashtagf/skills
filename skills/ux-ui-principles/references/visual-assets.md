@@ -92,9 +92,11 @@ Icons are welcome on public pages when they help scanning: feature lists,
 service menus, process steps, contact methods, deliverables, comparison rows.
 
 - **One family**, one stroke width, one size per context. Free families with
-  wide coverage: Lucide, Phosphor, Tabler, Heroicons. Load a pinned build
-  (e.g. `https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js`, then
-  `lucide.createIcons()`) or inline the SVG paths.
+  wide coverage: Lucide, Phosphor, Tabler, Heroicons. Default to Lucide and paste only
+  the icons you use: `python3 scripts/icons.py lucide phone map-pin calendar-check`
+  (inline SVG) or `--sprite icons.svg`. Brand marks (LINE, WhatsApp, Facebook, payment
+  networks) come from Simple Icons via `icons.py brand line --ground <ground hex>`, under the
+  trademark rules in [iconography.md](iconography.md) "Icon libraries".
 - **Always with a label**; decorative icons get `aria-hidden="true"`
   ([iconography.md](iconography.md)).
 - **Containers are allowed** when consistent: plain glyph, or a 40–48px circle

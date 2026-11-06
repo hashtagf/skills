@@ -418,6 +418,7 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [showcase catalog](../assets/showcase/README.md), `scripts/showcase_fetch.py` | 98 Open Design showcase entries as 65 distinct captures, each marked template / study / skip with a composition; pictures fetched locally | 3, 4, 6 |
 | `scripts/look.py` | Lists the pictures to open before building a page of a kind (references, showcase, market study, direction and product previews) | 3, 5 |
 | [market studies](../assets/market/README.md), `scripts/market_fetch.js` | Per kind of business: category look, design-led moves, three gaps, checked facts, screenshots of local and design-led sites (local only) | 3 |
+| `scripts/icons.py` | Lucide UI glyphs (inline SVG or sprite) and Simple Icons brand marks with contrast, guideline and licence notes | 4, 5 |
 | `scripts/photo_search.py` | Open-licensed photographs of the subject's world (Commons, Openverse), licence-filtered, downloads with credits | 4, 5 |
 | `scripts/compositions.js`, [content packs](../assets/directions/content-packs.json), [photos](../assets/photos/README.md) | Fourteen first-screen compositions; sample content per kind of business; licensed stand-in photographs | 3, 5 |
 | `scripts/brand.js` | One direction → public pages and product UI on one token set (`backoffice_preview.js --direction`) | 3, 5 |

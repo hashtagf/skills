@@ -66,7 +66,7 @@
 | `framework.md` | 6 ศาสตร์, ระดับ, rigor tier | นิยามคำว่า Light/Standard/Critical | phase 1 |
 | `gate-tiers.md` | ชั้นกติกา Floor/Reflex/Finish | แยกกฎที่ห้ามพลาดออกจากงานขัดเกลา | phase 6; คำศัพท์ tier ทั้งหมดอธิบายใน design-workflow |
 | `i18n-performance.md` | ภาษาไทย/สองภาษา, RTL, Core Web Vitals | layout ที่แปลภาษาได้และเร็ว | แถว Thai/bilingual |
-| `iconography.md` | icon label, family, ขนาด | icon ที่ไม่มีชื่อ = ปุ่มที่ใช้ไม่ได้ | phase 4 |
+| `iconography.md` | icon label, family, ขนาด, Lucide vs Simple Icons, กติกาโลโก้แบรนด์ | icon ที่ไม่มีชื่อ = ปุ่มที่ใช้ไม่ได้ | phase 4 |
 | `interaction.md` | heuristic, mental model, Fitts, Hick | หลักพื้นฐานที่ใช้อธิบายเหตุผล | ANSWER/RESEARCH |
 | `marketing-copy.md` | headline, CTA, proof | หน้า public ต้องมีข้อเสนอที่จริง | แถว Landing (Round A) |
 | `measurement.md` | metric, experiment, design QA | วัดผลหลังปล่อย | โหมด DISCOVER, phase 8 |
@@ -115,6 +115,7 @@
 | `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |
 | `look.py` | รายการภาพอ้างอิงตามประเภทหน้า + market study ถ้ามี | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
 | `market_fetch.js` | แคปเว็บคู่แข่งในตลาด + เว็บที่ออกแบบดี ตามประเภทธุรกิจ | research ตลาดก่อนเลือก direction | interview Round B |
+| `icons.py` | ค้น/วาง icon จาก Lucide (UI) และ Simple Icons (โลโก้แบรนด์) พร้อมเช็ก contrast และลิขสิทธิ์ | ได้ icon ชุดเดียว ใช้โลโก้แบรนด์ถูกกติกา | iconography.md |
 | `photo_search.py` | ค้นรูปไลเซนส์เปิด (Commons/Openverse) พร้อม credit | ได้รูปจริงโดยไม่ละเมิดลิขสิทธิ์ | ก่อนสร้างหน้า |
 | `placeholders.py` | หา placeholder ที่เหลือ | ห้ามส่งของปลอมเป็นของจริง | §3 ข้อ 6 |
 | `halftone.py` | ทำรูปฮาล์ฟโทนหมึกเดียวจริงจากรูปถ่าย | สไตล์งานพิมพ์ต้องดูพิมพ์จริง ไม่ใช่ลายจุดโปะทับ | §3 ข้อ 4, visual-assets §2b |
