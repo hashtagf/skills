@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (infographic lessons from the same café page)
+- `visual-assets.md` §4: new recipe row "Choosing a physical product". Use a cross-section or anatomy infographic in the subject's vessel shape. Tell parts apart by fill and pattern, put a part list beside each item, and add a text summary. General proportions are labelled approximate; client facts are placeholders.
+- `data-visualization.md` review checklist #11: no part may share its ground colour, and fills use theme tokens (a fixed dark fill vanishes in dark mode). Check both themes visually, because `contrast.py` does not test graphic parts.
+- Reference `cafe-halftone-full.jpg` re-shot with the infographic.
+
 ### Changed (lessons from a café landing that went from correct to crafted)
 - Diagnosis: the first build passed every check but read as unfinished because of boxed placeholders, a fake dot overlay, an empty photo slot, a heading-sized hero and flat bands with straight edges. A survey of 12 design-led roaster sites (Perc, Stumptown, Coava, Irving Farm, Tandem, Partners …) gave the fixes.
 - New `scripts/halftone.py`: a real one-ink AM dot screen from a photo (`--size --cell --ink --paper --angle --bright --crop-x --eq`). `visual-assets.md` §2b: print-led directions print their pictures; dark or busy photos become a duotone band.

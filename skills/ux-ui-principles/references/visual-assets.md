@@ -104,6 +104,7 @@ service menus, process steps, contact methods, deliverables, comparison rows.
 | Feature deep-dive | Fragment beside 3–4 icon-led points | Alternate sides per feature |
 | How it works | SVG process diagram or timeline with icon nodes | Horizontal on desktop, vertical on phone |
 | Plan, estimate, pricing | Interactive fragment: chosen option updates bars, dates or totals | Bars or Gantt strip rather than a plain list |
+| Choosing a physical product (drinks, dishes, bags, sizes) | Cross-section or anatomy infographic in inline SVG, drawn in the subject's own vessel or package shape (cup layers, what is in the bag, size beside size) | One row before the menu or price list; parts told apart by fill **and** pattern, a part list beside each item in the same order as the drawing, a text summary for screen readers. General-knowledge proportions are labelled "approximate"; anything specific to the client is a placeholder, never invented |
 | What you get | Icon list beside an artefact preview (report page, invoice, export) | Split 50/50 |
 | Integrations, stack | Diagram of the real systems, or text chips of the real tools | No borrowed vendor logos without permission |
 | Proof | Real numbers, quotes, logos only from the client | Otherwise omit the section and list it in hand-off |

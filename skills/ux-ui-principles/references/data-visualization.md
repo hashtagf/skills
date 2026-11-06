@@ -203,6 +203,7 @@ full information, e.g. a data table or long description. [S86]
 8. Zero, not provided, not applicable, unknown, restricted and failed values look different.
 9. Deltas state base and period; percent vs percentage points is clear.
 10. Truncated values and abbreviated numbers have a non-hover path to the exact value.
+11. No part shares a colour with the ground it sits on: a cream layer on a cream section reads as empty space. Give light parts a pattern or outline, use theme tokens for every fill (a fixed dark fill vanishes in dark mode), and look at both themes rendered. `contrast.py` checks text pairs, not graphic parts, so this check is visual.
 
 ## Do / Don't
 
