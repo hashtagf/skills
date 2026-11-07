@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-08
+
 ### Added (test-design: Senior QA + PM / production readiness)
 - `references/release-readiness.md`: Definition of Ready + numbered product questions for the PM, three-amigos pass, UAT script template (business language, per outcome) with sign-off and feedback triage (defect / change request / misunderstanding), go/no-go with named signers (PM, QA lead, engineering lead, security), deploy plan, feature-flag and migration-compatibility criteria, production smoke rules, rollback plan + staging drill (incl. what can't be reversed), watch window with numeric signals, analytics verification, hotfix path, per-level table.
 - `references/execution.md`: scenario priority P0–P3 derived from the risk matrix, regression tiers (smoke / core / targeted / full) with impact analysis, test data plan (owner, reset, masking, time-dependent data), exploratory charters + debrief, bug lifecycle and severity vs priority, flaky / blocked / build-frozen rules, QA metrics (escape rate, reopen rate, blocked ratio) and a one-line stakeholder status.
@@ -824,7 +826,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/hashtagf/skills/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/hashtagf/skills/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/hashtagf/skills/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/hashtagf/skills/compare/v0.12.0...v0.13.0
