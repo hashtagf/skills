@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-07
+
+### Added (one template library)
+- `scripts/_library.py` reads every picture collection into one row shape: `kind`, `tags`, `verdict` (template / study), `take`, `comp`, `origin` (ours / generated / product), `local`, `source`. A new collection is one loader plus one row in `assets/LIBRARY.md`.
+- `assets/LIBRARY.md`: schema, the collections with rights and rebuild commands, shared rules (take the move, never the look; local pictures stay local), how to add a collection.
+- `look.py` prints one format for every picture: kind, composition, verdict, what it is (our build, designed page, real product screen), take, and a `from:` credit line; templates before studies, committed before local, one picture per app; warns when a listed picture is someone else's work.
+- SKILL.md §3 step 2, `direction-library.md` and `design-workflow.md` point at the library instead of naming collections.
+
+### Added (real product screens)
+- `assets/mobbin/`: ranks 50–100 of Mobbin's latest web apps (51 apps × 4 screens, typed landing / product / auth): 11 template, 36 study, 4 skip, 57 tags (crm, finance, ai-chat, canvas, builder, inbox, marketplace, dev …), notes in our words. Pictures and signed URLs are git-ignored; `scripts/mobbin_fetch.py` rebuilds them (exit 0/1/2/3).
+- `look.py <tag>` lists app screens by tag; synonyms login / signup / sign-in → auth, chat → ai-chat, การเงิน → finance, ล็อกอิน / สมัคร → auth.
+
+### Changed
+- Showcase *study* rows now load (before, only templates): new kinds `document`, `poster`, `social`, `careers`, `wireframe`, `motion`. `invoice` / `resume` / `เอกสาร` list the document studies first, then report and cover; "no pictures yet" prints only when none are on disk.
+- `templates.md`: which output template per mode, depth per rigor tier, map of the other report formats; Phase 8 routes the deliverable by mode.
+- Regression: library row shape, uniform `look.py` output, docs point at the library, Mobbin catalog integrity, tag lookup, `mobbin_fetch` usage error (299 cases).
+
 ## [0.13.0] - 2026-11-06
 
 ### Added (machine-readable checker output)
@@ -776,7 +793,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/hashtagf/skills/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/hashtagf/skills/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/hashtagf/skills/compare/v0.10.0...v0.12.0
 [0.10.0]: https://github.com/hashtagf/skills/compare/026626b...v0.10.0
