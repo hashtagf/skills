@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-11-08
+
+### Fixed (ux-ui-principles scripts: 46 bugs from a bug hunt)
+- Checkers: `slop_check` no longer hits RecursionError on deeply nested pages; `focus-removed` matches whole `outline` values only (`0.5px` is not removal, `0px` is) and `pure-black` ignores `border-color`. `contrast.py` reads selector lists spanning lines, treats `:root:not(.dark)` as light, resolves CSS named colours, opaque `/ 1` alpha and `!important`. `state_check --per-file/--matrix` scan every path; no sources → exit 2. `design_md_check` reads a UTF-8 BOM and no longer takes `15/10/2026` for a dial. `placeholders --md` and `review_report` give one `error:` line instead of tracebacks; review_report renders before an atomic write and bands fractional scores by their whole part.
+- Tools: a corrupt `catalog.json` is an `error:` line, exit 2; `look.py` merges tag pools (templates before studies), accepts "ai chat", hints when pictures are not fetched, checks `--direction` first. `mobbin_fetch` validates its input and slugs (no writes outside `--out`). `design_md`/`export_tokens` treat null as missing, validate interview types, report `--out` problems, write atomically with normal file modes. `code_extract` parses `rgb(… / 50%)` and skips `href="#…"`. `halftone` rejects non-finite numbers; `photo_search` keeps Thai titles, de-duplicates names and protects `credits.json`; `tweaks_panel` inserts at the right place after case-changing characters; missing arguments print one `error:` line; `icons.py lucide` is case-insensitive.
+- Node: `script_check` compiles modules with `node --check`, resolves `src="/…"` from the page folder, reads unquoted `src` and ignores `data-src`, reports unreadable or folder inputs as errors. `render_check` writes fragment wrappers to a temp folder and adds `--scroll-budget` (default 15 s, NOTE when cut). `flow_check` validates every step before the browser starts. `direction_preview --group/--width/--height` go to a temp folder (no longer overwrite library previews); `backoffice_preview --singles` works with `--out`; `build_previews` runs in the documented order with absolute `--out`. `market_fetch` accepts http(s) only; `_args.js` honours `--`; `_color.js` requires `#` for hex.
+- Regression suites: 299 → 430 cases.
+
 ## [0.14.0] - 2026-11-07
 
 ### Added (one template library)
@@ -793,7 +801,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/hashtagf/skills/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/hashtagf/skills/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/hashtagf/skills/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/hashtagf/skills/compare/v0.10.0...v0.12.0
