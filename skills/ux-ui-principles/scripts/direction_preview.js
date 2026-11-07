@@ -10,8 +10,8 @@
  *   client shortlist: node scripts/direction_preview.js --ids a,b,c --subject dental --sheet --out <project>/previews
  *
  * Output: with no selection flags (the library build, as build_previews.js runs it) the pictures go to
- * assets/directions/previews/ (<id>.jpg, sheet.jpg, sheet-<group>.jpg). When any of --ids, --subject, --comp or
- * --brief is given and --out is not, they go to a new temp folder (<os temp>/ux-ui-previews/<timestamp>, printed),
+ * assets/directions/previews/ (<id>.jpg, sheet.jpg, sheet-<group>.jpg). When any of --ids, --group, --subject, --comp,
+ * --brief, --width or --height is given (a different set or size) and --out is not, they go to a new temp folder (<os temp>/ux-ui-previews/<timestamp>, printed),
  * so a client shortlist never overwrites the library previews that look.py serves. Pass --out to choose.
  *
  * A shortlist (--ids) must differ in layout, not only colour: when two listed directions share a composition,
@@ -56,7 +56,7 @@ if (opt('--subject') && !packs[opt('--subject')]) fail(`unknown --subject ${opt(
 const GROUPS = [...new Set(data.map(d => d.group))];
 if (opt('--group') && !GROUPS.includes(opt('--group'))) fail(`unknown --group ${opt('--group')}`, `choose one of ${GROUPS.join(', ')}`);
 // a client selection never writes into the library folder unless --out says so
-const custom = ['--ids', '--subject', '--comp', '--brief'].some(has);
+const custom = ['--ids', '--group', '--subject', '--comp', '--brief', '--width', '--height'].some(has);
 const libraryOut = A.libPath('assets/directions/previews');
 const out = opt('--out') ? A.userPath(opt('--out')) : custom ? path.join(os.tmpdir(), 'ux-ui-previews', A.stamp()) : libraryOut;
 const W = a.num('--width', 1440, { min: 200, max: 4000, int: true }), H = a.num('--height', 1240, { min: 200, max: 6000, int: true });

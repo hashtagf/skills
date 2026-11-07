@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Regression cases for the preview, asset and network scripts:
-direction_preview.js, build_previews.js, icons.py, photo_search.py, showcase_fetch.py.
+direction_preview.js, build_previews.js, backoffice_preview.js (--out / --singles), icons.py, photo_search.py, showcase_fetch.py.
 
 Usage:
   python3 evals/regress/test_preview.py
@@ -135,6 +135,45 @@ def test_direction_preview():
               f"rc={rc} {line}")
 
 
+def test_preview_out():
+    # direction_preview: --group / --width / --height change the set or size -> temp folder, never the library.
+    # Run on a copy of scripts/ + the direction data with no Playwright reachable, so it prints its output line and stops (exit 3).
+    cp = os.path.join(TMP, "skillcopy")
+    shutil.copytree(SCRIPTS, os.path.join(cp, "scripts"))
+    os.makedirs(os.path.join(cp, "assets", "directions"))
+    for f in ("directions.json", "content-packs.json"):
+        shutil.copy(os.path.join(SKILL, "assets", "directions", f), os.path.join(cp, "assets", "directions"))
+    group = json.load(open(os.path.join(SKILL, "assets/directions/directions.json")))["directions"][0]["group"]
+    nenv = {k: v for k, v in os.environ.items() if k not in ("NODE_PATH", "PW_MODULE", "PW_CHROMIUM")}
+    nenv.update(PATH="/usr/bin:/bin", NODE_PATH="", TMPDIR=TMP + "/")
+    lib = os.path.join(cp, "assets", "directions", "previews")
+    for name, a in (("--group " + group, ["--group", group]), ("--width 600", ["--width", "600"]), ("--height 600", ["--height", "600"])):
+        try:
+            r = subprocess.run([shutil.which("node") or "node", os.path.join(cp, "scripts", "direction_preview.js"), *a], capture_output=True, text=True, env=nenv, timeout=120, cwd=TMP)
+        except subprocess.TimeoutExpired:
+            report("FAIL", f"direction_preview {name} without --out -> temp folder", "timeout")
+            continue
+        said = [l for l in r.stdout.splitlines() if l.startswith("output: ")]
+        ok = bool(said) and os.path.realpath(said[0][8:].split(" (")[0]).startswith(os.path.realpath(TMP)) and not os.path.exists(lib)
+        if r.returncode != 3 and not ok:
+            report("NOT RUN", f"direction_preview {name} without --out -> temp folder", "Playwright still found from the copy")
+            continue
+        check(f"direction_preview {name} without --out -> temp folder, library folder untouched", ok, f"rc={r.returncode} {r.stdout[:200]} {r.stderr[-200:]}")
+    # backoffice_preview: --singles is honoured with --out
+    o = os.path.join(TMP, "bo-singles")
+    rc, out, err = node("backoffice_preview.js", "--styles", "calm", "--screens", "records,approval", "--singles", "approval", "--out", o)
+    if rc == 3:
+        report("NOT RUN", "backoffice_preview --singles approval --out keeps only calm-approval.jpg", "no Playwright")
+    else:
+        files = sorted(os.listdir(o)) if os.path.isdir(o) else []
+        check("backoffice_preview --singles approval --out keeps only calm-approval.jpg", rc == 0 and files == ["calm-approval.jpg"], f"rc={rc} {files} {err[-200:]}")
+    o = os.path.join(TMP, "bo-all")
+    rc, out, err = node("backoffice_preview.js", "--styles", "calm", "--screens", "records,approval", "--out", o)
+    if rc != 3:
+        files = sorted(os.listdir(o)) if os.path.isdir(o) else []
+        check("backoffice_preview --out without --singles keeps every single", rc == 0 and files == ["calm-approval.jpg", "calm-records.jpg"], f"rc={rc} {files}")
+
+
 def test_icons():
     env = {"TMPDIR": os.path.join(TMP, "icons") + "/"}
     os.makedirs(env["TMPDIR"], exist_ok=True)
@@ -246,7 +285,7 @@ def main():
     TMP = tempfile.mkdtemp(prefix="ux-ui-test-preview-")
     before = snapshot()
     try:
-        for t in (test_direction_preview, test_icons, test_photo_search, test_showcase):
+        for t in (test_direction_preview, test_preview_out, test_icons, test_photo_search, test_showcase):
             try:
                 t()
             except Exception as e:  # a crash in one group is a failure, keep going

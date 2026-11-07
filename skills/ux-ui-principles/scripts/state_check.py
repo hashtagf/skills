@@ -20,7 +20,8 @@ not that the state is reachable or correct; a miss means "unverified, review by
 hand". Report results as Manual, never as "covered".
 
 Exit: 0 every needed state has a marker (or no gaps with --per-file; always 0 with --matrix),
-1 a state is missing / a gap found, 2 usage or input error (missing path, unknown state in --need).
+1 a state is missing / a gap found, 2 usage or input error (missing path, unknown state in --need, no source files
+to scan). --matrix and --per-file scan every path given, like the default scan.
 Writes nothing. Stdlib only.
 """
 import argparse, json, os, re, sys
@@ -67,9 +68,20 @@ RULES = [
 ]
 
 
-def per_file(path):
+def sources(paths):
+    """[(root, file)] for every path given, each file once (several paths are scanned together)."""
+    out, seen = [], set()
+    for p in paths:
+        for f in files(p):
+            if os.path.abspath(f) not in seen:
+                seen.add(os.path.abspath(f))
+                out.append((p, f))
+    return out
+
+
+def per_file(paths):
     gaps = []
-    for f in files(path):
+    for _, f in sources(paths if isinstance(paths, (list, tuple)) else [paths]):
         if f.endswith(".css"):
             continue
         try:
@@ -113,9 +125,13 @@ def main(argv):
     if gone:
         print(f"error: path not found: {gone[0]} (pass a source directory or file)", file=sys.stderr)
         return 2
+    src = sources(args)
+    if not src:
+        print(f"error: no source files to scan in {', '.join(args)} (looked for {' '.join(EXT)})", file=sys.stderr)
+        return 2
     if a.matrix:
         rows = []
-        for f in files(args[0]):
+        for root, f in src:
             if f.endswith(".css"):
                 continue
             try:
@@ -123,7 +139,7 @@ def main(argv):
             except OSError:
                 continue
             cells = ["Manual (marker)" if re.search(STATES[s], text, re.I) else "missing" for s in need]
-            rows.append((os.path.relpath(f, args[0]) if os.path.isdir(args[0]) else os.path.basename(f), cells))
+            rows.append((os.path.relpath(f, root) if os.path.isdir(root) else os.path.basename(f), cells))
         note = "Marker present != state verified: render each cell before marking it Ran."
         if a.json:
             print(json.dumps({"states": need, "rows": [{"surface": n, **dict(zip(need, c))} for n, c in rows], "note": note}, indent=2, ensure_ascii=False))
@@ -135,7 +151,7 @@ def main(argv):
         print("\n" + note)
         return 0
     if a.per_file:
-        gaps = per_file(args[0])
+        gaps = per_file(args)
         if a.json:
             print(json.dumps({"gaps": gaps, "note": "Static markers only; label results Manual."}, indent=2, ensure_ascii=False))
         else:
@@ -145,11 +161,7 @@ def main(argv):
         return 1 if gaps else 0
     hits = {s: [] for s in need}
     n = 0
-    scanned = set()
-    for f in (f for a in args for f in files(a)):
-        if os.path.abspath(f) in scanned:
-            continue
-        scanned.add(os.path.abspath(f))
+    for _, f in src:
         n += 1
         try:
             text = open(f, encoding="utf-8", errors="replace").read()

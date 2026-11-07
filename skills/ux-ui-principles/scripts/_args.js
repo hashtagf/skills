@@ -8,7 +8,8 @@
  *
  * -h / --help anywhere prints the calling script's header comment and exits 0. An unknown flag, a value flag
  * without a value, a missing required flag or a wrong number of positionals prints
- * "error: <what> (<how to fix>)" to stderr and exits 2. "--flag=value" is accepted for value flags.
+ * "error: <what> (<how to fix>)" to stderr and exits 2. "--flag=value" is accepted for value flags; "--" ends the
+ * options (every argument after it is a positional, e.g. a file named "-x.html").
  * Paths: userPath() resolves a user-given path against the current directory; libPath() resolves an
  * internal library path against the skill root; tempOut() is os.tmpdir()/ux-ui-<script>/<host>-<timestamp>.
  * spec.report = '<script name>' also accepts --json and starts the shared JSON report (_report.js); usage errors
@@ -35,11 +36,13 @@ function helpText(file) {
 
 function parse(argv, spec = {}) {
   const values = new Set(spec.values || []), flags = new Set(spec.flags || []);
-  if (argv.includes('-h') || argv.includes('--help')) { console.log(helpText(spec.file || require.main.filename)); process.exit(0); }
-  if (spec.report) { flags.add('--json'); R.start(spec.report, argv.includes('--json')); }
+  const opts = argv.includes('--') ? argv.slice(0, argv.indexOf('--')) : argv;
+  if (opts.includes('-h') || opts.includes('--help')) { console.log(helpText(spec.file || require.main.filename)); process.exit(0); }
+  if (spec.report) { flags.add('--json'); R.start(spec.report, opts.includes('--json')); }
   const got = new Map(), pos = [];
   for (let i = 0; i < argv.length; i++) {
     let a = argv[i], inline;
+    if (a === '--') { pos.push(...argv.slice(i + 1)); break; } // end of options: the rest are positionals
     if (a.startsWith('--') && a.includes('=')) { inline = a.slice(a.indexOf('=') + 1); a = a.slice(0, a.indexOf('=')); }
     if (values.has(a)) {
       const v = inline !== undefined ? inline : argv[i + 1];

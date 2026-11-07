@@ -91,6 +91,8 @@ def lucide(names, lv):
     tags = lucide_tags(lv)
     symbols, bad = [], 0
     for n in names:
+        n = n.strip()  # names are lower-case kebab: "Calendar" -> calendar, "CalendarCheck" -> calendar-check
+        n = n.lower() if n.lower() in tags else re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "-", n).replace("_", "-").lower()
         if n not in tags:
             near = [k for k in tags if n in k or any(n in t for t in tags[k])][:8]
             print(f"<!-- '{n}' is not in Lucide {lv}. Closest: {', '.join(near) or 'none'}. "
@@ -187,8 +189,10 @@ def main(argv=None):
     ap.add_argument("--lucide-version", default=LUCIDE_V)
     ap.add_argument("--simple-version", default=SIMPLE_V)
     argv = sys.argv[1:] if argv is None else argv
-    if not argv or argv[0] in ("-h", "--help"):
-        print(__doc__); return 0 if argv else 2
+    if not argv:
+        return usage("give a command: search, lucide or brand (run with --help)")
+    if argv[0] in ("-h", "--help"):
+        print(__doc__); return 0
     A = ap.parse_intermixed_args(argv)
     if A.ground is not None and not HEX.fullmatch(A.ground):
         return usage(f"--ground takes a hex colour, #rgb or #rrggbb (got {A.ground!r})")

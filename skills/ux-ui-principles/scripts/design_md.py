@@ -47,6 +47,7 @@ import export_tokens as ex  # noqa: E402
 
 LIST_FIELDS = ("proof_available", "languages", "feel", "shape_from_subject", "likes", "dislikes", "competitors",
                "constraints", "never")
+TEXT_FIELDS = ("brand", "what", "audience", "goal", "differentiator", "energy", "shape", "asked_by", "date")
 
 
 def die(msg):
@@ -79,6 +80,18 @@ def load_interview(path):
             iv[k] = [str(x) for x in v if x is not None]
         else:
             die("--interview %s: %s must be a list of strings or one string (got %r)" % (path, k, v))
+    for k in TEXT_FIELDS:  # null = not answered (the default applies); a list or object is an input error
+        v = iv.get(k)
+        if v is None:
+            iv.pop(k, None)
+        elif isinstance(v, (int, float)) and not isinstance(v, bool):
+            iv[k] = str(v)
+        elif not isinstance(v, str):
+            die("--interview %s: %s must be one string (got %r)" % (path, k, v))
+    if iv.get("density") is not None and (isinstance(iv["density"], bool) or not isinstance(iv["density"], (int, float))):
+        die("--interview %s: density must be a number 1-10 (got %r)" % (path, iv["density"]))
+    if iv.get("density") is None:
+        iv.pop("density", None)
     return iv
 
 TEMPLATE = {
@@ -152,16 +165,26 @@ def ys(v):
 
 
 def write_atomic(path, text):
-    """Write the finished text to a temp file next to path, then rename; a failed run leaves nothing behind."""
+    """Write the finished text to a temp file next to path, then rename; a failed run leaves nothing behind.
+    The file gets normal permissions (0666 minus umask); an unwritable target is an input error (exit 2)."""
     import tempfile
-    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)  # only now, after the text was built
-    fd, tmp = tempfile.mkstemp(prefix=".DESIGN.", suffix=".tmp", dir=os.path.dirname(os.path.abspath(path)))
+    from _net import file_mode
+    if os.path.isdir(path):
+        die("%s is a folder, not a file (move it away or pick another --out)" % path)
+    tmp = None
     try:
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)  # only now, after the text was built
+        fd, tmp = tempfile.mkstemp(prefix=".%s." % os.path.basename(path), suffix=".tmp", dir=os.path.dirname(os.path.abspath(path)))
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(text)
+        os.chmod(tmp, file_mode())
         os.replace(tmp, path)
+    except OSError as e:
+        if tmp and os.path.exists(tmp):
+            os.unlink(tmp)
+        die("cannot write %s (%s; check --out)" % (path, e))
     except BaseException:
-        if os.path.exists(tmp):
+        if tmp and os.path.exists(tmp):
             os.unlink(tmp)
         raise
 
@@ -579,12 +602,12 @@ def wire(dirpath):
     names = [n for n in ("AGENTS.md", "CLAUDE.md") if os.path.exists(os.path.join(dirpath, n))] or ["AGENTS.md"]
     for n in names:
         p = os.path.join(dirpath, n)
-        t = open(p).read() if os.path.exists(p) else ""
+        t = open(p, encoding="utf-8").read() if os.path.exists(p) else ""
         if BLOCK_START in t:
             t = re.sub(re.escape(BLOCK_START) + r"[\s\S]*?" + re.escape(BLOCK_END) + r"\n?", BLOCK, t)
         else:
             t = t.rstrip() + ("\n\n" if t.strip() else "") + BLOCK
-        open(p, "w").write(t)
+        write_atomic(p, t)
         print("wired", p)
 
 
@@ -648,8 +671,7 @@ def main(argv=None):
         print("wrote", path)
     else:
         if not a.id or not a.interview:
-            print(__doc__)
-            return 2
+            die("give a direction id and --interview FILE (or --from-code SRC / --backoffice STYLE; run with --help)")
         iv = load_interview(a.interview)
         d = load_direction(a.id)
         out = out_dir(a)

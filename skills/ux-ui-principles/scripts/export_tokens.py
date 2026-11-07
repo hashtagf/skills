@@ -40,6 +40,7 @@ DIRS = os.path.join(HERE, "..", "assets", "directions", "directions.json")
 
 # ---------- color math: one source in _color.py (re-exported: code_extract / design_md use ex.lum, ex.reach ...) ----------
 sys.path.insert(0, HERE)
+import _net  # noqa: E402
 from _color import (best_ink, delin, from_oklch, has_alpha, hex_rgb, is_hex, lin, lum, mix,  # noqa: E402,F401
                     norm_hex, ratio, reach, to_oklch)
 
@@ -391,13 +392,13 @@ def load_json(path):
         d = d["directions"][0]
     if not isinstance(d, dict):
         die("--json %s: expected one object with the keys of a directions.json entry" % path)
-    missing = [k for k in COLOR_KEYS + ("tints",) if k not in d]
+    missing = [k for k in COLOR_KEYS + ("tints",) if d.get(k) is None]
     if missing:
         die("--json %s: missing %s (a token file needs %s, tints: 4 hex fills)" % (path, ", ".join(missing), ", ".join(COLOR_KEYS)))
     if not isinstance(d["tints"], list) or len(d["tints"]) != 4:
         die("--json %s: tints must be a list of 4 hex colours" % path)
     stem = os.path.splitext(os.path.basename(path))[0]
-    d = dict(d)
+    d = {k: v for k, v in d.items() if v is not None}  # "display": null means not given: the default applies
     d.setdefault("id", stem)
     d.setdefault("name", d["id"])
     for k, v in (("display", "Inter"), ("body", "Inter"), ("dw", 700), ("track", "-0.02em"), ("radius", 8), ("btn", "round")):
@@ -433,8 +434,7 @@ def load(a):
             die("give a direction id or --json FILE, not both")
         return load_json(a.json)
     if not a.id:
-        print(__doc__)
-        sys.exit(2)
+        die("give a direction id or --json FILE (run with --help)")
     for x in directions():
         if x["id"] == a.id:
             return dict(x)
@@ -474,8 +474,7 @@ def main(argv=None):
             os.makedirs(out, exist_ok=True)
             for k in only or list(FILES):
                 name, body = files[k]
-                with open(os.path.join(out, name), "w", encoding="utf-8") as f:
-                    f.write(body)
+                _net.write_atomic(os.path.join(out, name), body)
                 print("wrote", os.path.join(out, name))
         except OSError as e:
             die("cannot write into %s (%s)" % (out, e))

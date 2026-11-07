@@ -21,7 +21,7 @@ Exit 0 ok, 1 no usable hits or a download failed, 2 usage error, 3 not run (no n
 Network: curl (system certificates, scripts/_net.py) to the Commons API and api.openverse.org, anonymous, one
 request per query. Standard library only.
 """
-import argparse, json, os, re, sys, urllib.parse
+import argparse, hashlib, json, os, re, sys, unicodedata, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _net  # noqa: E402
@@ -77,6 +77,27 @@ def openverse(q, n, min_w):
     return out[:n]
 
 
+def default_name(h, used, out, credits):
+    """File name from the title: Unicode letters and digits kept (Thai stays Thai), a trailing file extension dropped,
+    a short hash of the picture URL when nothing is left; -2, -3 ... when the name is taken in this run or by
+    another photo already in the folder."""
+    t = re.sub(r"\.(jpe?g|png|gif|webp|tiff?|svg)$", "", h["title"].strip(), flags=re.I).lower()
+    base = "".join(c if unicodedata.category(c)[0] in "LMN" else "-" for c in t)
+    base = re.sub(r"-+", "-", base)[:40].strip("-") or "photo-" + hashlib.sha1(h["img"].encode()).hexdigest()[:8]
+    def taken(n):  # the same photo (same page) may be saved again under its own name
+        c = credits.get(n)
+        if n in used:
+            return True
+        if c is not None:
+            return not (isinstance(c, dict) and c.get("page") == h["page"])
+        return any(os.path.exists(os.path.join(out, n + e)) for e in (".jpg", ".png"))
+    name, i = base, 1
+    while taken(name):
+        i += 1
+        name = "%s-%d" % (base, i)
+    return name
+
+
 class Parser(argparse.ArgumentParser):
     def error(self, message):
         sys.stderr.write("error: %s (run with --help)\n" % message)
@@ -95,7 +116,7 @@ def main(argv=None):
     a = ap.parse_intermixed_args(sys.argv[1:] if argv is None else argv)
     qs = [q for q in a.queries if q.strip()]
     if not qs:
-        print(__doc__); return 2
+        ap.error("give at least one search query")
     if not 1 <= a.n <= 50:
         ap.error("--n must be 1-50")
     if a.min_width < 0:
@@ -143,10 +164,16 @@ def main(argv=None):
         credits = json.load(open(cpath, encoding="utf-8")) if os.path.exists(cpath) else {}
     except ValueError:
         print(f"error: {cpath} is not valid JSON (fix or move it; nothing downloaded)", file=sys.stderr); return 2
+    except OSError as e:
+        print(f"error: cannot read {cpath} ({e}; nothing downloaded)", file=sys.stderr); return 2
+    if not isinstance(credits, dict):
+        print(f"error: {cpath} is not a JSON object of credits (fix or move it; nothing downloaded)", file=sys.stderr); return 2
+    used = set()
     failed = 0
     for j, k in enumerate(picks):
         h = hits[k - 1]
-        name = names[j] if j < len(names) and names[j] else re.sub(r"[^a-z0-9]+", "-", h["title"].lower())[:40].strip("-")
+        name = names[j] if j < len(names) and names[j] else default_name(h, used, out, credits)
+        used.add(name)
         try:
             body = get(h["img"])
         except RuntimeError as e:

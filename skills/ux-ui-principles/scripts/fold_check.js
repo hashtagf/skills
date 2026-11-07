@@ -95,7 +95,8 @@ A.main(async () => {
     else if (r.ctaBottom > r.fold) { fail = true; lines.push(`- CTA "${r.cta}" ends at ${r.ctaBottom}px, below the ${r.fold}px fold`); }
     else lines.push(`  CTA "${r.cta}" ends at ${r.ctaBottom}px of ${r.fold}px`);
     const hinted = (r.nextTop != null && r.nextTop < r.fold) || (r.heroBottom != null && r.heroBottom <= r.fold - 24);
-    lines.push(hinted ? `  next section hinted (hero ends ${r.heroBottom}px, next heading at ${r.nextTop}px)` : `· note: next section not hinted: hero ends ${r.heroBottom}px, next heading at ${r.nextTop}px`);
+    const nextAt = `${r.heroBottom == null ? 'no hero found' : `hero ends ${r.heroBottom}px`}, ${r.nextTop == null ? 'no second section found (pass --next)' : `next heading at ${r.nextTop}px`}`;
+    lines.push(hinted ? `  next section hinted (${nextAt})` : `· note: next section not hinted: ${nextAt}`);
     lines.push(r.offer ? `  offer on first screen: "${r.offer}"` : '· note: no offer or price on the first screen' + (sel.offer ? ` (${sel.offer})` : ''));
     if (fail) fails++;
     const where = `${w}x${h}`;

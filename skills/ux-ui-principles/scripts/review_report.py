@@ -11,12 +11,14 @@ findings.json:
    "keep": ["..."], "fix": [{"p": "P0", "text": "..."}], "quick": ["..."]}
 
 Dimensions are the rubric criteria in references/review-loop.md §3-4 (3 to 8 per report, e.g. the 6 visual or 5 UX criteria). Score 0-10; bands: 0-4 Broken,
-5-6 Functional, 7-8 Strong, 9-10 Exceptional. The report never averages: each dimension stands alone, so a
+5-6 Functional, 7-8 Strong, 9-10 Exceptional; a non-integer score falls in the band of its whole part (4.5 Broken,
+6.5 Functional, 8.9 Strong), since a band starts at its lower integer. The report never averages: each dimension stands alone, so a
 9 on one and a 4 on another stays visible.
 
 Writes only the report: --out PATH, or review.html in the folder of findings.json (never the current folder).
 Exit 0 written, 2 usage or input error (missing file, malformed JSON, fewer than 3 or more than 8 dimensions,
-a score that is missing, not a number or outside 0-10). Standard library only.
+a score that is missing, not a number or outside 0-10, a text field or list item of the wrong type). The report
+is rendered first and written atomically, so a failed run never leaves an empty review.html. Standard library only.
 """
 import argparse
 import html
@@ -24,6 +26,7 @@ import os
 import json
 import math
 import sys
+import tempfile
 
 TEMPLATE = {
     "title": "Review: landing page", "artifact": "index.html", "date": "2026-11-05",
@@ -39,7 +42,7 @@ TEMPLATE = {
 
 
 def band(s):
-    return "Broken" if s <= 4 else "Functional" if s <= 6 else "Strong" if s <= 8 else "Exceptional"
+    return "Broken" if s < 5 else "Functional" if s < 7 else "Strong" if s < 9 else "Exceptional"
 
 
 def radar(dims):
@@ -111,9 +114,18 @@ def validate(d, src):
             return f"dimension {x['name']!r}: \"score\" must be a number 0-10, got {sc!r}"
         if not 0 <= sc <= 10:
             return f"score out of range (0-10): {x['name']} = {sc}"
+        for k in ("evidence", "keep", "fix", "quick"):
+            if k in x and not isinstance(x[k], str):
+                return f"dimension {x['name']!r}: \"{k}\" must be a string, got {x[k]!r}"
+    for k in ("title", "artifact", "date", "verdict"):
+        if k in d and not isinstance(d[k], str):
+            return f"{src}: \"{k}\" must be a string, got {d[k]!r}"
     for k in ("keep", "fix", "quick"):
         if not isinstance(d.get(k, []), list):
             return f"{src}: \"{k}\" must be a list"
+        for n, i in enumerate(d.get(k, [])):
+            if not isinstance(i, (str, dict)):
+                return f"{src}: \"{k}\" item {n + 1} must be a string (or {{\"p\", \"text\"}}), got {i!r}"
     return None
 
 
@@ -139,10 +151,19 @@ def main(argv=None):
     if err:
         return fail(err)
     out = a.out or os.path.join(os.path.dirname(os.path.abspath(a.findings)), "review.html")
+    page = render(d)                       # render before touching the output file
+    tmp = None
     try:
-        with open(out, "w", encoding="utf-8") as f:
-            f.write(render(d))
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=os.path.dirname(os.path.abspath(out)),
+                                         prefix=".review-", suffix=".tmp", delete=False) as f:
+            tmp = f.name
+            f.write(page)
+        um = os.umask(0); os.umask(um)
+        os.chmod(tmp, 0o666 & ~um)         # mkstemp is 0600; keep the usual file mode
+        os.replace(tmp, out)
     except OSError as e:
+        if tmp and os.path.exists(tmp):
+            os.remove(tmp)
         return fail(f"cannot write {out}: {e.strerror} (pass a writable --out path)")
     print("wrote", out)
     return 0

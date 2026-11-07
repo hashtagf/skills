@@ -176,6 +176,126 @@ def main():
         except (ValueError, KeyError):
             ok = False
         case("contrast: --json single pair", ok, out + err)
+
+        # 8. bug-hunt regressions (one block per reproduced bug)
+        bh = os.path.join(tmp, "bh")
+        os.mkdir(bh)
+
+        def put(name, text, mode="w"):
+            p = os.path.join(bh, name)
+            with open(p, mode, **({} if "b" in mode else {"encoding": "utf-8"})) as fh:
+                fh.write(text)
+            return p
+
+        def err2(code, out, err):        # contract: exit 2, exactly one "error:" line on stderr, no traceback
+            lines = [l for l in err.splitlines() if l.strip()]
+            return code == 2 and "Traceback" not in out + err and len(lines) == 1 and lines[0].startswith("error:")
+
+        # bug 1: slop_check traversal is iterative (1000 unclosed <li> / <p> nest 1000 deep)
+        for name, page in (("deep-li.html", "<ul>" + "<li>item" * 1000 + "</ul>"), ("deep-p.html", "<div>" + "<p>x" * 1500 + "</div>")):
+            code, out, err = py("slop_check.py", put(name, page), "--json", cwd=cwd)
+            try:
+                ok = code in (0, 1) and "Traceback" not in err and isinstance(json.loads(out), dict)
+            except ValueError:
+                ok = False
+            case(f"slop: {name} (1000+ unclosed nested tags) -> normal result, no RecursionError", ok, f"exit {code}\n{err[-300:]}")
+
+        # bug 2: placeholders --md to a directory / missing folder / non-UTF-8 file -> one error line, exit 2
+        bin_md = put("utf16.md", b"\xff\xfe# x\n", "wb")
+        for label, md in (("a directory", bh), ("a missing folder", os.path.join(bh, "nope", "README.md")), ("a non-UTF-8 file", bin_md)):
+            code, out, err = py("placeholders.py", f("attrs.html"), "--md", md, cwd=cwd)
+            case(f"placeholders: --md to {label} -> error line, exit 2", err2(code, out, err), f"exit {code}\n{out}{err}")
+        case("placeholders: non-UTF-8 --md file left untouched", open(bin_md, "rb").read() == b"\xff\xfe# x\n")
+
+        # bug 3: review_report type-checks text fields and list items; no 0-byte review.html on failure
+        dims3 = [{"name": n, "score": 7} for n in "ABC"]
+        for label, extra in (("evidence 5", {"dimensions": [dict(dims3[0], evidence=5)] + dims3[1:]}), ("keep [1]", {"keep": [1]}),
+                             ("title null", {"title": None}), ("quick item null", {"quick": [None]}), ("fix text 3", {"dimensions": [dict(dims3[0], fix=3)] + dims3[1:]})):
+            rdir = os.path.join(bh, "rr-" + label.replace(" ", "-"))
+            os.mkdir(rdir)
+            fj = os.path.join(rdir, "findings.json")
+            json.dump(dict({"title": "R", "dimensions": dims3}, **extra), open(fj, "w"))
+            code, out, err = py("review_report.py", fj, cwd=cwd)
+            case(f"review_report: {label} -> error line, exit 2, no review.html left", err2(code, out, err)
+                 and os.listdir(rdir) == ["findings.json"], f"exit {code}\n{out}{err}{os.listdir(rdir)}")
+
+        # bug 12: a non-integer score is banded by its whole part (6.5 Functional, 8.9 Strong, 4.5 Broken)
+        fj = os.path.join(bh, "frac.json")
+        json.dump({"title": "R", "dimensions": [{"name": "A", "score": 6.5}, {"name": "B", "score": 8.9}, {"name": "C", "score": 4.5}]}, open(fj, "w"))
+        code, out, err = py("review_report.py", fj, "--out", os.path.join(bh, "frac.html"), cwd=cwd)
+        page = open(os.path.join(bh, "frac.html"), encoding="utf-8").read() if code == 0 else ""
+        case("review_report: 6.5 Functional, 8.9 Strong, 4.5 Broken", "6.5/10 · Functional" in page and "8.9/10 · Strong" in page
+             and "4.5/10 · Broken" in page, f"exit {code}\n{out}{err}")
+
+        # bug 4: a selector list spanning lines (":root,\n:host {") is a token block
+        code, out, err = py("contrast.py", "--css", put("host.css", ":root,\n:host {\n  --bg: #ffffff;\n  --ink: #bbbbbb;\n}\n"), cwd=cwd)
+        case("contrast: multi-line ':root,\\n:host' block checked -> FAIL, exit 1", code == 1 and "FAIL" in out and "N/A" not in out, f"exit {code}\n{out}{err}")
+
+        # bug 5: ":root:not(.dark)" is a light block, checked on the light ground
+        code, out, err = py("contrast.py", "--css", put("notdark.css", ":root{--bg:#ffffff;--ink:#111111}\n.dark{--bg:#000000;--ink:#eeeeee}\n"
+                                                         ":root:not(.dark){--muted:#999999}\n"), "--json", cwd=cwd)
+        try:
+            row = next(r for r in json.loads(out) if r["fg"] == "--muted")
+            ok = code == 1 and row["theme"] == "light" and row["bg_value"] == "#ffffff" and row["status"] == "FAIL"
+            ok = ok and any(r["block"] == ".dark" and r["theme"] == "dark" for r in json.loads(out))
+        except (ValueError, StopIteration, KeyError, TypeError):
+            ok = False
+        case("contrast: :root:not(.dark) is light (muted on #fff FAIL), .dark still dark", ok, f"exit {code}\n{out}{err}")
+
+        # bug 11: named colours, opaque "/ 1" / "/ 100%" alpha and !important resolve; translucent stays unresolved
+        for label, css in (("named white", ":root{--bg:white;--ink:#bbbbbb}"), ("oklch / 1", ":root{--bg:#fff;--ink:oklch(80% 0 0 / 1)}"),
+                           ("rgb / 100%", ":root{--bg:#fff;--ink:rgb(187 187 187 / 100%)}"), ("rgba(..., 1)", ":root{--bg:#fff;--ink:rgba(187,187,187,1)}"),
+                           ("hsl / 1", ":root{--bg:#fff;--ink:hsl(0 0% 73% / 1)}"), ("!important", ":root{--bg:#ffffff;--ink:#BBBBBB !important}")):
+            code, out, err = py("contrast.py", "--css", put("c11.css", css), cwd=cwd)
+            case(f"contrast: {label} resolves -> FAIL, exit 1", code == 1 and "FAIL" in out, f"exit {code}\n{out}{err}")
+        code, out, err = py("contrast.py", "--css", put("c11.css", ":root{--bg:#fff;--ink:rgb(0 0 0 / .5)}"), cwd=cwd)
+        case("contrast: translucent rgb(… / .5) still unresolved -> N/A, exit 0", code == 0 and out.startswith("N/A"), f"exit {code}\n{out}{err}")
+
+        # bug 6: --matrix and --per-file scan every path given, not only the first
+        sa = put("sa.html", '<div class="skeleton"></div>')
+        sb = put("sb.js", 'fetch("/api/x")')
+        code, out, err = py("state_check.py", sa, sb, "--matrix", cwd=cwd)
+        case("state_check --matrix: a row per path given", code == 0 and "| sa.html |" in out and "| sb.js |" in out, f"exit {code}\n{out}{err}")
+        code, out, err = py("state_check.py", sa, sb, "--per-file", cwd=cwd)
+        case("state_check --per-file: gaps in the second path found", code == 1 and "sb.js: fetches data" in out, f"exit {code}\n{out}{err}")
+
+        # bug 13: a folder with no source files -> error line, exit 2 (not "0 files scanned", all MISS)
+        emptydir = os.path.join(bh, "nosrc")
+        os.mkdir(emptydir)
+        for extra in ([], ["--matrix"], ["--per-file"]):
+            code, out, err = py("state_check.py", emptydir, *extra, cwd=cwd)
+            case(f"state_check {' '.join(extra) or '(default)'}: empty folder -> error line, exit 2", err2(code, out, err), f"exit {code}\n{out}{err}")
+
+        # bug 7: a DD/MM date in the decision log is not a dial; a real out-of-range dial still is
+        dm_head = '---\nname: Shop\nversion: alpha\ncolors:\n  primary: "#0f6e64"\n---\n## Overview\nStatus: draft\n'
+        code, out, err = py("design_md_check.py", put("dm-date.md", dm_head + "## Decision log\n- 15/10/2026 picked teal\n- 2026/10/15 again\n"), "--json", cwd=cwd)
+        case("design_md_check: dates 15/10/2026, 2026/10/15 are not dials", "dial value out of range" not in out and code == 0, f"exit {code}\n{out}{err}")
+        code, out, err = py("design_md_check.py", put("dm-dial.md", dm_head + "## Dials\n- variance 12/10\n"), "--json", cwd=cwd)
+        case("design_md_check: dial 12/10 still an error", code == 1 and "dial value out of range: 12/10" in out, f"exit {code}\n{out}{err}")
+
+        # bug 8: a UTF-8 BOM does not hide the front matter
+        code, out, err = py("design_md_check.py", put("dm-bom.md", "\ufeff" + dm_head + "## Decision log\n- 2026-10-15 picked teal\n"), cwd=cwd)
+        case("design_md_check: BOM file still read as front matter (not legacy)", "no YAML front matter" not in out and code == 0, f"exit {code}\n{out}{err}")
+
+        # bug 9: outline values matched whole (0.5px is not removal; 0px / 0em / none are)
+        for css, want in (("a:focus{outline: 0.5px solid #333}", False), ("a{outline: 0px}", True), ("a{outline:0em;color:#123}", True),
+                          ("a{outline: none !important}", True), ("a{outline:0}", True), ("a{outline: 0 solid red}", False)):
+            code, out, err = py("slop_check.py", put("ol.html", f"<style>{css}</style><a href='/'>x</a>"), "--json", cwd=cwd)
+            try:
+                got = any(r["rule"] == "focus-removed" for r in json.loads(out)[os.path.join(bh, "ol.html")])
+            except (ValueError, KeyError):
+                got = None
+            case(f"slop: '{css}' focus-removed={want}", got is want, f"exit {code}\n{out[:300]}{err}")
+
+        # bug 10: border-color:#000 is not "pure black text or ground"; color:#000 still is
+        for css, want in ((".box{border-color:#000}", False), (".box{outline-color:black}", False), (".box{color:#000}", True), (".box{background-color:#000000}", True)):
+            code, out, err = py("slop_check.py", put("pb.html", f"<style>{css}</style><div class=box>x</div>"), "--json", cwd=cwd)
+            try:
+                got = any(r["rule"] == "pure-black" for r in json.loads(out)[os.path.join(bh, "pb.html")])
+            except (ValueError, KeyError):
+                got = None
+            case(f"slop: '{css}' pure-black={want}", got is want, f"exit {code}\n{out[:300]}{err}")
+        case("no stray files written into cwd by the bug-hunt cases", os.listdir(cwd) == [], os.listdir(cwd))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

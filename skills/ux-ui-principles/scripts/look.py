@@ -77,7 +77,12 @@ def market(want):
     p = os.path.join(ROOT, "assets", "market", "catalog.json")
     if not os.path.exists(p):
         return None, None
-    for kind, k in json.load(open(p, encoding="utf-8"))["kinds"].items():
+    cat = _library.read_json(p)
+    if not isinstance(cat, dict) or not isinstance(cat.get("kinds"), dict):
+        raise _library.CatalogError('%s: expected {"kinds": {...}}; fix it (design-direction.md §9 Round B)' % p)
+    for kind, k in cat["kinds"].items():
+        if not isinstance(k, dict):
+            raise _library.CatalogError("%s: kinds.%s is not an object" % (p, kind))
         if want == kind or want in k.get("synonyms", []):
             return kind, k
     return None, None
@@ -127,6 +132,14 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.n < 1:
         ap.error("--n must be 1 or more")
+    try:
+        return run(a)
+    except _library.CatalogError as e:
+        print("error: %s" % e, file=sys.stderr)
+        return 2
+
+
+def run(a):
     rows = _library.load(ROOT)
     kinds = sorted({r["kind"] for r in rows})
     tags = _library.tags(rows)
@@ -134,8 +147,15 @@ def main(argv=None):
         print("kinds:", ", ".join(kinds)); print("tags:", ", ".join(tags))
         print("synonyms:", ", ".join(sorted(SYN))); return 0
     want = " ".join(a.kind).strip().lower()
-    if want not in SYN and want not in kinds and want not in tags:
-        want = want.replace(" ", "-") if want.replace(" ", "-") in SYN else want
+    if want not in SYN and want not in kinds and want not in tags:  # "ai chat" -> ai-chat (a synonym, kind or tag)
+        dashed = want.replace(" ", "-")
+        want = dashed if dashed in SYN or dashed in kinds or dashed in tags else want
+    d, x = a.direction, None
+    if d:  # validate before anything is printed
+        data = json.load(open(os.path.join(ROOT, "assets", "directions", "directions.json"), encoding="utf-8"))["directions"]
+        x = next((y for y in data if y["id"] == d), None)
+        if not x:
+            print(f"error: unknown direction {d!r} (python3 scripts/export_tokens.py --list)", file=sys.stderr); return 2
     mkind, mstudy = market(want)
     targets = ([want] if want in kinds else []) + [t for t in SYN.get(want, []) if t != want]
     tag_targets = list(dict.fromkeys(t for t in [want] + SYN.get(want, []) if t in tags and t not in kinds))
@@ -148,12 +168,14 @@ def main(argv=None):
         pool = [r for r in rows if r["kind"] == t and os.path.exists(r["img"])]
         pool.sort(key=rank)
         picked += one_per_app(pool, picked)[:n]
-    for t in tag_targets:  # a tag: one picture per app, templates first, product screens before landing
-        pool = [r for r in rows if t in r["tags"] and os.path.exists(r["img"])]
+    if tag_targets:  # tags: one pool for all of them (chat + ai-chat), one picture per app, templates first, product screens before landing
+        pool = [r for r in rows if set(tag_targets) & set(r["tags"]) and os.path.exists(r["img"])]
         pool.sort(key=lambda r: (rank(r), r["kind"] != "product"))
         picked += one_per_app(pool, picked)[:max(n, 4)]
     if not picked and not mstudy:
-        hint = " (pictures not fetched: see assets/LIBRARY.md)" if tag_targets else ""
+        todo = _library.unfetched(rows, ROOT)
+        hint = (" (pictures not fetched: %s; see assets/LIBRARY.md)" % " and ".join(todo or ["the fetch scripts"])
+                if tag_targets or todo else "")
         print(f"error: no pictures for '{want}'{hint} (kinds: {', '.join(kinds)}; synonyms: --kinds)", file=sys.stderr)
         print("No market study either: run the market research (design-direction.md §9 Round B) and record it with scripts/market_fetch.js.", file=sys.stderr)
         return 2
@@ -170,12 +192,7 @@ def main(argv=None):
         print("\nPictures marked local are other people's work: take the move, never their names, copy, imagery or brand.")
     if mstudy:
         print_market(mkind, mstudy, n)
-    d = a.direction
-    if d:
-        data = json.load(open(os.path.join(ROOT, "assets", "directions", "directions.json"), encoding="utf-8"))["directions"]
-        x = next((y for y in data if y["id"] == d), None)
-        if not x:
-            print(f"error: unknown direction {d!r} (python3 scripts/export_tokens.py --list)", file=sys.stderr); return 2
+    if x:
         prev = os.path.join(ROOT, "assets", "directions", "previews")
         print(f"\nDirection {x['name']} ({x['group']}): composition {x.get('comp')} on '{x.get('subject')}'")
         for p in (os.path.join(prev, d + ".jpg"), os.path.join(prev, "product", d + "-overview.jpg")):

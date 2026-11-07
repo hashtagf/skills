@@ -95,6 +95,7 @@ def uses_thai(md):
 CANON = [("overview", r"overview|brand\s*&\s*style"), ("colors", r"colou?rs?$"), ("typography", r"typography"),
          ("layout", r"layout"), ("elevation", r"elevation"), ("shapes", r"shapes?"), ("components", r"components?"),
          ("dos-donts", r"do'?s\s*(and|&)\s*don'?ts")]
+DIAL = re.compile(r"(?<![\d/.])(\d+)\s*/\s*10(?![\d/.])")   # "7/10", not a date like 15/10/2026
 DIM = re.compile(r"^-?\d+(\.\d+)?(px|em|rem)$|^0$")
 HEX = re.compile(r"^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
 CSSFN = re.compile(r"^(rgb|rgba|hsl|hsla|hwb|oklch|oklab|lch|lab|color-mix)\(", re.I)
@@ -103,7 +104,7 @@ COMP_PROPS = {"backgroundColor", "textColor", "typography", "rounded", "padding"
 
 
 def split_front(md):
-    m = re.match(r"^---\s*\n([\s\S]*?)\n---\s*(\n|$)", md)
+    m = re.match(r"^\ufeff?---\s*\n([\s\S]*?)\n---\s*(\n|$)", md)
     return (m.group(1), md[m.end():]) if m else (None, md)
 
 
@@ -296,7 +297,7 @@ def check_spec(md, fm_text, body):
         add("warn", "no direction dials section")
     if not re.search(r"^##\s+decision", md, re.I | re.M):
         add("warn", "no Decision log; record why, not only what")
-    for m in re.finditer(r"(\d+)\s*/\s*10", md):
+    for m in DIAL.finditer(md):
         if not 1 <= int(m.group(1)) <= 10:
             add("error", f"dial value out of range: {m.group(0)}")
     if uses_thai(md):
@@ -366,7 +367,7 @@ def check_legacy(md):
         if n < 3:
             add("warn", f"only {n} anti-pattern(s); list what the brand deliberately avoids")
 
-    for m in re.finditer(r"(\d+)\s*/\s*10", md):
+    for m in DIAL.finditer(md):
         if not 1 <= int(m.group(1)) <= 10:
             add("error", f"dial value out of range: {m.group(0)}")
 
@@ -394,7 +395,7 @@ def main(argv):
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     a = ap.parse_args(argv)
     try:
-        with open(a.file, encoding="utf-8", errors="replace") as f:
+        with open(a.file, encoding="utf-8-sig", errors="replace") as f:      # -sig: a BOM must not hide front matter
             res = check(f.read())
     except OSError as e:
         print(f"error: cannot read {a.file}: {e.strerror} (pass the path to a DESIGN.md)", file=sys.stderr)

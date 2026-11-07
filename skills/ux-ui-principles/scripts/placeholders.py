@@ -128,8 +128,20 @@ def md_section(items, attr_items=(), where=None):
     return "\n".join(lines) + "\n"
 
 
+def read_md(path):
+    """Current text of the --md file ("" when it does not exist yet); raises OSError / UnicodeDecodeError."""
+    if os.path.isdir(path):
+        raise IsADirectoryError(21, "is a directory", path)
+    if not os.path.isdir(os.path.dirname(os.path.abspath(path))):
+        raise FileNotFoundError(2, "folder not found", path)
+    if not os.path.isfile(path):
+        return ""
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
 def write_md(path, section):
-    old = open(path, encoding="utf-8").read() if os.path.isfile(path) else ""
+    old = read_md(path)
     pat = re.compile(r"^## Placeholders\b.*?(?=^## |\Z)", re.S | re.M)
     new = pat.sub(lambda m: section + "\n", old, count=1) if pat.search(old) else (old.rstrip() + "\n\n" + section if old else section)
     with open(path, "w", encoding="utf-8") as f:
@@ -146,6 +158,15 @@ def main(argv):
     if gone:
         print(f"error: file not found: {gone[0]} (pass the path to a built .html file)", file=sys.stderr)
         return 2
+    if a.md:
+        try:
+            read_md(a.md)
+        except OSError as e:
+            print(f"error: cannot write --md {a.md}: {e.strerror} (pass a Markdown file in an existing folder)", file=sys.stderr)
+            return 2
+        except UnicodeDecodeError:
+            print(f"error: cannot update --md {a.md}: not UTF-8 text (pass a UTF-8 Markdown file)", file=sys.stderr)
+            return 2
     total, attr, where = Counter(), Counter(), defaultdict(set)
     for p in a.pages:
         t, at, w = scan(p)
@@ -172,7 +193,11 @@ def main(argv):
             for k, v in attr_items:
                 print("  %s  %d  (%s)" % (dljust(k, w), v, ", ".join(sorted(where[k]))))
     if a.md:
-        write_md(a.md, md_section(items, attr_items, where))
+        try:
+            write_md(a.md, md_section(items, attr_items, where))
+        except (OSError, UnicodeDecodeError) as e:
+            print(f"error: cannot write --md {a.md}: {getattr(e, 'strerror', None) or e}", file=sys.stderr)
+            return 2
         print("wrote section to", a.md, file=sys.stderr if a.json else sys.stdout)
     return 0
 

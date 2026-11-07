@@ -7,6 +7,7 @@ curl does the fetching: it uses the system certificates (Python's own store is o
   cached(url, name, dir, valid=None)   -> str; the file under dir, fetched once. Writes atomically (temp file +
                                           os.replace) only after a good fetch; an empty or invalid cached file
                                           (bad JSON for *.json, or valid(text) False) counts as missing.
+  write_atomic(path, data)             str or bytes via temp file + os.replace; normal permissions (0666 & ~umask)
   EXIT_NOT_RUN = 3                     exit code for NotRun (shared contract: 0 ok, 1 check failed, 2 usage, 3 not run)
 """
 import json
@@ -81,6 +82,13 @@ def cached(url, name, dir, valid=None, ua=None, timeout=60):
     return text
 
 
+def file_mode():
+    """0o666 minus the process umask: the mode a plain open(path, "w") would give a new file."""
+    m = os.umask(0)
+    os.umask(m)
+    return 0o666 & ~m
+
+
 def write_atomic(path, data):
     """Write str or bytes to path via a temp file in the same folder + os.replace."""
     d = os.path.dirname(os.path.abspath(path))
@@ -89,6 +97,7 @@ def write_atomic(path, data):
     try:
         with os.fdopen(fd, "wb" if isinstance(data, bytes) else "w", **({} if isinstance(data, bytes) else {"encoding": "utf-8"})) as f:
             f.write(data)
+        os.chmod(tmp, file_mode())  # mkstemp makes 0600; give the file normal permissions (umask respected)
         os.replace(tmp, path)
     except BaseException:
         if os.path.exists(tmp):

@@ -6,7 +6,7 @@
  *   node render_check.js --doctor | -h
  *   node render_check.js <url-or-file> [--out dir] [--widths 1440,768,390] [--schemes light,dark]
  *                         [--zoom] [--fast] [--viewport-shots] [--reduced-motion] [--wait 800] [--timeout 30000]
- *                         [--toggle "<selector>"] [--json]
+ *                         [--toggle "<selector>"] [--scroll-budget 15000] [--json]
  *
  * The page is loaded once; widths and color schemes are switched in place
  * (viewport resize + prefers-color-scheme emulation), so each extra viewport
@@ -43,8 +43,9 @@
  *     playwright-core on the require path, then the global npm root (looked up once, last). Set PW_MODULE=/path/to/node_modules to force one.
  *   - Browser: PW_CHROMIUM, then Playwright's own build, then any cached
  *     chromium / headless shell build (any version), then installed Chrome / Edge.
- *   - A file without <!doctype>/<html> (a fragment) is wrapped in a doctype +
- *     viewport meta page next to the original, so relative assets still resolve.
+ *   - A file without <!doctype>/<html> (a fragment) is wrapped in a doctype + viewport meta page
+ *     written to a temp folder (never next to the page or into --out), with <base href> set to the
+ *     page's folder so relative assets still resolve.
  * --doctor prints what was found and exits. When no module or browser is found
  * the script exits 3 at once: report the render check as "not tested" and move
  * on; do not install browsers mid-task (`npx playwright install chromium` is a
@@ -55,6 +56,9 @@
  * Screenshots go to render-check/ next to a local page, or for a URL to a new temp folder
  * (<os temp>/ux-ui-render-check/<host>-<time>, printed), never the current directory; --out overrides. Before each viewport is measured, finite CSS/JS animations and
  * transitions are given up to 3s to finish, so entrance effects do not skew the checks or shots.
+ * Before that, each viewport scrolls through the page once (reveal-on-scroll content); --scroll-budget caps that
+ * scroll in ms per viewport (default 15000, 0 = no scroll). A page too long for the budget is scrolled as far as
+ * the budget allows and a NOTE (rule scroll-budget) says where it stopped: content below may stay hidden.
  * This is a smoke check, not an accessibility audit: it does not test keyboard
  * flows, screen readers, contrast or task success.
  * --json: one JSON document on stdout (README "Script contract"), log lines on stderr, same exit codes. Each
@@ -68,7 +72,7 @@ const R = require('./_report');
 const a = A.parse(process.argv.slice(2), {
   file: __filename,
   report: 'render_check',
-  values: ['--out', '--widths', '--schemes', '--wait', '--timeout', '--toggle'],
+  values: ['--out', '--widths', '--schemes', '--wait', '--timeout', '--toggle', '--scroll-budget'],
   flags: ['--zoom', '--fast', '--viewport-shots', '--reduced-motion', '--doctor'],
   positional: process.argv.includes('--doctor') ? [0, 1, '<url-or-file>'] : [1, 1, '<url-or-file> (node render_check.js page.html, or --doctor)'],
 });
@@ -88,15 +92,18 @@ if (doctor) {
   if (!mod || exe === undefined) pw.need(arg0, 'render check');
   process.exit(0);
 }
-const env = pw.need(arg0, 'render check');
 
 if (!A.isUrl(arg0)) {
   const file = path.resolve(arg0);
-  const head = fs.readFileSync(file, 'utf8').slice(0, 2000);
-  if (!/<!doctype|<html[\s>]/i.test(head)) {
-    const wrapped = path.join(path.dirname(file), `.render-check-${path.basename(file, path.extname(file))}.html`);
-    fs.writeFileSync(wrapped, '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>\n' + fs.readFileSync(file, 'utf8') + '\n</body></html>');
-    process.on('exit', () => { try { fs.unlinkSync(wrapped); } catch (e) {} });
+  let html;
+  try { html = fs.readFileSync(file, 'utf8'); } catch (e) { A.usageError(`cannot read ${file}: ${e.code || e.message.split('\n')[0]}`, 'check the file permissions'); }
+  if (!/<!doctype|<html[\s>]/i.test(html.slice(0, 2000))) {
+    // the wrapper lives in a temp folder; <base> points relative assets back at the page's folder
+    const tmp = fs.mkdtempSync(path.join(require('os').tmpdir(), 'ux-ui-render-check-'));
+    const wrapped = path.join(tmp, `${path.basename(file, path.extname(file))}.html`);
+    const base = require('url').pathToFileURL(path.dirname(file) + path.sep).href;
+    fs.writeFileSync(wrapped, `<!doctype html><html><head><meta charset="utf-8"><base href="${base}"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>\n` + html + '\n</body></html>');
+    process.on('exit', () => { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {} });
     console.log(`note: ${path.basename(file)} is a fragment; rendered inside a doctype wrapper`);
     R.add('note', 'fragment', `${path.basename(file)} is a fragment; rendered inside a doctype wrapper`, null);
     target = pw.target(wrapped);
@@ -111,10 +118,13 @@ if (a.has('--zoom')) widths.push(320);
 const schemes = a.list('--schemes', ['light', 'dark'], fast ? ['light'] : ['light', 'dark']);
 const wait = a.num('--wait', 800, { min: 0 });
 const timeout = a.num('--timeout', 30000, { min: 1 });
+const scrollBudget = a.num('--scroll-budget', 15000, { min: 0 });
 const fullPage = !(fast || a.has('--viewport-shots'));
 if (A.isUrl(arg0) && !a.has('--out')) console.log(`output: ${out}`);
 R.setArtifact('out', out);
 const viewports = []; R.set('widths', widths); R.set('schemes', schemes); R.set('viewports', viewports);
+// every input and option is checked above (exit 2) before looking for a browser (exit 3)
+const env = pw.need(arg0, 'render check');
 
 A.main(async () => {
   fs.mkdirSync(out, { recursive: true });
@@ -131,13 +141,20 @@ A.main(async () => {
     document.querySelectorAll('img[loading=lazy]').forEach(i => { i.loading = 'eager'; });
     await Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); setTimeout(r, 8000); })));
   });
-  // Scroll through once so reveal-on-scroll content (IntersectionObserver) is shown in full-page shots.
+  // Scroll through once so reveal-on-scroll content (IntersectionObserver) is shown in full-page shots,
+  // within --scroll-budget ms; returns where it stopped when the budget ran out first, else null.
   const reveal = async () => {
-    await page.evaluate(async () => {
-      const h = document.documentElement.scrollHeight, step = Math.max(300, innerHeight * 0.5);
-      for (let y = 0; y < h; y += step) { scrollTo({ top: y, behavior: 'instant' }); await new Promise(r => setTimeout(r, 300)); }
+    if (!scrollBudget) return null;
+    return page.evaluate(async (budget) => {
+      const h = document.documentElement.scrollHeight, step = Math.max(300, innerHeight * 0.5), t0 = performance.now();
+      let y = 0, cut = null;
+      for (; y < h; y += step) {
+        if (performance.now() - t0 > budget) { cut = { y: Math.round(y), h }; break; }
+        scrollTo({ top: y, behavior: 'instant' }); await new Promise(r => setTimeout(r, 300));
+      }
       scrollTo({ top: 0, behavior: 'instant' }); await new Promise(r => setTimeout(r, 400));
-    });
+      return cut;
+    }, scrollBudget);
   };
   // Let entrance animations / transitions end (finite ones only, capped at 3s) so checks and shots see the final state.
   const idle = () => page.evaluate(async () => {
@@ -145,7 +162,8 @@ A.main(async () => {
     const t0 = performance.now();
     while (finite().length && performance.now() - t0 < 3000) await Promise.race([Promise.all(finite().map(a => a.finished.catch(() => 0))), new Promise(r => setTimeout(r, 250))]);
   }).catch(() => {});
-  const settle = async () => { await reveal(); await idle(); await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); };
+  let cut = null;
+  const settle = async () => { cut = await reveal(); await idle(); await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); };
   let problems = 0, reported = { errs: 0, cons: 0, fails: 0 }, compFirst = true;
   // Dev server: the final gate runs on the shipped build (render-verification.md)
   if (/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)/.test(target)) {
@@ -378,6 +396,10 @@ A.main(async () => {
       const where = `${prefix}${scheme} ${w}px`;
       issues.forEach((m, k) => R.add('fail', rules[k], m, where));
       r.notes.forEach((m, k) => R.add('note', k >= ownNotes ? 'composition' : /^Thai word split/.test(m) ? 'thai-word-split' : 'heading-wrap', m, where));
+      if (cut) {
+        const m = `reveal scroll stopped at ${cut.y}px of ${cut.h}px (--scroll-budget ${scrollBudget}ms); reveal-on-scroll content below may stay hidden`;
+        R.add('note', 'scroll-budget', m, where); r.notes.push(m);
+      }
       R.artifact('screenshots', file);
       viewports.push({ pass: prefix ? 'alt' : 'default', scheme, width: w, lang: r.lang || null, result: issues.length ? 'FAIL' : 'PASS', problems: issues.length, notes: r.notes.length, screenshot: file });
       console.log(`${issues.length ? 'FAIL' : 'PASS'}  ${prefix}${scheme} ${w}px${r.lang ? ' [' + r.lang + ']' : ''}  → ${file}`);

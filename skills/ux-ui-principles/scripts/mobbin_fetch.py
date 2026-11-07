@@ -11,7 +11,7 @@ Existing pictures are kept unless --force. Pictures are other companies' product
 study set (git-ignored), never assets for client work.
 Exit 0 all fetched, 1 some failed, 2 usage error, 3 not run (Pillow missing or no network).
 """
-import argparse, io, json, os, sys, time
+import argparse, io, json, math, os, re, sys, time
 
 import _net
 
@@ -32,18 +32,36 @@ def main(argv=None):
     ap.add_argument("--force", action="store_true", help="re-download pictures that already exist")
     ap.add_argument("--delay", type=float, default=0.3, help="seconds between requests (default 0.3)")
     a = ap.parse_args(argv)
+    if not math.isfinite(a.delay):
+        ap.error("--delay %r: must be a finite number of seconds" % a.delay)
     if not os.path.exists(a.urls):
         ap.error("no %s: collect the URLs first (assets/mobbin/README.md, Rebuild)" % a.urls)
     try:
-        urls = json.load(open(a.urls, encoding="utf-8"))
+        with open(a.urls, encoding="utf-8") as f:
+            urls = json.load(f)
     except ValueError as e:
         ap.error("%s is not JSON: %s" % (a.urls, e))
+    except OSError as e:
+        ap.error("cannot read --urls %s (%s)" % (a.urls, e))
+    # {"slug": ["https://...", ...]}: the slug becomes a file name, so it must stay inside --out
+    if not isinstance(urls, dict):
+        ap.error("%s: expected an object {\"slug\": [url, ...]}" % a.urls)
+    for slug, lst in urls.items():
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", slug):
+            ap.error("%s: slug %r: use lower-case letters, digits and - only" % (a.urls, slug))
+        if not isinstance(lst, list) or not all(isinstance(u, str) and re.match(r"https?://", u) for u in lst):
+            ap.error("%s: %s must be a list of http(s) URLs" % (a.urls, slug))
     try:
         from PIL import Image
     except ImportError:
         print("NOT RUN: Pillow missing (pip install Pillow)", file=sys.stderr)
         return _net.EXIT_NOT_RUN
-    os.makedirs(a.out, exist_ok=True)
+    try:
+        os.makedirs(a.out, exist_ok=True)
+    except OSError as e:
+        ap.error("cannot create --out %s (%s)" % (a.out, e))
+    if not os.access(a.out, os.W_OK):
+        ap.error("cannot write into --out %s (permission denied)" % a.out)
     ok = failed = kept = 0
     for slug, lst in urls.items():
         for i, u in enumerate(lst, 1):
@@ -62,9 +80,12 @@ def main(argv=None):
                 failed += 1
                 continue
             im.thumbnail((1440, 1440))
-            tmp = path + ".tmp"
-            im.save(tmp, "JPEG", quality=82)
-            os.replace(tmp, path)
+            buf = io.BytesIO()
+            im.save(buf, "JPEG", quality=82)
+            try:
+                _net.write_atomic(path, buf.getvalue())
+            except OSError as e:
+                ap.error("cannot write %s (%s)" % (path, e))
             ok += 1
             time.sleep(max(a.delay, 0))
     print("fetched %d, kept %d, failed %d -> %s" % (ok, kept, failed, a.out))

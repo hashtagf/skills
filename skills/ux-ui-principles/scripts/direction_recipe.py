@@ -22,6 +22,7 @@ DIRS = os.path.join(HERE, "..", "assets", "directions", "directions.json")
 sys.path.insert(0, HERE)
 from export_tokens import DISPLAY_CLAMP  # noqa: E402
 from _color import norm_hex, is_hex  # noqa: E402
+import _net  # noqa: E402
 
 PURE = {"#000000": "#000", "#ffffff": "#fff"}
 
@@ -138,13 +139,11 @@ def main(argv=None):
         print(", ".join(x["id"] for x in items()))
         return 0
     if not a.id:
-        print(__doc__)
-        return 2
+        ap.error("give a direction id (or --list)")
     out = recipe(load(a.id))
     if a.out:
         try:
-            with open(a.out, "w", encoding="utf-8") as f:
-                f.write(out)
+            _net.write_atomic(a.out, out)
         except OSError as e:
             die("cannot write %s (%s)" % (a.out, e))
         print("wrote", a.out)

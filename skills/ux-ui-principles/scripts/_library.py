@@ -15,7 +15,8 @@ Row (the same for every collection; README "Template library" in assets/LIBRARY.
   local     True when the picture is git-ignored and rebuilt by a fetch script (other people's work: study only)
   source    short provenance line with the link, for the answer's credit; never a reason to pick one row over another
 
-Skipped entries are not rows. A collection whose catalog is missing yields nothing (its pictures are optional).
+Skipped entries are not rows. A collection whose catalog is missing yields nothing (its pictures are optional);
+a catalog that is there but unreadable or the wrong shape raises CatalogError (a ValueError naming the file).
 Collections and how to rebuild them: COLLECTIONS below and assets/LIBRARY.md.
 """
 import json
@@ -57,7 +58,10 @@ def _showcase(root):
     if not os.path.exists(p):
         return []
     rows = []
-    for r in json.load(open(p, encoding="utf-8")):
+    cat = read_json(p)
+    if not isinstance(cat, list) or not all(isinstance(r, dict) for r in cat):
+        raise CatalogError("%s: expected a list of entries; fix it or fetch it again (assets/LIBRARY.md)" % p)
+    for r in cat:
         if r.get("verdict") not in ("template", "study") or not r.get("img"):
             continue
         rows.append({"id": r["slug"], "kind": r["kind"], "tags": [], "verdict": r["verdict"], "take": r["note"],
@@ -73,7 +77,10 @@ def _mobbin(root):
     if not os.path.exists(p):
         return []
     rows = []
-    for a in json.load(open(p, encoding="utf-8"))["apps"]:
+    cat = read_json(p)
+    if not isinstance(cat, dict) or not isinstance(cat.get("apps"), list):
+        raise CatalogError('%s: expected {"apps": [...]}; fix it or fetch it again (assets/LIBRARY.md)' % p)
+    for a in cat["apps"]:
         if a["verdict"] == "skip":
             continue
         for i, sc in enumerate(a["screens"], 1):
@@ -87,15 +94,45 @@ def _mobbin(root):
 _LOADERS = {"references": _references, "showcase": _showcase, "mobbin": _mobbin}
 
 
+class CatalogError(ValueError):
+    """A catalog file exists but cannot be read as the expected shape; the message names the file."""
+
+
+def read_json(p):
+    try:
+        with open(p, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, UnicodeDecodeError, ValueError) as e:
+        raise CatalogError("%s is not readable JSON (%s); fix it or fetch it again (assets/LIBRARY.md)" % (p, e))
+
+
 def load(root=None):
     root = root or ROOT
     rows = []
     for name in COLLECTIONS:
-        for r in _LOADERS[name](root):
+        try:
+            got = _LOADERS[name](root)
+        except (KeyError, TypeError, AttributeError) as e:  # an entry without a needed field
+            raise CatalogError("%s: an entry is missing or has a wrong field (%r); fix it or fetch it again (assets/LIBRARY.md)"
+                               % (os.path.join(root, "assets", COLLECTIONS[name][0], "catalog.json"), e))
+        for r in got:
             r.setdefault("app", r["id"])
             r["collection"] = name
             rows.append(r)
     return rows
+
+
+def unfetched(rows, root=None):
+    """Rebuild commands of local collections whose catalog or some pictures are missing (pictures need fetching)."""
+    root = root or ROOT
+    out = []
+    for name, (folder, local, cmd) in COLLECTIONS.items():
+        if not local:
+            continue
+        if not os.path.exists(os.path.join(root, "assets", folder, "catalog.json")) or any(
+                r["collection"] == name and not os.path.exists(r["img"]) for r in rows):
+            out.append(cmd)
+    return out
 
 
 def tags(rows):

@@ -35,7 +35,8 @@
  * They show layout, density, hierarchy, status treatment (text + shape, never colour alone), money
  * alignment and masking. They are NOT a tested screen: keyboard, focus order and loading, empty,
  * error and permission states still need a rendered build. Fonts load from Google Fonts (network).
- * Single images are kept only for --singles (default records,approval; "all" keeps every one);
+ * Single images are kept only for --singles (default records,approval; "all" keeps every one; with --out and no
+ * --singles every one is kept);
  * --sheet writes sheet-<screen>.jpg (all looks side by side; --style-sheets also writes sheet-<style>.jpg).
  * components and states are always kept as full-page singles.
  * Output: with no selection the library folder assets/backoffice/previews/ (resolved from the skill root); with
@@ -681,7 +682,8 @@ A.main(async () => {
     for (const sc of flat) await sheet(pickS.map(st => [st, sc]), `sheet-${mp}${sc}`, pickS.length > 6 ? (mobile ? 6 : 4) : 2);
     if (has('--style-sheets')) for (const st of pickS) await sheet(flat.map(sc => [st, sc]), `sheet-${mp}${st.id}`, flat.length > 8 ? 5 : 3);
   }
-  if (singles !== 'all' && !has('--out')) {
+  // --out without --singles keeps every single; an explicit --singles is honoured everywhere
+  if (singles !== 'all' && (has('--singles') || !has('--out'))) {
     const keep = singles.split(',').concat(TALL);
     for (const st of pickS) for (const sc of pickC) if (!keep.includes(sc)) { try { fs.unlinkSync(file(st.id, sc)); } catch (e) {} }
   }

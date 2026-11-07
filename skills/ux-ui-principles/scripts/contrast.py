@@ -15,8 +15,9 @@ accent-ink/accent, field/panel, foreground/background, …) plus naming patterns
 --X-foreground or --on-X, and --lN with --lNi. A leading "color-" is ignored (--color-ink = ink)
 and paper/paper-2/paper-3 count as bg/panel grounds. Blocks whose selector mentions "dark" are
 layered over the first plain dark block (approximating the cascade for palette variants); blocks
-other than :root ones are labelled "(light theme)" / "(dark theme)". Values resolved: #hex, rgb(), hsl(), oklch()
-and var(--x) references (with fallback). color-mix(), alpha and transparent values are skipped. Local
+other than :root ones are labelled "(light theme)" / "(dark theme)". Values resolved: #hex, CSS named colours, rgb(), hsl(), oklch()
+(alpha only when opaque: / 1, / 100%) and var(--x) references (with fallback); !important is ignored.
+color-mix(), translucent and transparent values are skipped. "dark" inside :not(…) does not make a block dark. Local
 @import and <link rel=stylesheet> files are read too. It cannot see colors set outside tokens.
 Prints "N/A …" and exits 0 (check.py: N/A) when no token block or no checkable pair is found.
 
@@ -37,7 +38,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _color import is_hex, lum as luminance, ratio  # noqa: E402,F401  (shared WCAG maths)
+from _color import CSS_NAMED, is_hex, lum as luminance, ratio  # noqa: E402,F401  (shared WCAG maths)
 
 
 def _hex(r, g, b):
@@ -63,25 +64,35 @@ def _hsl_to_hex(h, sat, lig):
     return _hex(r + m, g + m, b + m)
 
 
+_ALPHA = r"(?:\s*[,/]\s*([\d.]+)(%?))?\s*\)"     # optional alpha; only an opaque one (>= 1 or 100%) resolves
+
+
+def _opaque(a, pct):
+    return a is None or float(a) >= (100 if pct else 1)
+
+
 def resolve_color(value, tok, depth=0):
-    """Return #rrggbb for hex, rgb(), hsl(), oklch() and var(--x[, fallback]); else None."""
+    """Return #rrggbb for hex, CSS named colours, rgb(), hsl(), oklch() (opaque alpha only) and
+    var(--x[, fallback]); a trailing !important is ignored. Else None (translucent, color-mix(), …)."""
     if not value or depth > 6:
         return None
-    v = value.strip()
+    v = re.sub(r"\s*!\s*important\s*$", "", value.strip(), flags=re.I)
     if re.fullmatch(r"#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?", v):
         return v
+    if v.lower() in CSS_NAMED:
+        return CSS_NAMED[v.lower()]
     m = re.fullmatch(r"var\(\s*--([\w-]+)\s*(?:,\s*(.+))?\)", v)
     if m:
         return resolve_color(tok.get(m.group(1)) or m.group(2), tok, depth + 1)
-    m = re.fullmatch(r"oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*\)", v)
-    if m:
+    m = re.fullmatch(r"oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?" + _ALPHA, v)
+    if m and _opaque(m.group(5), m.group(6)):
         L = float(m.group(1)) / (100 if m.group(2) else 1)
         return _oklch_to_hex(L, float(m.group(3)), float(m.group(4)))
-    m = re.fullmatch(r"rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)\s*\)", v)
-    if m:
-        return _hex(*(int(x) / 255 for x in m.groups()))
-    m = re.fullmatch(r"hsl\(\s*([\d.]+)(?:deg)?[\s,]+([\d.]+)%[\s,]+([\d.]+)%\s*\)", v)
-    if m:
+    m = re.fullmatch(r"rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)" + _ALPHA, v)
+    if m and _opaque(m.group(4), m.group(5)):
+        return _hex(*(int(x) / 255 for x in m.groups()[:3]))
+    m = re.fullmatch(r"hsla?\(\s*([\d.]+)(?:deg)?[\s,]+([\d.]+)%[\s,]+([\d.]+)%" + _ALPHA, v)
+    if m and _opaque(m.group(4), m.group(5)):
         return _hsl_to_hex(float(m.group(1)), float(m.group(2)) / 100, float(m.group(3)) / 100)
     return None
 
@@ -147,11 +158,10 @@ def css_blocks(text):
     while i < len(text):
         c = text[i]
         if c == "{":
-            sel = buf.strip().splitlines()[-1] if buf.strip() else ""
-            sel = re.split(r";", sel)[-1]                     # "@import …; :root" on one line
+            sel = re.split(r";", buf)[-1]                     # "@import …; :root"; a selector list may span lines
             if "<" in sel:          # leftover HTML before the selector; a bare ">" is a CSS child combinator, kept
                 sel = re.split(r"<[^<>]*>?", sel)[-1]
-            stack.append(sel.strip()); buf = ""
+            stack.append(" ".join(sel.split())); buf = ""
         elif c == "}":
             sel = stack.pop() if stack else ""
             if "--" in buf and (":root" in sel or is_token_selector(sel)):
@@ -165,8 +175,13 @@ def css_blocks(text):
     return out
 
 
+def is_dark(label):
+    """A dark block: "dark" in the selector or @media context outside :not(…) (so :root:not(.dark) is light)."""
+    return "dark" in re.sub(r":not\((?:[^()]|\([^()]*\))*\)", "", label.lower())
+
+
 def theme_of(label):
-    return "dark" if "dark" in label.lower() else "light"
+    return "dark" if is_dark(label) else "light"
 
 
 def check_css(path, as_json=False):
@@ -179,12 +194,12 @@ def check_css(path, as_json=False):
         return na("no :root custom properties found (no :root, html, .dark, [data-theme] or @theme token block)")
     base_i = next((i for i, (l, _) in enumerate(blocks) if theme_of(l) == "light"), 0)
     base = blocks[base_i][1]
-    dark_base = next((p for i, (l, p) in enumerate(blocks) if i != base_i and "dark" in l and "palette" not in l), {})
+    dark_base = next((p for i, (l, p) in enumerate(blocks) if i != base_i and is_dark(l) and "palette" not in l), {})
     strip = lambda d: {(k[6:] if k.startswith("color-") else k): v for k, v in d.items()}
     failed = total = 0
     for i, (label, props) in enumerate(blocks):
         raw = dict(base)
-        if "dark" in label:  # theme variants layer over the main dark block, as in the browser
+        if is_dark(label):  # theme variants layer over the main dark block, as in the browser
             raw.update(dark_base)
         raw.update(props)
         hexv = lambda name: resolve_color(tok.get(name), raw)

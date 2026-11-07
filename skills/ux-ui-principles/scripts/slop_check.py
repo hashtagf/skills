@@ -43,15 +43,15 @@ class Node:
         return set((self.attrs.get("class") or "").split())
 
     def all_text(self):
-        out = list(self.text)
-        for c in self.children:
-            out.append(c.all_text())
-        return " ".join(t for t in out if t).strip()
+        return " ".join(t for n in self.walk() for t in n.text if t).strip()
 
     def walk(self):
-        yield self
-        for c in self.children:
-            yield from c.walk()
+        """Pre-order, iterative: deep unclosed nesting (1000s of <li>/<p>) must not hit the recursion limit."""
+        stack = [self]
+        while stack:
+            n = stack.pop()
+            yield n
+            stack.extend(reversed(n.children))
 
 
 class Tree(HTMLParser):
@@ -302,13 +302,13 @@ def check(path):
             hues.add(int(hh * 360) // 30)
     if len(hues) > 2:
         add("note", "many-saturated-hues", f"{len(hues)} saturated hue families in CSS; UI chrome usually needs ≤ 2 (color-palette.md)")
-    if re.search(r"(background(-color)?|color)\s*:\s*(#000\b|#000000\b|black\b|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))", css):
+    if re.search(r"(?<![\w-])(background(-color)?|color)\s*:\s*(#000\b|#000000\b|black\b|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))", css):
         add("note", "pure-black", "pure black used for text or ground; use a tinted ink / near-black")
     sections = len([n for n in nodes if n.tag == "section"])
     if sections >= 3 and not re.search(r"(@keyframes|animation\s*:|transition\s*:|animate\(|IntersectionObserver)", css + js):
         add("note", "no-motion", f"{sections} sections and no transition/animation at all; public pages need the motion baseline (motion.md §1)")
 
-    if re.search(r"outline\s*:\s*(none|0)\b", css) and ":focus-visible" not in css:
+    if re.search(r"(?<![\w-])outline\s*:\s*(none|0(?:\.0*)?(?:px|em|rem)?)\s*(?:!important\s*)?(?:[;}]|$)", css) and ":focus-visible" not in css:
         add("flag", "focus-removed", "outline removed with no :focus-visible replacement")
     if re.search(r"(@keyframes|animation\s*:|transition\s*:)", css) and "prefers-reduced-motion" not in css:
         add("flag", "no-reduced-motion", "motion without a prefers-reduced-motion path")

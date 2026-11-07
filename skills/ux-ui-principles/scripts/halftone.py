@@ -50,6 +50,9 @@ def main():
     ap.add_argument('--crop-x', type=float, default=0.5); ap.add_argument('--eq', action='store_true')
     ap.add_argument('--quality', type=int, default=80)
     a = ap.parse_args()
+    for flag, v in (('--cell', a.cell), ('--angle', a.angle), ('--bright', a.bright), ('--crop-x', a.crop_x)):
+        if not math.isfinite(v):
+            die('%s %r: must be a finite number' % (flag, v))
     for flag, v in (('--ink', a.ink), ('--paper', a.paper)):
         if not is_hex(v) or len(v.lstrip('#')) not in (3, 6):
             die('%s %r is not a hex colour; use #rgb or #rrggbb, e.g. %s "#2a1410"' % (flag, v, flag))

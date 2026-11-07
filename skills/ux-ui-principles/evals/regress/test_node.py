@@ -71,6 +71,12 @@ def has_finding(d, rule, levels=("fail", "flag")):
     return any(f["rule"] == rule and f["level"] in levels for f in d["findings"])
 
 
+def write(p, text):
+    with open(p, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    return p
+
+
 def assets_status():
     return subprocess.run(["git", "-C", SKILL, "status", "--porcelain", "assets/"], capture_output=True, text=True).stdout
 
@@ -184,11 +190,17 @@ def main():
         # 4. build_previews: library --out paths resolve from the skill root, whatever the cwd
         rc, out, err = js("build_previews.js", "--dry-run", cwd=empty, timeout=30)
         outs = [l.split("--out ", 1)[1].split()[0] for l in out.splitlines() if "--out " in l]
-        check("build_previews --dry-run: every --out is absolute under the skill's assets/",
-              rc == 0 and len(outs) == 3 and all(o.startswith(os.path.join(SKILL, "assets") + os.sep) for o in outs) and not os.listdir(empty),
+        check("build_previews --dry-run: every --out (6 sets, directions/backoffice/mobile too) is absolute under the skill's assets/",
+              rc == 0 and len(outs) == 6 and all(o.startswith(os.path.join(SKILL, "assets") + os.sep) for o in outs) and not os.listdir(empty),
               f"rc={rc} {outs} {err[-200:]}")
         src = open(os.path.join(SCRIPTS, "build_previews.js"), encoding="utf-8").read()
         check("build_previews has no cwd-relative 'assets/…' --out", "'--out', 'assets/" not in src)
+        sets = [l.split("--out ", 1)[1].split()[0] for l in out.splitlines() if l.startswith("> node")]
+        order = ["directions/previews", "directions/previews/product", "backoffice/previews", "backoffice/previews", "backoffice/previews/tablet", "backoffice/previews/rtl"]
+        runs = [l for l in out.splitlines() if l.startswith("> node")]
+        check("build_previews --dry-run runs in the documented order (mobile 4th, before tablet/rtl)",
+              [o.split(os.sep + "assets" + os.sep, 1)[-1] for o in sets] == order and len(runs) == 6 and "--mobile" in runs[3],
+              out[-600:])
 
         # _color.js maths (shared by brand.js, compositions.js and the in-page checks)
         code = ("const c=require(%r);console.log(JSON.stringify([c.parse('#abc'),c.parse('#11223380'),c.parse('rgb(10 20 30 / 50%%)'),"
@@ -202,11 +214,82 @@ def main():
               v and v[0] == [170, 187, 204, 1] and v[1][:3] == [17, 34, 51] and abs(v[1][3] - 128 / 255) < 1e-9 and v[2] == [10, 20, 30, 0.5]
               and v[3] == [1, 2, 3, 0.4] and v[4] is None and v[5] == 21 and v[6] == 4.48, r.stdout + r.stderr)
 
+        # script_check: modules compiled as modules (multi-line import/export), root-relative and unquoted src, data-src
+        sc = os.path.join(tmp, "sc"); os.makedirs(os.path.join(sc, "assets")); os.makedirs(os.path.join(sc, "sub"))
+        page = lambda n, body: write(os.path.join(sc, n), f"<!doctype html><html><body>{body}</body></html>")
+        write(os.path.join(sc, "assets", "index.js"), "export const x = 1;\n")
+        page("mod-import.html", '<script type="module">\nimport {\n  a,\n  b\n} from "./x.js";\nconsole.log(a, b);\n</script>')
+        page("mod-export.html", '<script type="module">\nexport function f() {\n  return 1;\n}\nexport default {\n  y: 2\n};\n</script>')
+        page("mod-bad.html", '<script type="module">\nimport {\n  a\n} from "./x.js";\nconst = 1;\n</script>')
+        page("root.html", '<script type="module" src="/assets/index.js"></script>')
+        page("root-missing.html", '<script src="/assets/nope.js"></script>')
+        page("unquoted.html", '<script src=assets/missing.js></script><script data-src="lazy.js"></script>')
+        page("dir.html", '<script src="sub"></script>')
+        for n, want in (("mod-import.html", 0), ("mod-export.html", 0), ("root.html", 0)):
+            rc, out, err = js("script_check.js", os.path.join(sc, n), cwd=empty, timeout=30)
+            check(f"script_check {n}: valid module / root-relative src -> PASS", rc == 0 and out.startswith("PASS"), f"rc={rc} {out[-300:]} {err[-200:]}")
+        rc, out, err = js("script_check.js", os.path.join(sc, "mod-bad.html"), cwd=empty, timeout=30)
+        check("script_check multi-line import + real syntax error in a module -> FAIL syntax error", rc == 1 and "syntax error" in out, f"rc={rc} {out[-300:]}")
+        rc, out, err = js("script_check.js", os.path.join(sc, "root-missing.html"), cwd=empty, timeout=30)
+        check("script_check root-relative src that exists nowhere -> missing-script", rc == 1 and "missing local script /assets/nope.js" in out, f"rc={rc} {out[-300:]}")
+        rc, out, err = js("script_check.js", os.path.join(sc, "unquoted.html"), "--json", cwd=empty, timeout=30)
+        d = jdoc(out)
+        msgs = " ".join(x["message"] for x in (d or {}).get("findings", []))
+        check("script_check unquoted src=assets/missing.js checked, data-src ignored",
+              rc == 1 and d and has_finding(d, "missing-script") and "assets/missing.js" in msgs and "lazy.js" not in msgs, f"rc={rc} {out[-400:]}")
+        rc, out, err = js("script_check.js", os.path.join(sc, "dir.html"), "--json", cwd=empty, timeout=30)
+        d = jdoc(out)
+        check("script_check src that is a folder -> missing-script finding, no crash",
+              rc == 1 and shape_ok(d, "script_check.js", 1) and d["result"] == "FAIL" and has_finding(d, "missing-script") and not traced(err), f"rc={rc} {out[-300:]} {err[-300:]}")
+        # unreadable inputs: one error line, exit 2 / JSON ERROR (skipped when running as root)
+        nr = os.path.join(sc, "noread.html"); write(nr, "<!doctype html><p>x</p>"); os.chmod(nr, 0)
+        if os.access(nr, os.R_OK):
+            report("NOT RUN", "unreadable page -> exit 2 (script_check, render_check)", "running as root: chmod 000 still readable")
+        else:
+            for s_ in ("script_check.js", "render_check.js"):
+                rc, out, err = js(s_, nr, "--json", cwd=empty, timeout=60)
+                d = jdoc(out)
+                check(f"{s_} unreadable page -> exit 2, one error line, JSON ERROR with error",
+                      rc == 2 and err.startswith("error: ") and "cannot read" in err and not traced(err) and shape_ok(d, s_, 2) and d["result"] == "ERROR" and d.get("error"),
+                      f"rc={rc} {out[-300:]} {err[-300:]}")
+        os.chmod(nr, 0o644)
+        # market_fetch --urls: a folder and a non-http(s) URL are usage errors (exit 2), before any browser
+        for name, u in (("a folder", sc), ("an ftp:// line", write(os.path.join(tmp, "ftp.txt"), "x ftp://a.b/\n"))):
+            rc, out, err = js("market_fetch.js", "--kind", "testkind", "--urls", u, cwd=empty, timeout=30)
+            check(f"market_fetch --urls {name} -> exit 2, one error line", rc == 2 and err.startswith("error: ") and not traced(err), f"rc={rc} {err[-300:]}")
+        # _args: "--" ends the options
+        rc, out, err = js("script_check.js", "--", os.path.join(sc, "root.html"), cwd=empty, timeout=30)
+        check("script_check -- page.html: '--' ends the options", rc == 0 and out.startswith("PASS"), f"rc={rc} {out[-200:]} {err[-200:]}")
+        write(os.path.join(sc, "-dash.html"), "<!doctype html><p>x</p>")
+        rc, out, err = js("script_check.js", "--", "-dash.html", cwd=sc, timeout=30)
+        check("script_check -- -dash.html: a file named like an option after '--'", rc == 0 and "-dash.html" in out, f"rc={rc} {out[-200:]} {err[-200:]}")
+        # _color.js: '#' required for hex, empty rgb() items rejected
+        code = ("const c=require(%r);console.log(JSON.stringify([c.parse('bad'),c.parse('cafe'),c.parse('abc'),c.parse('rgb(10,20,30,)'),"
+                "c.parse('rgb(,1,2,3)'),c.parse('#cafe'),c.parse('rgb(10,20,30)')]))") % os.path.join(SCRIPTS, "_color.js")
+        r = subprocess.run([NODE, "-e", code], capture_output=True, text=True)
+        v = jdoc('{"v":' + r.stdout.strip() + '}') if r.stdout.strip() else None
+        v = v and v["v"]
+        check("_color.js: bare 'bad'/'cafe'/'abc' and rgb trailing/leading comma -> null; '#cafe' and rgb() still parse",
+              v and v[:5] == [None] * 5 and v[5][:3] == [204, 170, 255] and v[6] == [10, 20, 30, 1], r.stdout + r.stderr)
+        # flow_check: every step is validated before any browser starts
+        for name, steps in (("fill without value", [{"do": "fill", "sel": "#q"}]), ("select without value", [{"do": "select", "sel": "s"}]),
+                            ("expect text without value", [{"expect": "text", "sel": "h1"}]),
+                            ("wait with non-number value", [{"expect": "visible", "sel": "h1"}, {"do": "wait", "value": "abc"}]),
+                            ("expect attr without attr", [{"expect": "attr", "sel": "h1", "value": "x"}]),
+                            ("press without key", [{"do": "press"}]), ("empty array", [])):
+            sf = write(os.path.join(tmp, "steps-v.json"), json.dumps(steps))
+            rc, out, err = js("flow_check.js", f("page.html"), sf, cwd=empty, timeout=30)
+            n_ = len(steps)
+            check(f"flow_check {name} -> exit 2 naming the step", rc == 2 and err.startswith("error: ") and not traced(err)
+                  and (f"step {n_}" in err if n_ else "no steps" in err), f"rc={rc} {err[-200:]}")
+
         # browser cases
         rc, out, err = js("render_check.js", "--doctor", cwd=empty, timeout=60)
         if rc != 0:
             why = (out.strip().splitlines() or ["no Playwright"])[-1][:80]
-            for n in ("URL target -> temp, cwd stays empty (x3)", "admin_check oklch/oklab/color-mix buttons", "market_fetch skip -> 1, all shot -> 0"):
+            for n in ("URL target -> temp, cwd stays empty (x3)", "admin_check oklch/oklab/color-mix buttons", "market_fetch skip -> 1, all shot -> 0",
+                      "render_check fragment in a read-only folder -> wrapper in temp", "fold_check no second section message",
+                      "render_check --scroll-budget caps the reveal scroll with a NOTE"):
                 report("NOT RUN", n, why)
         else:
             srv, url = serve(work)
@@ -248,6 +331,34 @@ def main():
             d = jdoc(out)
             check("render_check --json unreachable URL -> exit 1, JSON ERROR document with the reason",
                   rc == 1 and shape_ok(d, "render_check.js", 1) and d["result"] == "ERROR" and "could not load" in d.get("error", ""), f"rc={rc} {out[-300:]} {err[-200:]}")
+            # fragment: the doctype wrapper goes to a temp folder (never next to the page); relative assets still load
+            ro = os.path.join(tmp, "ro"); os.makedirs(ro)
+            write(os.path.join(ro, "frag.html"), '<h1>Fragment</h1><p>frag text</p><img src="tiny.jpg" alt="t" width="10" height="10">')
+            shutil.copy(os.path.join(os.path.dirname(FIX), "preview", "tiny.jpg"), ro)
+            os.chmod(ro, 0o555)
+            rc, out, err = js("render_check.js", os.path.join(ro, "frag.html"), "--fast", "--viewport-shots", "--widths", "1440", "--out", os.path.join(tmp, "frag-out"), "--json", cwd=empty)
+            left = sorted(os.listdir(ro)); os.chmod(ro, 0o755)
+            d = jdoc(out)
+            check("render_check fragment in a read-only folder -> wrapper in temp, relative image loads, folder untouched",
+                  rc in (0, 1) and d and d["result"] in ("PASS", "FAIL") and not d.get("error") and has_finding(d, "fragment", ("note",))
+                  and not has_finding(d, "image-broken") and left == ["frag.html", "tiny.jpg"] and not traced(err), f"rc={rc} left={left} {out[-400:]} {err[-300:]}")
+            # fold_check: a page with one section names the missing next section instead of "nullpx"
+            one = write(os.path.join(tmp, "one.html"), '<!doctype html><html lang="en"><body><main><section style="height:300px"><h1>Hi</h1><a class="btn-primary" href="#">Go</a></section></main></body></html>')
+            rc, out, err = js("fold_check.js", one, "--sizes", "1440x900", "--out", os.path.join(tmp, "fold1"), cwd=empty)
+            check("fold_check no second section -> 'no second section found', never 'nullpx'",
+                  rc == 0 and "nullpx" not in out and "no second section found" in out, f"rc={rc} {out[-400:]}")
+            # render_check: the reveal scroll is capped by --scroll-budget and says so
+            long_ = write(os.path.join(tmp, "long.html"), '<!doctype html><html lang="en"><body style="margin:0 40px"><h1>Long</h1><div style="height:30000px"></div><p>end</p></body></html>')
+            import time
+            t0 = time.time()
+            rc, out, err = js("render_check.js", long_, "--widths", "1440", "--schemes", "light", "--viewport-shots", "--scroll-budget", "800",
+                              "--out", os.path.join(tmp, "long-out"), "--json", cwd=empty)
+            took = time.time() - t0
+            d = jdoc(out)
+            check("render_check --scroll-budget 800 on a 30000px page: scroll-budget NOTE, finishes quickly",
+                  rc in (0, 1) and d and has_finding(d, "scroll-budget", ("note",)) and took < 40, f"rc={rc} took={took:.0f}s {out[-300:]} {err[-200:]}")
+            rc, out, err = js("render_check.js", long_, "--scroll-budget", "-1", cwd=empty, timeout=30)
+            check("render_check --scroll-budget -1 -> exit 2", rc == 2 and err.startswith("error: "), f"rc={rc} {err[-200:]}")
             check("browser cases left the cwd empty", not os.listdir(empty), str(os.listdir(empty)))
     finally:
         if srv:

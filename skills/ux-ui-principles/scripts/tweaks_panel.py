@@ -32,6 +32,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from code_extract import css_blocks, is_dark, strip_comments, style_text, to_hex  # noqa: E402
 from _color import best_ink, is_hex, norm_hex, readable  # noqa: E402
+import _net  # noqa: E402
 
 PRESETS = "Rust:#c2410c,Cobalt:#2c4d8e,Sage:#4a7a3f,Plum:#7a3f6a,Rose:#b4405f,Graphite:#3a3a3a"
 
@@ -229,11 +230,14 @@ def main(argv=None):
     v["hasDark"] = bool(vd)
     swatches = [swatch(n, h, light, dark) for n, h in pre]
     panel = PANEL.replace("__VARS__", json.dumps(v)).replace("__PRE__", json.dumps(swatches))
-    i = html.lower().rfind("</body>")
+    # case-insensitive search on the original string: lower() can change its length ('İ' -> 'i̇') and shift the index
+    m = None
+    for m in re.finditer(r"</body\s*>", html, re.I):
+        pass
+    i = m.start() if m else -1
     html = html[:i] + panel + html[i:] if i != -1 else html + panel
     try:
-        with open(out, "w", encoding="utf-8") as f:
-            f.write(html)
+        _net.write_atomic(out, html)
     except OSError as e:
         die("cannot write %s (%s)" % (out, e))
     print("wrote", out)

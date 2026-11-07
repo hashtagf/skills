@@ -125,9 +125,12 @@ def to_hex(value):
         if len(n) < 3:
             return None
         if fn.startswith("rgb"):
-            if "%" in args:
-                n = [x * 2.55 for x in n]
-            return "#%02x%02x%02x" % tuple(round(max(0, min(255, x))) for x in n[:3])
+            # channels and alpha separately: "rgb(100 50 25 / 50%)" has percent alpha, not percent channels
+            ch = [t for t in re.split(r"[\s,]+", args.split("/")[0].strip()) if t][:3]
+            if len(ch) < 3 or any(not nums(t) for t in ch):
+                return None
+            n = [nums(t)[0] * (2.55 if t.endswith("%") else 1) for t in ch]
+            return "#%02x%02x%02x" % tuple(round(max(0, min(255, x))) for x in n)
         if fn.startswith("hsl"):
             return hsl_hex(n[0], n[1], n[2])
         if fn == "oklch":
@@ -138,6 +141,15 @@ def to_hex(value):
     if m:
         return hsl_hex(float(m.group(1)), float(m.group(2)), float(m.group(3)))
     return None
+
+
+# "#add" in href="#add", id="#cafe", url(#bad), querySelector("#bad") or a CSS id selector "#cafe {" is a name, not a colour
+_NOT_COLOR_BEFORE = re.compile(r"(?:\b(?:href|xlink:href|src|action|to|id|for|name|target|data-target|aria-controls)\s*=\s*[\"']?"
+                               r"|\burl\(\s*[\"']?|\b(?:querySelector(?:All)?|getElementById|closest|\$)\(\s*[\"'])$", re.I)
+
+
+def not_a_color(text, m):
+    return bool(_NOT_COLOR_BEFORE.search(text[max(0, m.start() - 40):m.start()])) or bool(re.match(r"\s*\{", text[m.end():m.end() + 20]))
 
 
 def chroma(h):
@@ -209,7 +221,10 @@ def detect_stack(src):
     for pj in package_jsons(src):
         try:
             p = json.load(open(pj))
-            deps = {**p.get("dependencies", {}), **p.get("devDependencies", {})}
+            p = p if isinstance(p, dict) else {}  # a package.json that is [] or has "dependencies": null counts as empty
+            deps = {}
+            for k in ("dependencies", "devDependencies"):
+                deps.update({n: str(v) for n, v in (p.get(k) or {}).items()} if isinstance(p.get(k), dict) else {})
             for key, label in [("expo", "Expo"), ("react-native", "React Native"), ("next", "Next.js"), ("nuxt", "Nuxt"), ("react", "React"), ("vue", "Vue"), ("svelte", "Svelte"),
                                ("@angular/core", "Angular"), ("astro", "Astro"), ("tailwindcss", "Tailwind"),
                                ("@mui/material", "MUI"), ("@chakra-ui/react", "Chakra"), ("antd", "Ant Design"),
@@ -270,7 +285,7 @@ def scan(src):
         rel = os.path.relpath(path, src)
         is_style = ext in STYLE_EXT
         # color literals
-        found = [norm_hex(m.group(0)) for m in HEX_RE.finditer(text)]
+        found = [norm_hex(m.group(0)) for m in HEX_RE.finditer(text) if not not_a_color(text, m)]
         for m in FN_RE.finditer(text):
             h = to_hex(m.group(0))
             if h:

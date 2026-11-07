@@ -15,7 +15,8 @@
  * The default --out is the skill's assets/market/img (resolved from the skill root, whatever the current
  * directory); a given --out is resolved against the current directory.
  * Exit 0 when every site was shot; 1 when any was skipped (WARN skip lines: refused, unreachable, timed out twice);
- * 2 for a usage error (no --kind, unknown study, --only slug not in the study: the valid slugs are listed);
+ * 2 for a usage error (no --kind, unknown study, --only slug not in the study: the valid slugs are listed; an --urls
+ * file that is missing, a folder or unreadable, or a line without an http(s) URL);
  * 3 when Playwright or a browser is missing (NOT RUN). Setup: see render_check.js --doctor; nothing is downloaded.
  */
 const fs = require('fs');
@@ -37,9 +38,12 @@ let sites;
 if (a.has('--urls')) {
   const f = a.get('--urls');
   if (!fs.existsSync(f)) A.usageError(`--urls file not found: ${path.resolve(f)}`, 'one "slug url TH|intl" per line');
-  sites = fs.readFileSync(f, 'utf8').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'))
+  if (!fs.statSync(f).isFile()) A.usageError(`--urls ${path.resolve(f)} is not a file`, 'one "slug url TH|intl" per line');
+  let text;
+  try { text = fs.readFileSync(f, 'utf8'); } catch (e) { A.usageError(`cannot read --urls ${path.resolve(f)}: ${e.code || e.message.split('\n')[0]}`, 'check the file permissions'); }
+  sites = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'))
     .map(l => { const [slug, url, region] = l.split(/\s+/); return { slug, url, region: region || '?' }; });
-  const bad = sites.filter(s => !s.slug || !A.isUrl(s.url));
+  const bad = sites.filter(s => !s.slug || !/^https?:\/\/[^\s/]/i.test(s.url || ''));
   if (bad.length) A.usageError(`--urls line for ${JSON.stringify(bad[0].slug || '')} has no http(s) URL`, 'one "slug url TH|intl" per line');
 } else {
   const k = (catalog.kinds || {})[kind];

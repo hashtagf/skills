@@ -314,11 +314,243 @@ def test_recipe():
           rc == 2 and not os.path.exists(os.path.join(SKILL, "DESIGN.md")), f"rc={rc} {err}")
 
 
+# 9. bug hunt: one case (or more) per fixed bug, temp fixtures only
+def run_in(code, *a, env=None):
+    """Run a few lines of Python with the scripts folder importable (stubs: look.ROOT, photo_search.get ...)."""
+    r = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, %r)\n%s" % (SCRIPTS, code), *a], capture_output=True,
+                       text=True, cwd=TMP, env=dict(env or os.environ, PYTHONDONTWRITEBYTECODE="1"), timeout=120)
+    return r.returncode, r.stdout, r.stderr
+
+
+def look_at(root, *a):
+    return run_in("import look; look.ROOT = sys.argv[1]; sys.exit(look.main(sys.argv[2:]))", root, *a)
+
+
+def wfile(p, text):
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(text)
+    return p
+
+
+def mobbin_root(name, apps, pictures=True):
+    """A temp library root with only a Mobbin catalog (and, with pictures, a 1-byte file per screen)."""
+    root = os.path.join(TMP, name)
+    cat = {"apps": [{"slug": s, "name": s.title(), "verdict": v, "tags": t, "note": "n", "url": "https://mobbin.com/" + s,
+                     "screens": [{"img": "img/%s-1.jpg" % s, "kind": "product"}]} for s, v, t in apps]}
+    wfile(os.path.join(root, "assets", "mobbin", "catalog.json"), json.dumps(cat))
+    if pictures:
+        for s, _, _ in apps:
+            wfile(os.path.join(root, "assets", "mobbin", "img", "%s-1.jpg" % s), "x")
+    return root
+
+
+def look_error(name, root, *a):
+    rc, out, err = look_at(root, *a)
+    check(name, rc == 2 and "Traceback" not in out + err and err.strip().startswith("error:") and "catalog.json" in err,
+          f"rc={rc} {(out + err)[-300:]}")
+
+
+PHOTO_STUB = """import json, photo_search as p
+titles = json.loads(sys.argv[2])
+p.commons = lambda q, n, m: [{"title": t, "artist": "a", "license": "CC0", "w": 1, "h": 1, "source": "commons",
+                              "page": "page-%d" % i, "img": "https://x/%d" % i} for i, t in enumerate(titles)]
+p.get = lambda u: b"\\xff\\xd8\\xff" + b"x" * 10
+sys.exit(p.main(["q", "--source", "commons", "--download", sys.argv[1]]))
+"""
+
+
+def test_bugfixes():
+    try:
+        import PIL  # noqa: F401
+        have_pil = True
+    except ImportError:
+        have_pil = False
+    # bug 1: corrupt catalog.json -> one error line naming the file, exit 2; a missing catalog is still fine
+    for label, text in (("'{bad'", "{bad"), ("'{}'", "{}"), ("'[]'", "[]"), ("empty", "")):
+        root = os.path.join(TMP, "cat-" + str(len(label)) + label.strip("'{}[]") )
+        wfile(os.path.join(root, "assets", "mobbin", "catalog.json"), text)
+        look_error(f"bug1 look.py with a {label} mobbin catalog.json: error naming the file, exit 2", root, "landing")
+        root2 = root + "-sc"
+        wfile(os.path.join(root2, "assets", "showcase", "catalog.json"), text if text != "[]" else '{"x": 1}')
+        look_error(f"bug1 look.py with a {label if text != '[]' else 'dict'} showcase catalog.json: error naming the file, exit 2", root2, "landing")
+    root = os.path.join(TMP, "cat-market")
+    wfile(os.path.join(root, "assets", "market", "catalog.json"), "[]")
+    look_error("bug1 look.py with a '[]' market catalog.json: error naming the file, exit 2", root, "landing")
+    rc, out, err = look_at(os.path.join(TMP, "cat-none"), "--kinds")
+    check("bug1 look.py with no catalogs at all: --kinds exit 0", rc == 0 and "Traceback" not in err, f"rc={rc} {err[-200:]}")
+    # bug 10: one pool across tag targets (chat + ai-chat): templates before the study
+    root = mobbin_root("lib-chat", [("telegram", "study", ["chat"]), ("v0", "template", ["ai-chat"]), ("mistral", "template", ["ai-chat"])])
+    rc, out, err = look_at(root, "chat", "--n", "2")
+    apps = re.findall(r"^    from: ([^,]+), screen", out, re.M)
+    check("bug10 look.py chat --n 2: templates (v0, mistral) before the study (telegram) across tags",
+          rc == 0 and apps[:2] == ["V0", "Mistral"] and "Telegram" in apps[2:], f"rc={rc} {apps} {err[-200:]}")
+    # bug 11: "ai chat" -> ai-chat, also for tags and kinds
+    rc, out, err = look_at(root, "ai chat")
+    check("bug11 look.py \"ai chat\" finds the ai-chat tag (space -> dash for tags too)", rc == 0 and "from: V0" in out, f"rc={rc} {err[-200:]}")
+    # bug 12: the fetch hint without pictures (tag known from the catalog) and with no catalogs at all
+    root = mobbin_root("lib-nopix", [("twenty", "template", ["crm"])], pictures=False)
+    rc, out, err = look_at(root, "crm")
+    check("bug12 look.py crm, catalog but no pictures: exit 2 with 'pictures not fetched' and mobbin_fetch.py",
+          rc == 2 and "pictures not fetched" in err and "mobbin_fetch.py" in err, f"rc={rc} {err[-300:]}")
+    rc, out, err = look_at(os.path.join(TMP, "cat-none"), "crm")
+    check("bug12 look.py crm with no catalogs fetched: exit 2 with the fetch hint",
+          rc == 2 and "pictures not fetched" in err and "fetch.py" in err, f"rc={rc} {err[-300:]}")
+    # bug 18: --direction validated before anything is printed
+    rc, out, err = py("look.py", "landing", "--direction", "nope")
+    check("bug18 look.py --direction nope: exit 2, nothing on stdout", rc == 2 and out == "" and "unknown direction" in err, f"rc={rc} {out[:200]}")
+
+    # bug 2 / 3: mobbin_fetch input validation (never the real assets: --out and --urls are temp paths)
+    mout = os.path.join(TMP, "mb", "out")
+    def urls(name, data):
+        return wfile(os.path.join(TMP, "mb", name), data if isinstance(data, str) else json.dumps(data))
+    good = urls("good.json", {"a": ["http://127.0.0.1:9/a.jpg"]})
+    usage_error("bug2 mobbin_fetch urls.json '[]'", "mobbin_fetch.py", "--urls", urls("list.json", "[]"), "--out", mout)
+    usage_error("bug2 mobbin_fetch --urls a folder", "mobbin_fetch.py", "--urls", os.path.join(TMP, "mb"), "--out", mout)
+    usage_error("bug2 mobbin_fetch --delay nan", "mobbin_fetch.py", "--urls", good, "--out", mout, "--delay", "nan")
+    usage_error("bug3 mobbin_fetch slug '../../escaped'", "mobbin_fetch.py", "--urls", urls("esc.json", {"../../escaped": ["http://127.0.0.1:9/a.jpg"]}), "--out", mout)
+    check("bug3 mobbin_fetch: nothing written outside --out", not os.path.exists(os.path.join(TMP, "escaped-1.jpg")) and not os.path.exists(mout))
+    usage_error("bug3 mobbin_fetch a string instead of a list", "mobbin_fetch.py", "--urls", urls("str.json", {"a": "http://127.0.0.1:9/a.jpg"}), "--out", mout)
+    usage_error("bug3 mobbin_fetch a non-http URL", "mobbin_fetch.py", "--urls", urls("ftp.json", {"a": ["ftp://x/a.jpg"]}), "--out", mout)
+    if have_pil:
+        usage_error("bug2 mobbin_fetch --out an existing file", "mobbin_fetch.py", "--urls", good, "--out", good)
+        ro = os.path.join(TMP, "mb", "ro")
+        os.makedirs(ro)
+        os.chmod(ro, 0o555)
+        if os.access(ro, os.W_OK):
+            report("NOT RUN", "bug2 mobbin_fetch read-only --out", "running as root")
+        else:
+            usage_error("bug2 mobbin_fetch read-only --out", "mobbin_fetch.py", "--urls", good, "--out", ro)
+        os.chmod(ro, 0o755)
+    else:
+        report("NOT RUN", "bug2 mobbin_fetch --out a file / read-only", "no Pillow")
+
+    # bug 4 / 5 / 16 / 17 / 19: design_md
+    usage_error("bug4 design_md interview energy: [\"calm\"]", "design_md.py", "cobalt", "--interview", wfile(os.path.join(TMP, "iv-energy.json"), '{"energy": ["calm"]}'), "--out", "x4")
+    usage_error("bug4 design_md interview brand: {}", "design_md.py", "cobalt", "--interview", wfile(os.path.join(TMP, "iv-brand.json"), '{"brand": {}}'), "--out", "x4")
+    ivok = os.path.join(FIX, "iv_strings.json")
+    afile = wfile(os.path.join(TMP, "afile"), "x")
+    usage_error("bug5 design_md --out an existing file", "design_md.py", "cobalt", "--interview", ivok, "--out", afile)
+    rod = os.path.join(TMP, "ro-out")
+    os.makedirs(rod)
+    os.chmod(rod, 0o555)
+    if not os.access(rod, os.W_OK):
+        usage_error("bug5 design_md read-only --out", "design_md.py", "cobalt", "--interview", ivok, "--out", rod)
+    else:
+        report("NOT RUN", "bug5 design_md read-only --out", "running as root")
+    os.chmod(rod, 0o755)
+    os.makedirs(os.path.join(TMP, "dirmd", "DESIGN.md"))
+    usage_error("bug5 design_md DESIGN.md is a folder + --force", "design_md.py", "cobalt", "--interview", ivok, "--out", os.path.join(TMP, "dirmd"), "--force")
+    o = os.path.join(TMP, "null-brand")
+    rc, out, err = py("design_md.py", "cobalt", "--interview", wfile(os.path.join(TMP, "iv-null.json"), '{"brand": null, "goal": null}'), "--out", o)
+    md = open(os.path.join(o, "DESIGN.md"), encoding="utf-8").read() if rc == 0 else ""
+    check("bug16 design_md \"brand\": null uses the direction name, never \"None\"",
+          rc == 0 and front(md, "name") == "Cobalt" and "None" not in md, f"rc={rc} {front(md, 'name')} {err[-200:]}")
+    um = os.umask(0o022)
+    os.umask(um)
+    want_mode = 0o666 & ~um
+    mode = os.stat(os.path.join(o, "DESIGN.md")).st_mode & 0o777 if rc == 0 else None
+    check("bug19 design_md: DESIGN.md gets normal permissions (0666 & ~umask), not 0600", mode == want_mode, oct(mode or 0))
+    rc, out, err = py("design_md.py", "cobalt", "--interview", ivok, "--out", os.path.join(TMP, "wired"), "--wire")
+    ag = os.path.join(TMP, "wired", "AGENTS.md")
+    check("bug19 design_md --wire: AGENTS.md written (atomic, normal mode)",
+          rc == 0 and "design-md:start" in open(ag, encoding="utf-8").read() and os.stat(ag).st_mode & 0o777 == want_mode, f"rc={rc} {err[-200:]}")
+    for script, a in (("design_md.py", ()), ("direction_recipe.py", ()), ("export_tokens.py", ()), ("icons.py", ()), ("photo_search.py", ())):
+        rc, out, err = py(script, *a)
+        check(f"bug17 {script} without required args: one 'error: ... (run with --help)' line on stderr, nothing on stdout, exit 2",
+              rc == 2 and out == "" and err.strip().startswith("error:") and "--help" in err and len(err.strip().splitlines()) == 1,
+              f"rc={rc} out={out[:80]!r} err={err[-200:]!r}")
+        rc, out, err = py(script, "--help")
+        check(f"bug17 {script} --help still prints the full help (exit 0)", rc == 0 and "Usage" in out and len(out.splitlines()) > 8, f"rc={rc}")
+
+    # bug 19: _net.write_atomic and the other writers: normal mode, temp file + os.replace
+    p = os.path.join(TMP, "wa", "f.txt")
+    _net.write_atomic(p, "x")
+    check("bug19 _net.write_atomic: file mode 0666 & ~umask (not 0600)", os.stat(p).st_mode & 0o777 == want_mode, oct(os.stat(p).st_mode & 0o777))
+    rc, out, err = py("export_tokens.py", "cobalt", "--out", "tok")
+    rc2, out2, err2 = py("direction_recipe.py", "coral", "--out", "rec.md")
+    shutil.copy(os.path.join(FIX, "tweaks-page.html"), os.path.join(TMP, "twm.html"))
+    rc3, out3, err3 = py("tweaks_panel.py", "twm.html", "--out", "twm-out.html")
+    modes = [os.stat(os.path.join(TMP, f)).st_mode & 0o777 for f in ("tok/tokens.css", "rec.md", "twm-out.html") if os.path.exists(os.path.join(TMP, f))]
+    plain = [s for s in ("export_tokens.py", "direction_recipe.py", "tweaks_panel.py", "design_md.py")
+             if re.search(r"\bopen\([^)]*[\"']w[\"']", open(os.path.join(SCRIPTS, s), encoding="utf-8").read())]
+    check("bug19 export_tokens / direction_recipe / tweaks_panel write atomically with normal modes (no plain open(..., 'w'))",
+          (rc, rc2, rc3) == (0, 0, 0) and modes == [want_mode] * 3 and not plain, f"{(rc, rc2, rc3)} {[oct(m) for m in modes]} {plain}")
+
+    # bug 6: package.json [] / dependencies null
+    for label, pj in (("[]", "[]"), ("dependencies null", '{"dependencies": null, "devDependencies": ["x"]}')):
+        src = os.path.join(TMP, "pj-" + label.replace(" ", "-").strip("[]") + "x")
+        wfile(os.path.join(src, "package.json"), pj)
+        wfile(os.path.join(src, "a.css"), ":root{--bg:#ffffff}")
+        rc, out, err = py("code_extract.py", src, "--json")
+        check(f"bug6 code_extract package.json {label}: treated as empty, exit 0", rc == 0 and "Traceback" not in err, f"rc={rc} {err[-200:]}")
+        rc, out, err = py("design_md.py", "--from-code", src, "--out", os.path.join(src, "o"))
+        check(f"bug6 design_md --from-code package.json {label}: exit 0", rc == 0 and "Traceback" not in err, f"rc={rc} {err[-200:]}")
+    # bug 13: rgb() alpha percent
+    import code_extract
+    check("bug13 code_extract rgb(100 50 25 / 50%) -> #643219 (alpha % is not a channel %)",
+          code_extract.to_hex("rgb(100 50 25 / 50%)") == "#643219" and code_extract.to_hex("rgb(100%, 0%, 0%)") == "#ff0000"
+          and code_extract.to_hex("rgba(255, 0, 0, 50%)") == "#ff0000", code_extract.to_hex("rgb(100 50 25 / 50%)"))
+    # bug 14: anchors / ids are not colours
+    src = os.path.join(TMP, "anchors")
+    wfile(os.path.join(src, "index.html"), '<style>#cafe { color: #123456 }</style><a href="#add">x</a><a id="#bad">y</a>'
+          '<svg><rect fill="url(#cafe)"/></svg><script>document.querySelector("#bad")</script>')
+    rc, out, err = py("code_extract.py", src, "--json")
+    cols = set(json.loads(out).get("colors", {})) if rc == 0 else None
+    check("bug14 code_extract: #add / #bad / #cafe in href, id, url(), selectors are not colours", cols == {"#123456"}, cols)
+    # bug 7: halftone non-finite numbers
+    jpg = os.path.join(HERE, "preview", "tiny.jpg")
+    for flag, v in (("--bright", "nan"), ("--angle", "inf"), ("--angle", "nan"), ("--cell", "nan")):
+        usage_error(f"bug7 halftone {flag} {v}", "halftone.py", jpg, "o7.jpg", flag, v)
+    # bug 8 / 9: photo_search download names and credits (stubbed search and download, no network)
+    d8 = os.path.join(TMP, "ph8")
+    wfile(os.path.join(d8, "credits.json"), "[]")
+    rc, out, err = run_in(PHOTO_STUB, d8, json.dumps(["a"]))
+    check("bug8 photo_search credits.json [] : exit 2, error line, credits left as they were, nothing downloaded",
+          rc == 2 and err.strip().startswith("error:") and open(os.path.join(d8, "credits.json")).read() == "[]"
+          and os.listdir(d8) == ["credits.json"], f"rc={rc} {err[-200:]} {os.listdir(d8)}")
+    d9 = os.path.join(TMP, "ph9")
+    titles = ["วัดพระแก้ว", "ร้านกาแฟ", "Shop front.JPG", "Shop front.jpg", "!!!"]
+    rc, out, err = run_in(PHOTO_STUB, d9, json.dumps(titles, ensure_ascii=False))
+    files = sorted(os.listdir(d9)) if os.path.isdir(d9) else []
+    cred = json.load(open(os.path.join(d9, "credits.json"), encoding="utf-8")) if "credits.json" in files else {}
+    check("bug9 photo_search default names: Thai kept, extension dropped, collisions de-duplicated, never empty",
+          rc == 0 and len(cred) == 5 and "" not in cred and ".jpg" not in files and "วัดพระแก้ว" in cred and "ร้านกาแฟ" in cred
+          and "shop-front" in cred and "shop-front-2" in cred and any(k.startswith("photo-") for k in cred)
+          and len([f for f in files if f.endswith(".jpg")]) == 5, f"rc={rc} {files} {err[-200:]}")
+    rc, out, err = run_in(PHOTO_STUB, d9, json.dumps(["ร้านกาแฟ-new"], ensure_ascii=False))
+    check("bug9 photo_search rerun: an existing photo's name is not overwritten by another photo",
+          json.load(open(os.path.join(d9, "credits.json"), encoding="utf-8"))["ร้านกาแฟ"]["page"] == "page-1", err[-200:])
+    # bug 15: 'İ' before </body> (lower() lengthens the string)
+    page = wfile(os.path.join(TMP, "dotted.html"), "<html><head><style>:root{--accent:#c2410c}</style></head><body><p>" + "İ" * 40 + "</p></body></html>\n")
+    rc, out, err = py("tweaks_panel.py", page, "--out", "dotted-out.html")
+    html = open(os.path.join(TMP, "dotted-out.html"), encoding="utf-8").read() if rc == 0 else ""
+    check("bug15 tweaks_panel with 'İ' in the page: panel inserted right before </body>, </html> intact",
+          rc == 0 and html.rstrip().endswith("</body></html>") and 'id="tw"' in html and html.index('id="tw"') > html.index("İ" * 40), f"rc={rc} {html[-120:]!r}")
+    # bug 16: export_tokens --json "display": null
+    tj = json.load(open(os.path.join(FIX, "tokens_alpha.json"), encoding="utf-8"))
+    tj = tj["directions"][0] if isinstance(tj, dict) and "directions" in tj else tj
+    tj.update(display=None, body=None)
+    rc, out, err = py("export_tokens.py", "--json", wfile(os.path.join(TMP, "tok-null.json"), json.dumps(tj)))
+    check("bug16 export_tokens --json \"display\": null uses the default face, never \"None\"",
+          rc in (0, 1) and "None" not in out and '--font-display: "Inter"' in out, f"rc={rc} {re.findall(r'--font-display:[^;]*', out)} {err[-200:]}")
+    # bug 20: lucide names are case-insensitive (cache seeded in a temp TMPDIR, no network)
+    tdir = os.path.join(TMP, "icons20") + "/"
+    cache = os.path.join(tdir, "ux-ui-icons-cache")
+    wfile(os.path.join(cache, "lucide-9.9.9-tags.json"), '{"calendar": ["date"], "calendar-check": ["date"]}')
+    for n in ("calendar", "calendar-check"):
+        wfile(os.path.join(cache, "lucide-9.9.9-%s.svg" % n), '<svg xmlns="http://www.w3.org/2000/svg"><rect width="1"/></svg>')
+    r = subprocess.run([sys.executable, os.path.join(SCRIPTS, "icons.py"), "lucide", "Calendar", "CalendarCheck", "--lucide-version", "9.9.9"],
+                       capture_output=True, text=True, cwd=TMP, env=dict(os.environ, TMPDIR=tdir), timeout=60)
+    check("bug20 icons.py lucide Calendar CalendarCheck -> calendar, calendar-check (case normalised)",
+          r.returncode == 0 and 'data-lucide="calendar"' in r.stdout and 'data-lucide="calendar-check"' in r.stdout, f"rc={r.returncode} {r.stdout[-200:]}")
+
+
 def main():
     global TMP
     TMP = tempfile.mkdtemp(prefix="ux-ui-test-py-tools-")
     try:
-        for t in (test_net, test_color, test_usage, test_export, test_look, test_tweaks, test_code_extract, test_recipe):
+        for t in (test_net, test_color, test_usage, test_export, test_look, test_tweaks, test_code_extract, test_recipe, test_bugfixes):
             try:
                 t()
             except Exception as e:  # a crash in one group is a FAIL, the others still run

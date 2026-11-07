@@ -24,7 +24,9 @@
  *
  * Prints PASS/FAIL per step, then any page errors and console errors. Exit 1 on any failure or error,
  * 3 when no browser is available (NOT RUN). A missing page or steps file, malformed JSON, a steps file that is
- * not an array or a step with no known "do"/"expect" prints "error: …" and exits 2 before any browser starts.
+ * not an array, an empty array, a step with no known "do"/"expect" or a step missing a field it needs (sel; value for
+ * fill / select / press / expect text / expect attr; attr for expect attr; a number for wait) prints "error: …"
+ * naming the step and exits 2 before any browser starts.
  * --json: one JSON document on stdout (README "Script contract"), log lines on stderr, same exit codes; findings
  * step / page-errors / console-errors (fail); "steps" lists each step's result.
  */
@@ -40,11 +42,21 @@ let steps;
 try { steps = JSON.parse(fs.readFileSync(stepsFile, 'utf8')); }
 catch (e) { A.usageError(`${stepsFile} is not valid JSON: ${e.message.split('\n')[0]}`, 'fix the steps file'); }
 if (!Array.isArray(steps)) A.usageError(`${stepsFile} must hold a JSON array of steps, got ${steps === null ? 'null' : typeof steps}`, 'wrap the steps in [ … ]');
+if (!steps.length) A.usageError(`${stepsFile} holds no steps`, 'add at least one {"do": …} or {"expect": …} step');
 const DO = ['click', 'fill', 'check', 'uncheck', 'select', 'press', 'wait'], EXPECT = ['text', 'visible', 'hidden', 'disabled', 'enabled', 'attr'];
 steps.forEach((s, i) => {
   if (!s || typeof s !== 'object' || Array.isArray(s)) A.usageError(`step ${i + 1} is not an object`, 'each step is {"do": …} or {"expect": …}');
   if (!(DO.includes(s.do) || EXPECT.includes(s.expect))) A.usageError(`step ${i + 1} has no known "do" (${DO.join('|')}) or "expect" (${EXPECT.join('|')})`, 'see --help');
   if (s.do !== 'wait' && s.do !== 'press' && typeof s.sel !== 'string') A.usageError(`step ${i + 1} needs "sel"`, 'a CSS selector or "text=…"');
+  if (s.do === 'press' && s.sel != null && typeof s.sel !== 'string') A.usageError(`step ${i + 1} (press) "sel" must be a string`, 'a CSS selector or leave it out');
+  const scalar = (v) => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
+  const what = s.do || `expect ${s.expect}`;
+  if (['fill', 'select'].includes(s.do) || ['text', 'attr'].includes(s.expect)) {
+    if (!scalar(s.value)) A.usageError(`step ${i + 1} (${what}) needs a "value"`, s.do ? 'the text or option value to use' : 'the text or attribute value to expect');
+  }
+  if (s.do === 'press' && (typeof s.value !== 'string' || !s.value)) A.usageError(`step ${i + 1} (press) needs a "value" key`, 'e.g. "Escape" or "Enter"');
+  if (s.do === 'wait' && s.value != null && !(s.value !== '' && Number.isFinite(Number(s.value)) && Number(s.value) >= 0)) A.usageError(`step ${i + 1} (wait) "value" ${JSON.stringify(s.value)} is not a number of milliseconds`, 'e.g. "value": 500');
+  if (s.expect === 'attr' && (typeof s.attr !== 'string' || !s.attr)) A.usageError(`step ${i + 1} (expect attr) needs "attr"`, 'the attribute name, e.g. "aria-expanded"');
 });
 const W = a.num('--width', 1440, { min: 100, int: true }), H = a.num('--height', 900, { min: 100, int: true });
 const wait = a.num('--wait', 600, { min: 0 }), timeout = a.num('--timeout', 30000, { min: 1 });
@@ -73,7 +85,7 @@ A.main(async () => {
       else if (s.do === 'uncheck') await page.uncheck(s.sel, { ...T, force: true });
       else if (s.do === 'select') await page.selectOption(s.sel, String(s.value), T);
       else if (s.do === 'press') { if (s.sel) await page.press(s.sel, s.value, T); else await page.keyboard.press(s.value); }
-      else if (s.do === 'wait') await page.waitForTimeout(Number(s.value || 300));
+      else if (s.do === 'wait') await page.waitForTimeout(s.value == null ? 300 : Number(s.value));
       else if (s.expect === 'text') {
         const got = norm(await page.textContent(s.sel, T));
         if (!got.includes(norm(String(s.value)))) throw new Error(`text is "${got.slice(0, 80)}"`);
