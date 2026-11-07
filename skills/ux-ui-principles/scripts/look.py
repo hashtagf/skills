@@ -5,8 +5,8 @@ Usage:
   python3 scripts/look.py <kind> [--direction <id>] [--n 3]
   python3 scripts/look.py --kinds
 
-Prints absolute paths of real designed pages of that kind (assets/references, plus the showcase study set when
-it has been fetched locally), what to take from each, and, with --direction, that direction's preview, its
+Prints absolute paths of pictures of that kind from the skill's template library (scripts/_library.py, assets/LIBRARY.md:
+every collection read as one row shape; local study sets count once their pictures are fetched), what to take from each, and, with --direction, that direction's preview, its
 product UI preview and its composition. Open (Read) every listed image before writing code; then say in the
 answer which ones you looked at and the one move you are taking from them.
 
@@ -17,8 +17,14 @@ blog/article/magazine -> editorial, slides/presentation -> deck, app -> mobile, 
 -> cafe + landing, hotel/restaurant/travel -> destination + landing, waitlist -> landing. Thai words work too:
 คาเฟ่/ร้านกาแฟ/เบเกอรี่, แลนดิ้ง/หน้าแรก, แดชบอร์ด/หลังบ้าน, สไลด์/พรีเซนต์, พอร์ต, โรงแรม/ร้านอาหาร/ท่องเที่ยว,
 รายงาน, ราคา, บทความ, แอป, ปก, เอกสาร.
-document, invoice and resume have no pictures yet: the script says so and shows the nearest kinds (report,
-cover). Exit 0 with pictures or a market study, 2 for an unknown kind, direction or bad flag.
+document, invoice and resume list the document studies (an invoice, a résumé, a guide) first, then report and cover;
+a word with no pictures of its own says so and shows the nearest kinds. Exit 0 with pictures or a market study, 2 for an unknown kind, direction or bad flag.
+
+Order: templates before studies, committed pictures before local study sets, one picture per app. A tag (crm,
+finance, ai-chat, canvas, builder, editor, inbox, marketplace, dev ...; --kinds lists them) lists rows with that tag.
+Synonyms: login/signup/sign-in -> auth, chat/chatbot -> ai-chat, การเงิน -> finance, ล็อกอิน/สมัคร -> auth.
+Every row prints kind, composition, verdict, what it is (our build, designed page, real product screen), take, and a
+"from:" credit line.
 
 Market studies (assets/market/catalog.json): when the kind or a synonym has a study (clinic: dental, dentist,
 medical, ทันตกรรม ...), it also prints the category look, the gaps, checked facts and the screenshots of
@@ -26,6 +32,8 @@ design-led and category sites. No study yet: run the market research in design-d
 Standard library only.
 """
 import argparse, json, os, re, sys
+
+import _library
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -47,43 +55,22 @@ SYN = {
     "รายงาน": ["report"], "ราคา": ["pricing"], "แพ็กเกจ": ["pricing"], "บทความ": ["editorial"], "บล็อก": ["editorial"],
     "แอป": ["mobile", "product"], "ปก": ["cover"], "เอกสาร": ["report", "cover"], "ใบแจ้งหนี้": ["report", "cover"],
     "เรซูเม่": ["report", "cover"],
+    "login": ["auth"], "signup": ["auth"], "sign-up": ["auth"], "sign-in": ["auth"], "signin": ["auth"],
+    "chat": ["ai-chat"], "chatbot": ["ai-chat"], "ล็อกอิน": ["auth"], "สมัคร": ["auth"], "สมัครสมาชิก": ["auth"],
+    "การเงิน": ["finance"], "แชท": ["ai-chat"],
 }
 # words with no pictures of their own yet: say so and show the nearest kinds
-NO_PICTURES = {"document": "document", "invoice": "invoice", "resume": "resume", "เอกสาร": "document",
-               "ใบแจ้งหนี้": "invoice", "เรซูเม่": "resume"}
-SYN.update({"invoice": ["report", "cover"], "resume": ["report", "cover"]})
+NO_PICTURES = {"document": "document", "invoice": "document", "resume": "document", "เอกสาร": "document",
+               "ใบแจ้งหนี้": "document", "เรซูเม่": "document"}
+SYN.update({"invoice": ["document", "report", "cover"], "resume": ["document", "report", "cover"],
+            "ใบแจ้งหนี้": ["document", "report", "cover"], "เรซูเม่": ["document", "report", "cover"],
+            "เอกสาร": ["document", "report", "cover"]})
 
 
 class Parser(argparse.ArgumentParser):
     def error(self, message):
         sys.stderr.write("error: %s (run with --help)\n" % message)
         sys.exit(2)
-
-
-def references():
-    rows, readme = [], os.path.join(ROOT, "assets", "references", "README.md")
-    for line in open(readme, encoding="utf-8"):
-        m = re.match(r"\|\s*`([^`]+)`\s*\|\s*([^|]+?)\s*\|\s*(c\d+)\s*\|\s*(.+?)\s*\|\s*$", line)
-        if m:
-            name, kind, comp, why = m.groups()
-            rows.append({"kind": kind, "comp": comp, "why": why, "src": "reference",
-                         "img": os.path.join(ROOT, "assets", "references", name + ".jpg"),
-                         "full": os.path.join(ROOT, "assets", "references", name + "-full.jpg")})
-    return rows
-
-
-def showcase():
-    p = os.path.join(ROOT, "assets", "showcase", "catalog.json")
-    if not os.path.exists(p):
-        return []
-    out = []
-    for r in json.load(open(p, encoding="utf-8")):
-        if r.get("verdict") != "template" or not r.get("img"):
-            continue
-        img = os.path.join(ROOT, "assets", "showcase", r["img"])
-        out.append({"kind": r["kind"], "comp": r.get("comp") or "", "why": r["note"], "src": "showcase " + r["url"], "img": img,
-                    "full": os.path.join(ROOT, "assets", "showcase", r["img_full"]) if r.get("img_full") else ""})
-    return out
 
 
 def market(want):
@@ -118,6 +105,19 @@ def print_market(kind, k, n):
         print(f"  pictures missing: node scripts/market_fetch.js --kind {kind}")
 
 
+def rank(r):
+    """Templates before studies; committed pictures before local study sets; then collection order."""
+    return (r["verdict"] != "template", r["local"], list(_library.COLLECTIONS).index(r["collection"]))
+
+
+def one_per_app(pool, picked):
+    seen, out = {r["app"] for r in picked}, []
+    for r in pool:
+        if r["app"] not in seen:
+            seen.add(r["app"]); out.append(r)
+    return out
+
+
 def main(argv=None):
     ap = Parser(prog="look.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("kind", nargs="*", help="kind of page or a synonym (one or more words)")
@@ -127,34 +127,47 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.n < 1:
         ap.error("--n must be 1 or more")
-    rows = references() + showcase()
+    rows = _library.load(ROOT)
     kinds = sorted({r["kind"] for r in rows})
+    tags = _library.tags(rows)
     if a.kinds or not a.kind:
-        print("kinds:", ", ".join(kinds)); print("synonyms:", ", ".join(sorted(SYN))); return 0
+        print("kinds:", ", ".join(kinds)); print("tags:", ", ".join(tags))
+        print("synonyms:", ", ".join(sorted(SYN))); return 0
     want = " ".join(a.kind).strip().lower()
-    if want not in SYN and want not in kinds:
+    if want not in SYN and want not in kinds and want not in tags:
         want = want.replace(" ", "-") if want.replace(" ", "-") in SYN else want
     mkind, mstudy = market(want)
     targets = ([want] if want in kinds else []) + [t for t in SYN.get(want, []) if t != want]
+    tag_targets = list(dict.fromkeys(t for t in [want] + SYN.get(want, []) if t in tags and t not in kinds))
+    targets = [t for t in targets if t not in tag_targets]
     if not targets and mstudy:
         targets = ["landing"]
     n = a.n
     picked = []
     for t in targets:
         pool = [r for r in rows if r["kind"] == t and os.path.exists(r["img"])]
-        pool.sort(key=lambda r: (r["src"] != "reference",))  # references first, then showcase
-        picked += pool[:n]
+        pool.sort(key=rank)
+        picked += one_per_app(pool, picked)[:n]
+    for t in tag_targets:  # a tag: one picture per app, templates first, product screens before landing
+        pool = [r for r in rows if t in r["tags"] and os.path.exists(r["img"])]
+        pool.sort(key=lambda r: (rank(r), r["kind"] != "product"))
+        picked += one_per_app(pool, picked)[:max(n, 4)]
     if not picked and not mstudy:
-        print(f"error: no pictures for '{want}' (kinds: {', '.join(kinds)}; synonyms: --kinds)", file=sys.stderr)
+        hint = " (pictures not fetched: see assets/LIBRARY.md)" if tag_targets else ""
+        print(f"error: no pictures for '{want}'{hint} (kinds: {', '.join(kinds)}; synonyms: --kinds)", file=sys.stderr)
         print("No market study either: run the market research (design-direction.md §9 Round B) and record it with scripts/market_fetch.js.", file=sys.stderr)
         return 2
-    if want in NO_PICTURES:
-        print(f"No pictures for {NO_PICTURES[want]} yet; nearest: {', '.join(targets)}. Take layout and type moves from them, not the page kind.\n")
+    if want in NO_PICTURES and not any(r["kind"] == NO_PICTURES[want] and os.path.exists(r["img"]) for r in rows):
+        print(f"No pictures for {NO_PICTURES[want]} yet; nearest: {', '.join(t for t in targets if t != NO_PICTURES[want])}. Take layout and type moves from them, not the page kind.\n")
     print(f"Open every image below before building ({want}). Then name the one move you take from them.\n")
     for r in picked:
-        print(f"- {r['img']}\n    {r['kind']} · composition {r['comp'] or '-'} · {r['src']}\n    take: {r['why']}")
+        what = {"product": "real product screen", "ours": "our build", "generated": "designed page"}[r["origin"]]
+        print(f"- {r['img']}\n    {r['kind']} · composition {r['comp'] or '-'} · {r['verdict']} · {what}\n    take: {r['take']}")
         if r.get("full") and os.path.exists(r["full"]):
             print(f"    longer view: {r['full']}")
+        print(f"    from: {r['source']}")
+    if any(r["local"] for r in picked):
+        print("\nPictures marked local are other people's work: take the move, never their names, copy, imagery or brand.")
     if mstudy:
         print_market(mkind, mstudy, n)
     d = a.direction

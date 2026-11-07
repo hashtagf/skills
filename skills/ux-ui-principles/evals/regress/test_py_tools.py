@@ -169,9 +169,14 @@ def test_look():
     rc, out, err = py("look.py", "cover")
     kinds = re.findall(r"^\s{4}(\w+) · composition", out, re.M)
     check("look.py cover shows the cover references first, synonyms add deck/report", rc == 0 and kinds[:2] == ["cover", "cover"] and "deck" in kinds, kinds)
-    rc, out, err = py("look.py", "document")
-    check("look.py document: 'no pictures for document yet; nearest: ...', exit 0, pictures listed",
-          rc == 0 and "No pictures for document yet; nearest: report, cover" in out and "- /" in out, f"rc={rc} {out[:200]}")
+    rc, out, err = py("look.py", "invoice")
+    kinds = re.findall(r"^\s{4}(\w+) · composition", out, re.M)
+    if any(r["kind"] == "document" and os.path.exists(r["img"]) for r in __import__("_library").load()):
+        check("look.py invoice: document studies first, then report/cover; no false 'no pictures' note",
+              rc == 0 and kinds[:1] == ["document"] and "report" in kinds and "No pictures for" not in out, f"rc={rc} {kinds}")
+    else:
+        check("look.py invoice without document pictures: 'no pictures for invoice yet; nearest: ...', exit 0",
+              rc == 0 and "No pictures for invoice yet; nearest:" in out and "- /" in out, f"rc={rc} {out[:200]}")
     for word, kind in (("คาเฟ่", "cafe"), ("ร้านกาแฟ", "cafe"), ("เบเกอรี่", "cafe"), ("แลนดิ้ง", "landing"), ("หน้าแรก", "landing"),
                        ("แดชบอร์ด", "product"), ("หลังบ้าน", "product"), ("สไลด์", "deck"), ("พรีเซนต์", "deck"), ("พอร์ต", "portfolio"),
                        ("โรงแรม", "destination"), ("ร้านอาหาร", "destination"), ("ท่องเที่ยว", "destination"), ("รายงาน", "report"), ("ราคา", "pricing")):
@@ -180,6 +185,41 @@ def test_look():
         check(f"look.py {word} -> {kind}", rc == 0 and kinds and kinds[0] == kind, f"rc={rc} {kinds}")
     src = open(os.path.join(SCRIPTS, "look.py"), encoding="utf-8").read()
     check("look.py: identity kind map removed", '{"destination": "destination"' not in src)
+    # Mobbin catalog: integrity, tag lookup, fetch usage
+    cat = json.load(open(os.path.join(SCRIPTS, "..", "assets", "mobbin", "catalog.json"), encoding="utf-8"))
+    apps = cat["apps"]
+    bad = [a["slug"] for a in apps if a["verdict"] not in ("template", "study", "skip") or len(a["screens"]) != 4
+           or any(s["kind"] not in ("landing", "product", "auth") for s in a["screens"]) or not a["tags"] or not a["note"]]
+    check("mobbin catalog: ranks 50-100, unique slugs, 4 typed screens, verdict, tags and note per app",
+          [a["rank"] for a in apps] == list(range(50, 101)) and len({a["slug"] for a in apps}) == len(apps) and not bad, bad)
+    have = os.path.exists(os.path.join(SCRIPTS, "..", "assets", "mobbin", "img", "twenty-1.jpg"))
+    rc, out, err = py("look.py", "crm")
+    apps_listed = re.findall(r"^    from: ([^,]+), screen \d+: https://mobbin", out, re.M)
+    if have:
+        check("look.py crm (a Mobbin tag) lists Mobbin screens, one per app, template first",
+              rc == 0 and apps_listed and apps_listed[0].strip() == "Twenty" and len(apps_listed) == len(set(apps_listed)), f"rc={rc} {apps_listed}")
+    else:
+        check("look.py crm without Mobbin pictures: exit 2 with the fetch hint", rc == 2 and "mobbin_fetch.py" in err, f"rc={rc} {err[-200:]}")
+    # one template library: every collection loads into the same row shape; look.py prints one format for all
+    sys.path.insert(0, SCRIPTS)
+    import _library
+    rows = _library.load()
+    keys = {"id", "app", "kind", "tags", "verdict", "take", "comp", "img", "full", "origin", "local", "source", "collection"}
+    odd = [r["id"] for r in rows if set(r) != keys or r["verdict"] not in ("template", "study")
+           or r["origin"] not in ("ours", "generated", "product")]
+    check("_library.load: every collection yields the same row keys, verdict and origin",
+          {r["collection"] for r in rows} >= {"references", "mobbin"} and not odd, odd[:5])
+    rc, out, err = py("look.py", "dashboard")
+    items = out.count("\n- /")
+    check("look.py dashboard: every listed picture has one verdict/origin line and one from: credit",
+          rc == 0 and items and out.count("\n    from: ") == items
+          and len(re.findall(r"^    \w+ · composition \S+ · (?:template|study) · (?:our build|designed page|real product screen)$", out, re.M)) == items,
+          f"rc={rc} items={items}")
+    for doc in ("SKILL.md", os.path.join("references", "direction-library.md")):
+        txt = open(os.path.join(SCRIPTS, "..", doc), encoding="utf-8").read()
+        check(f"{doc} points at the template library, not at a collection", "assets/LIBRARY.md" in txt
+              and "assets/mobbin/" not in txt and "assets/showcase/" not in txt)
+    usage_error("mobbin_fetch.py missing --urls file", "mobbin_fetch.py", "--urls", os.path.join(TMP, "no-such-urls.json"))
 
 
 # 6. tweaks_panel accent text / focus by contrast

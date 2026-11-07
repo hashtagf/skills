@@ -100,7 +100,7 @@
 | `_args.js` | ตัวอ่าน argument กลางของสคริปต์ Node (`--help`, `error:` + exit 2, path ของ output/temp) | ทุกสคริปต์ Node ทำตาม [Script contract](#script-contract) เหมือนกัน | ภายใน: ใช้โดย render/fold/flow/admin/script/market/preview scripts |
 | `_color.js` | สูตรสีกลางฝั่ง Node: อ่านสี, luminance, contrast (และโค้ดที่ฉีดเข้าหน้าเว็บ) | ให้สคริปต์ Node และตัวตรวจในหน้าเว็บคำนวณสีตรงกัน | ภายใน: ใช้โดย brand, compositions, render_check, admin_check |
 | `_report.js` | ตัวสร้างผล `--json` กลางของตัวตรวจ Node (render/fold/admin/flow/script_check) | ทั้งห้าตัวพิมพ์ JSON รูปแบบเดียวกัน, exit code เดิม | ภายใน: ใช้ผ่าน `_args.js` |
-| `_net.py` | ตัวช่วยดึงข้อมูลเน็ตกลาง (ใช้ curl, cache เขียนแบบ atomic) | ไม่มีเน็ต/curl = exit 3 (NOT RUN) เหมือนกันทุกสคริปต์ | ภายใน: ใช้โดย icons, photo_search, showcase_fetch |
+| `_net.py` | ตัวช่วยดึงข้อมูลเน็ตกลาง (ใช้ curl, cache เขียนแบบ atomic) | ไม่มีเน็ต/curl = exit 3 (NOT RUN) เหมือนกันทุกสคริปต์ | ภายใน: ใช้โดย icons, photo_search, showcase_fetch, mobbin_fetch |
 | `admin_check.js` | ตรวจหน้า admin ที่ render แล้วตามประเภทหน้า + เปิดทุก `?state=` | จับคอลัมน์เงินชิดซ้าย, ปุ่ม disabled ไม่มีเหตุผล, sticky ที่ไม่ sticky, state ที่ยังไม่ได้สร้าง | `check.py <page> --admin list` |
 | `backoffice_preview.js` | render ภาพหน้าหลังบ้านทุก look (`--density compact`, `--thai`, `--mobile`) | ให้ทีมเลือก look จากภาพ | back-office.md 'Choosing density and tone' |
 | `brand.js` | direction เดียว → หน้า public และ product UI ด้วย token ชุดเดียว | กันสองหน้าตาในแบรนด์เดียว | ใช้โดย preview scripts |
@@ -119,7 +119,8 @@
 | `export_tokens.py` | direction → token ในโค้ด (`--out DIR`; ไม่ใส่ = พิมพ์ออก stdout ไม่เขียนไฟล์; `--print-dark`) | ส่งต่อให้โค้ดโดยไม่พิมพ์มือ | tokens-export.md |
 | `flow_check.js` | เดิน journey จาก steps.json รวม failure path | ตรวจว่างานหลักทำได้จริง | §3 ข้อ 6 |
 | `fold_check.js` | primary action อยู่เหนือ fold | หน้า public ที่ไม่มี CTA ในจอแรก | ผ่าน `check.py --render` |
-| `look.py` | รายการภาพอ้างอิงตามประเภทหน้า (รวม `cover`; คำไทยเช่น คาเฟ่, หลังบ้าน, สไลด์ ใช้ได้; `--kinds` ดูทั้งหมด) + market study ถ้ามี | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
+| `look.py` | รายการภาพจากคลัง template ตามประเภทหน้าหรือ tag (รวม `cover`; tag แอปเช่น crm, finance, ai-chat, auth; คำไทยเช่น คาเฟ่, หลังบ้าน, สไลด์, การเงิน ใช้ได้; `--kinds` ดูทั้งหมด) + market study ถ้ามี | ดูของจริงก่อนสร้าง | §3 ข้อ 2 |
+| `_library.py` | อ่านทุกชุดในคลัง template เป็น row รูปแบบเดียว (kind, tags, template/study, take, origin, local) | เพิ่มชุดใหม่ที่เดียว ไม่ต้องแก้ที่อื่น | ภายใน: ใช้โดย `look.py` |
 | `market_fetch.js` | แคปเว็บคู่แข่งในตลาด + เว็บที่ออกแบบดี ตามประเภทธุรกิจ | research ตลาดก่อนเลือก direction | interview Round B |
 | `icons.py` | ค้น/วาง icon จาก Lucide (UI) และ Simple Icons (โลโก้แบรนด์) พร้อมเช็ก contrast และลิขสิทธิ์ | ได้ icon ชุดเดียว ใช้โลโก้แบรนด์ถูกกติกา | iconography.md |
 | `photo_search.py` | ค้นรูปไลเซนส์เปิด (Commons/Openverse) พร้อม credit | ได้รูปจริงโดยไม่ละเมิดลิขสิทธิ์ | ก่อนสร้างหน้า |
@@ -128,7 +129,7 @@
 | `render_check.js` | render หลายขนาด light/dark, overflow, JS error, ชื่อปุ่ม | smoke check ทั่วไปของทุกหน้า | ผ่าน `check.py --render` |
 | `review_report.py` | finding → รายงาน HTML | รีวิวที่ส่งต่อได้ | review-loop.md 'Report format' |
 | `script_check.js` | syntax ของ script และ global ที่ชน window | บั๊กที่ทำให้หน้าเปล่า | ผ่าน `check.py` |
-| `showcase_fetch.py` | ดึงภาพ showcase มาเก็บในเครื่อง | ภาพมีลิขสิทธิ์ ไม่ commit | ครั้งแรกถ้าต้องการ |
+| `showcase_fetch.py`, `mobbin_fetch.py` | ดึงภาพของคลัง template ชุด local มาเก็บในเครื่อง | ภาพมีลิขสิทธิ์ ไม่ commit | ครั้งแรกถ้าต้องการ (ดู `assets/LIBRARY.md`) |
 | `slop_check.py` | สแกนหน้าตา template แบบ static | จับ device ที่ทำให้ดูเป็น AI | ผ่าน `check.py` |
 | `state_check.py` | หา marker ของ state แบบ static | รู้ว่า state ไหนยังไม่ได้ทำ | ผ่าน `check.py` |
 | `tweaks_panel.py` | แผงปรับค่าสดระหว่างรีวิว | ปรับกับผู้ใช้แบบเห็นผลทันที | review session |
@@ -156,7 +157,7 @@ JSON เสีย, id ไม่รู้จัก) · **3** ไม่ได้�
 | `assets/backoffice/styles.json` | 17 look ของหลังบ้าน: สี, 5 status tone, density ปกติ + compact, รูปทรง | **template UI หลังบ้าน**: ค่าเดียวที่ preview และ `design_md.py --backoffice` ใช้ | back-office.md |
 | `assets/directions/` | direction ของหน้า public (`directions.json`, content packs) | หน้าตาที่ไม่ซ้ำแบบ default | direction-library.md |
 | `assets/design-systems/` | คู่มือ 126 design system (Apache-2.0, S102) | ข้อมูลดิบของ benchmarks | `ds_lookup.py` |
-| `assets/photos/, assets/references/, assets/showcase/, assets/market/` | ภาพจริงพร้อม credit, market study ต่อประเภทธุรกิจ | ภาพอ้างอิง/ใช้งานที่มีที่มา | `look.py` |
+| `assets/LIBRARY.md` (references, showcase, mobbin), `assets/photos/`, `assets/market/` | คลัง template ชุดเดียว (อ่านเป็น row รูปแบบเดียวผ่าน `_library.py`), ภาพพร้อม credit, market study ต่อประเภทธุรกิจ | ภาพตัวอย่าง/อ้างอิงที่มีที่มา | `look.py` |
 | `evals/` | สถานการณ์ทดสอบ routing/trigger/A-B + `index_check.py` + regression suite ของสคริปต์ (`evals/regress/run.py [checkers\|design\|node\|preview\|py_checkers\|py_tools]`, เขียนแค่ temp folder) | วัดว่า skill เปิดไฟล์ถูก, README ไม่ตกหล่น และสคริปต์ยังทำตาม contract | ก่อน release และหลังแก้สคริปต์ |
 
 ## หลักสำคัญที่แปลงเป็นกติกาใน skill

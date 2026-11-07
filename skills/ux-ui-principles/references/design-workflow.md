@@ -418,8 +418,8 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [visual assets](visual-assets.md) | What picture goes in each section when there are no photos | 4 |
 | [visual system](visual-system.md) Part C | Measured values: type, tone, spacing, radius, motion, presets, craft pass | 4 |
 | [reference library](../assets/references/README.md) | 30 rendered pages that look designed (landing, editorial, report, product, mobile), each mapped to a composition | 3, 4, 6 (compare the render) |
-| [showcase catalog](../assets/showcase/README.md), `scripts/showcase_fetch.py` | 98 Open Design showcase entries as 65 distinct captures, each marked template / study / skip with a composition; pictures fetched locally | 3, 4, 6 |
-| `scripts/look.py` | Lists the pictures to open before building a page of a kind (references, showcase, market study, direction and product previews) | 3, 5 |
+| [template library](../assets/LIBRARY.md), `scripts/_library.py` | Every picture collection read as one row shape (kind, tags, template / study, take, origin, local); collections, rights and rebuild commands in one table | 3, 4, 6 |
+| `scripts/look.py` | Lists the library pictures to open before building a page of a kind or tag, plus the market study and direction previews | 3, 5 |
 | [market studies](../assets/market/README.md), `scripts/market_fetch.js` | Per kind of business: category look, design-led moves, three gaps, checked facts, screenshots of local and design-led sites (local only) | 3 |
 | `scripts/icons.py` | Lucide UI glyphs (inline SVG or sprite) and Simple Icons brand marks with contrast, guideline and licence notes | 4, 5 |
 | `scripts/photo_search.py` | Open-licensed photographs of the subject's world (Commons, Openverse), licence-filtered, downloads with credits | 4, 5 |

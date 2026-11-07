@@ -42,5 +42,9 @@ node_modules/
 skills/*/assets/showcase/img/
 skills/*/assets/showcase/items.json
 
+# Mobbin app-screen study pictures (other companies' products, captured by Mobbin) and their signed URLs; rebuild with scripts/mobbin_fetch.py
+skills/*/assets/mobbin/img/
+skills/*/assets/mobbin/urls.json
+
 # Market study screenshots of real businesses' sites (their copyright); rebuild with scripts/market_fetch.js
 skills/*/assets/market/img/

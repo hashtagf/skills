@@ -30,7 +30,7 @@ material, type voice and surface; it never changes the page pattern
    and show them (the sheets are for you to choose from; show the user 2-3 at a time). Each
    direction is drawn in **its own composition** (`comp` in directions.json: one of fourteen
    in `scripts/compositions.js`, each distilled from a page in the
-   [reference library](../assets/references/README.md) or the [showcase catalog](../assets/showcase/README.md)) on **content from a real kind of
+   [template library](../assets/LIBRARY.md)) on **content from a real kind of
    business** (`subject`, `assets/directions/content-packs.json`) with open-collection
    photographs (`assets/photos/`). They show a designed first screen and the section under
    it, not a palette swatch. The same direction as product UI (same tokens, admin
