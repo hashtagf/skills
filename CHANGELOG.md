@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (test-design: Senior QA + PM / production readiness)
+- `references/release-readiness.md`: Definition of Ready + numbered product questions for the PM, three-amigos pass, UAT script template (business language, per outcome) with sign-off and feedback triage (defect / change request / misunderstanding), go/no-go with named signers (PM, QA lead, engineering lead, security), deploy plan, feature-flag and migration-compatibility criteria, production smoke rules, rollback plan + staging drill (incl. what can't be reversed), watch window with numeric signals, analytics verification, hotfix path, per-level table.
+- `references/execution.md`: scenario priority P0–P3 derived from the risk matrix, regression tiers (smoke / core / targeted / full) with impact analysis, test data plan (owner, reset, masking, time-dependent data), exploratory charters + debrief, bug lifecycle and severity vs priority, flaky / blocked / build-frozen rules, QA metrics (escape rate, reopen rate, blocked ratio) and a one-line stakeholder status.
+- `checklist-library.md` §9b personal data / PDPA · GDPR, §9c analytics events, NFR "Production readiness"; `work-types.md` presets 13 (personal data, L4) and 14 (feature-flagged release).
+- SKILL.md rules 11–14 (priority on every scenario; "tests passed" ≠ production-ready; QA recommends, PM + engineering decide; no real personal data in test data or tickets); workflow steps 8 Run and 9 Release; L1 gets a 3-line "After deploy" block.
+- Evals 5–7: go/no-go, UAT script, bug report with personal data.
+
+### Added (test-design: research pass — roadmap.sh QA + ISTQB CTFL v4.0.1, OWASP, WCAG 2.2, Fowler, Google SRE, Pact, chaos, Bolton/Bach, Android quality, PDPA)
+- `checklist-library.md` §7c security baseline mapped to OWASP WSTG v4.2 / API Top 10 2023 / LLM Top 10 2025 (headers, CORS, XSS, SSRF, mass assignment, over-exposure, business-flow abuse, session, resource limits, SCA, secrets, prompt injection); NFR Accessibility rewritten to WCAG 2.2 AA with SC numbers (2.4.11, 2.5.7, 2.5.8, 3.2.6, 3.3.7, 3.3.8, 1.4.10, 1.4.11); NFR Reliability (failover, pod kill, backlog, cache down, degradation, backup restore, cache invalidation); PDPA DSR deadline, 72-hour breach drill, cross-border transfer.
+- `work-types.md` §15 AI / LLM feature (property-based criteria, golden set + pass-rate threshold, model/prompt versioning); contract testing and API4/API9 in §3; provider schema drift in §5; mobile §12 expanded (rotation, interruptions, process death, network switch, Doze, forced upgrade, crash/ANR).
+- `taxonomy.md`: pyramid + agile testing quadrants; `planning-docs.md`: quadrant owners, layer per check, estimate basis, product vs project risk, test completion activities; `execution.md`: SFDIPOT and FEW HICCUPPS oracles; `release-readiness.md`: canary vs same-time control, SLO-burn alarms; Given/When/Then accepted as criteria syntax.
+
+### Fixed (test-design: standards alignment)
+- Test levels now the five of CTFL v4 (component integration and system integration added; acceptance forms incl. operational / regulatory); test types per v4 (functional, non-functional, black-box, white-box) with confirmation/regression separate; pairwise attributed to ISO 29119-4.
+- **Renamed Test Summary Report → Test Completion Report** (ISO/IEC/IEEE 29119-3:2021, CTFL v4) everywhere; `scaffold.py` now writes `NN-test-completion-report.md`. Test Status Report = the one-line status.
+- Personal-data auto-escalation narrowed to sensitive data or access to other people's data (eval showed a profile photo being pushed toward L4 → 16 scenarios at L2; re-run: 8).
+- Sources: v3-era blog links replaced with the CTFL v4.0.1 syllabus, Fowler, roadmap.sh.
+
+### Changed (test-design)
+- Bug template: severity and priority as separate fields, environment, build, platform, account/data, reproducibility, evidence, impact; masking rule.
+- Scenario table and spec carry Priority; traceability adds Priority and Build; test plan adds UAT, production verification, regression tier, exploratory, named roles and release exit criteria; summary report adds status line, results by priority, UAT, metrics, sign-off.
+- `scaffold.py`: default priority per type, test data / product questions / exploratory / full bug template in the INDEX, L2 short-form release block, `NN-release-readiness.md` at L3+, roles and sign-off tables, L1 "After deploy" (en + th).
+
 ## [0.14.1] - 2026-11-08
 
 ### Fixed (ux-ui-principles scripts: 46 bugs from a bug hunt)

@@ -30,7 +30,9 @@ Skip the tiers. One task, `Test : <work item>`, with the checklist in its descri
 | ---| --- |
 | Module tag | the end user (`client`, `admin`, `internal`) |
 | Scenario tag | `scenario` — lets you filter every spec at once |
-| Priority | from the risk matrix: Critical/High risk → high |
+| Priority | scenario P0→urgent, P1→high, P2→normal, P3→low (execution.md §1); Module = its highest risk |
+| Bug fields | Severity and Priority as two separate fields — never one merged "priority" |
+| Build | custom field on the test task: the build/version the run used |
 | Bug task type | `Bug` |
 | Bug assignee | the developer who owns that area, never blank |
 | Custom fields | Project, Team, PM — whatever the workspace already uses |

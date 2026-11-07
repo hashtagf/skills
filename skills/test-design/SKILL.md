@@ -2,13 +2,15 @@
 name: test-design
 description: >-
   SOP for designing and running software tests at the right depth — test scenarios, test
-  case checklists, test plans, coverage audits, and bug reports — via a 4-level system
+  case checklists, test plans, coverage audits, bug reports, UAT scripts, and release
+  go/no-go with production smoke and rollback — via a 4-level system
   (L1 smoke → L4 critical) that adapts to the kind of work (new feature, bugfix, API-only,
   third-party integration, data migration, auth/payment, refactor, report/export, realtime,
   mobile). Use this skill whenever the user mentions test cases, testcase, test scenario,
-  QA, test plan, UAT, regression, smoke test, acceptance criteria, coverage, bug report, or
-  says things like "ออกแบบเทสเคส", "เขียน test case", "ทำ test scenario", "วางแผนทดสอบ",
-  "ตรวจว่าเทสครบไหม", "ครอบคลุมหรือยัง", "เขียน checklist ให้ QA", "ทำ SOP การเทส" — even
+  QA, test plan, UAT, regression, smoke test, acceptance criteria, coverage, bug report,
+  go/no-go, release checklist, sign-off, or says things like "ออกแบบเทสเคส", "เขียน test case", "ทำ test scenario", "วางแผนทดสอบ",
+  "ตรวจว่าเทสครบไหม", "ครอบคลุมหรือยัง", "เขียน checklist ให้ QA", "ทำ SOP การเทส",
+  "พร้อมขึ้น production ไหม", "ทำ UAT" — even
   when they only ask for "a few test cases" for one small feature, because choosing the
   right level and the right path types (happy / alternate / error / edge / security) is
   exactly what separates a checklist that catches bugs from one that only proves the happy
@@ -21,7 +23,8 @@ description: >-
 # Test Design
 
 Design test documentation at the right depth — not 60 scenarios for a single button, and
-not 5 lines for an authentication system.
+not 5 lines for an authentication system — and carry it through to a release someone signed
+for and verified on production.
 
 The problem this solves: most teams write happy-path tests because those are the easiest to
 imagine, then real bugs show up in error / edge / security paths in production. The 5 path
@@ -37,15 +40,23 @@ which level you picked and why.
 
 | Level | Signals | Deliverable | Effort |
 | ---| ---| ---| --- |
-| **L1 Smoke** | bugfix, hotfix, small change, "just check nothing broke" | one checklist (5–15 items) | 15–30 min |
+| **L1 Smoke** | bugfix, hotfix, small change, "just check nothing broke" | one checklist (5–15 items) + 3-line "After deploy" block (not counted in the 15) | 15–30 min |
 | **L2 Module** | new feature, one flow / one screen, "write test cases for this" | scenario specs + a checklist per scenario | half a day |
 | **L3 System** | epic / release / several screens, "test the whole X system" | several modules + Edge paths + NFR + traceability | 1–2 days |
-| **L4 Critical** | auth, payment, permissions, personal data, migration, "is our coverage complete?" | L3 + full Security paths + Test Plan + Summary Report | 3–5 days |
+| **L4 Critical** | auth, payment, permissions, personal data, migration, "is our coverage complete?" | L3 + full Security paths + Test Plan + Completion Report | 3–5 days |
 
 **Auto-escalation rule:** if the work touches **money, permissions, personal data, or
 authentication**, use L4 even when the user asked for "just a few test cases". State the
 reason briefly and offer the option to scale down — let them decide. Never scale down
 silently: the damage from missing something here is not symmetric with the time saved.
+
+"Personal data" here means **sensitive data** (national id, financial, health, biometrics,
+precise location, children's data) **or access to other people's data** (admin views, search,
+bulk export, sharing with third parties). A user editing their own ordinary profile field —
+name, avatar, bio — stays at its normal level: add a Security path for "another user's
+record" and the relevant `checklist-library.md` §9b items (e.g. EXIF/GPS stripped from a
+photo), and keep L2's 3–8 scenarios. Over-escalating a small feature buries the real risks
+in volume as surely as under-escalating misses them.
 
 Per-level deliverables and closing criteria live in `references/levels.md`.
 
@@ -56,8 +67,8 @@ expectations before starting, and to notice when you're overshooting the level.
 
 | Level | Output | Working time | Fast path |
 | ---| ---| ---| --- |
-| L1 | ~400 words, 1 file | ~5 min | write it straight from this file — **read no reference files** |
-| L2 | 2–3k words, 2–3 files | ~10 min | read `templates.md` only; hand-write rather than scaffold a single module |
+| L1 | ~400 words, 1 file | ~5 min | write it straight from this file — **read no reference files**; end the checklist with the 3-line "After deploy" block (prod smoke of the fixed flow · rollback = redeploy previous version · 30-min watch) |
+| L2 | 2–3k words, 2–3 files | ~10 min | read `templates.md`; hand-write rather than scaffold a single module; add `release-readiness.md` §2–3 only if user-visible behaviour changes |
 | L3 | 5–8k words | 20–30 min | scaffold, then fill module by module |
 | L4 | 14k+ words, 15 files | 25–40 min | see the wave rule below — do not try to fill everything in one pass |
 
@@ -89,6 +100,9 @@ you can drop**.
 | Report / export | L2 | Edge (empty, huge, timezone, encoding) | — |
 | Realtime / chat | L3 | Edge (reconnect, duplicate, loss, ordering) | — |
 | Mobile app | L2–L3 | NFR device matrix, offline, permission dialogs | — |
+| Personal data (PDPA / GDPR) — sensitive, or other people's data | **L4** | privacy criteria, Security (other users' data), DPO sign-off | — |
+| AI / LLM feature | L3 (L4 if it acts on money/data/permissions) | golden-set pass rate, prompt injection, output encoding, cost limits | — |
+| Behind a feature flag | +block on its level | flag off = old behaviour, flag on, kill switch, API enforces flag | — |
 
 Presets per work type — the module list you usually need plus the edge cases teams forget
 most often — are in `references/work-types.md`.
@@ -127,7 +141,8 @@ or when you need to justify this vocabulary to a team trained on the standards.
 
 Reasons are in parentheses — understanding the reason tells you when a rule can flex.
 
-1. **Every acceptance criterion must be checkable by eye or by an API response.** "The
+1. **Every acceptance criterion must be checkable by eye or by an API response** (Given /
+   When / Then is fine if the team uses BDD — same rule, one outcome per line). "The
    system must be fast" belongs in NFR with a number, or becomes "redirects within 1
    second". (Uncheckable criteria force QA to guess, and guessed results aren't evidence.)
 2. **Anything not visible from the screen goes in Business Logic / Rules** — e.g. "store
@@ -141,7 +156,7 @@ Reasons are in parentheses — understanding the reason tells you when a rule ca
    checklist — parenthetical conditions dropped — so the thing QA ticks stopped matching the
    thing the developer agreed to.)
 4. **Confirm the scenario list with the work's owner before writing full specs.** Send the
-   table of IDs, names, and types first. (Writing 40 specs and then learning the scope was
+   table of IDs, names, types, and priorities first. (Writing 40 specs and then learning the scope was
    wrong is the most painful way to lose a day on this work.)
 5. **Always write down what is out of scope.** Anything you did not test needs a name in
    the document. (A document that doesn't say what was skipped reads as "everything is
@@ -168,7 +183,26 @@ Reasons are in parentheses — understanding the reason tells you when a rule ca
     reference them from the criteria that depend on them, and ask for confirmation before the
     set gets run. (You will have to assume things — token lifetimes, refund policy, who may do
     what. Numbered assumptions are correctable in one message; assumptions buried inside
-    criteria get discovered only when QA reports a failure that was never a bug.)
+    criteria get discovered only when QA reports a failure that was never a bug.) What only
+    the owner can decide goes to the PM as numbered **product questions** (Q1, Q2…) instead —
+    format in `release-readiness.md` §1.
+11. **Every scenario carries a Priority (P0–P3) as well as a Type** at L2+. Type says how to
+    run it; priority says whether it runs when time is short and which regression tier it
+    joins. Keep P0 to ~10–15% — the set that runs on every deploy. (`execution.md` §1–2.
+    Without priority, a slipping deadline cuts scenarios at random instead of from the bottom.)
+12. **"Tests passed" is not "ready for production".** Anything going live needs, scaled to
+    the level: a rollback path, a production smoke run after deploy, and someone watching the
+    signals afterwards; from L2 with user-visible change, UAT by the business owner; from L3, a
+    go/no-go signed by named people. (`release-readiness.md` §9 has the per-level table. Most
+    production incidents happen in the deploy or the hour after — the part a staging-only test
+    set never sees.)
+13. **QA recommends; the PM and engineering lead decide.** The completion report and go/no-go
+    state the evidence and the risk; the business-risk call (shipping with a known High,
+    dropping scope) is signed by the PM, the deploy/rollback by engineering. (When QA silently
+    owns the ship decision, it either blocks everything or gets blamed for business calls.)
+14. **Never put real personal data in test data, tickets, or screenshots.** Masked copies
+    only outside production; mask before attaching evidence. (A bug tracker is read by far
+    more people than the database it describes.)
 
 ---
 
@@ -176,16 +210,22 @@ Reasons are in parentheses — understanding the reason tells you when a rule ca
 
 ```
 1. Determine level + work type       → tell the user what you picked and why
-2. Gather inputs                     → PRD, Figma, API spec, permission matrix, old bugs
-3. Draft the module + scenario list   → table of ID / name / type → confirm before continuing
+2. Gather inputs + check readiness   → PRD, Figma, API spec, permission matrix, old bugs;
+                                       Definition of Ready + product questions (release-readiness.md §1)
+3. Draft the module + scenario list   → ID / name / type / priority → confirm before continuing
 4. Write the scenario specs           → templates in references/templates.md
 5. Convert criteria → checklists 1:1  → one scenario = one test task
 6. Push into the tracker              → references/clickup.md (4 tiers)
 7. Audit the coverage                 → references/coverage-audit.md
+8. Run                                → priority order, regression tier, test data, exploratory
+                                       charters, bug lifecycle (references/execution.md)
+9. Release                            → UAT, go/no-go, deploy plan, prod smoke, rollback,
+                                       watch window (references/release-readiness.md)
 ```
 
-Steps 3 and 7 are the two people skip most often, and they are what separates this from
-"writing a checklist off the top of your head".
+Steps 3, 7 and 9 are the ones people skip most often. 3 and 7 separate this from "writing a
+checklist off the top of your head"; 9 separates "QA passed" from "safe in production".
+At L1 step 9 is the three-line "After deploy" block; it is never zero.
 
 ### Old bugs are excellent raw material
 
@@ -263,12 +303,14 @@ to scaffold it. Whatever you scaffold, rule 6 applies: no `TODO` may survive int
 | ---| --- |
 | `references/levels.md` | deciding the level, or checking what a level must deliver |
 | `references/work-types.md` | you know the work type and want its module list + commonly forgotten edge cases |
-| `references/taxonomy.md` | the user asks how many kinds of testing exist, or you must cite ISTQB / ISO 25010 / ISO 29119 |
+| `references/taxonomy.md` | the user asks how many kinds of testing exist, or you must cite ISTQB CTFL v4 / ISO 25010 / ISO 29119; test pyramid + agile testing quadrants |
 | `references/templates.md` | writing modules / scenarios / checklists / bugs — copy-paste ready |
-| `references/planning-docs.md` | L3–L4: test plan, risk matrix, environment spec, summary report |
-| `references/checklist-library.md` | you want ready criteria and edge cases per domain (form, list, upload, money, notification, realtime, export, RBAC, cron, NFR) |
+| `references/planning-docs.md` | L3–L4: test plan (strategy, quadrants, estimate), product vs project risk, traceability, completion report + completion activities |
+| `references/checklist-library.md` | you want ready criteria and edge cases per domain (form, list, upload, money, notification, realtime, export, auth, OWASP security baseline incl. LLM, RBAC, cron, personal data / PDPA, analytics events, NFR: performance, WCAG 2.2 AA, compatibility, localization, reliability, observability, production readiness) |
 | `references/coverage-audit.md` | the user asks "is our coverage complete?", or you must review existing test docs |
 | `references/clickup.md` | pushing work into ClickUp / Jira as a task tree |
+| `references/execution.md` | priority P0–P3, regression tiers + impact analysis, test data, exploratory charters + SFDIPOT / FEW HICCUPPS heuristics, bug lifecycle / priority vs severity, flaky results, QA metrics, one-line status |
+| `references/release-readiness.md` | Definition of Ready + product questions, UAT script + sign-off, go/no-go, feature flags, migrations, prod smoke, rollback drill, watch window + analytics, hotfix path |
 | `examples/auth-l4.md` | you want a finished L4 set as a reference point |
 | `scripts/checklist.py` | generating checklists from criteria, or verifying they're still 1:1 |
 | `scripts/scaffold.py` | creating the file skeleton for L2+ (skip it for a single module) |
@@ -289,3 +331,9 @@ to scaffold it. Whatever you scaffold, rule 6 applies: no `TODO` may survive int
 | checklist quietly shorter than the criteria | generate it (`checklist.py --write`), then gate on `--check` |
 | L4 taking an hour and still unfinished | the wave rule — highest-risk modules complete, tail on demand |
 | beautiful docs nobody runs | one scenario = one tickable task in the tracker, not a file nobody opens |
+| deadline slips and scenarios get cut at random | rule 11 — priority P0–P3, cut from P3 up |
+| bug bounced as "can't reproduce" | bug template fields: build, environment, data, reproducibility rate |
+| all green on staging, incident in the first hour | rule 12 — prod smoke, rollback rehearsed, watch window |
+| "QA approved it" after a bad release | rule 13 — named PM + engineering sign-off on the go/no-go |
+| PM's dashboard shows nonsense after launch | analytics criteria (`checklist-library.md` §9c) verified before go/no-go |
+| production dump on staging | rule 14 — masked data only; privacy criteria §9b |

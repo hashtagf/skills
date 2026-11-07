@@ -132,11 +132,23 @@ Is the *set* complete, not just the scenarios — compared against ISO/IEC/IEEE 
 | Test strategy | | L4 |
 | Risk assessment | | L4 |
 | Traceability matrix | | L3+ |
-| Test summary report | | L4 |
+| Test completion report | | L4 |
 | Test log / execution record | | every level (the tracker can serve this) |
+| Test data plan (owner + reset) | | L2+ |
+| Exploratory charters + debrief | | L2+ |
+| UAT scripts + sign-off | | L2+ if user-visible, L3+ |
+| Go / No-Go with named signers | | L3+ (short form L2) |
+| Rollback plan + prod smoke | | every release |
 
-Most teams have the first three and assume that's the set. The two that hurt most when missing
-are **risk assessment** (testing runs in the wrong order) and **a summary report containing a
+**Category check for L3–L4** — two quick grids that catch whole families nobody designed for:
+- the agile testing quadrants (taxonomy.md): does Q1, Q2, Q3, and Q4 each have an owner?
+- the OWASP baseline (checklist-library.md §7c): is each category designed, or named in "not
+  tested" with who covers it?
+
+Most teams have the first three and assume that's the set. The release rows are covered in
+`release-readiness.md`; a set without them can be complete *as testing* and still not ready
+for production. The two that hurt most when missing
+are **risk assessment** (testing runs in the wrong order) and **a completion report containing a
 "what we did not test" section** (release decisions get made on incomplete information).
 
 ---

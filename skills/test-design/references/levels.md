@@ -13,9 +13,10 @@ change that introduces no new flow.
 **Deliver**
 
 ```markdown
-- [ ] one checklist of 5–15 items (no separate scenario specs)
+- [ ] one checklist of 5–15 pre-deploy items (no separate scenario specs)
 - [ ] it must include: the happy path of the flow you touched + the original bug symptom (for a bugfix)
 - [ ] 3–5 regression items for neighbouring flows that share the same code
+- [ ] after deploy (separate 3-line block, outside the 5–15): prod smoke of the fixed flow + rollback path named + 30-min watch
 ```
 
 **Closing criterion:** 100% pass. L1 has no room for accepted failures — if you can accept
@@ -39,7 +40,11 @@ behaviour the user can see.
 - [ ] a spec for every scenario: Type, Persona, Pre-condition, Steps, Criteria, Business Logic, UX/UI
 - [ ] one test-case checklist per scenario (the criteria, 1:1)
 - [ ] at least one Happy and one Error path
+- [ ] a Priority (P0–P3) on every scenario
+- [ ] test data table (what, state, owner, reset) — execution.md §3
+- [ ] one exploratory charter for the module
 - [ ] the bug template, ready to use
+- [ ] if user-visible behaviour changes: a UAT script; short-form go/no-go; prod smoke
 ```
 
 **Reasonable size:** 3–8 scenarios. More than 10 usually means this is two modules.
@@ -60,8 +65,11 @@ with an external system, a migration.
 - [ ] INDEX: module list + coverage map (system capability → covering scenarios) + test data needed
 - [ ] at least one Edge path per module that involves timing, concurrency, or the network
 - [ ] a Non-Functional checklist that gets re-run per module
-- [ ] traceability matrix: scenario → test task → status → bug
+- [ ] traceability matrix: scenario → priority → test task → build → status → bug
 - [ ] an explicit out-of-scope list
+- [ ] regression tier + impact analysis for this release (execution.md §2)
+- [ ] release readiness: UAT scripts, go/no-go with named signers, deploy plan, rollback
+      plan + drill, prod smoke, watch-window signals (release-readiness.md)
 ```
 
 **Closing criteria:** on top of L2 — Edge ≥ 95% · NFR meets the thresholds you set · no row
@@ -71,7 +79,7 @@ in the matrix left without a status.
 
 ## L4 Critical — where mistakes are not affordable
 
-**Use for:** authentication, authorization, payment, personal data, irreversible data
+**Use for:** authentication, authorization, payment, sensitive personal data or access to other people's data, irreversible data
 migration, any system where downtime has a clear cost — or whenever the user asks "is our
 coverage actually complete?"
 
@@ -80,15 +88,19 @@ coverage actually complete?"
 ```markdown
 - [ ] Security paths in every module + a cross-cutting module for attacks that span flows
       (brute force, CSRF, enumeration, injection, IDOR, token tampering)
+- [ ] OWASP baseline (checklist-library.md §7c): each category designed, or named in
+      "not tested" with who covers it (security team, scanner, pentest)
 - [ ] Test Plan: scope + out-of-scope, strategy (levels/types/techniques), environment spec,
       risk matrix, entry/exit criteria, roles, schedule
 - [ ] decision table + state transitions covering every meaningful combination of states
-- [ ] Test Summary Report at close, including a complete "what we did not test" section
+- [ ] Test Completion Report at close, including a complete "what we did not test" section
 - [ ] two-way coverage audit: every requirement has a scenario / every scenario has a status
+- [ ] personal data in scope → privacy criteria (checklist-library.md §9b) + DPO in the sign-off
+- [ ] go/no-go signed by PM, QA lead, engineering lead, and security/compliance
 ```
 
 **Closing criteria:** Security paths 100% with no waiver · all critical/high bugs closed ·
-summary report approved.
+completion report approved · go/no-go signed · prod smoke passed after deploy.
 
 **Real effort:** the reference authentication set is 12 modules / 64 scenarios / 18 files —
 budget 3–5 days to write and another 3–5 to run.
@@ -110,8 +122,15 @@ out of room partway, and a scaffold full of placeholders reads as finished work.
 | NFR checklist | ✗ | ✗ | ✓ | ✓ |
 | Test Plan | ✗ | ✗ | ✗ | ✓ |
 | Traceability | ✗ | ✗ | ✓ | ✓ |
-| Summary Report | ✗ | ✗ | if a report is expected | ✓ |
+| Completion Report | ✗ | ✗ | if a report is expected | ✓ |
 | Risk matrix | ✗ | ✗ | ✗ | ✓ |
+| Priority P0–P3 | ✗ | ✓ | ✓ | ✓ |
+| Test data plan | ✗ | ✓ | ✓ | ✓ |
+| Exploratory charter | ✗ | ✓ 1 | ✓ per module | ✓ per module |
+| UAT + sign-off | ✗ | if user-visible | ✓ | ✓ |
+| Go / No-Go | ✗ | short form | ✓ | ✓ + security |
+| Rollback | one line | ✓ | ✓ + drill | ✓ + drill |
+| Prod smoke + watch | ✓ 30 min | ✓ | ✓ 24 h | ✓ 24–72 h |
 
 ---
 

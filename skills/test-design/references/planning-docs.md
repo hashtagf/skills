@@ -1,9 +1,12 @@
 # Planning-level documents (L3–L4)
 
-A complete test documentation set under ISO/IEC/IEEE 29119-3 runs to roughly eleven artefacts.
-Most teams have the test cases and assume that's the set.
+ISO/IEC/IEEE 29119-3 defines a family of test documents — organisational (policy, practices),
+management (plan, status report, completion report), and dynamic (design / case / procedure
+specs, data and environment requirements, execution log, incident report). Most teams have the
+test cases and assume that's the set.
 This file templates the four that go missing most often: **Test Plan · Risk Matrix ·
-Traceability Matrix · Summary Report**.
+Traceability Matrix · Completion Report**. What happens after the tests pass — UAT, go/no-go,
+deploy, production smoke, rollback — is in `release-readiness.md`.
 
 | Document | Required at | Question it answers |
 | ---| ---| --- |
@@ -11,7 +14,8 @@ Traceability Matrix · Summary Report**.
 | Risk Matrix | L4 | what to test first when time runs short |
 | Environment Spec | L3 | what QA needs before testing can start |
 | Traceability Matrix | L3 | is coverage complete — answered with evidence |
-| Summary Report | L4 | can we release, and what risk are we accepting |
+| Completion Report | L4 | can we release, and what risk are we accepting |
+| Go / No-Go + sign-off | L3 (short form L2) | who decided to ship, on what evidence — `release-readiness.md` §3 |
 
 ---
 
@@ -35,17 +39,28 @@ Traceability Matrix · Summary Report**.
 | Unit | Dev | ... |
 | Integration | Dev | ... |
 | System (E2E) | QA | all N scenarios |
-| Acceptance | PM + QA | Happy + Alternate in every module |
+| Acceptance (UAT) | business owner, PM | one UAT script per business outcome — `release-readiness.md` §2 |
+| Production verification | release owner | prod smoke + watch window — `release-readiness.md` §5, §7 |
 
 **Techniques:** EP / BVA / decision table / state transition / pairwise / exploratory
+**Quadrants covered** (taxonomy.md): Q1 component tests — <owner> · Q2 scenarios — QA ·
+Q3 exploratory + UAT — <owner> · Q4 performance / security / reliability — <owner>. An
+unowned quadrant is a gap to name in out-of-scope.
+**Layer per check:** criteria provable at component level are asserted there; scenarios keep
+what needs the whole system (test pyramid — don't re-test every boundary end to end).
+**Estimate:** <scenarios × average run time + bug retest allowance (~30%) + regression tier +
+exploratory sessions + UAT support> — state the basis so the number can be challenged.
 **Automation split:** <what stays manual, what gets automated>
+**Regression:** which tier runs on this release (smoke / core / targeted / full) + the impact
+analysis behind it — `execution.md` §2
+**Exploratory:** <n> charters, time-boxed — `execution.md` §4
 
 ## 3. Test Environment
 | Item | Required value |
 | ---| --- |
 | Environment | staging with a database separate from production |
 | URL | ... |
-| Test data | per the test-data table |
+| Test data | per the test-data table (`execution.md` §3) — owner + reset path per set, no unmasked production personal data |
 | External dependencies | which providers' sandboxes |
 | Config QA must be able to change | TTLs, thresholds, feature flags |
 | Access QA needs | read logs, reset seed data, change the config above |
@@ -66,13 +81,21 @@ Traceability Matrix · Summary Report**.
 - [ ] Happy + Alternate 100%
 - [ ] Security paths 100% (no waiver)
 - [ ] Error + Edge ≥ 95%, remainder accepted by the PM
-- [ ] all critical/high bugs closed
+- [ ] all critical/high bugs closed, or each open High accepted in writing by the PM
+- [ ] P0 regression pack 100% on the frozen release build
+- [ ] UAT accepted for every business outcome in scope
 - [ ] no row in the traceability matrix without a status
-- [ ] summary report delivered
+- [ ] completion report delivered
+- [ ] rollback rehearsed, prod smoke checklist ready (`release-readiness.md` §5–6)
 
 ## 7. Roles
 | Role | Responsibility |
 | ---| --- |
+| QA Lead | plan, evidence, completion report — signs that the evidence is accurate |
+| Product Manager | answers product questions, accepts risk, signs go/no-go for the business |
+| Engineering Lead | build quality, deploy, rollback — signs go/no-go for production |
+| Business owner | runs and signs UAT |
+| (L4) Security / DPO | signs off Security paths / personal-data handling |
 
 ## 8. Schedule
 | Stage | Owner | Start | End |
@@ -95,8 +118,15 @@ exception.
 ```
 
 Level = impact × likelihood → Critical / High / Medium / Low.
+
+Keep two kinds apart (CTFL v4 §5.2): **product risks** — what could be wrong with the software
+(the rows above), which drive *what to test and in what order*; and **project risks** — what
+could stop the testing (environment late, sandbox unavailable, key tester away, spec still
+changing), which drive *the schedule and the entry criteria*. Put project risks in their own
+short table with an owner and a mitigation; mixed into the product table they crowd out the
+real priorities.
 **Test order:** Critical → High → Medium → Low. When time runs out, cut from the bottom and
-record what you cut in the summary report.
+record what you cut in the completion report.
 
 Risks that belong on almost every project's list:
 - someone reaches data or an account that isn't theirs
@@ -109,9 +139,9 @@ Risks that belong on almost every project's list:
 ## 3. Traceability Matrix
 
 ```markdown
-| ID | Scenario | Type | Risk | Test task | Status | Bug | Automated |
-| ---| ---| ---| ---| ---| ---| ---| --- |
-| SC-XXX-01 | ... | Happy | R1 | <link> | Pass | | `e2e/checkout.spec.ts:14` |
+| ID | Scenario | Type | Priority | Risk | Test task | Build | Status | Bug | Automated |
+| ---| ---| ---| ---| ---| ---| ---| ---| ---| --- |
+| SC-XXX-01 | ... | Happy | P0 | R1 | <link> | 2.4.0-rc2 | Pass | | `e2e/checkout.spec.ts:14` |
 ```
 
 Statuses: `Pass` / `Fail` / `Blocked` / `Skipped` — **Blocked and Skipped need a written
@@ -141,10 +171,15 @@ Conventions that make the mapping survive:
 - **A scenario spec is the source of truth, not the test.** When behaviour changes, the criteria
   change first and the test follows; a test that drifts from its scenario is a bug in the test.
 
-## 4. Test Summary Report
+## 4. Test Completion Report
+
+ISO/IEC/IEEE 29119-3:2021 and the ISTQB CTFL v4 syllabus call this the **Test Completion
+Report**; older material (IEEE 829, 29119-3:2013) calls it the *Test Summary Report* — same
+document. Its in-cycle sibling is the **Test Status Report**: the one-line status in
+`execution.md` §7, sent daily while the cycle runs.
 
 ```markdown
-# Test Summary Report — <system / release>
+# Test Completion Report — <system / release>
 
 | Field | Value |
 | ---| --- |
@@ -152,6 +187,8 @@ Conventions that make the mapping survive:
 | Dates | |
 | Environment / build | |
 | Testers | |
+
+**Status:** <one line — see `execution.md` §7, e.g. "🟡 P0 100% · P1 91% pass · 1 High open, accepted by PM">
 
 ## 1. Scenario results
 | Type | Total | Pass | Fail | Blocked | Skipped | % pass |
@@ -170,6 +207,14 @@ Conventions that make the mapping survive:
 | Area | Result | Notes |
 | ---| ---| --- |
 
+### By priority
+| Priority | Planned | Run | Pass | Fail | Blocked |
+| ---| ---| ---| ---| ---| --- |
+| P0 | | | | | |
+| P1 | | | | | |
+| P2 | | | | | |
+| P3 | | | | | |
+
 ## 4. Bugs
 | Severity | Found | Closed | Still open |
 | ---| ---| ---| --- |
@@ -182,6 +227,17 @@ Conventions that make the mapping survive:
 | Bug | Severity | Scenario | Reason accepted | Approver |
 | ---| ---| ---| ---| --- |
 
+### UAT
+| UAT | Business outcome | Runner | Result | Open defects |
+| ---| ---| ---| ---| --- |
+
+### Metrics
+| Metric | This release | Previous |
+| ---| ---| --- |
+| Defect escape rate (previous release) | | |
+| Reopen rate | | |
+| Blocked ratio | | |
+
 ## 5. What was not tested (never leave this empty)
 | Item | Reason | Risk accepted |
 | ---| ---| --- |
@@ -193,6 +249,29 @@ Conventions that make the mapping survive:
 **Ship:** ☐ yes ☐ yes with conditions ☐ no
 Conditions / reasoning:
 **Process improvements for next cycle (not bugs):**
+
+## 8. Sign-off
+| Role | Name | Decision | Date |
+| ---| ---| ---| --- |
+| QA Lead (evidence is accurate) | | | |
+| Product Manager (business risk accepted) | | | |
+| Engineering Lead (deploy + rollback ready) | | | |
+```
+
+QA recommends; the PM and engineering lead decide. The go/no-go page in
+`release-readiness.md` §3 is built from this report.
+
+### Test completion activities (after the report)
+
+ISTQB lists these as part of closing a cycle; they are what makes the next cycle cheaper.
+
+```markdown
+- [ ] open bugs moved to the backlog with severity, priority, and owner — none left in "Verifying"
+- [ ] accepted risks recorded where the next release will see them
+- [ ] lessons learned (15 min): what slowed testing, what escaped, what to change — goes in §7
+- [ ] testware archived: final scenario set, data scripts, environment notes, the build tested
+- [ ] regression pack updated: new scenarios added, priorities adjusted, retired ones marked
+- [ ] test environments / data torn down or reset; temporary access revoked
 ```
 
 **Section 5 is the heart of the report.** A report listing only what passed leaves readers

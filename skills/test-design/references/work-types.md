@@ -19,6 +19,9 @@ what it does.
 10. Report / export
 11. Realtime / chat / notification
 12. Mobile app
+13. Personal data / privacy (PDPA · GDPR)
+14. Feature-flagged / staged release
+15. AI / LLM feature
 
 ---
 
@@ -45,6 +48,7 @@ rewritten from memory) · regression of the parent scenario.
 - testing only the case in the ticket, not the neighbouring cases sharing that code
 - not promoting the symptom into a permanent criterion → the bug returns next release
 - not checking what the fix does to rows already corrupted in the database
+- never checking the fix on production after the deploy (L1 "After deploy" block)
 
 ## 3. API / backend only — L2
 
@@ -62,6 +66,13 @@ body, status codes, and error codes.
 - the last page of pagination, and a page number beyond the end
 - idempotency for POSTs that create data
 - 404 vs 403: does the endpoint reveal that someone else's record exists?
+- mass assignment (extra `role` / `price` fields accepted) and over-exposed response fields — `checklist-library.md` §7c
+- missing limits: page size, payload size, rate (API4) — exceeding them must return 413/429
+- **contract / compatibility:** when other services or apps call this API, a breaking change
+  (renamed field, new required field, changed enum, changed error shape) is caught before
+  release — by consumer-driven contract tests (e.g. Pact) or a schema diff against the
+  published spec; old clients (the mobile app version still in users' hands) keep working
+- deprecated versions: still answering as documented, or switched off on purpose
 
 ## 4. UI / redesign only — L2
 
@@ -89,6 +100,8 @@ body, status codes, and error codes.
 - retries causing duplicate actions (two emails, two charges)
 - circuit breaking: does their outage take your system down?
 - sandbox vs production config swapped
+- the provider changing its response shape — pin it with a contract test or a recorded schema
+  check, so drift fails a build instead of a customer's payment
 
 ## 6. Auth / payment / permissions — L4, always
 
@@ -199,3 +212,81 @@ offline · permission dialogs.
 - the keyboard covering the submit button
 - the smallest supported screen and the largest system font
 - upgrading the app — is the old local storage still readable?
+- rotation / configuration change (dark mode, font size, language) mid-flow — no lost input
+- interruptions: incoming call, notification, switching apps, low-battery dialog
+- process death (OS reclaims memory while in background) vs user force-close — both restore sensibly
+- network switching Wi-Fi ↔ mobile data, airplane mode mid-request, captive portal
+- system back gesture / back button on every screen — no exit from mid-flow without warning
+- battery saver / Doze: background sync and scheduled notifications still arrive when promised
+- forced upgrade: an unsupported old version is told to update instead of failing silently
+- release: store review notes, staged rollout percentage, and the crash-free / ANR rate watched
+  per version (see `release-readiness.md` §7)
+
+## 13. Personal data / privacy (PDPA · GDPR) — L4
+
+Sensitive personal data (national id, financial, health, biometrics, precise location,
+children's data) or any access to *other people's* personal data (admin views, search, bulk
+export, third-party sharing). A user editing their own ordinary profile field (name, avatar)
+stays at its normal level with a few §9b items added — see SKILL.md step 1. Criteria in
+`checklist-library.md` §9b; confirm obligations with the DPO / legal before the scenario list
+is final.
+
+**Modules:** Consent · Collection (forms) · Access & masking (UI, admin, export) · Data subject
+requests (view / export / delete) · Sharing with third parties · Retention job · Logs & analytics.
+
+**Mandatory:** Security (another user's data, admin over-reach) · Edge (deletion while a job is
+processing the user, restore from backup) · DPO in the sign-off.
+
+**Forgotten often**
+- personal data in logs, URLs, analytics events, crash reports, and bug tickets
+- "deleted" users still in the search index, cache, data warehouse, or email tool
+- consent recorded without the version of the text the user agreed to
+- staging seeded with an unmasked production dump
+- CSV export of customers available to a role that can't see them on screen
+
+## 14. Feature-flagged / staged release — add to the work's own level
+
+Not a separate set — a block added to whichever level the feature is at. Criteria in
+`release-readiness.md` §4.
+
+**Mandatory:** flag-off regression of the parent module's Happy paths · flag-on Happy paths ·
+kill switch · API enforcing the flag.
+
+**Forgotten often**
+- the API stays open while only the UI is hidden behind the flag
+- a user flipping between variants on refresh (non-sticky percentage)
+- data written under flag-on breaking screens when the flag goes off
+- flags never removed — stale flag paths become untested code; add "remove flag" to the backlog
+
+## 15. AI / LLM feature — L3 (L4 if it acts on money, data, or permissions)
+
+Features whose output comes from a model (chat, summarise, classify, extract, generate, agents
+calling tools). The test oracle problem is the core difficulty: the same input can give
+different valid outputs, so "expected result = this exact text" doesn't work.
+
+**Modules:** Golden-set quality · Guardrails & safety · Prompt injection / security ·
+Tool actions (if any) · Failure & cost · Feedback loop.
+
+**How criteria change**
+- write criteria as **properties** the output must have, not exact text: "cites the order
+  number", "answers in Thai", "never states a refund amount not in the order", "≤ 120 words"
+- quality is measured on a **golden set** (30–200 representative inputs with what a good answer
+  must contain), run on every prompt/model change, with a pass-rate threshold agreed in
+  advance (e.g. ≥ 90% of cases meet every property) — a single manual check proves nothing
+- record the model name/version and prompt version with each run; a model update is a release
+
+**Mandatory:** Security (prompt injection direct + indirect, data leakage between users,
+system-prompt extraction — `checklist-library.md` §7c) · Edge (empty / huge / other-language /
+adversarial input, model timeout, rate limit from the provider) · Error (the provider is down:
+the feature degrades with a clear message).
+
+**Forgotten often**
+- hallucinated facts presented as data from the system (prices, policies, order status)
+- one user's data appearing in another user's answer (shared context, cached prompts)
+- output rendered as HTML / markdown without encoding (XSS through the model)
+- tool calls with side effects executed without confirmation, or retried twice
+- cost: a long conversation or a loop running up tokens without a cap
+- refusing too much: legitimate requests blocked by over-strict guardrails — measure it
+- regression after a provider silently updates the model behind the same name
+- users' feedback (thumbs down) not feeding back into the golden set
+

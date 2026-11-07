@@ -80,6 +80,10 @@ PRESETS = {
 
 TYPE_CYCLE = ["Happy Path", "Error Path", "Error Path", "Alternate Path", "Edge Path", "Security Path"]
 
+# default priority per type (references/execution.md §1) — the author corrects it per risk
+DEFAULT_PRIORITY = {"Happy Path": "P0", "Alternate Path": "P1", "Security Path": "P1",
+                    "Error Path": "P2", "Edge Path": "P2"}
+
 # ---------------------------------------------------------------- strings
 
 L = {
@@ -97,8 +101,17 @@ L = {
         "todo_ux": "TODO Figma link with node-id",
         "checklist_note": "copied 1:1 from the scenario's Acceptance Criteria",
         "copy_note": "paste this block into the task description",
-        "type_note": ("Types below are defaults from the script — correct them per the rules in "
-                      "references/taxonomy.md"),
+        "type_note": ("Types and priorities below are defaults from the script — correct types per "
+                      "references/taxonomy.md and priorities per the risk matrix "
+                      "(references/execution.md §1)"),
+        "pq": "Product questions (for the PM)",
+        "pq_note": ("What only the owner can decide. Blocking questions mark the affected "
+                    "scenarios `Blocked — waiting Qn` — references/release-readiness.md §1"),
+        "explore": "Exploratory charters",
+        "explore_note": "one 60–90 min session per module — references/execution.md §4",
+        "release_note": ("Release readiness — fill before the go/no-go; per-level scope in "
+                         "references/release-readiness.md §9"),
+        "signoff": "Sign-off",
         "shared": "Shared Rules",
         "todo_shared": ("TODO rules true for every scenario here (token lifetimes, currency, audit "
                         "logging). Scenarios cite them as SR-1, SR-2 instead of repeating them"),
@@ -113,8 +126,9 @@ L = {
         "bug_title_note": "Title it: `Issue [SC-XXX-NN] : <short symptom>`",
         "dod": "Definition of Done",
         "dod_items": ["every scenario checklist run, no blank items",
-                      "Happy + Alternate pass 100%",
+                      "Happy + Alternate pass 100% · P0 100%",
                       "every bug closed or explicitly accepted with a reason",
+                      "prod smoke passed after deploy",
                       "no TODO left in any file (`grep -rn TODO .`)"],
         "trace_title": "Traceability Matrix",
         "trace_note": ("Answers \"is our coverage complete?\" with evidence — method in "
@@ -141,6 +155,10 @@ L = {
         "not_tested": "Not tested",
         "not_tested_item": "what you deliberately skipped + why",
         "smoke_exit": "Closing criterion: 100% pass — L1 has no room for accepted failures",
+        "after_deploy": "After deploy",
+        "after_items": ["prod smoke: the fixed flow once on production with the internal test account",
+                        "rollback: redeploy the previous version — confirmed possible",
+                        "watch 30 min: error rate for the touched endpoint / screen stays at baseline"],
         "nfr_note": ("Re-run per module · paste the relevant sections from "
                      "references/checklist-library.md §NFR"),
         "plan_note": "Fill from the full template in references/planning-docs.md §1",
@@ -167,7 +185,16 @@ L = {
         "todo_ux": "TODO Figma link พร้อม node-id",
         "checklist_note": "คัดจาก Acceptance Criteria ของ scenario แบบ 1:1",
         "copy_note": "คัดลอกบล็อกนี้ลง description ของ task",
-        "type_note": "Type ที่ script ใส่ไว้เป็นค่าเริ่มต้น — แก้ให้ตรงตามกฎใน references/taxonomy.md",
+        "type_note": ("Type และ Priority ที่ script ใส่ไว้เป็นค่าเริ่มต้น — แก้ Type ตาม references/taxonomy.md "
+                      "และ Priority ตาม risk matrix (references/execution.md §1)"),
+        "pq": "คำถามถึง PM (product questions)",
+        "pq_note": ("เรื่องที่เจ้าของงานเท่านั้นตัดสินได้ ข้อที่ blocking ให้ mark scenario ที่กระทบเป็น "
+                    "`Blocked — รอ Qn` — references/release-readiness.md §1"),
+        "explore": "Exploratory charters",
+        "explore_note": "module ละ 1 session 60–90 นาที — references/execution.md §4",
+        "release_note": ("ความพร้อมขึ้น production — เติมก่อนประชุม go/no-go ขอบเขตตามระดับอยู่ใน "
+                         "references/release-readiness.md §9"),
+        "signoff": "Sign-off",
         "shared": "Shared Rules",
         "todo_shared": ("TODO กฎที่ใช้กับทุก scenario ใน module นี้ (อายุ token, สกุลเงิน, audit log) "
                         "แล้วให้ scenario อ้างเป็น SR-1, SR-2 แทนการเขียนซ้ำ"),
@@ -182,8 +209,9 @@ L = {
         "bug_title_note": "ตั้งชื่อ: `Issue [SC-XXX-NN] : <อาการสั้น ๆ>`",
         "dod": "Definition of Done",
         "dod_items": ["checklist ทุก scenario ถูกรันครบ ไม่มีข้อว่าง",
-                      "Happy + Alternate ผ่าน 100%",
+                      "Happy + Alternate ผ่าน 100% · P0 ผ่าน 100%",
                       "bug ทุกใบปิดหรือถูก accept พร้อมเหตุผล",
+                      "prod smoke ผ่านหลัง deploy",
                       "ไม่มี TODO ค้างในไฟล์ใด (`grep -rn TODO .`)"],
         "trace_title": "Traceability Matrix",
         "trace_note": "ตอบคำถาม \"ครอบคลุมหรือยัง\" ด้วยหลักฐาน — วิธีใช้ใน references/coverage-audit.md",
@@ -208,6 +236,10 @@ L = {
         "not_tested": "ไม่ได้ทดสอบ",
         "not_tested_item": "สิ่งที่ตั้งใจไม่เทส + เหตุผล",
         "smoke_exit": "เกณฑ์ปิด: ผ่าน 100% — L1 ไม่มีที่ให้ยอมรับข้อที่ไม่ผ่าน",
+        "after_deploy": "หลัง deploy",
+        "after_items": ["prod smoke: รัน flow ที่แก้ 1 รอบบน production ด้วย test account ภายใน",
+                        "rollback: redeploy เวอร์ชันก่อนหน้า — ยืนยันว่าทำได้",
+                        "เฝ้า 30 นาที: error rate ของ endpoint / หน้าที่แตะอยู่ระดับปกติ"],
         "nfr_note": "รันซ้ำทุก module · หยิบหมวดที่เกี่ยวข้องจาก references/checklist-library.md §NFR",
         "plan_note": "คัด template เต็มจาก references/planning-docs.md §1 มาเติม",
         "summary_note": "คัด template เต็มจาก references/planning-docs.md §4 มาเติมตอนปิดรอบ",
@@ -220,8 +252,9 @@ L = {
     },
 }
 
-NFR_SECTIONS = ["Performance", "Accessibility", "Compatibility", "Localization",
-                "Observability", "Change-related (confirmation + regression)"]
+NFR_SECTIONS = ["Performance", "Accessibility (WCAG 2.2 AA)", "Compatibility", "Localization",
+                "Reliability", "Observability", "Security baseline (OWASP — checklist-library §7c)",
+                "Confirmation & regression", "Production readiness"]
 
 
 def slug(text):
@@ -243,12 +276,13 @@ def parse_module(spec):
 
 
 def scenario_block(t, sid, stype):
+    prio = DEFAULT_PRIORITY[stype]
     return f"""## {sid} · <{t['todo_name']}>
 
 ````markdown
 ## {sid} · <{t['todo_name']}>
 
-**Type:** {stype}
+**Type:** {stype} · **Priority:** {prio}
 {t['persona']} <{t['todo_persona']}>
 {t['pre']} <{t['todo_pre']}>
 
@@ -283,7 +317,7 @@ def module_file(t, project, name, code, count, level):
         stype = TYPE_CYCLE[(i - 1) % len(TYPE_CYCLE)]
         if level <= 2 and stype in ("Edge Path", "Security Path"):
             stype = "Error Path"  # L1-L2 don't mandate Edge/Security
-        rows.append(f"| {sid} | <{t['todo_name']}> | {stype} |")
+        rows.append(f"| {sid} | <{t['todo_name']}> | {stype} | {DEFAULT_PRIORITY[stype]} |")
         blocks.append(scenario_block(t, sid, stype))
 
     head = f"""# [Module] {name}
@@ -304,8 +338,8 @@ def module_file(t, project, name, code, count, level):
 
 ## {t['scenarios']}
 
-| ID | Scenario | Type |
-| ---| ---| --- |
+| ID | Scenario | Type | Priority |
+| ---| ---| ---| --- |
 {chr(10).join(rows)}
 ````
 
@@ -322,6 +356,18 @@ def index_file(t, project, modules, level):
         for i, (name, code, count) in enumerate(modules, 1)
     )
     dod = "\n".join(f"- [ ] {x}" for x in t["dod_items"])
+    explore_rows = "\n".join(
+        f"| EX-{i:02d} | {name}: TODO | | 60–90 min |" for i, (name, _c, _n) in enumerate(modules, 1))
+    short_release = "" if level >= 3 else f"""
+## Release (L2 short form)
+
+> {t['release_note']}
+
+- [ ] UAT script if user-visible behaviour changes — or write "not needed: <reason>"
+- [ ] rollback path: TODO
+- [ ] prod smoke after deploy: TODO 3–5 items
+- [ ] go/no-go: P0 100% · no open Critical · open High accepted by PM: TODO name
+"""
     return f"""# {project} — {t['index_title']} (Level {level})
 
 Generated by the test-design scaffold · the 4-tier task structure and all rules live in the
@@ -349,25 +395,59 @@ test-design skill.
 
 ## {t['test_data']}
 
-| {t['name_col']} | {t['detail_col']} |
-| ---| --- |
-| TODO | TODO |
+| ID | {t['name_col']} | State required | Used by | How to create / reset | Owner |
+| ---| ---| ---| ---| ---| --- |
+| TD-01 | TODO | TODO | SC-… | TODO | TODO |
+
+No unmasked production personal data outside production — references/execution.md §3.
+
+## {t['pq']}
+
+{t['pq_note']}
+
+| # | Question | Why it matters for testing | Blocking? | Answer | Answered by |
+| ---| ---| ---| ---| ---| --- |
+| Q1 | TODO (or "none") | | | | |
+
+## {t['explore']}
+
+{t['explore_note']}
+
+| Charter | Explore … with … to discover … | Tester | Time box |
+| ---| ---| ---| --- |
+{explore_rows}
 
 ## {t['bug_template']}
 
 ```markdown
+| Field | Value |
+| ---| --- |
+| Severity | Critical / High / Medium / Low |
+| Priority | (set at triage) |
+| Scenario / criterion | SC-XXX-NN · criterion #n |
+| Environment · Build | <env + URL> · <version> |
+| Platform | <browser / device + OS> |
+| Account / role / data | <test account, TD-nn> |
+| Reproducibility | always / n of 5 |
+
+## Pre-condition
+<starting state>
+
 ## Step
-1. <reproducible step from a clearly stated starting state>
+1. <reproducible step>
 
 ## Current Result
-<what actually happens> + screenshot
+<what actually happens> + screenshot (mask personal data)
 
 ## **Expected Result**
 <what should happen — cite which criterion>
+
+## Evidence
+<request id / console error / log line>
 ```
 
 {t['bug_title_note']}
-
+{short_release}
 ## {t['dod']}
 
 {dod}
@@ -378,7 +458,7 @@ def traceability_file(t, project, modules):
     rows = []
     for _name, code, count in modules:
         for i in range(1, count + 1):
-            rows.append(f"| {code}-{i:02d} | <name> | <Type> | <R?> | | | |")
+            rows.append(f"| {code}-{i:02d} | <name> | <Type> | <P?> | <R?> | | | | |")
     types = [("Happy Path", "~20%"), ("Alternate Path", "~20%"), ("Error Path", "~30%"),
              ("Edge Path", "~15%"), ("Security Path", "~15%")]
     dist = "\n".join(f"| {n} | | | {tg} |" for n, tg in types)
@@ -388,8 +468,8 @@ def traceability_file(t, project, modules):
 
 ## 1. {t['inventory']}
 
-| ID | {t['scenario']} | Type | {t['risk']} | {t['test_task']} | {t['status']} | {t['bug']} |
-| ---| ---| ---| ---| ---| ---| --- |
+| ID | {t['scenario']} | Type | Priority | {t['risk']} | {t['test_task']} | Build | {t['status']} | {t['bug']} |
+| ---| ---| ---| ---| ---| ---| ---| ---| --- |
 {chr(10).join(rows)}
 
 {t['status_note']}
@@ -428,6 +508,7 @@ def traceability_file(t, project, modules):
 
 def smoke_file(t, project, task):
     items = "\n".join(f"- [ ] <{x}>" for x in t["smoke_items"])
+    after = "\n".join(f"- [ ] <{x}>" for x in t["after_items"])
     return f"""# Test : {task}
 
 > {project} · {t['smoke_note']}
@@ -445,6 +526,12 @@ def smoke_file(t, project, task):
 ## {t['not_tested']}
 
 - <{t['not_tested_item']}>
+
+## {t['after_deploy']}
+
+```markdown
+{after}
+```
 
 {t['smoke_exit']}
 """
@@ -484,11 +571,17 @@ TODO
 
 ## 6. Exit Criteria
 
-- [ ] TODO
+- [ ] TODO (template: references/planning-docs.md §1 "Exit Criteria" — includes P0 100%, UAT accepted, rollback rehearsed)
 
 ## 7. Roles
 
-TODO
+| Role | Name | Responsibility |
+| ---| ---| --- |
+| QA Lead | TODO | plan, evidence, completion report |
+| Product Manager | TODO | product questions, risk acceptance, go/no-go (business) |
+| Engineering Lead | TODO | deploy, rollback, go/no-go (production) |
+| Business owner | TODO | runs and signs UAT |
+| Security / DPO | TODO | security paths, personal data |
 
 ## 8. Schedule
 
@@ -497,7 +590,7 @@ TODO
 
 
 def summary_file(t, project):
-    return f"""# Test Summary Report — {project}
+    return f"""# Test Completion Report — {project}
 
 > {t['summary_note']}
 
@@ -506,6 +599,78 @@ def summary_file(t, project):
 | {t['item']} | {t['reason']} | {t['risk_accepted']} |
 | ---| ---| --- |
 | TODO | | |
+
+## 8. {t['signoff']}
+
+| Role | Name | Decision | Date |
+| ---| ---| ---| --- |
+| QA Lead (evidence is accurate) | | | |
+| Product Manager (business risk accepted) | | | |
+| Engineering Lead (deploy + rollback ready) | | | |
+"""
+
+
+def release_file(t, project, level):
+    sec = "\n| Security / Compliance | | | |" if level >= 4 else ""
+    return f"""# Release Readiness — {project}
+
+> {t['release_note']}
+
+## 1. UAT
+
+| UAT | Business outcome | Covers | Runner | Result | Signed |
+| ---| ---| ---| ---| ---| --- |
+| UAT-01 | TODO | SC-… | TODO | | |
+
+Script template: references/release-readiness.md §2 (business language, ≤12 steps, realistic data).
+
+## 2. Deploy plan
+
+| # | Step | Who | Verify by | If it fails |
+| ---| ---| ---| ---| --- |
+| 1 | TODO | | | |
+
+Feature flag: TODO name + default state, or "none".
+Migration backward-compatible with the previous app version: TODO yes / no + plan.
+
+## 3. Rollback
+
+- **Trigger:** TODO (prod smoke fails · error rate > x% for 5 min · Critical reported)
+- **Decision owner:** TODO
+- **Fastest path:** TODO (flag off / redeploy previous version) — drill time: ___ min
+- **Not reversible:** TODO (emails sent, payments captured, partner webhooks)
+
+## 4. Prod smoke (post-deploy)
+
+```markdown
+- [ ] version shown is the expected one
+- [ ] TODO the new feature's Happy path once, internal test account
+- [ ] TODO the most-used existing flow still completes
+- [ ] third-party calls hit production, not sandbox
+- [ ] no new error types in the error tracker; error rate and p95 normal
+- [ ] test data created above cleaned up or tagged
+```
+
+## 5. Watch window
+
+| Signal | Kind | Source | Normal | Alarm | Owner |
+| ---| ---| ---| ---| ---| --- |
+| TODO | health | | | | |
+| TODO | product | analytics | | | PM |
+
+Analytics events verified: references/checklist-library.md §9c.
+
+## 6. Go / No-Go
+
+Checklist: references/release-readiness.md §3.
+
+☐ GO ☐ GO with conditions ☐ NO-GO — conditions:
+
+| Role | Name | Decision | Date |
+| ---| ---| ---| --- |
+| Product Manager | | | |
+| QA Lead | | | |
+| Engineering Lead | | | |{sec}
 """
 
 
@@ -559,7 +724,10 @@ def main():
                   traceability_file(t, args.project, modules))
         if args.level >= 4:
             write(f"{n + 3:02d}-test-plan.md", plan_file(t, args.project))
-            write(f"{n + 4:02d}-test-summary-report.md", summary_file(t, args.project))
+            write(f"{n + 4:02d}-test-completion-report.md", summary_file(t, args.project))
+        if args.level >= 3:
+            nr = n + (5 if args.level >= 4 else 3)
+            write(f"{nr:02d}-release-readiness.md", release_file(t, args.project, args.level))
 
     print(t["wrote"].format(n=len(written), out=out))
     for f in written:

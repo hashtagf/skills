@@ -56,12 +56,16 @@ of repeating them.
 
 ## Scenarios
 
-| ID | Scenario | Type |
-| ---| ---| --- |
-| SC-XXX-01 | <scenario name> | Happy Path |
-| SC-XXX-02 | <scenario name> | Error Path |
-| SC-XXX-03 | <scenario name> | Security Path |
+| ID | Scenario | Type | Priority |
+| ---| ---| ---| --- |
+| SC-XXX-01 | <scenario name> | Happy Path | P0 |
+| SC-XXX-02 | <scenario name> | Error Path | P2 |
+| SC-XXX-03 | <scenario name> | Security Path | P1 |
 ```
+
+**Priority (P0–P3) sets the running order** when time is short and decides which regression
+tier a scenario lands in — definitions and derivation from the risk matrix are in
+`execution.md` §1. Set it when the list is confirmed; keep P0 to roughly 10–15% of scenarios.
 
 **Shared Rules is what keeps a large module from bloating.** Anything true for every scenario —
 token lifetimes, currency handling, audit logging, rate limits — goes here once, and each
@@ -78,7 +82,7 @@ cite them. To add scenarios, append — never insert in the middle.
 ```markdown
 ## SC-XXX-01 · <scenario name>
 
-**Type:** Happy Path
+**Type:** Happy Path · **Priority:** P0
 **Persona:** <who acts + their context>
 **Pre-condition:** <the starting state, stated so anyone can reproduce it>
 
@@ -100,6 +104,10 @@ cite them. To add scenarios, append — never insert in the middle.
 already verified", because half the pre-condition hides inside the persona. For Security paths
 write the persona as "Attacker — has a proxy pool across many IPs" so whoever runs it knows
 what to prepare.
+
+**Given / When / Then is fine** if the team writes BDD (ATDD): keep one observable outcome
+per `Then` / `And` line and put each line as a criterion bullet — the 1:1 checklist and
+`checklist.py` work the same. The rules about checkable criteria don't change with the syntax.
 
 **Aim for 5–10 criteria.** Fewer than 5 usually means the thinking isn't finished; more than
 10 usually means the scenario should be split.
@@ -126,8 +134,23 @@ scenario (one bug usually spans several scenarios, and scenarios should stay spe
 becoming bug archives).
 
 ```markdown
+| Field | Value |
+| ---| --- |
+| Severity | Critical / High / Medium / Low (rubric below) |
+| Priority | set at triage by PM/lead — leave blank when filing |
+| Scenario / criterion | SC-XXX-NN · criterion #n |
+| Environment | staging / UAT / production · URL |
+| Build / version | <commit or version shown in the app> |
+| Platform | <browser + version / device + OS> |
+| Account / role / data | <test account, role, data id — e.g. TD-02, order #1042> |
+| Reproducibility | always / 3 of 5 / once (attempts made) |
+| Regression? | worked in <version> ☐ yes ☐ no ☐ unknown |
+
+## Pre-condition
+<the starting state, stated so anyone can reproduce it>
+
 ## Step
-1. <reproducible step from a clearly stated starting state>
+1. <reproducible step>
 2. ...
 
 ## Current Result
@@ -135,15 +158,31 @@ becoming bug archives).
 
 ## **Expected Result**
 <what should happen — cite which criterion or business rule>
+
+## Evidence
+<console error, failing request + response, request id / trace id, log line, timestamp>
+
+## Impact
+<who hits this, how often, workaround if any>
 ```
 
 **The expected result must cite a criterion.** If you can't cite one, either the spec doesn't
 cover this (add the criterion first) or it's a personal opinion rather than a bug (talk to the
 PM before filing).
 
+**Build, environment, and reproducibility are not optional.** A bug without the build can't be
+verified as fixed; one without reproducibility gets bounced as "works on my machine". For an
+intermittent bug, run it 5 times and write the rate — never file "sometimes".
+
+**Never paste real personal data, passwords, or tokens** into a ticket or screenshot — mask
+them. Tickets are read far more widely than the system they describe.
+
+How the bug moves from filed to closed (triage, verify, reopen, accepted risk) is in
+`execution.md` §5.
+
 ### Severity rubric
 
-The summary report buckets bugs into four severities, so they need one shared definition —
+The completion report buckets bugs into four severities, so they need one shared definition —
 otherwise every ticket becomes a negotiation. Severity is about consequence, not effort to fix.
 
 | Severity | Definition | Examples |
@@ -208,7 +247,15 @@ L1 has no scenario specs — one task named `Test : <work item>`.
 
 ## Not tested
 - <what you deliberately skipped + why>
+
+## After deploy
+- [ ] prod smoke: <the fixed flow once on production with the internal test account>
+- [ ] rollback: redeploy <previous version> — confirmed possible
+- [ ] watch 30 min: error rate for <endpoint / screen> stays at baseline
 ```
+
+The "After deploy" block is three lines, not a plan — but a fix that was never checked on
+production isn't verified. Full release guidance is in `release-readiness.md`.
 
 ## 7. Banned words in acceptance criteria
 

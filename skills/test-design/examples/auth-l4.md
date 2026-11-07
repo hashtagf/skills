@@ -44,7 +44,7 @@ where they don't belong.
 ````markdown
 ## SC-LOGIN-01 · Log in with email and password
 
-**Type:** Happy Path
+**Type:** Happy Path · **Priority:** P0
 **Persona:** Registered User — already has an account
 **Pre-condition:** account exists, email already verified, account not locked
 
@@ -87,7 +87,7 @@ what makes the QA checklist tickable without opening the code.
 ````markdown
 ## SC-MFA-06 · Attempt to skip the 2FA step (bypass)
 
-**Type:** Security Path
+**Type:** Security Path · **Priority:** P1
 **Persona:** Attacker who already knows the password — trying to get past the 2FA step
 **Pre-condition:** knows the email + password of an account with 2FA enabled, and is sitting on the 2FA code screen
 
@@ -139,11 +139,35 @@ which would bloat the set and obscure what the actual flow is.
 13-non-functional.md     NFR, 8 areas + pass thresholds
 14-test-plan.md          scope, strategy, environment, risks R1-R10, entry/exit, roles, schedule
 15-traceability-matrix.md  64-row inventory + distribution + flow×type + bug→scenario
-16-test-summary-report.md  closing template
+16-test-completion-report.md  closing template + sign-off
+17-release-readiness.md  UAT, deploy plan, rollback + drill, prod smoke, watch window, go/no-go
 ```
+
+(The original set predates files 17 and the Priority field; they were added when the skill
+gained release readiness, and are shown here so the layout matches what `scaffold.py` emits —
+the scaffold numbers files by module count, so exact numbers differ.)
 
 The risk matrix from that set, as an example of what an auth system's risks look like:
 R1 auth bypass · R2 data leaking across accounts · R3 account takeover via password reset ·
 R4 user permanently locked out · R5 sessions not revoked after a password change ·
 R6 successful brute force / email spam · R7 broken token refresh blocking all use ·
 R8 email never reaching users · R9 minor UX defects · R10 untranslated strings / wrong times
+
+## Priority and release — how this set maps to production
+
+**P0 (9 of 64, ~14%) — runs on every deploy and as prod smoke:** SC-REG-01, SC-VERIFY-01,
+SC-LOGIN-01, SC-OAUTH-01, SC-MFA-01, SC-PWD-01, SC-SESSION-01, SC-LOGOUT-01, SC-AUTHZ-01 — the
+Happy path of each user-facing flow. Every Security path is at least P1, so the core regression
+tier (P0 + P1) contains all 16 of them.
+
+**Prod smoke after an auth release (internal test account, ~10 min):** register a fresh
+`qa+<date>@` address · verify via the real email provider · log in · log in with Google · log
+out and confirm the session is revoked · request a reset email and check it arrives from the
+production sender · no new error types in the tracker.
+
+**Rollback note specific to auth:** rolling back code does not un-send verification or reset
+emails, and tokens issued by the new version must still validate (or be deliberately revoked) on
+the old one — test that in the rollback drill, or a rollback logs everyone out.
+
+**Go / no-go signers for this set:** PM, QA lead, engineering lead, and security — L4.
+
