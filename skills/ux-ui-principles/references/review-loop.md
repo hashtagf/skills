@@ -101,6 +101,9 @@ Mapping to the scale in [validation](validation.md) and
 [templates](../assets/templates.md): blocker → Critical or High; major →
 Medium; minor → Low; note → Low (taste). In the HTML report, P0 = blocker and P1 = major. "Critical" here is a severity, not the
 Critical rigor tier ([framework](framework.md)).
+Use this line format while critiquing and fixing; when the deliverable is the audit
+itself (AUDIT mode), convert the lines into the Audit finding table in
+[templates](../assets/templates.md).
 
 **Persona walk.** Walk the main task as 2–3 of: impatient power user (shortcuts, bulk
 actions) · first-timer (jargon, no undo) · keyboard / screen-reader user · stress tester

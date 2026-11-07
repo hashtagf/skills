@@ -280,8 +280,11 @@ outcome first; decisions with rationale; findings by task impact with
 severity, confidence and effort; what was tested vs not; assumptions and
 decisions to confirm; success metric, guardrail and when to review after
 release. Record approved decisions in DESIGN.md/design context only when asked
-or host-owned; re-run `design_md_check.py` after editing DESIGN.md. [Validation](validation.md) before claiming success;
-templates in [output templates](../assets/templates.md).
+or host-owned; re-run `design_md_check.py` after editing DESIGN.md. [Validation](validation.md) before claiming success.
+Pick the template by mode from [output templates](../assets/templates.md) "Which
+template, when" (AUDIT → Audit finding; DESIGN → Design decision + Validation
+plan; BUILD/IMPROVE → Design decision for choices to confirm; RESEARCH → Research
+synthesis), at the depth the rigor tier sets.
 
 **Ask.**
 - ASK to **approve decisions that become system rules** (new token, pattern
@@ -442,7 +445,7 @@ Critical) sets how much to specify and verify; *rule classes* (Floor / Reflex / 
 | [render verification](render-verification.md) | `render_check.js` run order, contrast, slop and DESIGN.md checks, failure table | 7 |
 | [i18n & performance](i18n-performance.md) | Thai calendar/currency, expansion, two-language checks, Core Web Vitals | 4, 7 |
 | [measurement](measurement.md) | Metrics, instrumentation, experiments, design QA | 7 |
-| [validation](validation.md), [output templates](../assets/templates.md) | Research methods, severity, report structure | 8 |
+| [validation](validation.md), [output templates](../assets/templates.md) | Research methods, severity scale; which output template per mode, depth per tier, map of the other report formats | 8 |
 | [design context](../assets/design-context.md) | The context card | all |
 
 | Script | Phase |

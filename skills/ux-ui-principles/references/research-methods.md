@@ -144,6 +144,9 @@ real Thai labels users would see. Analysis and IA decisions: [navigation-groupin
 
 ## Reporting template
 
+For a study run with real users. A synthesis of published sources (RESEARCH mode)
+uses Research synthesis in [output templates](../assets/templates.md) instead.
+
 | Section | Content |
 |---|---|
 | Decision it informs | One sentence |

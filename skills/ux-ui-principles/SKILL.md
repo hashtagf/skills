@@ -101,6 +101,11 @@ Every file, script and the phases that use them: [design workflow](references/de
 | IMPROVE | Existing UI + a change | 0, 4–8 scoped | Scoped change, re-verified, previous version kept |
 | REFINE | A refinement verb or "ทำให้สวยขึ้น / ดูรก / อ่านยาก" | 0, 6 → verb → 7–8 | Only that verb's change, re-rendered |
 
+Shape the deliverable with [output templates](assets/templates.md) "Which template,
+when": RESEARCH → Research synthesis · DESIGN → Design decision + Validation plan ·
+ARCHITECT / BUILD / IMPROVE → Design decision for choices to confirm · AUDIT →
+Audit finding · ANSWER / REFINE → none. Field depth follows the rigor tier.
+
 Phases: **0 Inspect** (DESIGN.md, tokens, components, screens) → **1 Understand**
 (context card: role, job, device, data, risk → **rigor tier** Light / Standard /
 Critical, metric + guardrail) → **2 Architect** (journey with a failure path, page

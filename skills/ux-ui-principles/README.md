@@ -150,7 +150,7 @@ JSON เสีย, id ไม่รู้จัก) · **3** ไม่ได้�
 |---|---|---|---|
 | `assets/design-context.md` | การ์ด context ของโปรเจกต์ | ส่งบริบทเดียวกันข้ามทุก phase  | phase 1 |
 | `assets/page-spec.md` | page spec 16 แถว | ข้อกำหนดหน้าที่ทดสอบได้ | DESIGN mode |
-| `assets/templates.md` | รูปแบบผลลัพธ์ (decision, audit, research, validation plan) | ผลลัพธ์รูปแบบเดียวกันทุกครั้ง | ทุกโหมด |
+| `assets/templates.md` | รูปแบบผลลัพธ์ (decision, audit, research, validation plan) + ตารางเลือก template ตามโหมด/tier และแผนที่ format อื่น | ผลลัพธ์รูปแบบเดียวกันทุกครั้ง | RESEARCH, DESIGN, ARCHITECT, BUILD, IMPROVE, AUDIT (ไม่ใช้กับ ANSWER/REFINE) |
 | `assets/evidence.md` | ค่าวัดจาก site/gallery จริง | ที่มาของตัวเลขใน visual-system Part C | อ้างอิง |
 | `assets/layouts/` | blueprint หน้า 44 แบบ (A01–A08, D01–D06 …) + worked examples ภาษาไทย | โครงหน้าที่มี state และ acceptance | `layouts/index.md` ก่อน แล้วเปิดหมวดเดียว |
 | `assets/backoffice/styles.json` | 17 look ของหลังบ้าน: สี, 5 status tone, density ปกติ + compact, รูปทรง | **template UI หลังบ้าน**: ค่าเดียวที่ preview และ `design_md.py --backoffice` ใช้ | back-office.md |
