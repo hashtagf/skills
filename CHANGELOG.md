@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (ux-ui: screen and text density)
+- `visual-system.md` "Density" (owner): comfortable default + always available, compact opt-in app-wide (not per page), type scale and touch-target floor kept, alerts / small-target controls not fully compacted (Cloudscape, Material); text density per Tullis (overall/local density, grouping) and the "too much text" clutter item (Lewis & Sauro 2024).
+- Thai measure: no published Thai line-length study found, so measured 10 Thai sites (article pages, 1440/390): desktop 53–95 graphemes/line, median ~70, ~1.75 graphemes/em; phone 30–43. Rule: Thai prose `max-width: 40em`, not `ch`; count per grapheme. Table in `assets/evidence.md` "Thai line length".
+- `content-design.md` "Length caps": per-slot microcopy caps (button, label, helper, error, empty state, 25-word sentence), Thai word count with `Intl.Segmenter`, 30–40% translation headroom, counter rules.
+- `measurement.md` "Perceived clutter": the five validated PCW items + overall item; content clutter → remove, design clutter → reorganize.
+- `render_check.js` / `_composition.js` NOTEs: real characters per line (Thai per grapheme; > 90 Latin / > 80 Thai), > 8-line phone paragraph, running text > 50% of a public first screen, tables with different row heights (mixed density). Measure check now also sees `<p><span>…</span></p>` and sticky-wrapped content.
+- Sources S110–S116; SKILL.md routes density / "แน่นไป" / copy length / "looks cluttered"; evals 127–130 (routing 4/4); 4 regression cases.
+
 ## [0.15.0] - 2026-11-08
 
 ### Added (test-design: Senior QA + PM / production readiness)

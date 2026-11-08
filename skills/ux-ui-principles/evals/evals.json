@@ -2383,6 +2383,100 @@
       "must_not_read": [
         "back-office"
       ]
+    },
+    {
+      "id": 127,
+      "field": "answer",
+      "category": "density",
+      "prompt": "ตารางในหลังบ้านเราแน่นไป บางคนบอกอ่านยาก บางคนอยากให้แน่นกว่านี้ ควรทำ compact mode ยังไงดี",
+      "expected_output": "Comfortable stays the default and always available; compact is a user-chosen setting applied app-wide, not per page; compact shrinks heights and spacing but keeps the type scale and touch-target floor; alerts and validation messages are not fully compacted; density choice by role and frequency of use.",
+      "files": [],
+      "assertions": [
+        "Keeps comfortable as the default and offers compact as an opt-in the user switches",
+        "Applies one density across the whole app instead of page by page",
+        "Keeps the type scale and the touch-target floor when compact",
+        "Says alerts / validation messages or small-target controls do not take the full compact step"
+      ],
+      "expected_reads": [
+        [
+          "visual-system",
+          "back-office"
+        ]
+      ],
+      "must_not_read": [
+        "marketing-copy",
+        "email-design"
+      ]
+    },
+    {
+      "id": 128,
+      "field": "answer",
+      "category": "density",
+      "prompt": "บทความภาษาไทยบนเว็บควรกว้างกี่ตัวอักษรต่อบรรทัด ใช้ max-width 65ch แบบภาษาอังกฤษได้ไหม",
+      "expected_output": "No published Thai line-length study; measured Thai sites run 55–80 graphemes per line on desktop (median ~70), ~1.75 graphemes per em; set Thai prose at about 40em rather than ch; count graphemes, not code points; phone 35–43.",
+      "files": [],
+      "assertions": [
+        "Says there is no published research for a Thai measure and the value is measured practice",
+        "Gives a Thai range in graphemes (about 55–80, ~70) or about 40em",
+        "Recommends em over ch for Thai and explains ch is the width of a Latin 0",
+        "Counts Thai per grapheme, not per code point (tone marks / vowels have no width)"
+      ],
+      "expected_reads": [
+        [
+          "visual-system"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
+    },
+    {
+      "id": 129,
+      "field": "answer",
+      "category": "density",
+      "prompt": "error message กับ helper text ในฟอร์มควรยาวแค่ไหน แล้วภาษาไทยนับคำยังไง ไม่มีเว้นวรรค",
+      "expected_output": "Starting caps: helper 1 sentence (max 2), error 1–2 sentences (max 3), button 1–3 words, label 1–4; sentences under 25 words; count Thai words with Intl.Segmenter; 30–40% translation room; counter separate from hint when input is limited.",
+      "files": [],
+      "assertions": [
+        "Gives per-slot caps for helper and error text",
+        "Says to count Thai words with Intl.Segmenter (or a Thai word segmenter), not by spaces",
+        "Mentions translation headroom or not sizing controls to one language",
+        "Says over-length copy is rewritten or split, not shrunk or truncated"
+      ],
+      "expected_reads": [
+        [
+          "content-design"
+        ]
+      ],
+      "must_not_read": [
+        "back-office",
+        "data-visualization"
+      ]
+    },
+    {
+      "id": 130,
+      "field": "answer",
+      "category": "density",
+      "prompt": "ลูกค้าบอกว่าเว็บเรารก ตัวหนังสือเยอะ อ่านแล้วเหนื่อย จะวัดยังไงว่ารกจริงไหมก่อนแก้ แล้วแก้ตรงไหน",
+      "expected_output": "Measure with the five-item Perceived Clutter of Websites questionnaire (content vs design clutter) plus render_check density NOTEs (measure, tall phone paragraphs, first-screen text coverage); content clutter → remove, design clutter → group, chunk, white space; keep density as low as the task allows.",
+      "files": [],
+      "assertions": [
+        "Proposes a perceived-clutter measure with users (PCW items or equivalent) before redesigning",
+        "Separates content clutter (remove) from design clutter (reorganize)",
+        "Names concrete text-density checks: line length, long paragraphs, text share of the first screen",
+        "Fixes by grouping, chunking and white space rather than only shrinking text"
+      ],
+      "expected_reads": [
+        [
+          "measurement"
+        ],
+        [
+          "visual-system"
+        ]
+      ],
+      "must_not_read": [
+        "back-office"
+      ]
     }
   ]
 }

@@ -104,17 +104,64 @@ module.exports = async function composition({ w, first }) {
   };
   const quiet = /muted|meta|caption|hint|small|note|sub|fine|legal|foot/i;
   const paras = texts.filter(e => e.tagName === 'P' && words(e.innerText) >= 8 && !quiet.test(typeof e.className === 'string' ? e.className : '') && !e.closest('footer,small,figcaption'));
-  const small = [], weak = [], wide = [];
+  const small = [], weak = [], wide = [], tall = [];
+  // Measure (visual-system.md "Content widths"): real characters per full line. Thai is counted per grapheme
+  // (tone marks and upper/lower vowels have no width); Latin per character. Lines from the client rects.
+  const gseg = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('th', { granularity: 'grapheme' }) : null;
+  const glyphs = t => gseg ? [...gseg.segment(t)].length : t.length;
+  const lineCount = e => {
+    const lh = parseFloat(getComputedStyle(e).lineHeight) || parseFloat(getComputedStyle(e).fontSize) * 1.4;
+    // text-node rects only: a range over the element also returns the boxes of inline wrappers (double count)
+    const rs = [], tw = document.createTreeWalker(e, NodeFilter.SHOW_TEXT); let tn;
+    while ((tn = tw.nextNode())) { const rg = document.createRange(); rg.selectNodeContents(tn); rs.push(...[...rg.getClientRects()].filter(x => x.width > 1)); }
+    const tops = rs.map(x => x.top).sort((a, b) => a - b);
+    let n = 0, last = -1e9; for (const t of tops) { if (t - last > lh / 2) { n++; last = t; } }
+    return { n, ink: rs.reduce((a, x) => a + x.width, 0) };
+  };
   for (const p of paras) {
     const s = getComputedStyle(p), fs = parseFloat(s.fontSize);
     if (fs < 16) small.push(sel(p));
     const bg = bgOf(p);
     if (bg) { const cr = C.contrast(over(toRGBA(s.color), bg), bg); if (cr < 7) weak.push(`${sel(p)} ${cr.toFixed(1)}:1`); }
-    if (p.getBoundingClientRect().width / (fs * 0.5) > 88) wide.push(sel(p));
+  }
+  // Measure and paragraph height: every visible paragraph, including CMS markup (<p><span>text</span></p>)
+  // and content inside a sticky wrapper, which the own-text list above leaves out. Capped at 40.
+  const mParas = [...document.querySelectorAll('p')].filter(e => vis(e) && words(e.innerText) >= 8 && !quiet.test(typeof e.className === 'string' ? e.className : '') && !e.closest('footer,small,figcaption,nav')).slice(0, 40);
+  for (const p of mParas) {
+    const fs = parseFloat(getComputedStyle(p).fontSize);
+    const txt = p.innerText.replace(/\s+/g, ' ').trim(), lc = lineCount(p), lines = lc.n;
+    const thai = (txt.match(/[\u0E00-\u0E7F]/g) || []).length > txt.length * 0.4;
+    if (lines >= 3) {
+      const cs = getComputedStyle(p), inner = p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const cpl = Math.round(glyphs(txt) * inner / Math.max(lc.ink, inner)); // characters that fit one full line
+      if (cpl > (thai ? 80 : 90)) wide.push(`${sel(p)} ~${cpl} ${thai ? 'Thai graphemes' : 'chars'}/line`);
+    } else if (!thai && p.getBoundingClientRect().width / (fs * 0.5) > 88) wide.push(`${sel(p)} > 88ch wide`);
+    if (vw <= 480 && lines > 8 && !p.closest('article, [class*=prose], [class*=article]')) tall.push(`${sel(p)} ${lines} lines`);
   }
   if (small.length) notes.push(`${small.length} paragraph(s) under 16px: ${small.slice(0, 3).join(', ')}`);
   if (weak.length) notes.push(`${weak.length} paragraph(s) below 7:1 (body text reads unfinished in grey): ${weak.slice(0, 3).join(', ')}`);
-  if (wide.length) notes.push(`${wide.length} paragraph(s) wider than ~88ch: ${wide.slice(0, 3).join(', ')}`);
+  if (wide.length) notes.push(`${wide.length} paragraph(s) past the measure (Latin ~90 chars, Thai ~80 graphemes per line; aim 65ch / 40em): ${wide.slice(0, 3).join(', ')}`);
+  if (tall.length) notes.push(`${tall.length} paragraph(s) taller than 8 lines on a phone with no break; split, add a subhead or a list: ${tall.slice(0, 3).join(', ')}`);
+  // Text density on the first screen of a public page: area of the text line boxes vs the viewport
+  if (!app) {
+    let ink = 0;
+    for (const e of texts) {
+      if (/^(H1|H2|H3|BUTTON|A|LABEL)$/.test(e.tagName)) continue;
+      for (const n of e.childNodes) { if (n.nodeType !== 3 || !n.nodeValue.trim()) continue;
+      const rg = document.createRange(); rg.selectNodeContents(n);
+      for (const x of rg.getClientRects()) { const t = Math.max(0, x.top), b = Math.min(vh, x.bottom); if (b > t && x.right > 0 && x.left < vw) ink += (Math.min(vw, x.right) - Math.max(0, x.left)) * (b - t); } }
+    }
+    if (ink / (vw * vh) > 0.5) notes.push(`running text covers ~${Math.round(100 * ink / (vw * vh))}% of the first screen; a public first screen reads as a wall of text (visual-system.md "Density")`);
+  }
+  // Mixed density: tables on one page with different row heights (one density per app)
+  const rowH = [...document.querySelectorAll('table, [role=grid]')].filter(vis).map(t => {
+    const hs = [...t.querySelectorAll('tbody tr, [role=row]')].filter(vis).slice(0, 30).map(r => r.getBoundingClientRect().height).sort((a, b) => a - b);
+    return hs.length >= 4 ? [sel(t), Math.round(hs[Math.floor(hs.length / 2)])] : null;
+  }).filter(Boolean);
+  if (rowH.length >= 2) {
+    const lo = rowH.reduce((a, b) => (b[1] < a[1] ? b : a)), hi = rowH.reduce((a, b) => (b[1] > a[1] ? b : a));
+    if (hi[1] > lo[1] * 1.25) notes.push(`mixed density: table rows ${lo[1]}px in ${lo[0]} vs ${hi[1]}px in ${hi[0]}; use one density per app`);
+  }
   const tl = texts.filter(e => /^(P|H1|H2|H3|LI)$/.test(e.tagName));
   const totalLen = tl.reduce((a, e) => a + e.innerText.length, 0);
   const centred = tl.filter(e => getComputedStyle(e).textAlign === 'center').reduce((a, e) => a + e.innerText.length, 0);

@@ -183,6 +183,24 @@ baymard.com and notifications.service.gov.uk were blocked and are **partial**.
 | S109 | [Simple Icons DISCLAIMER](https://github.com/simple-icons/simple-icons/blob/develop/DISCLAIMER.md), README (CDN usage), npm `simple-icons` 16.36.0 data file, read 2026-11-06 | verified (official docs) | Project CC0 but icons are trademarks; check per-icon licence and brand guidelines; seek permission; 3,467 icons, 224 with licence, 839 with guidelines |
 | S102 | Open Design, design-system study guides (`https://open-design.ai/design-system/<slug>/`, `DESIGN-<slug>.md`), 126 systems, fetched 2026-11-05 | secondary study of public systems, not the systems' own docs; keyword-counted, not manually read in full | All 126 guides copied unchanged to `assets/design-systems/` (repo Apache-2.0). Token layers and roles, focus-ring and radius/breakpoint distributions, public-sector service flows, identity and provenance rules. Check the linked official source before citing an exact value |
 
+## Sources added 2026-11-08 (screen and text density)
+
+Access scope: web search and direct fetch on 2026-11-08. Cloudscape and the
+Lewis & Sauro paper were read directly; Material's density article returned
+403/redirect (**partial**, scale details not re-read); no Thai line-length study
+was found in English or Thai searches, so the Thai measure is our own measurement
+([evidence.md](../assets/evidence.md) "Thai line length").
+
+| ID | Source / date if available | Status | Authority and use |
+|---|---|---|---|
+| S110 | [Cloudscape — Content density](https://cloudscape.design/foundation/visual-foundation/content-density/), [Density settings](https://cloudscape.design/patterns/general/density-settings/), read 2026-11-08 | verified (official docs) | AWS design system; comfortable default and always available, compact opt-in for data-heavy views, app-wide not per page, alerts and small-target controls not fully compacted |
+| S111 | [Material — Applying density](https://material.io/design/layout/applying-density.html) | partial (page not re-read) | Google; density shrinks component dimensions while padding and alignment stay; never a step that breaks the component |
+| S112 | Tullis, T. S. (1983). The formatting of alphanumeric displays: a review and analysis. *Human Factors* 25(6), as summarised in S113 | secondary (via S113) | Overall density, local density, grouping, layout complexity; keep density low while showing task data, white space lowers local density, grouping helps |
+| S113 | Lewis, J. R. & Sauro, J. (2024). [Measuring the Perceived Clutter of Websites](https://doi.org/10.1080/10447318.2024.2359205). *IJHCI* | verified (paper read) | Five-item PCW questionnaire (2 content, 3 design clutter incl. "There was too much text"); clutter drives SUPR-Q appearance and usability; consumer websites |
+| S114 | [WCAG 2.2 SC 1.4.8 Visual Presentation](https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html) | verified (source) | W3C AAA; line width ≤ 80 characters (≤ 40 CJK); Thai not covered |
+| S115 | Design-system content guides on microcopy length, e.g. [microcopy guidelines](https://iagodantasf.github.io/tech-studies/roadmaps/skill-based/design-system/lessons/content-guidelines/microcopy-guidelines); IBM Carbon content guidelines (sentences < 25 words) | secondary; numbers vary between sources | Starting caps per slot (button, label, helper, error); translation headroom 30–40% |
+| S116 | [GOV.UK Design System — Character count](https://design-system.service.gov.uk/components/character-count), [Twilio Paste — Help text](https://paste-docs-n6rk1da6d-twilio.vercel.app/components/help-text) | verified (official docs) | Show a counter when input is limited, separate from hint and error; state the limit in help text |
+
 ## Maintenance
 
 For changed guidance, record the access date, original URL, authority, claim,

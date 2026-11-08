@@ -24,6 +24,26 @@ Not every category suits every page; choose few and meaningful.
 Public-service programmes commonly report completion rate, user satisfaction,
 cost per transaction and digital take-up; adapt rather than copy. [S62]
 
+## Perceived clutter (when density is the question)
+
+When a page is suspected of being too dense or "too much text", ask the five
+Perceived Clutter of Websites items after the task, 5-point agreement
+(1 strongly disagree – 5 strongly agree) [S113]:
+
+| Factor | Item |
+|---|---|
+| Content clutter | These types of content [ads, videos, suggested posts] made up a lot of the clutter. |
+| Content clutter | These types of content [ads, videos, suggested posts] took up too much space. |
+| Design clutter | The layout was unpleasant. |
+| Design clutter | There was too much text. |
+| Design clutter | There was too much visual noise. |
+
+Add the overall item "Overall, I thought the website was too cluttered" (0–10).
+Content clutter → remove; design clutter → reorganize (group, chunk, add white
+space). Validated on consumer websites; treat results on back-office tools as
+indicative. Translate the items for Thai participants and keep the bracket
+examples relevant to the product.
+
 ## Instrumentation spec
 
 Write analytics requirements with the design, not after release.

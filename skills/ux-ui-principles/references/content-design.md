@@ -63,6 +63,29 @@ you cannot confirm (see unknown outcomes in [patterns.md](patterns.md#async-and-
 - **Length:** Thai labels can be shorter or longer than English; never fix
   button widths from one language.
 
+## Length caps (text density in components)
+
+No standard sets microcopy length; these are starting caps from design-system
+content guides, to flag copy for a rewrite, not to truncate it. [S115]
+
+| Slot | Aim | Cap | Thai note |
+|---|---|---|---|
+| Button / menu item | 1–3 words | 4 words | verb + object, ≤ ~14 graphemes on a phone button |
+| Field label | 1–4 words | 6 words | short noun phrase |
+| Helper / hint text | 1 sentence | 2 sentences | put constraints here, not only in the error |
+| Error message | 1–2 sentences | 3 sentences | what happened + how to fix |
+| Empty state body | 1–2 sentences | 3 sentences | one next action |
+| Any UI sentence | — | 25 words | Carbon voice guideline |
+
+- Count Thai with `Intl.Segmenter('th', {granularity: 'word'})`; Thai has no
+  spaces, so `split(' ')` counts a whole sentence as one word.
+- Leave about 30–40% room for translation in buttons and errors; never size a
+  control to one language.
+- When input is length-limited, show a counter and state the limit in the hint;
+  the counter is separate from hint and error text. [S116]
+- Copy over the cap is a content problem: cut, split into steps, or move detail
+  behind a link; do not shrink the type to fit.
+
 ## Terminology glossary
 
 Maintain a glossary in [design-context.md](../assets/design-context.md):

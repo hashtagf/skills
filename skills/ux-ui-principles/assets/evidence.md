@@ -206,6 +206,32 @@ Radii/gaps listed most-frequent first.
 | agoda.com/th-th | Thonburi | 14/18.2, 16/20.3, 12/15 | ~1.27 lh — cramped marks; counter-example |
 | lazada.co.th | Noto Sans | 14/18, 12/13.8 body | dense commerce; low line-height |
 
+### Thai line length (2026-11-08)
+
+No published Thai line-length study was found, so this was measured. Script:
+article page per site, Thai paragraphs ≥ 160 characters with ≥ 50% Thai, not in
+nav/aside/footer/table, inside the viewport; lines found by grouping each
+grapheme's rect top; median of full lines (last line dropped); median over up
+to 10 paragraphs. Graphemes = `Intl.Segmenter('th', {granularity: 'grapheme'})`.
+
+| Site (article) | Font | 1440: graphemes/line | width (em) | 390: graphemes/line | size / lh |
+|---|---|---|---|---|---|
+| bbc.com/thai | Tahoma | 68 | 40.3 | 41 | 16 / 1.75 (1.5 phone) |
+| thestandard.co | Helvetica Neue → Thai fallback | 95 | 51.6 | 40 | 16 / 1.5 |
+| thairath.co.th | Thongterm | 56 | 33.8 | 37 | 16 / 2.25 |
+| sanook.com | Helvetica Neue → Thai fallback | 68 | 38.2 | — | 18 / 1.5 |
+| thaipbs.or.th | Thongterm | 81 | 44.1 | 39 | 18 / 1.7 |
+| posttoday.com | Prompt | 80 | 45.3 | 30 | 18 / 1.65 |
+| th.wikipedia.org | system sans | 61 | 57 (mixed) | 37 | 16 / 1.63 |
+| bot.or.th | Kanit | 53 | 28.8 | 40 | 18 / 1.4 |
+| apple.com/th/privacy | SF Pro TH | 75 (n=3) | 43.8 | 28 | 21 / 1.33 |
+| scb.co.th | Sukhumvit Tadmai | 90 (n=2) | 48.1 | 43 | 16 / 1.5 |
+
+Graphemes per em 1.64–1.84 (median ~1.75). Desktop median ~70 graphemes in
+~44em; phone 30–43. Blognone, Matichon, The Momentum, Prachachat, Beartai,
+Wongnai, KBank and Agoda yielded no measurable article paragraph. Observed
+practice, not a readability result.
+
 ### Method
 
 Script per page: computed styles for body, first visible h1/h2/h3/p, first two

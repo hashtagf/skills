@@ -30,7 +30,9 @@
  * the text-overlap check (full-page shots stack them mid-page).
  * Composition (_composition.js): FAIL on unequal outer margins, a blank gap ≥ 0.6 viewport and no h1
  * on the first screen of a public page; NOTEs for lopsided sections, hero void, scattered left edges,
- * < 4 pictures at ≥1280, no focal point, body text < 16px / < 7:1 / > 88ch, mostly centred text,
+ * < 4 pictures at ≥1280, no focal point, body text < 16px / < 7:1 / past the measure (Latin ~90 chars,
+ * Thai ~80 graphemes per line), > 8-line paragraphs on a phone, text covering > 50% of a public first screen,
+ * tables with different row heights (mixed density), mostly centred text,
  * > 9 font sizes, side-scrolling rows, difference-blend text, fonts not loaded, a page that barely
  * moves or uses one animation for every block, and a dev server (HMR) target.
  * --toggle "<selector>" clicks a language/theme switch after the first pass and

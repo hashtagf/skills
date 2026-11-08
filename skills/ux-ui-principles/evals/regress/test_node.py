@@ -357,6 +357,33 @@ def main():
             d = jdoc(out)
             check("render_check --scroll-budget 800 on a 30000px page: scroll-budget NOTE, finishes quickly",
                   rc in (0, 1) and d and has_finding(d, "scroll-budget", ("note",)) and took < 40, f"rc={rc} took={took:.0f}s {out[-300:]} {err[-200:]}")
+            # density NOTEs (visual-system.md "Content widths" / "Density"): Thai measure per grapheme, tall phone
+            # paragraph, wall of text on a public first screen, mixed table row heights; a 40em Thai paragraph is fine
+            th = "ระบบจะส่งรหัสยืนยันไปที่เบอร์มือถือของคุณภายในหนึ่งนาที กรุณาตรวจสอบข้อความและกรอกรหัสให้ครบถ้วน " * 8
+            rows = lambda h: "".join(f'<tr style="height:{h}px"><td>แถว {i}</td><td>{i * 100} บาท</td></tr>' for i in range(5))
+            dense = write(os.path.join(tmp, "dense.html"), '<!doctype html><html lang="th"><body style="margin:0 24px;font:16px/1.6 sans-serif">'
+                          f'<main><h1>ความหนาแน่น</h1><p class="wide">{th}</p><p class="ok" style="max-width:40em">{th}</p>'
+                          f'<table class="tcomfy"><tbody>{rows(60)}</tbody></table><table class="tcompact"><tbody>{rows(36)}</tbody></table></main></body></html>')
+            rc, out, err = js("render_check.js", dense, "--widths", "1440,390", "--schemes", "light", "--viewport-shots", "--scroll-budget", "0",
+                              "--out", os.path.join(tmp, "dense-out"), "--json", cwd=empty)
+            d = jdoc(out)
+            msgs = [f["message"] for f in (d or {}).get("findings", []) if f["level"] == "note"]
+            measure = [m for m in msgs if "past the measure" in m]
+            check("render_check density: Thai paragraph past the measure counted in graphemes; the 40em one is not flagged",
+                  any("p.wide" in m and "Thai graphemes" in m for m in measure) and not any("p.ok" in m for m in measure), f"rc={rc} {measure} {err[-200:]}")
+            check("render_check density: > 8-line paragraph on a phone -> NOTE",
+                  any("taller than 8 lines on a phone" in m for m in msgs), f"{msgs[-6:]}")
+            check("render_check density: tables with 60px vs 36px rows -> mixed density NOTE",
+                  any("mixed density" in m and "tcompact" in m and "tcomfy" in m for m in msgs), f"{msgs[-6:]}")
+            wall = write(os.path.join(tmp, "wall.html"), '<!doctype html><html lang="en"><body style="margin:0 24px;font:18px/1.35 serif"><main><h1>Terms</h1>'
+                         + "<p>" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " * 40 + "</p>" * 1
+                         + "</main></body></html>")
+            rc, out, err = js("render_check.js", wall, "--widths", "1440", "--schemes", "light", "--viewport-shots", "--scroll-budget", "0",
+                              "--out", os.path.join(tmp, "wall-out"), "--json", cwd=empty)
+            d = jdoc(out)
+            msgs = [f["message"] for f in (d or {}).get("findings", []) if f["level"] == "note"]
+            check("render_check density: wall of text on a public first screen -> NOTE; Latin measure in chars",
+                  any("of the first screen" in m and "wall of text" in m for m in msgs) and any("past the measure" in m and "chars/line" in m for m in msgs), f"{msgs}")
             rc, out, err = js("render_check.js", long_, "--scroll-budget", "-1", cwd=empty, timeout=30)
             check("render_check --scroll-budget -1 -> exit 2", rc == 2 and err.startswith("error: "), f"rc={rc} {err[-200:]}")
             check("browser cases left the cwd empty", not os.listdir(empty), str(os.listdir(empty)))

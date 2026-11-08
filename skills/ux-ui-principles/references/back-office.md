@@ -185,7 +185,7 @@ layouts. Record these in [design-context.md](../assets/design-context.md):
 | Content width | Reading pages vs full-width tables |
 | Spacing | Section, group and field spacing tokens |
 | Typography | Title, label and value hierarchy; tabular numerals |
-| Density | Compact / comfortable / expanded and who uses each; every look in `assets/backoffice/styles.json` has a `compact` set (`backoffice_preview.js --density compact`) |
+| Density | Compact / comfortable / expanded and who uses each; comfortable default, compact opt-in for the whole app ([visual-system.md](visual-system.md) "Density"); every look in `assets/backoffice/styles.json` has a `compact` set (`backoffice_preview.js --density compact`) |
 | Action hierarchy | One primary per region; secondary; destructive styling and confirmation rules |
 | Status vocabulary | One name and tone per status across all pages, from five tones: ok · warn (needs attention) · bad · info (waiting on someone, in progress) · neutral (draft, archived); an entity → status → tone table lives in DESIGN.md |
 | Feedback | Success, error, loading, empty, no-permission and stale-data patterns |

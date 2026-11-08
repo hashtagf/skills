@@ -35,7 +35,7 @@ the Design Tokens Format Module is a stable Community Group format. [S58]
 | 1 | Color | Roles, light/dark values, semantic + data palettes | [color-palette.md](color-palette.md) |
 | 2 | Typography | Families, scale, weights, line-heights, composed styles | Below |
 | 3 | Spacing | One scale for padding, gap, margin | 0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80 px; marketing sections add 96, 128, 160 |
-| 4 | Sizing | Control heights, icon sizes, content widths | Controls 32/40/48 px; icons 16/20/24/32; prose ~65ch |
+| 4 | Sizing | Control heights, icon sizes, content widths | Controls 32/40/48 px; icons 16/20/24/32; prose ~65ch Latin, ~40em Thai ("Content widths") |
 | 5 | Border | Widths and state colors | 1 default, 2 focus/emphasis |
 | 6 | Radius | Per component class | 0 / 4 / 8 / 12 / 16 / full; controls one value, containers one value |
 | 7 | Elevation | Levels mapped to roles | 0 flat · 1 card · 2 popover/menu · 3 dialog · 4 toast |
@@ -43,7 +43,7 @@ the Design Tokens Format Module is a stable Community Group format. [S58]
 | 9 | Layering | z-order ladder | dropdown < sticky < drawer/dialog < popover < toast < tooltip |
 | 10 | Motion | Durations, easing, named animations | Durations, easing and token names: [motion.md](motion.md) §2 |
 | 11 | Breakpoints | Content-driven widths | e.g. compact < 600, medium 600–1023, expanded ≥ 1024 px; tablet band 768–1024 (Part B "Tablet"); set by content, not devices |
-| 12 | Density | Comfortable / compact modes | Row heights e.g. 48 / 36 px; same type scale |
+| 12 | Density | Comfortable / compact modes | Row heights e.g. 48 / 36 px; same type scale; rules in "Density" below |
 | 13 | Focus | One focus ring contract | Value lives in [component-states.md](component-states.md) "Focus" (single owner; do not restate it here) [S04] |
 
 Record which categories are deferred or N/A for the current scope.
@@ -111,12 +111,50 @@ Rules:
   groups so grouping reads by proximity. [S30]
 - **Layout grid:** define columns and gutters per breakpoint (e.g. 4/8/12
   columns), page max width, and side gutters (≥16 px on phones).
-- **Content widths (owner of the measure):** reading text 60–75 characters, ~65ch default (Latin); tables and dashboards
-  may use full width.
+- **Content widths (owner of the measure):** reading text 60–75 characters, ~65ch default (Latin);
+  WCAG 1.4.8 (AAA) caps lines at 80 characters (40 for CJK) [S114]. **Thai:** no published study
+  sets a Thai measure (searched 2026-11-08), so the value is measured: Thai body runs 55–80
+  graphemes per line on desktop (median ~70) and 35–43 on a 390px phone, at ~1.75 graphemes per em
+  (Part C §9). Set Thai prose with `max-width: 40em` (≈ 70 graphemes; range 34–45em), not `ch`:
+  `ch` is the width of a Latin "0" in the first font and drifts with the stack. Count Thai
+  per grapheme (`Intl.Segmenter`), never per code point: tone marks and upper/lower vowels
+  are code points with no width. Tables and dashboards may use full width.
 - **App shell:** sidebar width, header height, page header structure and
   content padding are tokens too, so every page aligns.
 - **Reflow:** content must work at 320 CSS px width without two-dimensional
   scrolling except for data tables, maps and similar. [S05]
+
+### Density (owner of comfortable / compact)
+
+Density is how much content one view holds. Two separate questions:
+
+- **Screen density** (spacing and control size). Comfortable is the default and
+  always available; compact is an opt-in the user switches, for data-heavy views
+  (tables, resource lists, dashboards). Apply one density to the whole app, not
+  page by page; a component may offer its own compact prop (a table's row size).
+  **Row and control heights: comfortable 48px, compact 36px** (Part A row 12);
+  two levels by default. A third level (expanded) is optional for back-office
+  roles ([back-office.md](back-office.md)); never go below 36px for rows or invent
+  in-between steps without a measured need. Admins may not switch everyone to compact;
+  it stays the user's choice.
+  Compact shrinks component height and inner/outer spacing; type scale,
+  padding alignment and the touch-target floor ([accessibility.md](accessibility.md))
+  stay. Alerts, validation messages and small-target controls (select, date picker)
+  do not take the full compact step. [S110, S111]
+- **Text density** (how much text and how tightly packed). Keep overall density as
+  low as the task allows while still showing the data the task needs; use white
+  space to lower local density; group related items so the eye reads groups, not
+  items. [S112] "There was too much text" is one of the five items that predict
+  perceived clutter, which in turn lowers perceived usability and appearance. [S113]
+  To test whether a page is too dense with users, ask the five items in
+  [measurement.md](measurement.md) "Perceived clutter" before and after the fix.
+- **Signals to inspect** (`render_check.js` reports them as NOTEs, never fails):
+  a reading paragraph longer than the measure above; a paragraph taller than
+  ~8 lines on a phone with no subhead, list or break; text covering more than about
+  half the first viewport on a marketing or onboarding page; table rows of
+  different heights in one table (mixed density). These are prompts to look, not
+  thresholds proven by research.
+- Back-office density by role and frequency: [back-office.md](back-office.md) "Density".
 
 ### Elevation and surfaces
 
@@ -207,7 +245,8 @@ Choose font size, weight, line-height and line length using realistic content,
 language, viewport and font metrics. Body size around 16 CSS px and generous
 line-height can be starting recommendations; WCAG has no universal 16px floor.
 Avoid thin small text, low-contrast secondary information and truncated critical
-labels. Check loaded fonts and fallback fonts.
+labels. Check loaded fonts and fallback fonts. Line length and density: "Content
+widths" and "Density" above; microcopy length caps: [content-design.md](content-design.md).
 
 Test realistic content: long names and titles, wrapped labels, unbroken
 identifiers, missing/empty values, translated text, and user-entered strings.
@@ -644,6 +683,12 @@ Measured on Wongnai, LINE MAN Wongnai, SCB, Agoda, Nike TH, Apple TH.
 - Thai body line-height as observed (rule: [visual-system.md](visual-system.md) Typography; LMWN 16/26, Wongnai 16/24 and 18/28, SCB
   14/25.2, Nike TH 16/28). Agoda's 14/18 (≈1.3) crowds stacked marks — treat
   ≤1.35 on Thai body as a defect to inspect.
+- **Thai body measure (measured 2026-11-08, 10 Thai news, bank and reference sites,
+  article pages, 1440 and 390 px):** desktop 53–95 graphemes per line, median ~70,
+  in containers of 29–52em (median ~44em); phone 30–43. Density 1.64–1.84 graphemes
+  per em across Tahoma, Thongterm, Prompt, Kanit, Sukhumvit, SF Pro TH. Body
+  line-height 1.4–1.75 (median ~1.65; Thairath 2.25). Rule: Part A "Content widths".
+  Detail: [evidence.md](../assets/evidence.md) "Thai line length".
 - Thai display line-height follows Part A (never the 0.85–1.0 Latin
   display values; check marks don't clip). Set `:lang(th)` overrides.
 - No negative tracking on Thai; none of the Thai sites tighten Thai text.
