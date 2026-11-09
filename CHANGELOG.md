@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-09
+
 ### Added (ux-ui: screen and text density)
 - `visual-system.md` "Density" (owner): comfortable default + always available, compact opt-in app-wide (not per page), type scale and touch-target floor kept, alerts / small-target controls not fully compacted (Cloudscape, Material); text density per Tullis (overall/local density, grouping) and the "too much text" clutter item (Lewis & Sauro 2024).
 - Thai measure: no published Thai line-length study found, so measured 10 Thai sites (article pages, 1440/390): desktop 53–95 graphemes/line, median ~70, ~1.75 graphemes/em; phone 30–43. Rule: Thai prose `max-width: 40em`, not `ch`; count per grapheme. Table in `assets/evidence.md` "Thai line length".
@@ -834,7 +836,8 @@ plugin or via the `skills` CLI.
 ### Changed
 - Eval suites excluded from distribution (dev-only).
 
-[Unreleased]: https://github.com/hashtagf/skills/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/hashtagf/skills/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/hashtagf/skills/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/hashtagf/skills/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/hashtagf/skills/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/hashtagf/skills/compare/v0.13.0...v0.14.0
