@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (ux-ui: Change Loop routes)
+- `render-verification.md` "Inside a delivery harness (Change Loop)": maps the skill's checks to Change Loop evidence — bind the approved look with `prototypeSelection` (`excludes` for rejected parts), feed screenshots to the `browser` and `visual` providers, declare work type `ui` so `accessibility` is required, and use `quality readiness` `ui-` rows for tokens, DESIGN.md, and a11y lint.
+
 ## [0.16.0] - 2026-11-09
 
 ### Added (ux-ui: screen and text density)

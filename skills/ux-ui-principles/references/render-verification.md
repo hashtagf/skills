@@ -181,6 +181,22 @@ const { chromium } = require('playwright');
 | Contrast | n/m pairs pass | contrast.py output |
 | Not tested | screen reader, real API, real users… | — |
 
+## Inside a delivery harness (Change Loop)
+
+When the project delivers through Change Loop (`openspec/` plus
+`.claude/harness/`), the harness, not this report, decides whether UI work is
+proven. Feed it the same checks instead of only reporting them:
+
+| This skill's check | Change Loop route |
+|---|---|
+| Approved look (prototype, mockup, direction preview) | Bind it in the draft: `prototypeSelection` with `covers`, `mode`, and `excludes` for every part the request rejects (`"<element>: <reason>"`); `change start --template` shows the shape |
+| Screenshots of the built page | A `browser` provider whose command saves PNGs (for example `render_check.js --out test-results`), and the command-less `visual` provider with `screenshots` and `dependsOn` on it; the harness reviewer compares them with the bound prototype |
+| Alt text, names, labels, keyboard | Declare work type `ui`: `accessibility` becomes required. A project `test:accessibility` or `test:a11y` script runs as the provider; without one the harness reads the changed markup statically, which cannot see contrast or focus order, so add a rendered check for those |
+| Tokens, DESIGN.md, a11y lint | `cloop quality readiness --pretty` lists them as `ui-` rows; the `onboard` skill proposes each |
+
+A subjective taste call that no check can settle goes to the user as an
+`acceptance` decision, never into a passing receipt.
+
 ## Do / Don't
 
 | Do | Don't |
