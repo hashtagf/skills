@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-26
+
+### Added (remote-test: team-shared VM test queue)
+- New skill `remote-test`: submit a repo's tests to a shared Google Cloud VM pool through one team queue. The client snapshots HEAD + tags and tracked/untracked non-ignored files (minus `.env*`, key files, `node_modules`, `.venv`), uploads to GCS and queues via an IAM-protected Cloud Run API; nodes claim jobs from Pub/Sub with a Firestore precondition so duplicate deliveries never run twice, and power off when drained.
+- Job options: isolated Docker containers (default 2 × 6 CPU / 6 GiB per node), `--mongo 6|7|8` sidecar, `--go-packages` build → vet → test with Go cache, `--image` toolchain containers, `--exclusive` with a required reason, replay of an uploaded snapshot, own-job cancel (admins any).
+- Setup once per repo: `remote-test setup` detects candidate commands (npm/pnpm/yarn/bun, Go, Python, make) and hints (MongoDB, Playwright, Go toolchain, CI files); `--save-profile NAME` saves settings only after the job passes; `remote-test run [--profile NAME]` reuses them. Profiles are per user (`~/.config/remote-test/projects/`), keyed by normalized origin URL so clones/worktrees share them.
+- Bundled stdlib-only scripts (`client.py`, `core.py`, `gcp.py`) and `scripts/install.sh team.json`. The queue backend and team config are deployed separately and are not part of this repo.
+
 ## [0.16.0] - 2026-11-09
 
 ### Added (ux-ui: screen and text density)
